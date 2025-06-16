@@ -1,0 +1,168 @@
+﻿Reusable Part:
+  Name:               CERGNUTL
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE General Utility"
+
+  Source: |
+    * ========================================================
+    * Copyright       : (C) Lansa Commerce Edition, 2018
+    * Type            : Reusable Part
+    * Platform        : Web Application (Visual LANSA)
+    * Name            : CERGNUTL
+    * Identifier      : CERGNUTL
+    * Ancestor        : PRIM_OBJT
+    * Written By      : Jan Metica
+    * Written On      : 26th September 2018
+    * Description     : CE General Utility
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc App Trkr #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    Function Options(*DIRECT)
+    * =======================================================
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umFormatDisplayPrice
+    * Description....: Format display price using the storefront parameters like the currency, thousand separator and decimal symbols
+    * =======================================================
+    Mthroutine Name(umFormatDisplayPrice) Desc('Format Display Price') Help('Format display price using the storefront parameters like the currency, thousand separator and decimal symbols')
+    
+    Define_Map For(*INPUT) Class(#LW3ORDTOT) Name(#iNumericValue) Help('Numeric value')
+    Define_Map For(*INPUT) Class(#LW3TSSYM) Name(#iCurrencySymbol) Help('Currency symbol')
+    Define_Map For(*INPUT) Class(#LW3DPSYM) Name(#iDecimalSymbol) Help('Decimal point')
+    Define_Map For(*INPUT) Class(#LW3TSSYM) Name(#iThousandSymbol) Help('Thousands separator')
+    
+    Define_Map For(*OUTPUT) Class(#PRIM_ALPH) Name(#oReturnField)
+    
+    Define_Com Class(#PRIM_NMBR) Name(#L_Counter)
+    
+    * Set default symbols if none are passed
+    If Cond(#iDecimalSymbol = *BLANKS)
+    #iDecimalSymbol := '.'
+    Endif
+    If Cond(#iThousandSymbol = *BLANKS)
+    #iThousandSymbol := ','
+    Endif
+    If Cond(#iCurrencySymbol = *BLANKS)
+    #iCurrencySymbol := '$'
+    Endif
+    
+    * Edit numeric value
+    #LW3ORDTOT := #iNumericValue
+    Use Builtin(FORMAT_STRING) With_Args(':LW3ORDTOT(editcode ,N)') To_Get(#oReturnField)
+    
+    * Find decimal point
+    #L_Counter := #oReturnField.LastPositionOf( '.' )
+    
+    * Replace thousands separator(s) and decimal point
+    If Cond(#iThousandSymbol *NE *blank)
+    #oReturnField := #oReturnField.ReplaceAll( "," #iThousandSymbol )
+    If Cond(#STD_COUNT *NE *zero)
+    #oReturnField := #oReturnField.ReplaceSubstring( #L_Counter 1 #iDecimalSymbol )
+    Endif
+    
+    Else
+    #oReturnField := #oReturnField.RemoveAll( "," )
+    #oReturnField := #oReturnField.Replace( "." #iDecimalSymbol )
+    Endif
+    
+    #oReturnField := #iCurrencySymbol + #OReturnField
+    Endroutine
+    
+    
+    
+    * =======================================================
+    * Mthroutine ....: umSplitString
+    * Description....: Split string into an array
+    * =======================================================
+    Mthroutine Name(umSplitString)
+    Define_Map For(*INPUT) Class(#Prim_dc.UnicodeString) Name(#String)
+    Define_Map For(*INPUT) Class(#Prim_dc.UnicodeString) Name(#Separator) Mandatory(" ")
+    Define_Map For(*INPUT) Class(#Prim_boln) Name(#IncludeBlankItems) Mandatory(False)
+    Define_Map For(*RESULT) Class(#prim_lcol<#Prim_dc.UnicodeString>) Name(#Result) Pass(*BY_REFERENCE)
+    
+    Define_Com Class(#prim_nmbr) Name(#Break)
+    
+    #Result <= *New #prim_lcol<#Prim_dc.UnicodeString>
+    
+    If (#String <> "")
+    
+    Begin_Loop
+    
+    * Look for the first separator in the string
+    #Break := #String.PositionOf( #Separator )
+    
+    Case (#Break)
+    
+    When (= 0) /* No separator found, so must be a whole word remaining */
+    
+    #Result.Insert( (*New #Prim_dc.unicodeString) )
+    #Result.Last := #String
+    
+    Leave
+    
+    When (= 1) /* Separator is next character, so must be zero length item */
+    
+    If (#IncludeBlankItems)
+    
+    #Result.Insert( (*New #Prim_dc.unicodeString) )
+    
+    Endif
+    
+    Otherwise /* Substring */
+    
+    #Result.Insert( (*New #Prim_dc.unicodeString) )
+    #Result.Last := #String.Substring( 1 (#Break - 1) )
+    
+    Endcase
+    
+    * Remove the item from the string
+    #String := #String.DeleteSubstring( 1 #Break )
+    
+    End_Loop
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umDebugLog
+    * Description....: Log entry to CNTDEBUG
+    * =======================================================
+    Mthroutine Name(umDebugLog) Desc('Log entry to CNTDEBUG')
+    Define_Map For(*INPUT) Class(#LW3OBJNME) Name(#iObjectName)
+    Define_Map For(*INPUT) Class(#LW3DBGTXT) Name(#iDebugText)
+    
+    * Input Values
+    #LW3OBJNME := #iObjectName
+    #LW3DBGTXT := #iDebugText
+    
+    * Global Data Values
+    #LW3SFID := #Global_DataModel.upStorefrontId
+    #LW3WEBUSR := #Global_DataModel.upUserId
+    #LW3WEBC01 := #Global_DataModel.upCustomerId
+    #LW3CARTID := #Global_DataModel.upCartId
+    
+    * Insert new DEbug Record
+    Insert Fields(*ALL) To_File(CNTDEBUG) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Endroutine
+    
+    End_Com
+    

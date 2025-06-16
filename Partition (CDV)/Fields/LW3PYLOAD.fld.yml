@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               LW3PYLOAD
+  Type:               String
+  Length:             3000
+  Decimals:           0
+  Default Value:      "*NULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - ASQN
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "API Payload"
+      Label:              "API Payload"
+      Heading1:           "API"
+      Heading2:           "Payload"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    End_Com

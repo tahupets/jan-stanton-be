@@ -1,0 +1,66 @@
+﻿Reusable Part:
+  Name:               CNRPRDPR
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Products Processor"
+
+  Source: |
+    * ========================================================
+    * Copyright       : (C) Lansa Commerce Edition, 2018
+    * Type            : Reusable Part
+    * Platform        : Web Application (Visual LANSA)
+    * Name            : CNRPRDPR
+    * Identifier      : CNRPRDPR
+    * Ancestor        : PRIM_OBJT
+    * Written By      : Jerson Dela Cruz
+    * Written On      : 6th May 2025
+    * Description     : Products Processor
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc App Trkr #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Global Objects
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    
+    * =======================================================
+    * Mthroutine  : umGetProductMainImage
+    * Description : Get Product Image
+    * =======================================================
+    Mthroutine Name(umGetProductMainImage) Desc('Get Product Image') Help('Get Product Image')
+    Define_Map For(*INPUT) Class(#LW3ITEMCD) Name(#iItemCode)
+    Define_Map For(*OUTPUT) Class(#LW3IATVL) Name(#oImageURL)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oStatus) Mandatory('')
+    
+    * Fetch Item Image
+    Fetch Fields(#LW3IATVL) From_File(LW3IATTRL1) With_Key(#Global_DataModel.upStorefrontId #iItemCode 86 #Global_DataModel.upCurrentLanguage)
+    
+    * Check if the item is existing in the LW3IATTR
+    If_Status Is(*OKAY)
+    #oStatus := 'OK'
+    #oImageURL := #LW3IATVL
+    Else
+    #oStatus := 'ER'
+    
+    Endif
+    
+    Endroutine
+    
+    
+    End_Com

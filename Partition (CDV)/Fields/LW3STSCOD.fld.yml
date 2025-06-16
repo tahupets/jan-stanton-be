@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3STSCOD
+  Type:               Integer
+  Length:             4
+  Decimals:           0
+  Default Value:      "*NULL"
+  Edit Mask:          J
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - ASQN
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Status Code of Response"
+      Label:              "Status Code of"
+      Heading1:           "Status"
+      Heading2:           "Code"
+      Heading3:           "of"

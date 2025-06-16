@@ -1,0 +1,206 @@
+﻿File:
+  Name:                           CNTAPILOG
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             CNTAPILOG
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( *NOMAX) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Database for API logs"
+
+  Real Fields:
+  - LW3LOGID:
+      Type:               Decimal
+      Length:             19
+      Decimals:           0
+
+  - LW3HOST:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  - LW3ROUTE:
+      Type:               Alphanumeric
+      Length:             100
+      Decimals:           0
+
+  - LW3HEADER:
+      Type:               String
+      Length:             65000
+      Decimals:           0
+
+  - LW3REFER:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  - LW3OBJNME:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3STSCOD:
+      Type:               Integer
+      Length:             4
+      Decimals:           0
+
+  - LW3METHOD:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3RSPSIZ:
+      Type:               Decimal
+      Length:             10
+      Decimals:           3
+
+  - LW3RSPSEC:
+      Type:               Integer
+      Length:             4
+      Decimals:           0
+
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3GUID:
+      Type:               Alphanumeric
+      Length:             64
+      Decimals:           0
+
+  - LW3WEBUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CEMAIL:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3WEBC01:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3SRVJOB:
+      Type:               Alphanumeric
+      Length:             28
+      Decimals:           0
+
+  - LW3RESPO:
+      Type:               String
+      Length:             65000
+      Decimals:           0
+
+  - LW3PYLOAD:
+      Type:               String
+      Length:             3000
+      Decimals:           0
+
+  - LW3CDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - LW3UDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  Primary Keys:
+  - LW3LOGID
+
+  Logical Views:
+  - CNTAPILGL1:
+      Identifier:         CNTAPILGL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3APILGL1
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By SFID, UserID, CustID"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3WEBC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - CNTAPILGL2:
+      Identifier:         CNTAPILGL2
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3APILGL2
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By SFID, Email, CustID"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - LW3CEMAIL:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3WEBC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - CNTAPILGL3:
+      Identifier:         CNTAPILGL3
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3APILGL3
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By SFID, CustID"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - LW3WEBC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

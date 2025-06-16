@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3RSPSIZ
+  Type:               Packed
+  Length:             10
+  Decimals:           3
+  Default Value:      "*ZEROS"
+  Edit Mask:          J
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - ASQN
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Size in KB of the Response"
+      Label:              "Size in KB of t"
+      Heading1:           "Size"
+      Heading2:           "in"
+      Heading3:           "KB"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Usepicklist(False) Componentversion(1) Height(21) Width(397)
+    
+    End_Com
+    
+    End_Com

@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3CEMAIL
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "E-Mail Address"
+      Label:              "E-Mail Address"
+      Heading1:           "E-Mail"
+      Heading2:           "Address"
+      Heading3:           " "

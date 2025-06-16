@@ -1,0 +1,173 @@
+﻿Reusable Part:
+  Name:               CNRAPILG
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "REST API Activity Logger"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Reusable Part
+    * Platform        : VL Web
+    * Name            : CNRAPILG
+    * Identifier      : CNRAPILG
+    * Ancestor        : PRIM_OBJT
+    * Written By      : Jerson Dela Cruz
+    * Written On      : 30th October 2024
+    * Description     : API Log Writer
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    Define_Com Class(#PRIM_ALPH) Name(#L_LogRequestPayload)
+    Define_Com Class(#PRIM_ALPH) Name(#L_EnableLogging)
+    Define_Com Class(#LW3LOGID) Name(#L_LogId)
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umWriteLog
+    * Description....: API Log Writer
+    * =======================================================
+    Mthroutine Name(umWriteLog)
+    * Temp Flag for token
+    Define Field(#L_Flag) Type(*BOOLEAN)
+    
+    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpContext) Name(#iContext) Desc('LogId to Update') Help('LogId to Update') Pass(*BY_REFERENCE)
+    Define_Map For(*INPUT) Class(#LW3OBJNME) Name(#iObjectName) Desc('Server Module Used') Help('Server Module Used')
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oStatus) Mandatory('') Desc('Return Status') Help('Return Status')
+    Define_Map For(*OUTPUT) Class(#LW3RETMSG) Name(#oMessage) Mandatory('') Desc('Return Message') Help('Return Message')
+    
+    
+    If Cond(#L_EnableLogging = '')
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('API_LOG_ENABLE_LOG') Ilanguage('') Oalphavalue(#L_EnableLogging)
+    Endif
+    
+    If Cond(#L_LogRequestPayload = '')
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('API_LOG_RQS_PAYLOAD') Ilanguage('') Oalphavalue(#L_LogRequestPayload)
+    Endif
+    If Cond(#L_EnableLogging = 'Y')
+    
+    #L_LogId := *LW3_NEXT_RALI_NUM
+    
+    #LW3LOGID := #L_LogId
+    #LW3OBJNME := #iObjectName
+    
+    If Cond(*JOBNBR <> '')
+    #LW3SRVJOB := *JOBNBR + '/' + *PARTPGMLIB + '/' + *JOBNAME
+    Endif
+    
+    * Check if Request header have Host
+    If_Ref Com(#iContext.Request.Headers<"host">) Is_Not(*NULL)
+    #LW3HOST := #iContext.Request.Headers<"host">.value
+    Else
+    #LW3HOST := ''
+    Endif
+    
+    * Check if Request header have Referer
+    If_Ref Com(#iContext.Request.Headers<"referer">) Is_Not(*NULL)
+    #LW3REFER := #iContext.Request.Headers<"referer">.value
+    Else
+    #LW3REFER := ''
+    Endif
+    
+    #LW3METHOD := #iContext.Request.Method
+    #LW3ROUTE := #iContext.Request.Path
+    #LW3HEADER := ' { '
+    
+    * Loop to get Request Header items one by one
+    For Each(#Header) In(#iContext.Request.Headers)
+    Continue If(((#Header.Name *EQ 'ce_ac_token') Or (#Header.Name *EQ 'ce_rf_token')) And (#L_Flag = 1))
+    #LW3HEADER += #Header.Name + ' : ' + #Header.Value + ', '
+    Endfor
+    #LW3HEADER += ' } '
+    
+    #oStatus := 'OK'
+    #oMessage := #IO$MSGTXT
+    
+    Insert Fields(#LW3LOGID #LW3REFER #LW3HOST #LW3METHOD #LW3ROUTE #LW3HEADER #LW3RSPSIZ #LW3SRVJOB #LW3OBJNME) To_File(CNTAPILOG) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Endif
+    
+    Endroutine
+    
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umWriteLog
+    * Description....: Update API Log
+    * =======================================================
+    Mthroutine Name(umUpdateLog)
+    Define_Map For(*INPUT) Class(#LW3RESPO) Name(#iResponse) Mandatory('') Desc('API Response') Help('API Response')
+    Define_Map For(*INPUT) Class(#LW3STSCOD) Name(#iResponseStatus) Mandatory(0) Desc('API Status Code') Help('API Status Code')
+    Define_Map For(*INPUT) Class(#LW3PYLOAD) Name(#iPayload) Mandatory('') Desc('Request Payload') Help('Request Payload')
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oStatus) Mandatory('') Desc('Return Status') Help('Return Status')
+    Define_Map For(*OUTPUT) Class(#LW3RETMSG) Name(#oMessage) Mandatory('') Desc('Return Message') Help('Return Message')
+    
+    If Cond(#L_EnableLogging = 'Y')
+    
+    #LW3RESPO := #iResponse
+    #LW3LOGID := #L_LogId
+    #LW3RSPSIZ := #iResponse.CurChars * 0.001
+    #LW3SFID := #Global_DataModel.upStorefrontId
+    #LW3GUID := #Global_DataModel.upGUID
+    #LW3WEBUSR := #Global_DataModel.upUserId
+    #LW3CEMAIL := #Global_DataModel.upUserEmail
+    #LW3WEBC01 := #Global_DataModel.upCustomerId
+    #LW3STSCOD := #iResponseStatus
+    
+    
+    If Cond(#L_LogRequestPayload = 'Y')
+    #LW3PYLOAD := #iPayload
+    Endif
+    
+    Update Fields(#LW3RESPO #LW3RSPSIZ #LW3SFID #LW3WEBUSR #LW3CEMAIL #LW3WEBC01 #LW3GUID #LW3STSCOD) In_File(CNTAPILOG) With_Key(#LW3LOGID) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Endif
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umUpdatePayload
+    * Description....: Add Payload in API Log
+    * =======================================================
+    Mthroutine Name(umUpdatePayload)
+    Define_Map For(*INPUT) Class(#LW3PYLOAD) Name(#iPayload) Desc('Request Payload') Help('Request Payload')
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oStatus) Mandatory('') Desc('Return Status') Help('Return Status')
+    Define_Map For(*OUTPUT) Class(#LW3RETMSG) Name(#oMessage) Mandatory('') Desc('Return Message') Help('Return Message')
+    
+    If Cond(#L_EnableLogging = 'Y')
+    If Cond(#L_LogRequestPayload = 'Y')
+    #LW3PYLOAD := #iPayload
+    Endif
+    Update Fields(#LW3PYLOAD) In_File(CNTAPILOG) With_Key(#LW3LOGID) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    
+    Endroutine
+    End_Com

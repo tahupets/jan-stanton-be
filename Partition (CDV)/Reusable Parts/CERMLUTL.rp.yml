@@ -1,0 +1,108 @@
+﻿Reusable Part:
+  Name:               CERMLUTL
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE Multilingual Utility"
+
+  Source: |
+    * ========================================================
+    * Copyright       : (C) Lansa Commerce Edition, 2018
+    * Type            : Reusable Part
+    * Platform        : Web Application (Visual LANSA)
+    * Name            : CERMLUTL
+    * Identifier      : CERMLUTL
+    * Ancestor        : PRIM_OBJT
+    * Written By      : Jan Metica
+    * Written On      : 24th September 2018
+    * Description     : CE Multilingual Utility
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc App Trkr #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umDisplayMessage
+    * Description....: Display Client Side Messages
+    * =======================================================
+    Mthroutine Name(umDisplayMessage) Desc('Display Multilingual Message') Help('Display Client Side Messages')
+    
+    * Define_Map For(*BOTH) Class(#PRIM_ALPH) Name(#bMessageType) Help('Possible Values: SUCCESS | WARNING | ERROR | INFO')
+    
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iVariable) Mandatory('') Desc('Multilingual Variable Name') Help('Pass this if showing a multilingual message')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iMessage) Mandatory('') Desc('Custom Message') Help('Pass this if showing a custom message')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iLanguage) Desc('Language')
+    
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iSubVariable1) Mandatory('') Desc('Substitution Variable 1')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iSubVariable2) Mandatory('') Desc('Substitution Variable 2')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iSubVariable3) Mandatory('') Desc('Substitution Variable 3')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iSubVariable4) Mandatory('') Desc('Substitution Variable 4')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iSubVariable5) Mandatory('') Desc('Substitution Variable 5')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iSubVariable6) Mandatory('') Desc('Substitution Variable 6')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iSubVariable7) Mandatory('') Desc('Substitution Variable 7')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iSubVariable8) Mandatory('') Desc('Substitution Variable 8')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iSubVariable9) Mandatory('') Desc('Substitution Variable 9')
+    
+    Define_Map For(*RESULT) Class(#LW3VARUTX) Name(#rText)
+    
+    * If Cond((#bMessageType <> 'SUCCESS') And (#bMessageType <> 'WARNING') And (#bMessageType <> 'ERROR') And (#bMessageType <> 'INFO'))
+    * #bMessageType := *BLANKS
+    * Endif
+    
+    If Cond(#iVariable <> *BLANKS)
+    #rText := #COM_OWNER.umGetMultilingualText( #iVariable #iLanguage ).Substitute( #iSubVariable1 #iSubVariable2 #iSubVariable3 #iSubVariable4 #iSubVariable5 #iSubVariable6 #iSubVariable7 #iSubVariable8 #iSubVariable9 )
+    
+    Else
+    #rText := #iMessage
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetMultilingualText
+    * Description....: Get Commerce Edition System Multilingual Text
+    * =======================================================
+    Mthroutine Name(umGetMultilingualText) Desc('Get Multilingual Text') Help('Get Commerce Edition System Multilingual Text')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iVariable)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iLanguage)
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iUseSystemLanguage) Mandatory(False)
+    Define_Map For(*RESULT) Class(#LW3VARUTX) Name(#rText)
+    
+    If Cond(#iLanguage = *BLANKS)
+    #iLanguage := *LANGUAGE
+    Endif
+    
+    #rText #LW3VARUTX := *NULL
+    Fetch Fields(#LW3VARUTX) From_File(LW3MLVRM) With_Key(#iVariable #iLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    #rText := #LW3VARUTX
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umVerifyLanguageValidity
+    * Description....: Use this to check if the passed in language exists in the language master file. If it does not, return the language as the current system language (*LANGUAGE)
+    * =======================================================
+    Mthroutine Name(umVerifyLanguageValidity) Desc('Verify Language Validity') Help('Use this to check if the passed in language exists in the language master file. If it does not, return the language as the current system language (*LANGUAGE)')
+    
+    Define_Map For(*INPUT) Class(#LW3LNGCOD) Name(#iPassedLanguage)
+    Define_Map For(*OUTPUT) Class(#LW3LNGCOD) Name(#oReturnedLanguage)
+    
+    Check_For In_File(LW3LNGM) With_Key(#iPassedLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    #oReturnedLanguage := #iPassedLanguage
+    Else
+    #oReturnedLanguage := *LANGUAGE
+    Endif
+    
+    Endroutine
+    
+    End_Com

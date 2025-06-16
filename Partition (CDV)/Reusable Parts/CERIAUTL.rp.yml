@@ -1,0 +1,183 @@
+﻿Reusable Part:
+  Name:               CERIAUTL
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE Item Attribute Utility"
+
+  Source: |
+    * ========================================================
+    * Copyright       : (C) Lansa Commerce Edition, 2018
+    * Type            : Reusable Part
+    * Platform        : Web Application (Visual LANSA)
+    * Name            : CERIAUTL
+    * Identifier      : CERIAUTL
+    * Ancestor        : PRIM_OBJT
+    * Written By      : Jan Metica
+    * Written On      : 28th September 2018
+    * Description     : CE Multilingual Utility
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc App Trkr #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Global Objects
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Group Definitions
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    
+    Define_Com Class(#LW3IMAGE) Name(#L_ProductImagePath)
+    
+    * =======================================================
+    * Property Definitions
+    * =======================================================
+    
+    Define_Pty Name(upProductImagePath) Get(*AUTO #L_ProductImagePath) Set(*AUTO #L_ProductImagePath)
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine  : umGetItemAttributeById
+    * Description : Get Item Attribute By Name
+    * =======================================================
+    Mthroutine Name(umGetItemAttributeById) Desc('Get Item Attribute By Id') Help('Get Item Attribute by Id')
+    Define_Map For(*INPUT) Class(#LW3SFID) Name(#iStorefrontId) Desc('Storefront Id')
+    Define_Map For(*INPUT) Class(#LW3ITEMCD) Name(#iItemCode) Desc('Item Code')
+    Define_Map For(*INPUT) Class(#LW3IATID) Name(#iAttributeID) Desc('Attribute ID')
+    Define_Map For(*INPUT) Class(#LW3LNGCOD) Name(#iLanguage) Desc('Language')
+    Define_Map For(*RESULT) Class(#LW3IATVL) Name(#rValue) Desc('Value')
+    
+    Fetch Fields(#LW3IATVL) From_File(LW3IATTRL1) With_Key(#iStorefrontId #iItemCode #iAttributeID #iLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #rValue := #LW3IATVL
+    Endif
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine  : umGetAttributeNameById
+    * Description : Get Attribute Name By id
+    * =======================================================
+    Mthroutine Name(umGetAttributeNameById) Desc('Get Attribute Name by Id') Help('Get Attribute Name By Id')
+    Define_Map For(*INPUT) Class(#LW3IATID) Name(#iAttributeID) Desc('Attribute ID')
+    Define_Map For(*RESULT) Class(#LW3IATVL) Name(#rName) Desc('Name')
+    
+    Fetch Fields(#LW3IATNM) From_File(LW3IATYP) With_Key(#iAttributeID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #rName := #LW3IATNM
+    Endif
+    Endroutine
+    
+    * ==================================================================================
+    * Mthroutine  : umGetProductImageByColor
+    * Description : Retrieve the appropriate image for the product based on the selected color
+    * ==================================================================================
+    Mthroutine Name(umGetProductImageByColor) Desc('Get Product Image by Color') Help('Retrieve the appropriate image for the product based on the selected color')
+    Define_Map For(*INPUT) Class(#LW3SFID) Name(#iStorefrontId) Desc('Storefront Id')
+    Define_Map For(*INPUT) Class(#LW3SNAM) Name(#iStorefrontShortName) Desc('Storefront Short Name')
+    Define_Map For(*INPUT) Class(#LW3LNGCOD) Name(#iLanguage) Desc('Language')
+    Define_Map For(*INPUT) Class(#LW3ITEMCD) Name(#iItemCode) Desc('Item Code')
+    Define_Map For(*INPUT) Class(#LW3IATID) Name(#iColorAttribute) Desc('Color Attribute')
+    
+    Define_Map For(*RESULT) Class(#LW3IMAGE) Name(#rImage) Desc('Image')
+    
+    #rImage := *PATHDELIM + 'img' + *PATHDELIM + #iStorefrontShortName + 'item' + *PATHDELIM + 'detail' + *PATHDELIM + #COM_OWNER.umGetItemAttributeById( #iStorefrontId #iItemCode #iColorAttribute #iLanguage )
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetAttribuesForItemInCart
+    * Description....: Check if item has saved attributes in the cart and retrieve additional details required for each on
+    * =======================================================
+    Mthroutine Name(umGetAttribuesForItemInCart) Desc('Get Attributes for Item in Cart') Help('Check if item has saved attributes in the cart and retrieve additional details required for each one')
+    
+    Define_Map For(*INPUT) Class(#LW3SFID) Name(#iStorefrontId) Desc('Storefront Id')
+    Define_Map For(*INPUT) Class(#LW3SNAM) Name(#iStorefrontShortName) Desc('Storefront Short Name')
+    Define_Map For(*INPUT) Class(#LW3LNGCOD) Name(#iLanguage) Desc('Language')
+    
+    Define_Map For(*INPUT) Class(#LW3OION) Name(#iOrderNumber) Desc('Order Number')
+    Define_Map For(*INPUT) Class(#LW3COLNUM) Name(#iLineNumber) Desc('Line Number')
+    Define_Map For(*INPUT) Class(#LW3ITEMCD) Name(#iItemCode) Desc('Item Code')
+    
+    
+    Define_Map For(*OUTPUT) Class(#LW3ISIZE) Name(#oSize) Desc('Size')
+    Define_Map For(*OUTPUT) Class(#LW3ICOLR) Name(#oColor) Desc('Color')
+    Define_Map For(*OUTPUT) Class(#LW3IMAGE) Name(#oImage) Desc('Image')
+    Define_Map For(*OUTPUT) Class(#LW3LPRICE) Name(#oPrice) Desc('Price') Help('If the item has a different size, it may have a different price')
+    
+    * Default image setting
+    #oImage := #iStorefrontShortName + 'ITEM/thumb/' + #LW3ITEMCD + '_th.jpg'
+    
+    * Check if the item has saved attributes in the extension file
+    Fetch Fields(#LW3ATSIZE #LW3ATCOLR) From_File(LW3CARTXL7) With_Key(#iOrderNumber #iLineNumber) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    If Cond(#LW3ATSIZE <> 0)
+    #oSize := #COM_OWNER.umGetAttributeNameById( #LW3ATSIZE )
+    #oPrice := #COM_OWNER.umGetItemAttributeById( #iStorefrontId #iItemCode #LW3ATSIZE *LANGUAGE ).asNumber
+    Endif
+    
+    * Get the appropriate image for the selected color
+    If Cond(#LW3ATCOLR <> 0)
+    #oColor := #COM_OWNER.umGetAttributeNameById( #LW3ATCOLR )
+    #LW3IMAGE := #COM_OWNER.umGetProductImageByColor( #iStorefrontId #iStorefrontShortName #iLanguage #iItemCode #LW3ATCOLR )
+    If Cond(#LW3IMAGE <> *BLANKS)
+    #oImage := #LW3IMAGE
+    Endif
+    Endif
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetProductImage
+    * Description....: Get Attributes for Product Image
+    * =======================================================
+    Mthroutine Name(umGetProductImage) Desc('Get Attributes for Product Image') Help('Get Attributes for Product Image')
+    Define_Map For(*INPUT) Class(#LW3ITEMCD) Name(#ImageCode) Desc('Image Code')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iImageType) Desc('Image Type')
+    Define_Map For(*RESULT) Class(#LW3IMAGE) Name(#rImage)
+    
+    Case Of_Field(#iImageType.LowerCase)
+    When Value_Is(= 'detail')
+    #rImage := #L_ProductImagePath.Substitute( #Global_DataModel.upStorefrontShortName #iImageType (#ImageCode + '_dt.jpg') )
+    When Value_Is(= 'thumb')
+    #rImage := #L_ProductImagePath.Substitute( #Global_DataModel.upStorefrontShortName #iImageType (#ImageCode + '_th.jpg') )
+    When Value_Is(= 'altview')
+    #rImage := #L_ProductImagePath.Substitute( #Global_DataModel.upStorefrontShortName #iImageType (#ImageCode + '_at.jpg') )
+    Otherwise
+    Endcase
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetImagePath
+    * Description....: Get Image path in system variable
+    * =======================================================
+    Mthroutine Name(umGetImagePath)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iVariableName) Mandatory(*NULL) Desc('System Variable Name') Help('System Variable Name')
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable(#iVariableName) Ilanguage('') Oalphavalue(#L_ProductImagePath)
+    
+    Endroutine
+    
+    End_Com

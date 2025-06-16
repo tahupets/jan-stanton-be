@@ -1,0 +1,392 @@
+﻿ServerModule:
+  Name:               CNSCNTAST
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Content Assets"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Server Module
+    * Platform        : REST APIs
+    * Name            : CNSCNTAST
+    * Identifier      : CNSCNTAST
+    * Ancestor        : PRIM_SRVM
+    * Written By      : Jan Metica
+    * Written On      : 16th September 2024
+    * Description     : Content Assets
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Begin_Com Role(*EXTENDS #PRIM_SRVM)
+    
+    * =======================================================
+    * Global Objects
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERMLUTL) Name(#Utility_Multilinguals) Desc('Multilingual Utility') Help('Multilinguals Utility') Scope(*APPLICATION)
+    Define_Com Class(#CNRCNTUTL) Name(#Utility_ContentAssets) Desc('Content Assets Utility') Help('Content Assets Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    Define_Com Class(#CNRAPILG) Name(#Processor_ApiLog) Desc('API Log Processor') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Group Definitions
+    * =======================================================
+    
+    * =======================================================
+    * List Definitions
+    * =======================================================
+    
+    * =======================================================
+    * Srvroutine Definitions
+    * =======================================================
+    * =======================================================
+    * Srvroutine ....: usGetPageContent
+    * Description....: Get Page Content
+    * =======================================================
+    Srvroutine Name(usGetPageContent) Response(*HTTP #uContext) Desc('Get Page Content') Help('Use this to retrieve page content assets')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetPageContent) Name(#Operation)
+    Define_Com Class(#Com_Home.contentResponseObject) Name(#Object_ContentResponse)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetPageContent.Response.NoContent.Object) Name(#Object_NoContent) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetPageContent.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If Cond(#Operation.TryBind( #uContext ))
+    
+    * Validate that the site domain from the request, matches with a valid Storefront
+    #Global_DataModel.umGetStorefrontDetails Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #Utility_ContentAssets.upPageShortDescription := #Operation.Request.page.UpperCase
+    #Utility_ContentAssets.upPageLocationShortDescription := #Operation.Request.location.UpperCase
+    
+    #Utility_ContentAssets.umGetContentAsset Icontenttype('L') Ocontentstring(#LW3CNTSTR)
+    
+    If Cond(#LW3CNTSTR = *BLANKS)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgRecordNotFound') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Content Asset returned as blank.')
+    Set_Ref Com(#Object_NoContent) To(*CREATE_AS #Com_Home.GetPageContent.Response.NoContent.Object)
+    Set Com(#Object_NoContent) Messages(#Array_HttpResponse)
+    #Operation.Response.SetNoContent Content(#Object_NoContent)
+    
+    Else
+    * Transfer field values to mapped fields in the schema "loginResponseObject"
+    Set Com(#Object_ContentResponse) Com_Fields(*ALL)
+    
+    * Set the return JSON Response for "postLogin"
+    #Operation.Response.SetResponseJson Content(#Object_ContentResponse)
+    Endif
+    
+    Else
+    * Error in getting Storefront Details
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgForbiddenAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Get Storefront Details Error')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetPageContent.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umSetHttpResponseMessages
+    * Description....: Set Http Response Messages
+    * =======================================================
+    Mthroutine Name(umSetHttpResponseMessages) Desc('Set Http Response Messages') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3VARNAM) Name(#iVariableName)
+    Define_Map For(*INPUT) Class(#LW3MSGTYP) Name(#iMessageType)
+    Define_Map For(*INPUT) Class(#LW3FLDNAM) Name(#iFieldName) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iMessageDetails) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iSubstitutionVariable1) Mandatory('')
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Add_Entry To_List(#iArray_HttpResponse)
+    #iArray_HttpResponse.CurrentItem.code := #iVariableName
+    #iArray_HttpResponse.CurrentItem.type := #iMessageType
+    #iArray_HttpResponse.CurrentItem.message := #Utility_Multilinguals.umGetMultilingualText( #iVariableName #Global_DataModel.upCurrentLanguage )
+    
+    If Cond(#iFieldName <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.field := #iFieldName
+    Endif
+    If Cond(#iMessageDetails <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.detail := #iMessageDetails
+    Endif
+    If Cond(#iSubstitutionVariable1 <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.substitutions.Add Value(#iSubstitutionVariable1)
+    Endif
+    
+    Endroutine
+    
+    End_Com
+
+  API Definition:
+    Language Handling:       NoAction
+    Partition Handling:      PathVariable
+    Publish as Swagger V2:   Yes
+    Publish as OpenAPI V3:   Yes
+    ServicePath:             /CNSCNTAST
+
+    Paths:
+    - /content/{page}/{location}:
+
+        Operations:
+        - GetPageContent:
+            Verb:               Get
+            Server Routine:     usGetPageContent
+            Summary:            Get Page Content
+            Help Text:          Get Page Content
+            Ignore Security:    Yes
+            Deprecated:         No
+
+            Parameters:
+            - page:
+                Location:           Path
+                Style:              Default
+                Required:           Yes
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Title:              LW3PAGSDC
+                  Description:        LW3PAGSDC
+                  Type:               Field
+                  Field Name:         LW3PAGSDC
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            - location:
+                Location:           Path
+                Style:              Default
+                Required:           Yes
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Title:              LW3PAGLDC
+                  Description:        LW3PAGLDC
+                  Type:               Field
+                  Field Name:         LW3PAGLDC
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ResponseJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     contentResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Success (No Content):
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      NoContent
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    Components:
+      Schema:
+        Types:
+        - contentResponseObject:
+            Description:        Content Response Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3CNTSTR:
+                Description:        LW3CNTSTR
+                Type:               Field
+                Field Name:         LW3CNTSTR
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - httpResponseArray:
+            Description:        Http Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        Http Response Object
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - code:
+                  Description:        Multilingual Variable Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - message:
+                  Description:        Multilingual Variable Unicode Text
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - type:
+                  Description:        Message Type
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - field:
+                  Description:        Field Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - detail:
+                  Description:        Message Detail
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - substitutions:
+                  Description:        Substitution Variables
+                  Type:               Array
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+                  Items:
+                  - Description:        values
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No

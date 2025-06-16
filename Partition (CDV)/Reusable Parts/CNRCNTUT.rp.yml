@@ -1,0 +1,121 @@
+﻿Reusable Part:
+  Name:               CNRCNTUTL
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Content Asset Utility"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Reusable Part
+    * Platform        : REST APIs
+    * Name            : CNRCNTUTL
+    * Identifier      : CNRCNTUTL
+    * Ancestor        : PRIM_OBJT
+    * Written By      : Jan Metica
+    * Written On      : 16th September 2024
+    * Description     : Content Asset Utility
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    
+    Define_Com Class(#LW3PAGSDC) Name(#L_PageShortDescription)
+    Define_Com Class(#LW3PAGLSD) Name(#L_PageLocationShortDescription)
+    
+    Define_Com Class(#LW3EMLID) Name(#L_EmailEventId)
+    
+    Define_Com Class(#LW3CATID) Name(#L_CategoryId)
+    Define_Com Class(#LW3CATLSD) Name(#L_CategoryLocationShortDescription)
+    
+    * =======================================================
+    * Property Definitions
+    * =======================================================
+    
+    Define_Pty Name(upPageShortDescription) Get(*AUTO #L_PageShortDescription) Set(*AUTO #L_PageShortDescription)
+    Define_Pty Name(upPageLocationShortDescription) Get(*AUTO #L_PageLocationShortDescription) Set(*AUTO #L_PageLocationShortDescription)
+    
+    Define_Pty Name(upEmailEventId) Get(*AUTO #L_EmailEventId) Set(*AUTO #L_EmailEventId)
+    
+    Define_Pty Name(upCategoryId) Get(*AUTO #L_CategoryId) Set(*AUTO #L_CategoryId)
+    Define_Pty Name(upCategoryLocationShortDescription) Get(*AUTO #L_CategoryLocationShortDescription) Set(*AUTO #L_CategoryLocationShortDescription)
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umGetContentAsset
+    * Description....: Get Content Asset
+    * =======================================================
+    Mthroutine Name(umGetContentAsset) Desc('Get Content Asset') Help('Get content assets depending on the type')
+    
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iContentType)
+    Define_Map For(*OUTPUT) Class(#LW3CNTSTR) Name(#oContentString)
+    
+    #LW3APLID := #Global_DataModel.upStorefrontId
+    #LW3UTYP := #iContentType
+    #FXLNGCOD := #Global_DataModel.upCurrentLanguage
+    
+    Case Of_Field(#LW3UTYP)
+    
+    * Page Location
+    When Value_Is(= 'L')
+    #LW3PAGSDC := #L_PageShortDescription
+    #LW3PAGLSD := #L_PageLocationShortDescription
+    
+    Exchange Fields(#LW3APLID #LW3UTYP #LW3PAGSDC #LW3PAGLSD #FXLNGCOD)
+    Call Process(*DIRECT) Function(CM_BBOX) Menu_Used(*NEXT) If_Error(*NEXT)
+    
+    * Email
+    When Value_Is(= 'E')
+    #LW3EMLID := #L_EmailEventId
+    
+    Exchange Fields(#LW3APLID #LW3UTYP #LW3EMLID #FXLNGCOD)
+    Call Process(*DIRECT) Function(CM_BBOX) Menu_Used(*NEXT) If_Error(*NEXT)
+    
+    * Category
+    When Value_Is(= 'C')
+    #LW3CATID := #L_CategoryId
+    #LW3CATLSD := #L_CategoryLocationShortDescription
+    
+    Exchange Fields(#LW3APLID #LW3UTYP #LW3CATID #LW3CATLSD #LW3REVIEW #FXLNGCOD)
+    Call Process(*DIRECT) Function(CM_BBOX) Menu_Used(*NEXT) If_Error(*NEXT)
+    
+    Endcase
+    
+    #oContentString := #LW3CNTSTR
+    
+    Endroutine
+    
+    End_Com

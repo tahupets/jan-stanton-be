@@ -1,0 +1,290 @@
+﻿Reusable Part:
+  Name:               CNRWSSPR
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Web Session Processor"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Reusable Part
+    * Platform        : REST APIs
+    * Name            : CNRWSSPR
+    * Identifier      : CNRWSSPR
+    * Ancestor        : PRIM_OBJT
+    * Written By      : Jan Metica
+    * Written On      : 21st August 2024
+    * Description     : Web Session Processor
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#prim_srvm.HttpJsonWebToken) Name(#uJWT)
+    Define_Com Class(#prim_srvm.HttpJsonWebTokenSignatureHSnnn) Name(#HSnnn) Algorithm(HS384)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Group Definitions
+    * =======================================================
+    
+    Group_By Name(#XG_CNTSESSN) Fields(#LW3GUID #LW3SESTAT #LW3WEBUSR #LW3ASSC01 #LW3PGUID #LW3JSDTA #LW3CDSTMP #LW3UDSTMP)
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umProcessSession
+    * Description....: Process Session Record
+    * =======================================================
+    Mthroutine Name(umProcessSession) Desc('Process Session Record') Help('Use this to create or update the session record for a user using the GUID stored in the client-side')
+    
+    * Define_Map For(*INPUT) Class(#LW3WEBUSR) Name(#iLoggedInWebUserId) Mandatory('')
+    * Define_Map For(*INPUT) Class(#LW3ASSC01) Name(#iSelectedCustomerId) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3JSDTA) Name(#iJSONData) Mandatory('')
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iCreateNewSession) Mandatory(False)
+    Define_Map For(*INPUT) Class(#LW3WEBUSR) Name(#iWebUser)
+    Define_Map For(*BOTH) Class(#LW3GUID) Name(#bGUID)
+    Define_Map For(*OUTPUT) Class(#PRIM_ALPH) Name(#oReturnCode)
+    
+    #LW3JSDTA := #iJSONData
+    
+    If Cond(#bGUID = *BLANKS)
+    #COM_OWNER.umCreateSessionRecord Iwebuser(#iWebUser) Ijsondata(#iJSONData) Oreturncode(#oReturnCode)
+    
+    Else
+    * Ensure that the GUID is valid, otherwise create a new one
+    Fetch Fields(#XG_CNTSESSN *EXCLUDING #LW3CDSTMP #LW3UDSTMP) From_File(CNTSESSNL2) With_Key(#bGUID #iWebUser) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    If Cond((#LW3SESTAT = 'C') Or (#iCreateNewSession))
+    * LW3SESTAT = C (Confirmed)
+    * If the cart has been confirmed or a new session is required, do not allow this GUID to be used anymore and create a new one based on the record of the previous GUID
+    
+    * * If not a registered user clear some fields.
+    * If Cond(#LW3REGUSR <> 'Y')
+    * #LW3WEBUSR := *BLANKS
+    * Endif
+    
+    #COM_OWNER.umCreateSessionRecord Iwebuser(#LW3WEBUSR) Ijsondata(#iJSONData) Ipreviousguid(#LW3GUID) Oreturncode(#oReturnCode)
+    
+    Else
+    #oReturnCode := 'OK'
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umCreateSessionRecord Iwebuser(#iWebUser) Ijsondata(#iJSONData) Oreturncode(#oReturnCode)
+    
+    Endif
+    
+    Endif
+    
+    #bGUID := #LW3GUID
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umCreateSessionRecord
+    * Description....: Create Session Record
+    * =======================================================
+    Mthroutine Name(umCreateSessionRecord) Desc('Create Session Record') Help('Create Session Record') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3WEBUSR) Name(#iWebUser)
+    Define_Map For(*INPUT) Class(#LW3JSDTA) Name(#iJSONData)
+    Define_Map For(*INPUT) Class(#LW3PGUID) Name(#iPreviousGUID) Mandatory('')
+    Define_Map For(*INPUT) Class(#PRIM_NMBR) Name(#iRecursiveCounter) Mandatory(0)
+    Define_Map For(*OUTPUT) Class(#PRIM_ALPH) Name(#oReturnCode)
+    
+    Define_Com Class(#XPRIM_Binary) Name(#CryptoKey)
+    
+    If Cond(#iRecursiveCounter > 10)
+    * Something is wrong with the generation of the GUID as it kept hitting the same value already in the Session File too many times. Issue an error to the user to contact Customer Service
+    #oReturnCode := 'ER'
+    Return
+    Endif
+    
+    #iRecursiveCounter += 1
+    
+    #CryptoKey.FromRandomBytes Bytecount(32)
+    
+    #LW3PGUID := #iPreviousGUID
+    #LW3GUID := #CryptoKey.AsHexString
+    #LW3WEBUSR := #iWebUser
+    #LW3JSDTA := #iJSONData
+    
+    #LW3SESTAT := *BLANKS
+    
+    * If Cond(#LW3WEBUSR = *BLANKS)
+    * #LW3REGUSR := 'N'
+    * Else
+    * #LW3REGUSR := 'Y'
+    * Endif
+    
+    Check_For In_File(CNTSESSN) With_Key(#LW3GUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    #COM_OWNER.umCreateSessionRecord Iwebuser(#iWebUser) Ijsondata(#iJSONData) Ipreviousguid(#iPreviousGUID) Irecursivecounter(#iRecursiveCounter) Oreturncode(#oReturnCode)
+    Else
+    Insert Fields(#XG_CNTSESSN *EXCLUDING #LW3UDSTMP) To_File(CNTSESSN) Io_Error(*NEXT) Val_Error(*NEXT)
+    #oReturnCode := 'OK'
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umVerifyUserTokens
+    * Description....: Verify User Tokens Validity
+    * =======================================================
+    Mthroutine Name(umVerifyUserTokens) Desc('Verify User Tokens Validity') Help('Verify validity for the Access and Refresh Tokens')
+    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpContext) Name(#iContext) Pass(*BY_REFERENCE)
+    * Define_Map For(*INPUT) Class(#COM_OWNER.Security) Name(#Security) Pass(*BY_REFERENCE)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iAccessToken) Help('Receive the value from #Security.HttpBearer.Value')
+    * Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iRefreshToken) Help('Receive the value from Header Cookies')
+    * * * Define_Map For(*INPUT) Class(#com_home.Security) Name(#Security) Pass(*BY_REFERENCE)
+    Define_Map For(*OUTPUT) Class(#LW3GUID) Name(#oGUID) Desc('Storefront GUID')
+    
+    Define_Map For(*RESULT) Class(#PRIM_BOLN) Name(#rVerified) Mandatory(False)
+    
+    Define_Com Class(#LW3SVVALP) Name(#L_JWT_SecretKey)
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_ACCESS_KEY') Ilanguage('') Oalphavalue(#L_JWT_SecretKey)
+    
+    * Validate the Access Token
+    If (#HSnnn.TryVerifyToken( #iAccessToken #uJWT #L_JWT_SecretKey ))
+    
+    If (#uJWT.Claims<"ceGUID"> *IsNot *Null)
+    
+    #oGUID := #uJWT.Claims<"ceGUID">.asString
+    #rVerified := True
+    
+    Endif
+    
+    Endif
+    
+    Endroutine
+    
+    * ======================================================
+    * Mthroutine : umSetAuthTokenParms
+    * Description: Set Authorization Token Parameters
+    * ======================================================
+    Mthroutine Name(umSetAuthTokenParms) Desc('Set Authorization Token Parameters') Help('Set Authorization Token Parameters')
+    
+    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpJsonWebToken) Name(#iJWTAccess) Pass(*BY_REFERENCE)
+    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpJsonWebToken) Name(#iJWTRefresh) Pass(*BY_REFERENCE)
+    
+    Define_Map For(*INPUT) Class(#LW3GUID) Name(#iGUID)
+    Define_Map For(*INPUT) Class(#LW3WEBUSR) Name(#iUsername)
+    Define_Map For(*INPUT) Class(#LW3CEMAIL) Name(#iUserEmail)
+    Define_Map For(*INPUT) Class(#LW3CHFNME) Name(#iUserFirstName)
+    Define_Map For(*INPUT) Class(#LW3CHFNME) Name(#iUserLastName)
+    
+    Define_Map For(*OUTPUT) Class(#LW3ACSTKN) Name(#oAccessToken)
+    Define_Map For(*OUTPUT) Class(#LW3RFSTKN) Name(#oRefreshToken)
+    Define_Map For(*OUTPUT) Class(#LW3RFSTKN) Name(#oCSRFToken)
+    
+    Define_Com Class(#XPRIM_Crypto_Hash) Name(#uHashObject)
+    * Define_Com Class(#XPRIM_Binary) Name(#uCryptoKey)
+    Define_Com Class(#XPRIM_Binary) Name(#uPasswordBytes)
+    * Define_Com Class(#XPRIM_Binary) Name(#uSaltBytes)
+    Define_Com Class(#XPRIM_Binary) Name(#uHashBytes)
+    
+    Define_Com Class(#LW3SVVALP) Name(#L_JWT_SecretKey)
+    Define_Com Class(#LW3SVVNUM) Name(#L_JWT_TokenTimeSpan)
+    
+    * Set Access Token Claims
+    #iJWTAccess.Claims.AddStringMember( 'ceGUID' #iGUID )
+    #iJWTAccess.Claims.AddStringMember( 'ceUserName' #iUsername )
+    #iJWTAccess.Claims.AddStringMember( 'ceEmail' #iUserEmail )
+    #iJWTAccess.Claims.AddStringMember( 'ceFirstName' #iUserFirstName )
+    #iJWTAccess.Claims.AddStringMember( 'ceLastName' #iUserLastName )
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_ACCESS_KEY') Ilanguage('') Oalphavalue(#L_JWT_SecretKey)
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_ACCESS_TIMEOUT') Ilanguage('') Onumericvalue(#L_JWT_TokenTimeSpan)
+    
+    * JWT Access Token returned as part of the response body
+    #iJWTAccess.IssueTokenTimespan := #L_JWT_TokenTimeSpan
+    #oAccessToken := #HSnnn.IssueToken( #iJWTAccess #L_JWT_SecretKey )
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_REFRESH_KEY') Ilanguage('') Oalphavalue(#L_JWT_SecretKey)
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_REFRESH_TIMEOUT') Ilanguage('') Onumericvalue(#L_JWT_TokenTimeSpan)
+    
+    * JWT Refresh Token added as part of the response cookie
+    #iJWTRefresh.IssueTokenTimespan := #L_JWT_TokenTimeSpan
+    #oRefreshToken := #HSnnn.IssueToken( #iJWTRefresh #L_JWT_SecretKey )
+    * #iContext.Response.AddCookie Name('ce_rf_token') Value(#LW3RFSTKN) Secure(False) Httponly(True) Path('/')
+    * #iJWTRefresh.IssueTokenTimespan := 1
+    
+    * Create CSRF Token
+    
+    * #uCryptoKey.FromRandomBytes Bytecount(16)
+    * #LW3PWDSLT := #uCryptoKey.AsHexString
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('CSRF_TOKEN_SECRET_KEY') Ilanguage('') Oalphavalue(#L_JWT_SecretKey)
+    #uPasswordBytes.FromStringUsingUTF8 String(#L_JWT_SecretKey + (*YYYYMMDDC + *TIMEC))
+    * #uSaltBytes.FromStringUsingUTF8 String(#LW3PWDSLT)
+    
+    #uHashObject.UseSHA256
+    #uHashObject.Compute Input(#uPasswordBytes) Result(#uHashBytes)
+    #oCSRFToken := #uHashBytes.AsBase64String
+    
+    * Log the Access and Refresh Token combination
+    #LW3RFSTKN := #oRefreshToken
+    #LW3ACSTKN := #oAccessToken
+    #LW3CSRFTK := #oCSRFToken
+    #LW3GUID := #iGUID
+    
+    Insert Fields(#LW3RFSTKN #LW3GUID #LW3CSRFTK) To_File(CNTAUTKN) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Endroutine
+    
+    * ======================================================
+    * Mthroutine : umGetRefreshTokenFromCookie
+    * Description: Parse and get the refresh token value from the cookie
+    * ======================================================
+    Mthroutine Name(umGetRefreshTokenFromCookie) Desc('Get Refresh Token from Cookie') Help('Parse and get the refresh token value from the cookie')
+    
+    Define_Map For(*INPUT) Class(#LW3LNGSTR) Name(#iCookieValue)
+    Define_Map For(*RESULT) Class(#LW3RFSTKN) Name(#rRefreshToken)
+    
+    Define_Com Class(#PRIM_REGX) Name(#L_Regex)
+    Define_Com Class(#PRIM_REGX.Match) Name(#L_RegexMatch) Reference(*DYNAMIC)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_JWT_RefreshToken_RegexPattern)
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_RFSTKN_CK_REGEX') Ilanguage('') Oalphavalue(#L_JWT_RefreshToken_RegexPattern)
+    
+    #L_Regex.Match Inputstring(#iCookieValue) Pattern(#L_JWT_RefreshToken_RegexPattern) Match(#L_RegexMatch)
+    
+    If Cond(#L_RegexMatch.Success)
+    #rRefreshToken := #L_RegexMatch.Groups.Item<2>.Value.AsNativeString
+    Endif
+    
+    Endroutine
+    
+    End_Com
+    

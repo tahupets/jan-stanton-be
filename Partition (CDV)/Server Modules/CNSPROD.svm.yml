@@ -1,0 +1,2115 @@
+﻿ServerModule:
+  Name:               CNSPROD
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Storefront Products"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Server Module
+    * Platform        : REST APIs
+    * Name            : CNSPROD
+    * Identifier      : CNSPROD
+    * Ancestor        : PRIM_SRVM
+    * Written By      : Jan Metica
+    * Written On      : 2nd October 2024
+    * Description     : Storefront Products
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Begin_Com Role(*EXTENDS #PRIM_SRVM)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERMLUTL) Name(#Utility_Multilinguals) Desc('Multilingual Utility') Help('Multilinguals Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    Define_Com Class(#CERIAUTL) Name(#Processor_ProductAttributes) Desc('Product Attributes Processor')
+    Define_Com Class(#CNRAPILG) Name(#Processor_ApiLog) Desc('API Log Processor') Scope(*APPLICATION)
+    Define_Com Class(#CNRPRDPR) Name(#Processor_Products) Desc('Products Processor') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Collections
+    * =======================================================
+    
+    Define_Com Class(#PRIM_KCOL<#LW3FLTDSC #LW3FLTNCD>) Name(#Collection_Categories) Style(Collection)
+    
+    * =======================================================
+    * Simple Field Definitions
+    * =======================================================
+    
+    Define Field(#W_LSITEMSCOUNT) Reffld(#LISTCOUNT) Desc('Item List Count')
+    
+    Define Field(#W_SEARCHRELEVANCEPRIORITY) Type(*DEC) Length(5) Decimals(0) Desc('Search Relevance Priority')
+    
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    
+    * =======================================================
+    * List Definitions
+    * =======================================================
+    
+    Def_List Name(#LS_ENDNODE) Fields(#LW3CATID #LW3CATNAM) Type(*WORKING)
+    Def_List Name(#LS_PARENTNODE) Fields(#LW3CATID #LW3CATNAM) Type(*WORKING)
+    
+    Def_List Name(#LS_ITEMS) Fields(#LW3ITEMCD #LW3CATID #LW3CATNAM #W_SEARCHRELEVANCEPRIORITY) Counter(#W_LSITEMSCOUNT) Type(*WORKING) Entrys(*MAX)
+    Def_List Name(#LS_PRODUCTDETAILS) Fields(#LW3ITEMCD #LW3IDESC #LW3LPRICE #LW3URL #LW3IMAGE #LW3STKAVL #LW3CATNAM #W_AVLQTY #W_FLAGP #W_PDFLINK #D_LPRICE #LW3CATID #W_LOFT #W_RGHTHND #W_LEFTHND #W_BRAND #LW3ABTXT #LW3UM) Type(*WORKING) Entrys(*MAX)
+    Def_List Name(#LS_CATEGORIES) Fields(#LW3CATID #LW3CATNAM) Type(*WORKING) Entrys(*MAX)
+    
+    * Filter Related Data
+    Def_List Name(#LS_FILTERTYPES) Fields(#LW3FLTSLF #LW3FLTSEQ #LW3FLTESQ #LW3FLTTYP #LW3FLTACD #LW3FLTNCD #LW3FLTDSC #LW3FLTECN) Type(*WORKING) Entrys(*MAX)
+    Def_List Name(#LS_FILTERDATA) Fields(#LW3FLTSLF #LW3FLTSEQ #LW3FLTESQ #LW3FLTTYP #LW3FLTACD #LW3FLTNCD #LW3FLTDSC #LW3FLTECN) Type(*WORKING) Entrys(*MAX)
+    
+    * list of key words
+    Def_List Name(#LS_KEYLIST) Fields(#lw3kword) Type(*WORKING) Entrys(*MAX)
+    * list of misspellings
+    Def_List Name(#LS_MISSPELLINGS) Fields(#lw3kword) Type(*WORKING) Entrys(*MAX)
+    
+    * =======================================================
+    * Srvroutine Definitions
+    * =======================================================
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSPROD/category/{category}
+    * Operation: GetCategory
+    *
+    * Request
+    *    Parameter: category (String) - Category URL
+    *    Schema   : none
+    *
+    * Response
+    *    Schema   : (OK) responseObject
+    *             : (ER)
+    *
+    * Action  : Build the list of products for the passed in category and its sub-categories
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetProducts) Response(*HTTP #uContext) Desc('Get Product List')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetCategory) Name(#Operation)
+    Define_Com Class(#Com_Home.productsArray) Name(#Array_Products)
+    Define_Com Class(#Com_Home.filterArray) Name(#Array_Filter)
+    Define_Com Class(#Com_Home.filterSelectionsArray) Name(#Array_FilterSelections)
+    Define_Com Class(#Com_Home.responseObject) Name(#Object_Response)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetCategory.Response.NoContent.Object) Name(#Object_NoContent) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetCategory.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    #Processor_ProductAttributes.umGetImagePath Ivariablename('PRODUCT_IMAGE_PATH')
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umGetEndNodeCategories Icategoryurl(#Operation.Request.category)
+    #COM_OWNER.umBuildProductList
+    
+    #COM_OWNER.umBuildPrdLstResponse Iarray_Products(#Array_Products) Iarray_Filter(#Array_Filter) Iobject_Response(#Object_Response)
+    
+    If Cond(#Object_Response.products.Count > 0)
+    
+    #Operation.Response.SetContentJson Content(#Object_Response)
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgNoRecordsFound') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('No products retrieved for the search criteria.')
+    Set_Ref Com(#Object_NoContent) To(*CREATE_AS #Com_Home.GetCategory.Response.NoContent.Object)
+    Set Com(#Object_NoContent) Messages(#Array_HttpResponse)
+    #Operation.Response.SetNoContent Content(#Object_NoContent)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session id is not valid')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetCategory.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetCategory.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSPROD/products
+    * Operation: GetProductSearch
+    *
+    * Request
+    *    Parameter: search (String) - Search Keyword
+    *    Schema   : none
+    *
+    * Response
+    *    Schema   : (OK) responseObject
+    *             : (ER)
+    *
+    * Action  : Build the list of products based on a search keyword
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetProductSearch) Response(*HTTP #uContext) Desc('Search By Keyword') Help('Use this to search for products using a keyword')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetProductSearch) Name(#Operation)
+    Define_Com Class(#Com_Home.productsArray) Name(#Array_Products)
+    Define_Com Class(#Com_Home.filterArray) Name(#Array_Filter)
+    Define_Com Class(#Com_Home.filterSelectionsArray) Name(#Array_FilterSelections)
+    Define_Com Class(#Com_Home.responseObject) Name(#Object_Response)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetProductSearch.Response.NoContent.Object) Name(#Object_NoContent) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetProductSearch.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    #Processor_ProductAttributes.umGetImagePath Ivariablename('PRODUCT_IMAGE_PATH')
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umParseSearchKeyword Isearchedkeyword(#Operation.Request.search)
+    #COM_OWNER.umCorrectMisspellings
+    #COM_OWNER.umPerformKeywordSearch
+    
+    Selectlist Named(#LS_ITEMS)
+    #COM_OWNER.umGetProductDetails Iitemcode(#LW3ITEMCD)
+    Endselect
+    
+    Sort_List Named(#LS_FILTERTYPES) By_Fields(#LW3FLTSEQ)
+    Sort_List Named(#LS_FILTERDATA) By_Fields(#LW3FLTSEQ #LW3FLTESQ)
+    
+    #COM_OWNER.umBuildPrdLstResponse Iarray_Products(#Array_Products) Iarray_Filter(#Array_Filter) Iobject_Response(#Object_Response)
+    
+    If Cond(#Object_Response.products.Count > 0)
+    #Operation.Response.SetContentJson Content(#Object_Response)
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgNoRecordsFound') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('No products retrieved for the search criteria.')
+    Set_Ref Com(#Object_NoContent) To(*CREATE_AS #Com_Home.GetProductSearch.Response.NoContent.Object)
+    Set Com(#Object_NoContent) Messages(#Array_HttpResponse)
+    #Operation.Response.SetNoContent Content(#Object_NoContent)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session id is not valid')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetProductSearch.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetProductSearch.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSPROD/products/suggestions
+    * Operation: GetProductSuggestions
+    *
+    * Request
+    *    Parameter: search (String) - Search Keyword
+    *    Schema   : none
+    *
+    * Response
+    *    Schema   : (OK) productSuggestionArray
+    *             : (ER)
+    *
+    * Action  : Build a list of item codes based on the entered search keyword
+    *           Used in search autocomplete
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetProdSuggestions) Response(*HTTP #uContext) Desc('Get product suggestions')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetProductSuggestions) Name(#Operation)
+    Define_Com Class(#Com_Home.suggestionResponseObject) Name(#Array_SuggestionsResponse)
+    
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetProductSuggestions.Response.NoContent.Object) Name(#Object_NoContent) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetProductSuggestions.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umParseSearchKeyword Isearchedkeyword(#Operation.Request.search)
+    #COM_OWNER.umCorrectMisspellings
+    #COM_OWNER.umPerformKeywordSearch
+    
+    #Collection_Categories.RemoveAll
+    
+    Selectlist Named(#LS_ITEMS)
+    #COM_OWNER.umGetProductDetails Iitemcode(#LW3ITEMCD)
+    Endselect
+    
+    Selectlist Named(#LS_FILTERDATA) Where(#LW3FLTSEQ = 1)
+    Set_Ref Com(#Collection_Categories<#LW3FLTNCD>) To(*CREATE_AS #LW3FLTDSC)
+    #Collection_Categories<#LW3FLTNCD> := #LW3FLTDSC
+    Endselect
+    
+    For Each(#Category) In(#Collection_Categories) Key(#CategoryId)
+    #LW3CATNAM := #Category.Value
+    #LW3CATID := #CategoryId
+    Add_Entry To_List(#LS_CATEGORIES)
+    Endfor
+    
+    Sort_List Named(#LS_PRODUCTDETAILS) By_Fields(#LW3ITEMCD)
+    Sort_List Named(#LS_CATEGORIES) By_Fields(#LW3CATNAM)
+    
+    Selectlist Named(#LS_PRODUCTDETAILS)
+    Add_Entry To_List(#Array_SuggestionsResponse.product)
+    Endselect
+    
+    Selectlist Named(#LS_CATEGORIES)
+    Add_Entry To_List(#Array_SuggestionsResponse.category)
+    Endselect
+    
+    If Cond(#LW3RETCOD = 'OK')
+    #Operation.Response.SetContentJson Content(#Array_SuggestionsResponse)
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgNoResultsFromSearch') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('No results for searched product.') Isubstitutionvariable1(#Operation.Request.search)
+    Set_Ref Com(#Object_NoContent) To(*CREATE_AS #Com_Home.GetProductSuggestions.Response.NoContent.Object)
+    Set Com(#Object_NoContent) Messages(#Array_HttpResponse)
+    #Operation.Response.SetNoContent Content(#Object_NoContent)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session id is not valid')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetProductSuggestions.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetProductSuggestions.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSPROD/product/{itemcode}
+    * Operation: GetProductDetails
+    *
+    * Request
+    *    Parameter: itemcode (String) - Item Code
+    *    Schema   : none
+    *
+    * Response
+    *    Schema   : (OK) productsObject
+    *             : (ER)
+    *
+    * Action  : Build the details for the product being accessed
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetProductDetails) Response(*HTTP #uContext) Desc('Get product details')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetProductDetails) Name(#Operation)
+    Define_Com Class(#Com_Home.productsObject) Name(#Object_Products)
+    
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetProductDetails.Response.NoContent.Object) Name(#Object_NoContent) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetProductDetails.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    #Processor_ProductAttributes.umGetImagePath Ivariablename('PRODUCT_IMAGE_PATH')
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umGetProductDetails Iitemcode(#Operation.Request.itemcode) Igetdetailsonly(True) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umGetProductAttributeTabs Iobject_Products(#Object_Products)
+    
+    Set Com(#Object_Products) Com_Fields(*ALL)
+    #Operation.Response.SetContentJson Content(#Object_Products)
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgProductNotFound') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Product could not be found.')
+    Set_Ref Com(#Object_NoContent) To(*CREATE_AS #Com_Home.GetProductDetails.Response.NoContent.Object)
+    Set Com(#Object_NoContent) Messages(#Array_HttpResponse)
+    #Operation.Response.SetNoContent Content(#Object_NoContent)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session id is not valid')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetProductDetails.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetProductDetails.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umBuildPrdLstResponse
+    * Description....: Build Product List Response Data
+    * =======================================================
+    Mthroutine Name(umBuildPrdLstResponse) Desc('Build Product List Response Data') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#Com_Home.productsArray) Name(#iArray_Products) Pass(*BY_REFERENCE)
+    Define_Map For(*INPUT) Class(#Com_Home.filterArray) Name(#iArray_Filter) Pass(*BY_REFERENCE)
+    * Define_Map For(*INPUT) Class(#Com_Home.filterSelectionsArray) Name(#iArray_FilterSelections) Pass(*BY_REFERENCE)
+    Define_Map For(*INPUT) Class(#Com_Home.responseObject) Name(#iObject_Response) Pass(*BY_REFERENCE)
+    
+    Define_Com Class(#Com_Home.filterSelectionsArray) Name(#Array_FilterSelections) Reference(*DYNAMIC)
+    
+    Define_Com Class(#LW3FLTDSC) Name(#L_FilterDescription)
+    Define_Com Class(#LW3FLTSEQ) Name(#L_FilterSequence)
+    
+    Sort_List Named(#LS_FILTERDATA) By_Fields(#LW3FLTDSC)
+    
+    Selectlist Named(#LS_PRODUCTDETAILS)
+    
+    #LW3ABTXT := #Processor_ProductAttributes.umGetItemAttributeById( #Global_DataModel.upStorefrontId #LW3ITEMCD 22 #Global_DataModel.upCurrentLanguage )
+    #LW3UM := #Processor_ProductAttributes.umGetItemAttributeById( #Global_DataModel.upStorefrontId #LW3ITEMCD 14 #Global_DataModel.upCurrentLanguage )
+    
+    Add_Entry To_List(#iObject_Response.products)
+    
+    
+    Endselect
+    
+    * #iObject_Response.products <= #iArray_Products
+    
+    Selectlist Named(#LS_FILTERTYPES)
+    
+    #L_FilterDescription := #LW3FLTDSC
+    
+    Set_Ref Com(#Array_FilterSelections) To(*CREATE_AS #Com_Home.filterSelectionsArray)
+    
+    Clr_List Named(#Array_FilterSelections)
+    
+    #L_FilterSequence := #LW3FLTSEQ
+    Selectlist Named(#LS_FILTERDATA) Where(#LW3FLTSEQ = #L_FilterSequence)
+    Add_Entry To_List(#Array_FilterSelections)
+    Endselect
+    
+    Add_Entry To_List(#iArray_Filter)
+    
+    #iArray_Filter.CurrentItem.LW3FLTDSC := #L_FilterDescription
+    #iArray_Filter.CurrentItem.selections <= #Array_FilterSelections
+    
+    Endselect
+    
+    #iObject_Response.filters <= #iArray_Filter
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetEndNodeCategories
+    * Description....: Get end node categories based on the passed in Category URL
+    * =======================================================
+    Mthroutine Name(umGetEndNodeCategories) Desc('Get End Node Categories') Help('Get end node categories based on the passed in Category URL') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3CATURL) Name(#iCategoryUrl)
+    
+    * Are we at an end node in the category structure?
+    #LW3CATEND #LW3CATID := *NULL
+    Fetch Fields(#LW3CATEND #LW3CATNAM #LW3CATID) From_File(LW3C01L2) With_Key(#Global_DataModel.upStorefrontId #iCategoryUrl.LowerCase) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#LW3CATEND = 'Y')
+    Add_Entry To_List(#LS_ENDNODE)
+    
+    Else
+    * not an end node: get all sub categories for requested category
+    * get first level subcategory
+    Select Fields(#LW3CATSUB) From_File(LW3C02) With_Key(#Global_DataModel.upStorefrontId #LW3CATID) Io_Error(*NEXT) Val_Error(*NEXT)
+    Fetch Fields(#LW3CATID #LW3CATNAM #LW3CATEND) From_File(LW3C01) With_Key(#Global_DataModel.upStorefrontId #LW3CATSUB) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#LW3CATEND = 'Y')
+    Add_Entry To_List(#LS_ENDNODE)
+    
+    Else
+    Add_Entry To_List(#LS_PARENTNODE)
+    
+    Endif
+    Endselect
+    
+    * get subcategory's subcategories
+    Selectlist Named(#LS_PARENTNODE)
+    Select Fields(#LW3CATSUB) From_File(LW3C02) With_Key(#Global_DataModel.upStorefrontId #LW3CATID) Io_Error(*NEXT) Val_Error(*NEXT)
+    Fetch Fields(#LW3CATID #LW3CATNAM #LW3CATEND) From_File(LW3C01) With_Key(#Global_DataModel.upStorefrontId #LW3CATSUB) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#LW3CATEND = 'Y')
+    Add_Entry To_List(#LS_ENDNODE)
+    
+    Else
+    Add_Entry To_List(#LS_PARENTNODE)
+    
+    Endif
+    Endselect
+    Endselect
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildProductList
+    * Description....: Build the list of products based on the collected end node categories
+    * =======================================================
+    Mthroutine Name(umBuildProductList) Desc('Build Product List') Help('Build the list of products based on the collected end node categories') Access(*PRIVATE)
+    
+    * get product list using the end node's category id
+    Selectlist Named(#LS_ENDNODE)
+    Select Fields(#LW3ITEMCD) From_File(LW3C03) With_Key(#Global_DataModel.upStorefrontId #LW3CATID) Io_Error(*NEXT) Val_Error(*NEXT)
+    Add_Entry To_List(#LS_ITEMS)
+    
+    #COM_OWNER.umGetProductDetails Iitemcode(#LW3ITEMCD)
+    Endselect
+    Endselect
+    
+    Sort_List Named(#LS_FILTERTYPES) By_Fields(#LW3FLTSEQ)
+    Sort_List Named(#LS_FILTERDATA) By_Fields(#LW3FLTSEQ #LW3FLTESQ)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetProductDetails
+    * Description....: Get product details
+    * =======================================================
+    Mthroutine Name(umGetProductDetails) Desc('Get product details') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3ITEMCD) Name(#iItemCode)
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iGetDetailsOnly) Mandatory(False)
+    
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode) Mandatory('')
+    
+    Define_Com Class(#LW3IMAGE) Name(#L_imagePath)
+    
+    #LW3ITEMCD := #iItemCode
+    
+    Fetch Fields(#LW3CATID #LW3ITEMCD) From_File(LW3C03_3) With_Key(#Global_DataModel.upStorefrontId #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    #oReturnCode := 'OK'
+    
+    * Retrieve Category Name. Items can exist in multiple categories so this will only retrieve the first cross-reference it finds
+    Fetch Fields(#LW3CATNAM) From_File(LW3C01ML) With_Key(#Global_DataModel.upStorefrontId #LW3CATID #Global_DataModel.upCurrentLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    Fetch Fields(#LW3CATNAM) From_File(LW3C01) With_Key(#Global_DataModel.upStorefrontId #LW3CATID) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    
+    * -----------------------------------------
+    * Build Category Filter
+    If Cond(*Not #iGetDetailsOnly)
+    #COM_OWNER.umAddToFacetedFilterList Ifiltersequence(1) Ifiltertype('CAT') Ifiltertypedescription('CATEGORIES') Ifilternumericcode(#LW3CATID) Ifilterdescription(#LW3CATNAM)
+    Endif
+    * -----------------------------------------
+    
+    #COM_OWNER.umGetProductAttributesAndFilter
+    
+    #Processor_Products.umGetProductMainImage Iitemcode(#LW3ITEMCD) Oimageurl(#LW3IMAGE) Ostatus(#LW3RETCOD)
+    
+    * -----------------------------------------
+    * Check if product exists as a favorite already
+    #W_FLAGP := 'Y'
+    Check_For In_File(LW3CICAT) With_Key(#Global_DataModel.upUserId #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#IO$STS = EQ)
+    #W_FLAGP := N
+    Endif
+    * -----------------------------------------
+    
+    #com_owner.umGetItemStockPrice Iitemcode(#LW3ITEMCD) Ostockavailability(#LW3STKAVL) Oitemdescription(#LW3IDESC) Ounitprice(#LW3LPRICE) Oavailablequantity(#W_AVLQTY)
+    
+    * -----------------------------------------
+    * Constructing product links
+    #RWURLKEY := 'PRODUCT'
+    
+    #STD_TEXT := *blank
+    Substring Field(#LW3ITEMCD) Into_Field(#STD_TEXT)
+    #LW3URL := #RWURLTXT.LowerCase + '/' + #STD_TEXT.LowerCase
+    
+    #W_PDFLINK := '/CGI-BIN/lansaweb?webapp=WWRKPDFC+webrtn=wraddtopdf+ml=LANSA:XHTML+partition=' + *partition + '+language=' + *language + '+f(F_ITEM)=' + #LW3ITEMCD
+    * -----------------------------------------
+    
+    * Prepare currency field for display
+    #Utility_General.umFormatDisplayPrice Inumericvalue(#LW3LPRICE) Icurrencysymbol(#Global_DataModel.upStorefrontCurrencySymbol) Idecimalsymbol(#Global_DataModel.upStorefrontDecimalPointSymbol) Ithousandsymbol(#Global_DataModel.upStorefrontThousandSeparatorSymbol) Oreturnfield(#D_LPRICE)
+    
+    Add_Entry To_List(#LS_PRODUCTDETAILS)
+    
+    Else
+    #oReturnCode := 'ER'
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetProductAttributesAndFilter
+    * Description....: Get Product Attributes
+    * =======================================================
+    Mthroutine Name(umGetProductAttributesAndFilter) Desc('Get Product Attributes') Help('Use this to retrieve product attributes from the attributes file and build the faceted filter') Access(*PRIVATE)
+    
+    #W_LEFTHND #W_RGHTHND #W_LOFT #W_BRAND #LW3IMAGE := *NULL
+    
+    #LW3QSEL := "Select A.LW3IATID, A.LW3IATTY, B.LW3IATVL, A.LW3IATNM From " + #Global_DataModel.upDataLibrary + "LW3IATYP As A Join " + #Global_DataModel.upDataLibrary + "LW3IATTR As B On A.LW3IATID = B.LW3IATID Where B.LW3SFID = " + #Global_DataModel.upStorefrontId.asString + " And A.LW3IATTY in ('LFT', 'RGT', 'LOF', 'BRN', 'IMG') And b.LW3ITEMCD = '" + #LW3ITEMCD + "' Order By A.LW3IATTY, B.LW3IATVL, A.LW3IATNM"
+    
+    Select_Sql Fields(#LW3IATID #LW3IATTY #LW3IATVL #LW3IATNM) Io_Error(*NEXT) Using(#LW3QSEL)
+    
+    Case Of_Field(#LW3IATTY)
+    
+    * Left Hand
+    When Value_Is(= 'LFT')
+    If Cond(#LW3IATVL.UpperCase = 'YES')
+    #W_LEFTHND := True
+    #COM_OWNER.umAddToFacetedFilterList Ifiltersequence(3) Ifiltertype('HND') Ifiltertypedescription('HAND') Ifilternumericcode(#LW3IATID) Ifilterdescription(#LW3IATNM) Ifilteralphacode(#LW3IATNM)
+    Endif
+    
+    * Right Hand
+    When Value_Is(= 'RGT')
+    If Cond(#LW3IATVL.UpperCase = 'YES')
+    #W_RGHTHND := True
+    #COM_OWNER.umAddToFacetedFilterList Ifiltersequence(3) Ifiltertype('HND') Ifiltertypedescription('HAND') Ifilternumericcode(#LW3IATID) Ifilterdescription(#LW3IATNM) Ifilteralphacode(#LW3IATNM)
+    Endif
+    
+    * Loft
+    When Value_Is(= 'LOF')
+    #W_LOFT := #LW3IATVL
+    
+    #COM_OWNER.umAddToFacetedFilterList Ifiltersequence(4) Ifiltertype(#LW3IATTY) Ifiltertypedescription(#LW3IATNM) Ifilternumericcode(#LW3IATID) Ifilterdescription(#LW3IATVL) Ifilteralphacode(#LW3IATVL)
+    
+    * Brand
+    When Value_Is(= 'BRN')
+    #W_BRAND := #LW3IATVL
+    
+    * LW3CATID comes from the list selected
+    #COM_OWNER.umAddToFacetedFilterList Ifiltersequence(2) Ifiltertype(#LW3IATTY) Ifiltertypedescription(#LW3IATNM) Ifilternumericcode(#LW3CATID) Ifilterdescription(#LW3IATVL)
+    
+    * Image
+    When Value_Is(= 'IMG')
+    #LW3IMAGE := #LW3IATVL
+    
+    Endcase
+    
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umAddToFacetedFilterList
+    * Description....: Add to Faceted Filter List
+    * =======================================================
+    Mthroutine Name(umAddToFacetedFilterList) Desc('Add to Faceted Filter List') Help('Use this to add entries to the faceted filter list') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3FLTSEQ) Name(#iFilterSequence)
+    Define_Map For(*INPUT) Class(#LW3FLTTYP) Name(#iFilterType)
+    Define_Map For(*INPUT) Class(#LW3FLTDSC) Name(#iFilterTypeDescription)
+    Define_Map For(*INPUT) Class(#LW3FLTACD) Name(#iFilterAlphaCode) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3FLTNCD) Name(#iFilterNumericCode) Mandatory(0)
+    Define_Map For(*INPUT) Class(#LW3FLTESQ) Name(#iFilterEntrySequence) Mandatory(0)
+    Define_Map For(*INPUT) Class(#LW3FLTDSC) Name(#iFilterDescription)
+    
+    #LS_FILTERDATA := *NULL
+    
+    #LW3FLTSEQ := #iFilterSequence
+    #LW3FLTTYP := #iFilterType
+    
+    Loc_Entry In_List(#LS_FILTERTYPES) Where(#LW3FLTTYP = #iFilterType)
+    If_Status Is_Not(*OKAY)
+    #LW3FLTDSC := #iFilterTypeDescription
+    Add_Entry To_List(#LS_FILTERTYPES)
+    Endif
+    
+    #LW3COUNT5 := 0
+    
+    * If the filter entry already exists, just increment the count
+    Loc_Entry In_List(#LS_FILTERDATA) Where((#LW3FLTTYP = #iFilterType) And (((#iFilterAlphaCode <> *BLANKS) And (#LW3FLTACD = #iFilterAlphaCode)) Or ((#iFilterNumericCode <> 0) And (#LW3FLTNCD = #iFilterNumericCode))) And (#LW3FLTDSC = #iFilterDescription))
+    If_Status Is_Not(*OKAY)
+    #LW3FLTACD := #iFilterAlphaCode
+    #LW3FLTNCD := #iFilterNumericCode
+    #LW3FLTDSC := #iFilterDescription
+    #LW3FLTECN := 1
+    
+    * !NC! - For the meantime, set the filter entry sequence to auto increment
+    #LW3COUNT5 += 1
+    #LW3FLTESQ := #LW3COUNT5
+    Add_Entry To_List(#LS_FILTERDATA)
+    Else
+    #LW3FLTECN += 1
+    Upd_Entry In_List(#LS_FILTERDATA)
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetItemStockPrice
+    * Description....: Get Item Stock price using the API LW3APRC
+    * =======================================================
+    Mthroutine Name(umGetItemStockPrice) Desc('Get Item Stock Price') Help('Get Item Stock price using the API LW3APRC') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#FXSHIPID) Name(#iShippingId) Mandatory('')
+    Define_Map For(*INPUT) Class(#FXITEM) Name(#iItemCode)
+    Define_Map For(*INPUT) Class(#FXORDQTY) Name(#iOrderQuantity) Mandatory(1)
+    
+    Define_Map For(*OUTPUT) Class(#LW3STKAVL) Name(#oStockAvailability)
+    Define_Map For(*OUTPUT) Class(#LW3IDESC) Name(#oItemDescription)
+    Define_Map For(*OUTPUT) Class(#LW3LPRICE) Name(#oUnitPrice)
+    Define_Map For(*OUTPUT) Class(#W_AVLQTY) Name(#oAvailableQuantity)
+    
+    * ==================
+    * Call Inventory API to get stock & price
+    * API requires:
+    * #FXCUSID  - Customer Number
+    * #FXSHIPID - Ship To Number
+    * #FXITEM   - Item Number
+    * #FXORDQTY - Quantity in Order UM
+    
+    #LW3SFID := #Global_DataModel.upStorefrontId
+    #FXCUSID #LW3WEBC01 := #Global_DataModel.upCustomerId
+    #FXSHIPID := #iShippingId
+    #FXITEM := #iItemCode
+    #FXORDQTY := #iOrderQuantity
+    
+    Exchange Fields(#FXCUSID #FXSHIPID #FXITEM #FXORDQTY #LW3SFID #LW3WEBC01)
+    Call Process(*DIRECT) Function(LW3APRC)
+    
+    * API returns:
+    * #FXDESC   - Item Description
+    * #FXQTY    - Available Quantity in Order UM (at Ship From Plant on Customer Ship-To)
+    * #FXPRICE  - Price in Order UM
+    * #FXAMOUNT - Extended price (Qty X Price)
+    * #FXUM     - Unit of measure
+    
+    #oStockAvailability := #FXQTY
+    #oItemDescription := #FXDESC
+    #oUnitPrice := #FXPRICE
+    #oAvailableQuantity := #FXQTY
+    
+    * Don't display negative stock
+    If Cond(#LW3STKAVL < 0)
+    #W_AVLQTY #LW3STKAVL := 0
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umParseSearchKeyword
+    * Description....: Parse the keyword being searched for and collect each word in LS_KEYLIST
+    * =======================================================
+    Mthroutine Name(umParseSearchKeyword) Desc('Parse Search Keyword') Help('Parse the keyword being searched for and collect each word in LS_KEYLIST') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3SEARCH) Name(#iSearchedKeyword)
+    
+    Define_Com Class(#PRIM_NMBR) Name(#L_PositionOfBlankChar)
+    Define_Com Class(#LW3KWORD) Name(#L_SingleKeyword)
+    Define_Com Class(#PRIM_NMBR) Name(#L_Counter)
+    
+    Clr_List Named(#LS_KEYLIST)
+    Clr_List Named(#LS_MISSPELLINGS)
+    
+    #L_Counter := 0
+    Dowhile Cond((#iSearchedKeyword.occurrencesof( ' ' ) ¬= 0) *Or (#iSearchedKeyword ¬= ''))
+    
+    * get from first character to the first ' '
+    #L_PositionOfBlankChar := #iSearchedKeyword.positionof( ' ' )
+    #lw3kword := #iSearchedKeyword.substring( 1 #L_PositionOfBlankChar )
+    
+    * remove current keyword from the keywords field
+    #iSearchedKeyword := #iSearchedKeyword.deletesubstring( 1 #L_PositionOfBlankChar )
+    
+    * Ignore keyword if it exists in exclusions file
+    #lw3kword := #lw3kword.trim
+    
+    Check_For In_File(LW3KEYWEXC) With_Key(#Global_DataModel.upStorefrontId #lw3kword.UpperCase) Io_Error(*NEXT) Val_Error(*NEXT)
+    Continue If(#IO$STS = 'EQ')
+    
+    * remove any additional blanks the user may have entered
+    #iSearchedKeyword := #iSearchedKeyword.trim
+    #L_SingleKeyword := #lw3kword
+    Loc_Entry In_List(#LS_KEYLIST) Where(#lw3kword = #L_SingleKeyword) Ret_Entry(*NO)
+    If_Status Is_Not(*OKAY)
+    Add_Entry To_List(#LS_KEYLIST)
+    Endif
+    
+    * Failsafe for infinite loops
+    #L_Counter += 1
+    Leave If(#L_Counter >= 100)
+    Endwhile
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umCorrectMisspellings
+    * Description....: Use this to check for possible misspellings saved in file LW3SPELL and add the correct spellings to LS_KEYLIST
+    * =======================================================
+    Mthroutine Name(umCorrectMisspellings) Desc('Correct Misspellings') Help('Use this to check for possible misspellings saved in file LW3SPELL and add the correct spellings to LS_KEYLIST') Access(*PRIVATE)
+    
+    Define_Com Class(#LW3KWORD) Name(#L_SingleKeyword)
+    
+    * find common misspellings in search string
+    Selectlist Named(#LS_KEYLIST)
+    Continue If(#lw3kword.OccurrencesOf( '*' ) > 0)
+    #L_SingleKeyword := #lw3kword
+    Select Fields(#lw3good) From_File(lw3spell1) With_Key(#lw3kword) Io_Error(*NEXT) Val_Error(*NEXT)
+    Loc_Entry In_List(#LS_MISSPELLINGS) Where(#lw3kword = #L_SingleKeyword) Ret_Entry(*NO)
+    If_Status Is_Not(*OKAY)
+    #lw3kword := #lw3good
+    Add_Entry To_List(#LS_MISSPELLINGS)
+    #lw3kword := #L_SingleKeyword
+    Endif
+    Endselect
+    Endselect
+    
+    * add correct spellings to key word list
+    Selectlist Named(#LS_MISSPELLINGS)
+    If Cond(#lw3kword.trim ^= '')
+    #L_SingleKeyword := #lw3kword
+    Loc_Entry In_List(#LS_KEYLIST) Where(#LW3KWORD = #L_SingleKeyword) Ret_Entry(*NO)
+    If_Status Is_Not(*OKAY)
+    Add_Entry To_List(#LS_KEYLIST)
+    Endif
+    Endif
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umPerformKeywordSearch
+    * Description....: Conduct the search for products based on the collected keywords
+    * =======================================================
+    Mthroutine Name(umPerformKeywordSearch) Desc('Perform Keyword Search') Help('Conduct the search for products based on the collected keywords') Access(*PRIVATE)
+    
+    Define_Com Class(#LW3ITEMCD) Name(#L_ItemCode)
+    Define_Com Class(#LW3REVVAL) Name(#L_ItemMatchRating)
+    Define_Com Class(#LW3SVVNUM) Name(#L_SearchResultLimit)
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('ITEMSEARCHLIMIT') Ilanguage('') Onumericvalue(#L_SearchResultLimit)
+    If Cond(#L_SearchResultLimit <= 0)
+    #L_SearchResultLimit := 200
+    Endif
+    
+    Selectlist Named(#LS_KEYLIST)
+    #LW3KWORD := #LW3KWORD.UpperCase
+    * find exact item number
+    #LW3QSEL := "Select A.LW3ITEMCD, A.LW3CATID, B.LW3CATNAM From " + #Global_DataModel.upDataLibrary + "LW3C03 As A Join " + #Global_DataModel.upDataLibrary + "LW3C01 As B On A.LW3CATID = B.LW3CATID Where A.LW3SFID = " + #Global_DataModel.upStorefrontId.asString + " And A.LW3ITEMCD = '" + #LW3KWORD.Trim + "'"
+    
+    Select_Sql Fields(#LW3ITEMCD #LW3CATID #LW3CATNAM) Io_Error(*NEXT) Using(#LW3QSEL)
+    #W_SEARCHRELEVANCEPRIORITY := #L_ItemMatchRating
+    Add_Entry To_List(#LS_ITEMS)
+    Endselect
+    
+    If Cond(#lw3kword.OccurrencesOf( '*' ) = 0)
+    
+    #LW3QSEL := "Select Distinct A.LW3ITEMCD, Min(B.LW3CATID) as EndNode, Min(C.LW3CATNAM) From " + #Global_DataModel.upDataLibrary + "LW3KEYWRD As A Join " + #Global_DataModel.upDataLibrary + "LW3C03 As B On A.LW3SFID = B.LW3SFID And A.LW3ITEMCD = B.LW3ITEMCD Join " + #Global_DataModel.upDataLibrary + "LW3C01 As C On C.LW3SFID = A.LW3SFID and C.LW3CATID = B.LW3CATID Where A.LW3SFID = " + #Global_DataModel.upStorefrontId.asString + " And A.LW3KWORD Like '" + #LW3KWORD + "%' Group By A.LW3ITEMCD Order By A.LW3ITEMCD"
+    
+    * No wildcards in search string, so do simple keyword search
+    Select_Sql Fields(#LW3ITEMCD #LW3CATID #LW3CATNAM) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave If(#COM_OWNER.umAddToProductListBasedOnRelevance( #LW3ITEMCD #L_SearchResultLimit ))
+    Endselect
+    
+    Else
+    
+    * Wildcards present in search string, so do wildcarded keyword search
+    #LW3QSEL := "Select Distinct A.LW3ITEMCD, Min(B.LW3CATID) as EndNode, Min(C.LW3CATNAM) From " + #Global_DataModel.upDataLibrary + "LW3KEYWRD As A Join " + #Global_DataModel.upDataLibrary + "LW3C03 As B On A.LW3SFID = B.LW3SFID And A.LW3ITEMCD = B.LW3ITEMCD Join " + #Global_DataModel.upDataLibrary + "LW3C01 As C On C.LW3SFID = A.LW3SFID and C.LW3CATID = B.LW3CATID Where A.LW3SFID = " + #Global_DataModel.upStorefrontId.asString + " And A.LW3KWORD Like '" + #LW3KWORD.ReplaceAll( '*' '%' ) + "' Group By A.LW3ITEMCD Order By A.LW3ITEMCD"
+    
+    * No wildcards in search string, so do simple keyword search
+    Select_Sql Fields(#LW3ITEMCD #LW3CATID #LW3CATNAM) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave If(#COM_OWNER.umAddToProductListBasedOnRelevance( #LW3ITEMCD #L_SearchResultLimit ))
+    Endselect
+    
+    Endif
+    
+    Leave If(#W_LSITEMSCOUNT >= #L_SearchResultLimit)
+    
+    Endselect
+    
+    Sort_List Named(#LS_ITEMS) By_Fields((#W_SEARCHRELEVANCEPRIORITY *DESC))
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umAddToProductListBasedOnRelevance
+    * Description....: Add products to the list based on the relevance of the keyword search
+    * =======================================================
+    Mthroutine Name(umAddToProductListBasedOnRelevance) Desc('Add to Product List Based on Relevance') Help('Add products to the list based on the relevance of the keyword search') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3ITEMCD) Name(#iItemCode)
+    Define_Map For(*INPUT) Class(#PRIM_NMBR) Name(#iSearchResultLimit)
+    Define_Map For(*RESULT) Class(#PRIM_BOLN) Name(#rResult)
+    
+    Define_Com Class(#LW3REVVAL) Name(#L_KeywordMatchRating)
+    
+    Loc_Entry In_List(#LS_ITEMS) Where(#LW3ITEMCD = #iItemCode)
+    If_Status Is(*OKAY)
+    #W_SEARCHRELEVANCEPRIORITY += #L_KeywordMatchRating
+    Upd_Entry In_List(#LS_ITEMS)
+    Else
+    #W_SEARCHRELEVANCEPRIORITY := #L_KeywordMatchRating
+    Add_Entry To_List(#LS_ITEMS)
+    
+    #rResult := #W_LSITEMSCOUNT >= #iSearchResultLimit
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildProductSuggestions
+    * Description....: Build Product Suggestions
+    * =======================================================
+    Mthroutine Name(umBuildProductSuggestions) Desc('Build Product Suggestions') Help('Build Product Suggestions') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3SEARCH) Name(#iSearchKeyword)
+    Define_Map For(*INPUT) Class(#Com_Home.suggestionResponseObject) Name(#iArray_SuggestionObject) Pass(*BY_REFERENCE)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    Define_Com Class(#LW3QSEL) Name(#L_QSEL) Desc('Temporary string storage')
+    
+    * Define Field(#L_QSEL) Reffld(#LW3QSEL) Desc('Temporary string storage')
+    
+    #oReturnCode := 'ER'
+    If Cond(#iSearchKeyword <> *BLANKS)
+    
+    #FXACTION := 'G'
+    #LW3QSEL := "LW3SFID = " + #Global_DataModel.upStorefrontId.asstring + " and UPPER(LW3PHRASE) LIKE '" + #iSearchKeyword.Trim.UpperCase + "%'"
+    #L_QSEL := ''
+    Select_Sql Fields(#LW3ITEMCD #LW3KWORD #LW3PHRASE) From_Files((LW3KEYWRD)) Where(#LW3QSEL) Order_By('LW3ITEMCD') Distinct(*YES) Io_Error(*NEXT)
+    
+    #LW3IDESC := *NULL
+    
+    Exchange Fields(#FXACTION #LW3ITEMCD)
+    Call Process(*DIRECT) Function(LW3AITM) If_Error(*NEXT)
+    
+    Add_Entry To_List(#iArray_SuggestionObject.product)
+    #oReturnCode := 'OK'
+    
+    If Cond(#L_QSEL *EQ '')
+    #L_QSEL := "'" + #LW3ITEMCD + "'"
+    Else
+    #L_QSEL += " , '" + #LW3ITEMCD + "'"
+    Endif
+    Endselect
+    
+    If Cond(#iArray_SuggestionObject.product.Count *EQ 1)
+    #LW3QSEL := "SELECT DISTINCT A.LW3CATNAM, A.LW3CATID FROM LW3C01 AS A LEFT JOIN LW3C03 AS B ON A.LW3CATID = B.LW3CATID AND A.LW3SFID = B.LW3SFID WHERE B.LW3ITEMCD = " + #L_QSEL + " AND A.LW3SFID = '" + #Global_DataModel.upStorefrontId.asstring + "' And LW3PCTYP = 'CAT'"
+    Else
+    #LW3QSEL := "SELECT DISTINCT  A.LW3CATNAM, A.LW3CATID FROM LW3C01 AS A LEFT JOIN LW3C03 AS B ON A.LW3CATID = B.LW3CATID AND A.LW3SFID = B.LW3SFID WHERE B.LW3ITEMCD IN (" + #L_QSEL + ") AND A.LW3SFID = '" + #Global_DataModel.upStorefrontId.asstring + "' And LW3PCTYP = 'CAT'"
+    Endif
+    
+    Select_Sql Fields(#LW3CATNAM #LW3CATID) Using(#LW3QSEL)
+    Add_Entry To_List(#iArray_SuggestionObject.category)
+    #oReturnCode := 'OK'
+    Endselect
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetProductAttributeTabs
+    * Description....: Get Product Attribute Tabs
+    * =======================================================
+    Mthroutine Name(umGetProductAttributeTabs) Desc('Get Product Attribute Tabs') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#Com_Home.productsObject) Name(#iObject_Products) Pass(*BY_REFERENCE)
+    
+    * Item Long Description for the Description tab
+    Fetch Fields(#LW3IATID #LW3IATNM) From_File(LW3IATPL1) With_Key('DSC') Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    Fetch Fields(#LW3IATVL) From_File(LW3IATTR) With_Key(#Global_DataModel.upStorefrontId #LW3ITEMCD #LW3IATID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    Add_Entry To_List(#iObject_Products.tabs)
+    
+    #iObject_Products.tabs.CurrentItem.id := 1
+    #iObject_Products.tabs.CurrentItem.caption := #LW3IATNM
+    #iObject_Products.tabs.CurrentItem.content := #LW3IATVL
+    Endif
+    Endif
+    
+    Select Fields(#LW3IATTI #LW3IATID #LW3IATNM) From_File(LW3IATPL2) Where('#LW3IATTI *ne 0') Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Fetch Fields(#LW3IATNM) From_File(lw3iatyml) With_Key(#LW3IATID #Global_DataModel.upCurrentLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    #LW3IATSQ := 1
+    Fetch Fields(#LW3IATVL) From_File(LW3IATTR) With_Key(#Global_DataModel.upStorefrontId #LW3ITEMCD #LW3IATID #LW3IATSQ #Global_DataModel.upCurrentLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    Add_Entry To_List(#iObject_Products.tabs)
+    
+    #iObject_Products.tabs.CurrentItem.id := #LW3IATTI
+    #iObject_Products.tabs.CurrentItem.caption := #LW3IATNM
+    #iObject_Products.tabs.CurrentItem.content := #LW3IATVL
+    
+    Endif
+    
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSetHttpResponseMessages
+    * Description....: Set Http Response Messages
+    * =======================================================
+    Mthroutine Name(umSetHttpResponseMessages) Desc('Set Http Response Messages') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3VARNAM) Name(#iVariableName)
+    Define_Map For(*INPUT) Class(#LW3MSGTYP) Name(#iMessageType)
+    Define_Map For(*INPUT) Class(#LW3FLDNAM) Name(#iFieldName) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iMessageDetails) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iSubstitutionVariable1) Mandatory('')
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Add_Entry To_List(#iArray_HttpResponse)
+    #iArray_HttpResponse.CurrentItem.code := #iVariableName
+    #iArray_HttpResponse.CurrentItem.type := #iMessageType
+    #iArray_HttpResponse.CurrentItem.message := #Utility_Multilinguals.umGetMultilingualText( #iVariableName #Global_DataModel.upCurrentLanguage )
+    
+    If Cond(#iFieldName <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.field := #iFieldName
+    Endif
+    If Cond(#iMessageDetails <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.detail := #iMessageDetails
+    Endif
+    If Cond(#iSubstitutionVariable1 <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.substitutions.Add Value(#iSubstitutionVariable1)
+    Endif
+    
+    Endroutine
+    
+    End_Com
+
+  API Definition:
+    Language Handling:       NoAction
+    Partition Handling:      PathVariable
+    Publish as Swagger V2:   Yes
+    Publish as OpenAPI V3:   Yes
+    ServicePath:             /CNSPROD
+
+    Security Requirements:
+    - Security:
+
+        Security Schemes:
+        - HttpBearer:
+
+    Paths:
+    - /products:
+
+        Operations:
+        - GetProductSearch:
+            Verb:               Get
+            Server Routine:     usGetProductSearch
+            Deprecated:         No
+
+            Parameters:
+            - search:
+                Location:           Query
+                Style:              Default
+                Required:           Yes
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Search Keyword
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     responseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Success (No Content):
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      NoContent
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    - /category/{category}:
+
+        Operations:
+        - GetCategory:
+            Verb:               Get
+            Server Routine:     usGetProducts
+            Deprecated:         No
+
+            Parameters:
+            - category:
+                Location:           Path
+                Style:              Default
+                Required:           Yes
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        category
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     responseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Success (No Content):
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      NoContent
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Bad Request:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    - /products/suggestions:
+
+        Operations:
+        - GetProductSuggestions:
+            Verb:               Get
+            Server Routine:     usGetProdSuggestions
+            Deprecated:         No
+
+            Parameters:
+            - search:
+                Location:           Query
+                Style:              Default
+                Required:           No
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        search
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     suggestionResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Success (No Content):
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      NoContent
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Bad Request:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    - /product/{itemcode}:
+
+        Operations:
+        - GetProductDetails:
+            Verb:               Get
+            Server Routine:     usGetProductDetails
+            Deprecated:         No
+
+            Parameters:
+            - itemcode:
+                Location:           Path
+                Style:              Default
+                Required:           Yes
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        itemcode
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     productsObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Success (No Content):
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      NoContent
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    Components:
+      Schema:
+        Types:
+        - productsObject:
+            Description:        Products Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3ITEMCD:
+                Description:        Item Code
+                Type:               Field
+                Field Name:         LW3ITEMCD
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3IDESC:
+                Description:        Item Description
+                Type:               Field
+                Field Name:         LW3IDESC
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3LPRICE:
+                Description:        List Price
+                Type:               Field
+                Field Name:         LW3LPRICE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - unitOfMeasure:
+                Description:        Unit of Measure
+                Type:               Field
+                Field Name:         LW3UM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3URL:
+                Description:        Product URL
+                Type:               Field
+                Field Name:         LW3URL
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3IMAGE:
+                Description:        Product Image
+                Type:               Field
+                Field Name:         LW3IMAGE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3STKAVL:
+                Description:        Available Stock
+                Type:               Field
+                Field Name:         LW3STKAVL
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CATNAM:
+                Description:        Category Name
+                Type:               Field
+                Field Name:         LW3CATNAM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - specification:
+                Description:        Specification
+                Type:               Field
+                Field Name:         LW3ABTXT
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - W_AVLQTY:
+                Description:        Available Quantity
+                Type:               Field
+                Field Name:         W_AVLQTY
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - W_FLAGP:
+                Description:        Product Flag
+                Type:               Field
+                Field Name:         W_FLAGP
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - W_PDFLINK:
+                Description:        PDF Link
+                Type:               Field
+                Field Name:         W_PDFLINK
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - D_LPRICE:
+                Description:        Display List Price
+                Type:               Field
+                Field Name:         D_LPRICE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CATID:
+                Description:        Category Id
+                Type:               Field
+                Field Name:         LW3CATID
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - W_LOFT:
+                Description:        Loft Value
+                Type:               Field
+                Field Name:         W_LOFT
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - W_RGHTHND:
+                Description:        Right Hand Flag
+                Type:               Field
+                Field Name:         W_RGHTHND
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - W_LEFTHND:
+                Description:        Left Hand Flag
+                Type:               Field
+                Field Name:         W_LEFTHND
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - W_BRAND:
+                Description:        Brand
+                Type:               Field
+                Field Name:         W_BRAND
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - tabs:
+                Description:        Product Attribute Tabs
+                Type:               Array
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+                Items:
+                - Description:        Product Attribute Tabs Object
+                  Type:               Object
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+                  Properties:
+                  - id:
+                      Description:        Tab Id
+                      Type:               Number
+                      Format:             Unspecified
+                      Required:           Yes
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                  - caption:
+                      Description:        Tab Caption
+                      Type:               String
+                      Format:             Unspecified
+                      Required:           Yes
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                  - content:
+                      Description:        Tab Content
+                      Type:               String
+                      Format:             Unspecified
+                      Required:           Yes
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+        - productsArray:
+            Description:        Products Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     productsObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - responseObject:
+            Description:        Response Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - products:
+                Type:               Reference
+                Reference Name:     productsArray
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - filters:
+                Type:               Reference
+                Reference Name:     filterArray
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - filterObject:
+            Description:        Filter Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3FLTDSC:
+                Description:        Filter Description
+                Type:               Field
+                Field Name:         LW3FLTDSC
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - selections:
+                Type:               Reference
+                Reference Name:     filterSelectionsArray
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - filterArray:
+            Description:        Filter Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     filterObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - filterSelectionsObject:
+            Description:        Filter Selections Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3FLTTYP:
+                Description:        Filter Type
+                Type:               Field
+                Field Name:         LW3FLTTYP
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3FLTACD:
+                Description:        Filter Alpha Code
+                Type:               Field
+                Field Name:         LW3FLTACD
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3FLTNCD:
+                Description:        Filter Numeric Code
+                Type:               Field
+                Field Name:         LW3FLTNCD
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3FLTDSC:
+                Description:        Filter Description
+                Type:               Field
+                Field Name:         LW3FLTDSC
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3FLTECN:
+                Description:        Filter Entry Count
+                Type:               Field
+                Field Name:         LW3FLTECN
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - filterSelectionsArray:
+            Description:        Filter Selections Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     filterSelectionsObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - productSuggestionsObject:
+            Description:        Product Suggestions Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3ITEMCD:
+                Description:        Item Code
+                Type:               Field
+                Field Name:         LW3ITEMCD
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3IDESC:
+                Description:        Item Description
+                Type:               Field
+                Field Name:         LW3IDESC
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - productSuggestionsArray:
+            Description:        Product Suggestions Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     productSuggestionsObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - httpResponseArray:
+            Description:        Http Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        Http Response Object
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - code:
+                  Description:        Multilingual Variable Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - message:
+                  Description:        Multilingual Variable Unicode Text
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - type:
+                  Description:        Message Type
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - field:
+                  Description:        Field Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - detail:
+                  Description:        Message Detail
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - substitutions:
+                  Description:        Substitution Variables
+                  Type:               Array
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+                  Items:
+                  - Description:        values
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+        - categorySuggestionObject:
+            Description:        Catgory Suggestion
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3CATID:
+                Description:        Catgory ID
+                Type:               Field
+                Field Name:         LW3CATID
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CATNAM:
+                Description:        Category Name
+                Type:               Field
+                Field Name:         LW3CATNAM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - categorySuggestionArray:
+            Description:        Suggestion Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     categorySuggestionObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - suggestionResponseObject:
+            Description:        Suggestion Reponse Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - product:
+                Type:               Reference
+                Reference Name:     productSuggestionsArray
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - category:
+                Type:               Reference
+                Reference Name:     categorySuggestionArray
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+      Security Schemes:
+      - HttpBearer:
+          Type:                   HTTP
+          In:                     Unspecified
+          HTTP Scheme:            Bearer
+          HTTP Bearer Format:     JWT

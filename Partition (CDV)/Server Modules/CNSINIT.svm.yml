@@ -1,0 +1,1889 @@
+﻿ServerModule:
+  Name:               CNSINIT
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Storefront Initialization"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Server Module
+    * Platform        : REST APIs
+    * Name            : CNSINIT
+    * Identifier      : CNSINIT
+    * Ancestor        : PRIM_SRVM
+    * Written By      : Jan Metica
+    * Written On      : 12th September 2024
+    * Description     : Storefront Initialization
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Begin_Com Role(*EXTENDS #PRIM_SRVM)
+    
+    * =======================================================
+    * Global Objects
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERMLUTL) Name(#Utility_Multilinguals) Desc('Multilingual Utility') Help('Multilinguals Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    Define_Com Class(#CNRAPILG) Name(#Processor_ApiLog) Desc('API Log Processor') Scope(*APPLICATION)
+    Define_Com Class(#CERIAUTL) Name(#Processor_ProductAttributes) Desc('Product Attributes Processor')
+    Define_Com Class(#CNRPRDPR) Name(#Processor_Products) Desc('Products Processor') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Component Definitions
+    * =======================================================
+    
+    Define_Com Class(#PRIM_IOC.StringWriter) Name(#uStringWriter)
+    Define_Com Class(#PRIM_JSON.Writer) Name(#uJsonWriter) Textwriter(#uStringWriter)
+    
+    * =======================================================
+    * Group Definitions
+    * =======================================================
+    
+    Group_By Name(#XG_LW3C01) Fields(#LW3CATID #LW3CATNAM #LW3CATPRI #LW3CATEND #LW3PCTYP #LW3CATSEQ #lw3caturl #LW3NSHOW #LW3CATIMG #LW3SHWTPF #LW3CATORD)
+    
+    Group_By Name(#XG_LW3MENU01) Fields(#LW3SFID #LW3MNUID #LW3MNUNME #LW3MNUORD #LW3LNKTYP #LW3PRMMNU #LW3MNUURL #LW3MNUPGM #LW3SECSEQ #LW3LNKNEW #LW3DNSNM)
+    
+    * =======================================================
+    * List Definitions
+    * =======================================================
+    
+    * Product Categories List
+    Def_List Name(#LS_CATEGORY) Fields(#LW3SFID #LW3CATID #LW3CATNAM #LW3CINDT #LW3CATPRI #LW3CATEND #LW3PCTYP #LW3NSHOW #LW3URL #W_CATPOS #LW3CATIMG #LW3CATORD) Counter(#LISTCOUNT) Type(*WORKING) Entrys(999)
+    
+    * Artist
+    Def_List Name(#LS_ARTIST) Fields(#LW3ITEMCD #LW3BSQTY) Type(*WORKING) Entrys(*MAX)
+    
+    * Sub Menu Working List
+    Def_List Name(#LS_USERPERMISSIONSSUBMENU) Fields(#W_FLAG #LW3MNUID #LW3MNUNME #LW3SUBMNU) Type(*WORKING) Entrys(*MAX)
+    
+    * =======================================================
+    * Working Definitions
+    * =======================================================
+    Define Field(#W_FLAG) Reffld(#STD_FLAG)
+    Define Field(#W_SUBMENUID) Reffld(#LW3SUBMNU)
+    Define Field(#W_SubMenuName) Reffld(#LW3MNUNME)
+    Define_Com Class(#PRIM_ALPH) Name(#L_MenuPermissionId)
+    
+    * =======================================================
+    * Srvroutine Definitions
+    * =======================================================
+    * =======================================================
+    * Srvroutine ....: usGetSiteInitialize
+    * Description....: Site Initialization
+    * =======================================================
+    Srvroutine Name(usGetSiteInitialize) Response(*HTTP #uContext) Desc('Site Initialization') Help('Use this to initialize the site and retrieve the Storefront Details')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetStorefrontDetails) Name(#Operation)
+    Define_Com Class(#Com_Home.StorefrontResponseObject) Name(#Object_StorefrontResponse)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetStorefrontDetails.Response.Resp400.Object) Name(#Object_Resp400) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #LW3RETCOD := *BLANKS
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    #Global_DataModel.umGetStorefrontDetails Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    #LW3SFID := #Global_DataModel.upStorefrontId
+    #LW3NAME := #Global_DataModel.upStorefrontName
+    #LW3SNAM := #Global_DataModel.upStorefrontShortName
+    #LW3B2BIND := #Global_DataModel.upStorefrontIndicator
+    #LW3TSSYM := #Global_DataModel.upStorefrontThousandSeparatorSymbol
+    #LW3DPSYM := #Global_DataModel.upStorefrontDecimalPointSymbol
+    #LW3CURSM := #Global_DataModel.upStorefrontCurrencySymbol
+    #LW3CURCD := #Global_DataModel.upStorefrontCurrencyCode
+    #FXANALYZE := #Global_DataModel.upStorefrontAnalyticsFlag
+    #FXANACCT := #Global_DataModel.upStorefrontAnalyticsAccountId
+    
+    * Transfer field values to mapped fields in the schema "storefrontResponseObject"
+    Set Com(#Object_StorefrontResponse) Com_Fields(*ALL)
+    
+    * Set the return JSON Response for "postLogin"
+    #Operation.Response.SetContentJson Content(#Object_StorefrontResponse)
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgForbiddenAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Get Storefront Details Error')
+    Set_Ref Com(#Object_Resp400) To(*CREATE_AS #Com_Home.GetStorefrontDetails.Response.Resp400.Object)
+    Set Com(#Object_Resp400) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp400 Content(#Object_Resp400)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =======================================================
+    * Srvroutine ....: usGetInitFeatured
+    * Description....: Login Successful
+    * =======================================================
+    Srvroutine Name(usGetInitFeatured) Response(*HTTP #uContext) Desc('Login Successful') Help('Call this after the user successfully logs in and selects an associated account')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetInitFeatured) Name(#Operation)
+    Define_Com Class(#Com_Home.MenuArray) Name(#Array_Menu)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetInitFeatured.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #LW3RETCOD := *BLANKS
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Oreturncode(#LW3RETCOD) Ihttpheaders(#uContext.Request.Headers)
+    #Processor_ProductAttributes.umGetImagePath Ivariablename('PRODUCT_IMAGE_PATH')
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #uJsonWriter.BeginObject
+    
+    * #COM_OWNER.umGetProductCategories
+    * #COM_OWNER.umGetPrimaryMenus Iarray_Menu(#Array_Menu)
+    #COM_OWNER.umGetBestSellers
+    #COM_OWNER.umGetRecommendedItems
+    
+    #uJsonWriter.EndObject
+    
+    #uJsonWriter.Close
+    
+    #uContext.Response.HttpStatus := 200
+    #uContext.Response.ContentType := "application/json"
+    #uContext.Response.ContentStringUnicode := #uStringWriter.Text.AsValue.Trim
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session id is not valid')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetInitFeatured.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetInitFeatured.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =======================================================
+    * Srvroutine ....: usGetNavInfo
+    * Description....: Get Navigation Information
+    * =======================================================
+    Srvroutine Name(usGetNavInfo) Response(*HTTP #uContext) Desc('Get Navigation Information') Help('Use this to retrieve the navigation menu and product categories / sub-categories')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetNavInfo) Name(#Operation)
+    Define_Com Class(#Com_Home.NavigationResponseObject) Name(#Object_NavigationResponse)
+    Define_Com Class(#Com_Home.MenuArray) Name(#Array_Menu)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetNavInfo.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #uJsonWriter.BeginObject
+    
+    #COM_OWNER.umGetProductCategories
+    #COM_OWNER.umGetPrimaryMenus Iarray_Menu(#Array_Menu)
+    
+    #uJsonWriter.EndObject
+    
+    #uJsonWriter.Close
+    
+    #uContext.Response.HttpStatus := 200
+    #uContext.Response.ContentType := "application/json"
+    #uContext.Response.ContentStringUnicode := #uStringWriter.Text.AsValue.Trim
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session id is not valid')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetNavInfo.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetNavInfo.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umGetProductCategories
+    * Description....: Get Product Categories
+    * =======================================================
+    Mthroutine Name(umGetProductCategories) Desc('Get Product Categories') Access(*PRIVATE)
+    
+    #W_CATPOS := 0
+    
+    #uJsonWriter.BeginArray Membername('categories')
+    
+    Select Fields(#XG_LW3C01 *EXCLUDING #LW3CATSEQ) From_File(LW3C01L1) With_Key(#Global_DataModel.upStorefrontId 'CAT') Io_Error(*NEXT) Val_Error(*NEXT)
+    * Do not include if flag is not set to Y
+    Continue If(#LW3SHWTPF <> 'Y')
+    Continue If(#LW3CATID = 0)
+    
+    Fetch Fields(#LW3CATNAM #LW3CATIMG #LW3CATSNM) From_File(LW3C01ML) With_Key(#Global_DataModel.upStorefrontId #LW3CATID #Global_DataModel.upCurrentLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    #LW3URL := #LW3CATURL.Trim.LowerCase
+    
+    Add_Entry To_List(#LS_CATEGORY)
+    
+    #uJsonWriter.BeginObject
+    #uJsonWriter.WriteDecimal Membername('categoryId') Value(#LW3CATID)
+    #uJsonWriter.WriteString Membername('categoryName') Value(#LW3CATNAM)
+    #uJsonWriter.WriteDecimal Membername('categoryIndent') Value(#LW3CINDT)
+    #uJsonWriter.WriteString Membername('isPrimaryCategory') Value(#LW3CATPRI)
+    #uJsonWriter.WriteString Membername('isCategoryEndNode') Value(#LW3CATEND)
+    #uJsonWriter.WriteString Membername('productCategoryType') Value(#LW3PCTYP)
+    #uJsonWriter.WriteString Membername('categoryURL') Value(#LW3URL)
+    #uJsonWriter.WriteDecimal Membername('categoryPosition') Value(#W_CATPOS)
+    #uJsonWriter.WriteString Membername('categoryImage') Value(#LW3CATIMG)
+    #uJsonWriter.WriteDecimal Membername('categoryOrder') Value(#LW3CATORD)
+    
+    * If not an end-node, check for child categories
+    If Cond(#LW3CATEND <> 'Y')
+    #COM_OWNER.umGetProductSubCategories Icategoryid(#LW3CATID)
+    Endif
+    
+    #uJsonWriter.EndObject
+    
+    Endselect
+    
+    #uJsonWriter.EndArray
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetProductSubCategories
+    * Description....: Get Product Sub Categories
+    * =======================================================
+    
+    Mthroutine Name(umGetProductSubCategories) Desc('Get Product Sub Categories') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3CATID) Name(#iCategoryId)
+    
+    If Cond(#iCategoryId > 0)
+    
+    #uJsonWriter.BeginArray Membername('subCategories')
+    
+    Select Fields(#LW3SFID #LW3CATID #LW3CATSUB) From_File(LW3C02) With_Key(#Global_DataModel.upStorefrontId #iCategoryId) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Continue If(#LW3CATSUB = 0)
+    
+    Fetch Fields(#LW3CATNAM #LW3CATPRI #LW3CATEND #LW3PCTYP #LW3CATURL) From_File(LW3C01) With_Key(#Global_DataModel.upStorefrontId #LW3CATSUB) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    #LW3URL := #LW3CATURL.Trim.LowerCase
+    
+    Add_Entry To_List(#LS_CATEGORY)
+    
+    #uJsonWriter.BeginObject
+    
+    #uJsonWriter.WriteDecimal Membername('categoryId') Value(#LW3CATID)
+    #uJsonWriter.WriteString Membername('categoryName') Value(#LW3CATNAM)
+    #uJsonWriter.WriteDecimal Membername('categoryIndent') Value(#LW3CINDT)
+    #uJsonWriter.WriteString Membername('isPrimaryCategory') Value(#LW3CATPRI)
+    #uJsonWriter.WriteString Membername('isCategoryEndNode') Value(#LW3CATEND)
+    #uJsonWriter.WriteString Membername('productCategoryType') Value(#LW3PCTYP)
+    #uJsonWriter.WriteDecimal Membername('categoryToShow') Value(#LW3NSHOW)
+    #uJsonWriter.WriteString Membername('categoryURL') Value(#LW3URL)
+    #uJsonWriter.WriteDecimal Membername('categoryPosition') Value(#W_CATPOS)
+    #uJsonWriter.WriteString Membername('categoryImage') Value(#LW3CATIMG)
+    #uJsonWriter.WriteDecimal Membername('categoryOrder') Value(#LW3CATORD)
+    
+    * If not an end-node, check for child categories
+    If Cond(#LW3CATEND <> 'Y')
+    #COM_OWNER.umGetProductSubCategories Icategoryid(#LW3CATSUB)
+    Endif
+    
+    #uJsonWriter.EndObject
+    Endif
+    Endselect
+    
+    #uJsonWriter.EndArray
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetPrimaryMenus
+    * Description....: Get Primary Menu Items
+    * =======================================================
+    
+    Mthroutine Name(umGetPrimaryMenus) Desc('Get Primary Menu Items') Access(*PRIVATE)
+    Define_Map For(*INPUT) Class(#Com_Home.MenuArray) Name(#iArray_Menu) Pass(*BY_REFERENCE)
+    
+    * Check if the account is SubUser or not
+    Fetch Fields(#LW3MNPRAF) From_File(LW3MNUPRM) With_Key(#Global_DataModel.upStorefrontId #Global_DataModel.upUserId) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    * SubUser
+    #L_MenuPermissionId := #Global_DataModel.upUserId
+    Else
+    * Not a Sub-User
+    #LW3ROLES #LW3VARFLD := *NULL
+    Fetch Fields(#LW3ROLES) From_File(LW3WUSER) With_Key(#Global_DataModel.upUserId) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond((#LW3ROLES *NE XXX) *And (#LW3ROLES *NE *blank))
+    #L_MenuPermissionId := #LW3ROLES
+    Endif
+    Endif
+    
+    * Begin Array: Menu
+    #uJsonWriter.BeginArray Membername('menu')
+    
+    * Get All Menu Items
+    Select Fields(#XG_LW3MENU01) From_File(LW3MENU01A) With_Key(#Global_DataModel.upStorefrontId) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * Initialize Fields
+    #LW3MNUPID #LW3MNPRAF := *NULL
+    
+    * Get the Menu Name
+    * Menu Name under Menu ML Description File should be prioritize first
+    Fetch Fields(#LW3MNUNME) From_File(LW3MENUML) With_Key(#Global_DataModel.upStorefrontId #LW3MNUID #Global_DataModel.upCurrentLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    * If there is no Menu Name under Menu ML Description File then we should get Menu Name from Menu Links
+    Fetch Fields(#LW3MNUNME) From_File(LW3MENU01) With_Key(#Global_DataModel.upStorefrontId #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    
+    * Get the Menu Permission Flag
+    Fetch Fields(#LW3MNPRAF) From_File(LW3MNUPRM) With_Key(#Global_DataModel.upStorefrontId #L_MenuPermissionId #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    * Only get Menu with Permission
+    Continue If(#LW3MNPRAF <> 'Y')
+    
+    * Get the Menu Name
+    * Menu Name under Menu ML Description File should be prioritize first
+    Fetch Fields(#LW3MNUNME) From_File(LW3MENUML) With_Key(#Global_DataModel.upStorefrontId #LW3MNUID #Global_DataModel.upCurrentLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    * If there is no Menu Name under Menu ML Description File then we should get Menu Name from Menu Links
+    Fetch Fields(#LW3MNUNME) From_File(LW3MENU01) With_Key(#Global_DataModel.upStorefrontId #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    
+    * Begin Menu Object for Array
+    #uJsonWriter.BeginObject
+    
+    #uJsonWriter.WriteDecimal Membername('menuId') Value(#LW3MNUID)
+    #uJsonWriter.WriteDecimal Membername('menuParentId') Value(#LW3MNUPID)
+    #uJsonWriter.WriteString Membername('menuName') Value(#LW3MNUNME)
+    #uJsonWriter.WriteDecimal Membername('menuOrder') Value(#LW3MNUORD)
+    #uJsonWriter.WriteString Membername('isPrimaryMenu') Value(#LW3PRMMNU)
+    #uJsonWriter.WriteString Membername('isNotShow') Value(#LW3DNSNM)
+    #uJsonWriter.WriteString Membername('menuURL') Value(#LW3MNUURL)
+    #uJsonWriter.WriteString Membername('menuProgram') Value(#LW3MNUPGM)
+    #uJsonWriter.WriteString Membername('isOpenInNewWindow') Value(#LW3LNKNEW)
+    
+    * add to Array Menu
+    Add_Entry To_List(#iArray_Menu)
+    
+    * Check if there is a Sub Menu for the current Menu
+    Check_For In_File(LW3MENU02) With_Key(#Global_DataModel.upStorefrontId #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    * Get the Sub Menu Details
+    * #COM_OWNER.umGetSubMenus Iparentmenuid(#LW3MNUID) Imenupermissionid(#L_MenuPermissionId)
+    #COM_OWNER.umCheckAndAddSubMenu Iparentmenuid(#LW3MNUID) Imenupermissionid(#L_MenuPermissionId)
+    Endif
+    
+    * End Menu Object for Array
+    #uJsonWriter.EndObject
+    
+    Endselect
+    
+    * End Array: Menu
+    #uJsonWriter.EndArray
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umCheckAndAddSubMenu
+    * Description....: Check and add a submenu to main working list
+    * =======================================================
+    Mthroutine Name(umCheckAndAddSubMenu)
+    Define_Map For(*INPUT) Class(#LW3MNUID) Name(#iParentMenuId)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iMenuPermissionId)
+    
+    * Sub Menu Object
+    Define_Com Class(#Com_Home.SubMenuObject) Name(#uObject_SubMenu)
+    
+    * Parent Menu is required
+    If Cond(#iParentMenuId > 0)
+    
+    * Storefront ID
+    #LW3SFID := #Global_DataModel.upStorefrontId
+    
+    * Clear User Permissions Sub Menu List
+    Clr_List Named(#LS_USERPERMISSIONSSUBMENU)
+    
+    * Buld User Permissions Sub Menu List
+    Select Fields(#LW3SUBMNU #LW3MNUID #LW3SFID #LW3MNUORD) From_File(LW3MENU02) With_Key(#LW3SFID) Nbr_Keys(*COMPUTE) Io_Error(*NEXT) Val_Error(*NEXT)
+    Add_Entry To_List(#LS_USERPERMISSIONSSUBMENU)
+    Endselect
+    
+    * Begin Array: Sub Menu
+    #uJsonWriter.BeginArray Membername('subMenus')
+    
+    Selectlist Named(#LS_USERPERMISSIONSSUBMENU) Where(#LW3MNUID = #iParentMenuId)
+    
+    * Ge thte Menu Details
+    #lw3mnuid := #lw3submnu
+    Fetch Fields(#XG_LW3MENU01) From_File(LW3MENU01) With_Key(#Global_DataModel.upStorefrontId #LW3SUBMNU) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    * Initialize Fields
+    #LW3MNPRAF := *NULL
+    * Get the Sub Menu Permission Flag
+    Fetch Fields(#LW3MNPRAF) From_File(LW3MNUPRM) With_Key(#Global_DataModel.upStorefrontId #iMenuPermissionId #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    * Only get Sub Menu with Permission
+    Continue If(#LW3MNPRAF <> 'Y')
+    
+    * Temp Sub Menu Name
+    #W_SubMenuName := #LW3MNUNME
+    
+    * Menu Name under Menu ML Description File should be prioritize first
+    Fetch Fields(#LW3MNUNME) From_File(LW3MENUML) With_Key(#Global_DataModel.upStorefrontId #LW3SUBMNU #Global_DataModel.upCurrentLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    * If there is no Menu Name under Menu ML Description File then we should get Menu Name from Menu Links
+    #LW3MNUNME := #W_SubMenuName
+    Endif
+    
+    * PRESERVE Sub Menu ID
+    #W_SUBMENUID := #LW3SUBMNU
+    
+    * Parent Menu ID
+    #LW3MNUID := #iParentMenuId
+    
+    * Begin Object - Sub Menu
+    #uJsonWriter.BeginObject
+    
+    #uJsonWriter.WriteDecimal Membername('menuId') Value(#LW3MNUID)
+    #uJsonWriter.WriteDecimal Membername('menuParentId') Value(#LW3MNUPID)
+    #uJsonWriter.WriteString Membername('menuName') Value(#LW3MNUNME)
+    #uJsonWriter.WriteDecimal Membername('menuOrder') Value(#LW3MNUORD)
+    #uJsonWriter.WriteString Membername('isPrimaryMenu') Value(#LW3PRMMNU)
+    #uJsonWriter.WriteString Membername('isNotShow') Value(#LW3DNSNM)
+    #uJsonWriter.WriteString Membername('menuURL') Value(#LW3MNUURL)
+    #uJsonWriter.WriteString Membername('menuProgram') Value(#LW3MNUPGM)
+    #uJsonWriter.WriteString Membername('isOpenInNewWindow') Value(#LW3LNKNEW)
+    
+    * Build the Sub Menu Object from all the Property Fields
+    Set Com(#uObject_SubMenu) Com_Fields(*ALL)
+    
+    * Clear the Sub Menu value
+    #LW3SUBMNU := *Null
+    Check_For In_File(LW3MENU02) With_Key(#Global_DataModel.upStorefrontId #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    * Check if the current Sub Menu also has child Sub Menu
+    #COM_OWNER.umCheckAndAddSubMenu Iparentmenuid(#W_SUBMENUID) Imenupermissionid(#iMenuPermissionId)
+    Endif
+    
+    * End Object - Sub Menu
+    #uJsonWriter.EndObject
+    Endif
+    
+    * Clear the Sub Menu value
+    #LW3SUBMNU := *Null
+    
+    Endselect
+    
+    * End Array - Sub Menu
+    #uJsonWriter.EndArray
+    
+    Endif
+    Endroutine
+    
+    
+    * =======================================================
+    * Mthroutine ....: umGetBestSellers
+    * Description....: Get Best Sellers List
+    * =======================================================
+    Mthroutine Name(umGetBestSellers) Desc('Get Best Sellers')
+    
+    Define_Map For(*INPUT) Class(#LW3CATID) Name(#iSelectedCategoryId) Mandatory(0)
+    
+    Define_Com Class(#PRIM_BOLN) Name(#L_ProductExistsFlag)
+    
+    #uJsonWriter.BeginArray Membername('bestsellers')
+    
+    #LW3URL := 'lansaweb?srve=uc2+partition=' + *partition + 'language=' + *language
+    #LW3ADDURL := 'lansaweb?srve=uc2+partition=' + *partition + 'language=' + *language
+    
+    * Check if category is selected
+    If Cond(#iSelectedCategoryId <> 0)
+    * get category type
+    Fetch Fields(#LW3PCTYP) From_File(LW3C01) With_Key(#Global_DataModel.upStorefrontId #iSelectedCategoryId) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * best seller overrides
+    Select Fields(#LW3ITEMCD) From_File(LW3OVRBS1) With_Key(#Global_DataModel.upStorefrontId #iSelectedCategoryId) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#BSLCNT < 3)
+    * check stock and get price
+    #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
+    
+    If Cond((#LW3STKAVL > 0) *Or (#Global_DataModel.upUserIndicator = 'B'))
+    #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
+    
+    #COM_OWNER.umAddBestSellerToJson
+    Endif
+    Else
+    Leave
+    Endif
+    Endselect
+    
+    Else
+    * no category or artist selected, default view* no category or artist selected, default view
+    Select Fields(#LW3ITEMCD) From_File(LW3OVRBS1) With_Key(#Global_DataModel.upStorefrontId) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If Cond(#BSLCNT < 20)
+    * check stock and get price
+    #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
+    
+    If Cond((#LW3STKAVL > 0) *Or (#Global_DataModel.upUserIndicator = 'B'))
+    #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
+    #COM_OWNER.umAddBestSellerToJson
+    Endif
+    Else
+    Leave
+    Endif
+    Endselect
+    Endif
+    
+    * if there are not 3 overrides, add from best seller file (LW3BSELL)
+    If Cond(#iSelectedCategoryId <> 0)
+    * get category type
+    Fetch Fields(#LW3PCTYP) From_File(LW3C01) With_Key(#Global_DataModel.upStorefrontId #iSelectedCategoryId) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * category/collection selection
+    Select Fields(#LW3ITEMCD) From_File(LW3BSSELL1) With_Key(#Global_DataModel.upStorefrontId 'N') Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#BSLCNT < 3)
+    * check stock and get price
+    #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
+    
+    If Cond((#LW3STKAVL <= 0) *And (#Global_DataModel.upUserIndicator <> 'B'))
+    #LW3SLDOUT := 'Y'
+    Update Fields(#LW3SLDOUT) In_File(LW3BSELL) With_Key(#LW3SFID #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
+    Continue
+    Endif
+    
+    * check that item exists in category or subcategory
+    #L_ProductExistsFlag := False
+    
+    Selectlist Named(#LS_CATEGORY)
+    Check_For In_File(LW3C03) With_Key(#Global_DataModel.upStorefrontId #LW3CATID #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    #L_ProductExistsFlag := True
+    Leave
+    Endif
+    Endselect
+    
+    Continue If(*Not #L_ProductExistsFlag)
+    
+    #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
+    
+    #COM_OWNER.umAddBestSellerToJson
+    
+    Else
+    Leave
+    Endif
+    Endselect
+    
+    Else
+    If Cond(#LW3ARTIST <> *BLANK)
+    * artist selection
+    * currently no artist page to view
+    Select Fields(#LW3ITEMCD) From_File(LW3BSSELL2) With_Key(#LW3SFID #LW3ARTIST 'N') Io_Error(*NEXT) Val_Error(*NEXT)
+    Add_Entry To_List(#LS_ARTIST)
+    Endselect
+    
+    Select Fields(#LW3ITEMCD) From_File(LW3BSSELL3) With_Key(#LW3SFID #LW3ARTIST N) Io_Error(*NEXT) Val_Error(*NEXT)
+    Add_Entry To_List(#LS_ARTIST)
+    Endselect
+    
+    Sort_List Named(#LS_ARTIST) By_Fields((#LW3BSQTY *DESCEND))
+    
+    Selectlist Named(#LS_ARTIST)
+    If Cond(#BSLCNT < 3)
+    * check stock and get price
+    #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
+    
+    If Cond((#LW3STKAVL <= 0) *And (#LW3CUSIND <> 'B'))
+    #LW3SLDOUT := 'Y'
+    Update Fields(#LW3SLDOUT) In_File(LW3BSELL) With_Key(#LW3SFID #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
+    Continue
+    Endif
+    
+    #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
+    
+    #COM_OWNER.umAddBestSellerToJson
+    
+    Else
+    Leave
+    Endif
+    Endselect
+    
+    Else
+    * no category selected, default view
+    Select Fields(#LW3ITEMCD) From_File(LW3BSSELL1) With_Key(#LW3SFID 'N') Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#BSLCNT < 3)
+    * check stock and get price
+    #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
+    
+    If Cond((#LW3STKAVL <= 0) *And (#LW3CUSIND <> 'B'))
+    #LW3SLDOUT := 'Y'
+    Update Fields(#LW3SLDOUT) In_File(LW3BSELL) With_Key(#LW3SFID #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
+    Continue
+    Endif
+    
+    #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
+    
+    #COM_OWNER.umAddBestSellerToJson
+    
+    Else
+    Leave
+    Endif
+    Endselect
+    Endif
+    Endif
+    
+    #uJsonWriter.EndArray
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umAddBestSellerToJson
+    * Description....: Add Best Seller to Json
+    * =======================================================
+    Mthroutine Name(umAddBestSellerToJson) Desc('Add Best Seller to Json')
+    
+    #uJsonWriter.BeginObject
+    #uJsonWriter.WriteString Membername('LW3ITEMCD') Value(#LW3ITEMCD)
+    #uJsonWriter.WriteString Membername('LW3IDESC') Value(#LW3IDESC)
+    #uJsonWriter.WriteString Membername('LW3IMAGE') Value(#LW3IMAGE)
+    #uJsonWriter.WriteDecimal Membername('LW3LPRICE') Value(#LW3LPRICE)
+    #uJsonWriter.WriteDecimal Membername('LW3QTYRQS') Value(#LW3QTYRQS)
+    #uJsonWriter.WriteString Membername('LW3URL') Value(#LW3URL)
+    #uJsonWriter.WriteString Membername('LW3ADDURL') Value(#LW3ADDURL)
+    #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
+    #uJsonWriter.EndObject
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umCheckStock
+    * Description....: Check item stock availability
+    * =======================================================
+    Mthroutine Name(umCheckStock) Desc('Check item availability') Access(*PRIVATE)
+    Define_Map For(*INPUT) Class(#LW3ITEMCD) Name(#iItemCode)
+    Define_Map For(*OUTPUT) Class(#LW3STKAVL) Name(#oStockAvl)
+    Define_Map For(*OUTPUT) Class(#LW3IDESC) Name(#oItemDesc)
+    Define_Map For(*OUTPUT) Class(#LW3LPRICE) Name(#oPrice)
+    
+    #FXCUSID := #Global_DataModel.upCustomerId
+    #FXSHIPID := *null
+    #FXITEM := #iItemCode
+    #FXORDQTY := 1
+    
+    Exchange Fields(#FXCUSID #FXSHIPID #FXITEM #FXORDQTY)
+    Call Process(*DIRECT) Function(LW3APRC)
+    
+    #oStockAvl := #FXQTY
+    #oItemDesc := #FXDESC
+    #oPrice := #FXPRICE
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildProductInfoDisplay
+    * Description....: Build the information displayed for a product
+    * =======================================================
+    Mthroutine Name(umBuildProductInfoDisplay) Help('Build the information displayed for a product') Access(*PRIVATE)
+    Define_Map For(*OUTPUT) Class(#LW3URL) Name(#oUrl)
+    Define_Map For(*OUTPUT) Class(#LW3IMAGE) Name(#oImage)
+    Define_Map For(*OUTPUT) Class(#D_LPRICE) Name(#oDispPrice)
+    
+    Define_Com Class(#LW3IMAGE) Name(#L_imagePath)
+    #LW3QTYRQS := 0
+    #oUrl := '/' + #Global_DataModel.upCurrentLanguage + '/product/'
+    
+    * Product Image
+    #Processor_Products.umGetProductMainImage Iitemcode(#LW3ITEMCD) Oimageurl(#oImage) Ostatus(#LW3RETCOD)
+    
+    * Prepare currency field for display
+    #Utility_General.umFormatDisplayPrice Inumericvalue(#LW3LPRICE) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#oDispPrice)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetRecommendedItems
+    * Description....: Build personal recommendations by calling ms cognitive recommendations api
+    * =======================================================
+    Mthroutine Name(umGetRecommendedItems) Desc('Get Recommended Items') Help('Build personal recommendations by calling ms cognitive recommendations api')
+    
+    * * * Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("MSCOGAPIKEY") Io_Error(*NEXT) Val_Error(*NEXT)
+    * * *
+    * * * #Request.Options.AddHeader Name("x-api-key") Value(#LW3SVVALP)
+    * * * #Request.Content.ContentInfo.MediaType := 'application/x-www-form-urlencoded'
+    * * *
+    * * * Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("MSCOGSCHEME") Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * #Url.SetScheme( #LW3SVVALP )
+    * * * Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("MSCOGHOST") Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * #Url.SetHost( #LW3SVVALP )
+    * * * Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("MSCOGPATH") Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * #Url.SetPath( (#LW3SVVALP) )
+    * * *
+    * * * #Url.AddQueryString( "recommendationCount" "3" )
+    * * * If Cond(#CALLWAM = "WPRDPGE")
+    * * * #Url.AddQueryString( "itemId" #LW3ITEMCD )
+    * * * #Request.DoGet Url(#Url)
+    * * * Else
+    * * * #Url.AddQueryString( "userID" #LW3ASSC01 )
+    * * * #Request.DoPost Url(#Url)
+    * * * Endif
+    
+    * * * If Cond(#Request.Response.IsSuccessfulRequest *And #Request.Response.IsSuccessHttpStatusCode)
+    * * * #Reader.SetSourceHttpResponse Httpresponse(#Request.Response)
+    * * * #Reader.SetSourceHttpResponse Httpresponse(#Request.Response)
+    * * * #Reader.BeginArrayWithPath( "/" )
+    * * * Clr_List Named(#LS_RECOITEMS)
+    * * * #STD_NUM := 1
+    * * *
+    * * * * #LW3ITEMCD #LW3IDESC #LW3IMAGE #D_LPRICE #LW3URL
+    
+    #uJsonWriter.BeginArray Membername('recommended')
+    
+    * !NC! - Recommended items are hardcoded
+    #Utility_General.umFormatDisplayPrice Inumericvalue(1279.95) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#D_LPRICE)
+    #uJsonWriter.BeginObject
+    #uJsonWriter.WriteString Membername('LW3ITEMCD') Value('HXP3S')
+    #uJsonWriter.WriteString Membername('LW3IDESC') Value('Hippo XP3 Complete Set')
+    #uJsonWriter.WriteString Membername('LW3IMAGE') Value('https://res.cloudinary.com/dahqgdx87/image/upload//v1745547539/BK9/Product%20Images/hpmqpf5pupipbmpj16zw.jpg')
+    #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
+    #uJsonWriter.EndObject
+    
+    #Utility_General.umFormatDisplayPrice Inumericvalue(57.25) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#D_LPRICE)
+    
+    #uJsonWriter.BeginObject
+    #uJsonWriter.WriteString Membername('LW3ITEMCD') Value('2005')
+    #uJsonWriter.WriteString Membername('LW3IDESC') Value('Five Iron - Infiniti 500 Iron')
+    #uJsonWriter.WriteString Membername('LW3IMAGE') Value('https://res.cloudinary.com/dahqgdx87/image/upload//v1745547220/BK9/Product%20Images/tsys02yxojdyx29dbthb.jpg')
+    #uJsonWriter.WriteString Membername('LW3URL') Value('/ENG/PRODUCT/')
+    #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
+    #uJsonWriter.EndObject
+    
+    #Utility_General.umFormatDisplayPrice Inumericvalue(99.00) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#D_LPRICE)
+    
+    #uJsonWriter.BeginObject
+    #uJsonWriter.WriteString Membername('LW3ITEMCD') Value('0036')
+    #uJsonWriter.WriteString Membername('LW3IDESC') Value('Infiniti J5 Putter 36in')
+    #uJsonWriter.WriteString Membername('LW3IMAGE') Value('https://res.cloudinary.com/dahqgdx87/image/upload//v1745545526/BK9/Product%20Images/ptmyxa5rppszy1upidd9.jpg')
+    #uJsonWriter.WriteString Membername('LW3URL') Value('/ENG/PRODUCT/')
+    #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
+    #uJsonWriter.EndObject
+    
+    #Utility_General.umFormatDisplayPrice Inumericvalue(57.25) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#D_LPRICE)
+    
+    #uJsonWriter.BeginObject
+    #uJsonWriter.WriteString Membername('LW3ITEMCD') Value('2007')
+    #uJsonWriter.WriteString Membername('LW3IDESC') Value('Seven Iron - Infiniti 500 Iron')
+    #uJsonWriter.WriteString Membername('LW3IMAGE') Value('https://res.cloudinary.com/dahqgdx87/image/upload//v1745547227/BK9/Product%20Images/nns6bx3h6y0vxmmsd03u.jpg')
+    #uJsonWriter.WriteString Membername('LW3URL') Value('/ENG/PRODUCT/')
+    #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
+    #uJsonWriter.EndObject
+    
+    #uJsonWriter.EndArray
+    
+    * * * * Begin_Loop Using(#STD_NUM)
+    * * * * #Reader.ReadElementAtIndex Index(#STD_NUM) Found(#w_found)
+    * * * * If Cond(#W_FOUND)
+    * * * * #LW3ITEMCD := #Reader.ReadStringWithPath( (#STD_NUM.AsString + "/recommendedItemId") ).AsNativeString
+    * * * * #FXITEM := #LW3ITEMCD.UpperCase
+    * * * * #FXORDQTY := 1
+    * * * * Exchange Fields(#FXCUSID #FXSHIPID #FXITEM #FXORDQTY)
+    * * * * Call Process(*DIRECT) Function(LW3APRC)
+    * * * * #LW3IDESC := #FXDESC
+    * * * * #LW3LPRICE := #FXPRICE
+    * * * * #uEditmask.uEditField Unumberfield(#lw3lprice) Udecpoint(#LW3DPSYM) Uthousep(#LW3TSSYM) Ureturnfield(#D_LPRICE)
+    * * * * #STD_TEXT := *BLANK
+    * * * * Substring Field(#LW3ITEMCD) Into_Field(#STD_TEXT)
+    * * * * #LW3IMAGE := '/img/' + #LW3SNAM.LowerCase + "item/thumb/" + #STD_TEXT + "_th.jpg"
+    * * * * #COM_OWNER.umRewrite2 Iurlkey('PRODUCT') Ourl(#LW3URL)
+    * * * *
+    * * * * Add_Entry To_List(#LS_RECOITEMS)
+    * * * * Else
+    * * * * Leave
+    * * * * Endif
+    * * * * End_Loop
+    * * * Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSetHttpResponseMessages
+    * Description....: Set Http Response Messages
+    * =======================================================
+    Mthroutine Name(umSetHttpResponseMessages) Desc('Set Http Response Messages') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3VARNAM) Name(#iVariableName)
+    Define_Map For(*INPUT) Class(#LW3MSGTYP) Name(#iMessageType)
+    Define_Map For(*INPUT) Class(#LW3FLDNAM) Name(#iFieldName) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iMessageDetails) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iSubstitutionVariable1) Mandatory('')
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Add_Entry To_List(#iArray_HttpResponse)
+    #iArray_HttpResponse.CurrentItem.code := #iVariableName
+    #iArray_HttpResponse.CurrentItem.type := #iMessageType
+    #iArray_HttpResponse.CurrentItem.message := #Utility_Multilinguals.umGetMultilingualText( #iVariableName #Global_DataModel.upCurrentLanguage )
+    
+    If Cond(#iFieldName <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.field := #iFieldName
+    Endif
+    If Cond(#iMessageDetails <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.detail := #iMessageDetails
+    Endif
+    If Cond(#iSubstitutionVariable1 <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.substitutions.Add Value(#iSubstitutionVariable1)
+    Endif
+    
+    Endroutine
+    
+    End_Com
+
+  API Definition:
+    Language Handling:       NoAction
+    Partition Handling:      PathVariable
+    Publish as Swagger V2:   Yes
+    Publish as OpenAPI V3:   Yes
+    ServicePath:             /CNSINIT
+
+    Security Requirements:
+    - Security:
+
+        Security Schemes:
+        - HttpBearer:
+
+    Paths:
+    - /init:
+        Description:        Storefront Initialization
+
+        Operations:
+        - GetStorefrontDetails:
+            Verb:               Get
+            Server Routine:     usGetSiteInitialize
+            Ignore Security:    Yes
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Title:              Storefront Response Object
+                      Type:               Reference
+                      Reference Name:     StorefrontResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Bad Request:
+                Status Code:        400
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp400
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    - /init/featured:
+
+        Operations:
+        - GetInitFeatured:
+            Verb:               Get
+            Server Routine:     usGetInitFeatured
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Description:        Response Object
+                      Type:               Unspecified
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    - /menus:
+
+        Operations:
+        - GetNavInfo:
+            Verb:               Get
+            Server Routine:     usGetNavInfo
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     NavigationResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    Components:
+      Schema:
+        Types:
+        - BestSellersResponseArray:
+            Description:        Best Sellers Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     BestSellersResponseObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - CategoryResponseArray:
+            Description:        Category Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     CategoryResponseObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - MenuArray:
+            Description:        Menu Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     MenuObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - SubCategoryResponseArray:
+            Description:        Sub Category Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     SubCategoryResponseObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - BestSellersResponseObject:
+            Description:        Best Sellers Response Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3ITEMCD:
+                Description:        Item Code
+                Type:               Field
+                Field Name:         LW3ITEMCD
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3IDESC:
+                Description:        Item Description
+                Type:               Field
+                Field Name:         LW3IDESC
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3IMAGE:
+                Description:        Image
+                Type:               Field
+                Field Name:         LW3IMAGE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3LPRICE:
+                Description:        List Price
+                Type:               Field
+                Field Name:         LW3LPRICE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3QTYRQS:
+                Description:        Requested Quantity
+                Type:               Field
+                Field Name:         LW3QTYRQS
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3URL:
+                Description:        Product URL
+                Type:               Field
+                Field Name:         LW3URL
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3ADDURL:
+                Description:        Add to Cart URL
+                Type:               Field
+                Field Name:         LW3ADDURL
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - D_LPRICE:
+                Description:        DIsplayed List Price
+                Type:               Field
+                Field Name:         D_LPRICE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - CategoryResponseObject:
+            Description:        Category Response Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3CATID:
+                Description:        Category Id
+                Type:               Field
+                Field Name:         LW3CATID
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CATNAM:
+                Description:        Category Name
+                Type:               Field
+                Field Name:         LW3CATNAM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CINDT:
+                Description:        Category Indent
+                Type:               Field
+                Field Name:         LW3CINDT
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CATPRI:
+                Description:        Primary Category?
+                Type:               Field
+                Field Name:         LW3CATPRI
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CATEND:
+                Description:        Category End Node?
+                Type:               Field
+                Field Name:         LW3CATEND
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3PCTYP:
+                Description:        Product Category Type
+                Type:               Field
+                Field Name:         LW3PCTYP
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3URL:
+                Description:        Category Url
+                Type:               Field
+                Field Name:         LW3URL
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - W_CATPOS:
+                Description:        Category Position
+                Type:               Field
+                Field Name:         W_CATPOS
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CATIMG:
+                Description:        Category Image
+                Type:               Field
+                Field Name:         LW3CATIMG
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CATORD:
+                Description:        Category Order
+                Type:               Field
+                Field Name:         LW3CATORD
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - MenuObject:
+            Description:        Menu Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3MNUID:
+                Description:        Menu Id
+                Type:               Field
+                Field Name:         LW3MNUID
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3MNUPID:
+                Description:        Parent Menu Id
+                Type:               Field
+                Field Name:         LW3MNUPID
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3MNUNME:
+                Description:        Menu Name
+                Type:               Field
+                Field Name:         LW3MNUNME
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3MNUORD:
+                Description:        Menu Order
+                Type:               Field
+                Field Name:         LW3MNUORD
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3LNKTYP:
+                Description:        Link Type
+                Type:               Field
+                Field Name:         LW3LNKTYP
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3PRMMNU:
+                Description:        Primary Menu?
+                Type:               Field
+                Field Name:         LW3PRMMNU
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3MNUURL:
+                Description:        Menu Url
+                Type:               Field
+                Field Name:         LW3MNUURL
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3MNUPGM:
+                Description:        Menu Program
+                Type:               Field
+                Field Name:         LW3MNUPGM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3HCSMF:
+                Description:        Has Child Sub Menu Flag
+                Type:               Field
+                Field Name:         LW3HCSMF
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3DNSNM:
+                Description:        Do not show in Navigation Menu
+                Type:               Field
+                Field Name:         LW3DNSNM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - SubMenuObject:
+            Description:        Sub Menu Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3MNUID:
+                Description:        Menu Id
+                Type:               Field
+                Field Name:         LW3MNUID
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3MNUPID:
+                Description:        Parent Menu Id
+                Type:               Field
+                Field Name:         LW3MNUPID
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3MNUNME:
+                Description:        Menu Name
+                Type:               Field
+                Field Name:         LW3MNUNME
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3MNUORD:
+                Description:        Menu Order
+                Type:               Field
+                Field Name:         LW3MNUORD
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3LNKTYP:
+                Description:        Link Type
+                Type:               Field
+                Field Name:         LW3LNKTYP
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3MNUURL:
+                Description:        Menu URL
+                Type:               Field
+                Field Name:         LW3MNUURL
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3MNUPGM:
+                Description:        Menu Program
+                Type:               Field
+                Field Name:         LW3MNUPGM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3HCSMF:
+                Description:        Has Child Sub Menu Flag
+                Type:               Field
+                Field Name:         LW3HCSMF
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - submenu:
+                Description:        Sub Menus
+                Type:               Unspecified
+                Format:             Unspecified
+                Required:           No
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - StorefrontResponseObject:
+            Title:              StorefrontResponseObject
+            Description:        Storefront Response Details
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3SFID:
+                Description:        Storefront Id
+                Type:               Field
+                Field Name:         LW3SFID
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3SNAM:
+                Description:        Storefront Short Name
+                Type:               Field
+                Field Name:         LW3SNAM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3B2BIND:
+                Description:        Storefront Indicator
+                Type:               Field
+                Field Name:         LW3B2BIND
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CURCD:
+                Description:        Currency Code
+                Type:               Field
+                Field Name:         LW3CURCD
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CURSM:
+                Description:        Currency Symbol
+                Type:               Field
+                Field Name:         LW3CURSM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3DPSYM:
+                Description:        Decimal Point Symbol
+                Type:               Field
+                Field Name:         LW3DPSYM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3TSSYM:
+                Description:        Thousand Separator Symbol
+                Type:               Field
+                Field Name:         LW3TSSYM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - storefrontName:
+                Description:        Storefront Name
+                Type:               Field
+                Field Name:         LW3NAME
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - analyticsFlag:
+                Description:        Analytics Flag
+                Type:               Field
+                Field Name:         FXANALYZE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - analyticsAccount:
+                Description:        Analytics Account
+                Type:               Field
+                Field Name:         FXANACCT
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - SubCategoryResponseObject:
+            Description:        Sub Category Response Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3CATID:
+                Description:        Category Id
+                Type:               Field
+                Field Name:         LW3CATID
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CATNAM:
+                Description:        Category Name
+                Type:               Field
+                Field Name:         LW3CATNAM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CINDT:
+                Description:        Category Indent
+                Type:               Field
+                Field Name:         LW3CINDT
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CATPRI:
+                Description:        Primary Category?
+                Type:               Field
+                Field Name:         LW3CATPRI
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CATEND:
+                Description:        Category End Node?
+                Type:               Field
+                Field Name:         LW3CATEND
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3PCTYP:
+                Description:        Product Category Type
+                Type:               Field
+                Field Name:         LW3PCTYP
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3NSHOW:
+                Description:        Number of Categories to Show
+                Type:               Field
+                Field Name:         LW3NSHOW
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3URL:
+                Description:        Category Url
+                Type:               Field
+                Field Name:         LW3URL
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - W_CATPOS:
+                Description:        Category Position
+                Type:               Field
+                Field Name:         W_CATPOS
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - NavigationResponseObject:
+            Description:        Navigation Response Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - menu:
+                Type:               Reference
+                Reference Name:     MenuArray
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - httpResponseArray:
+            Description:        Http Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        Http Response Array
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - code:
+                  Description:        Multilingual Variable Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - message:
+                  Description:        Multilingual Variable Unicode Text
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - type:
+                  Description:        Message Type
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - field:
+                  Description:        Field Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - detail:
+                  Description:        Message Detail
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - substitutions:
+                  Description:        Substitution Variables
+                  Type:               Array
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+                  Items:
+                  - Description:        values
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+      Security Schemes:
+      - HttpBearer:
+          Type:                   HTTP
+          In:                     Unspecified
+          HTTP Scheme:            Bearer
+          HTTP Bearer Format:     JWT

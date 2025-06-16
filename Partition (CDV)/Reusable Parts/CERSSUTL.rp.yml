@@ -1,0 +1,54 @@
+﻿Reusable Part:
+  Name:               CERSSUTL
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE System Settings Utility"
+
+  Source: |
+    * ========================================================
+    * Copyright       : (C) Lansa Commerce Edition, 2018
+    * Type            : Reusable Part
+    * Platform        : Web Application (Visual LANSA)
+    * Name            : CERSSUTL
+    * Identifier      : CERSSUTL
+    * Ancestor        : PRIM_OBJT
+    * Written By      : Jan Metica
+    * Written On      : 2nd October 2018
+    * Description     : CE System Settings Utility
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc App Trkr #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    Function Options(*DIRECT)
+    * =======================================================
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umRetrieveSystemVariable
+    * Description....: Retrieve the alpha or numeric value of a saved system variable from file LW3SYS
+    * =======================================================
+    Mthroutine Name(umRetrieveSystemVariable) Desc('Retrieve System Variable') Help('Retrieve the alpha or numeric value of a saved system variable from file LW3SYS')
+    Define_Map For(*INPUT) Class(#LW3SVNAME) Name(#iVariable) Help('Variable')
+    Define_Map For(*INPUT) Class(#LW3SVLANG) Name(#iLanguage) Help('Language')
+    
+    Define_Map For(*OUTPUT) Class(#LW3SVVALP) Name(#oAlphaValue) Mandatory('') Desc('Alpha Return Value')
+    Define_Map For(*OUTPUT) Class(#LW3SVVNUM) Name(#oNumericValue) Mandatory(0) Desc('Numeric Return Value')
+    
+    #LW3SVVALP #LW3SVVNUM #oAlphaValue #oNumericValue := *NULL
+    Fetch Fields(#LW3SVVALP #LW3SVVNUM) From_File(LW3SYS) With_Key(#iVariable #iLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    #oAlphaValue := #LW3SVVALP
+    #oNumericValue := #LW3SVVNUM
+    Endroutine
+    
+    End_Com
+    

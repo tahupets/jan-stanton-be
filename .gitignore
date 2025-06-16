@@ -1,0 +1,38 @@
+# Windows thumbnail cache files
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# Exclude batch file for SQL scripting
+Database/SQLScripter2014/SQLImport.bat
+Database/SQLScripter2014/SQLExport.bat
+Database/SQLScripter2012/SQLImport.bat
+Database/SQLScripter2012/SQLExport.bat
+
+# Exclude unrelated LANSA partitions 
+Partition\ (DEM)/
+Partition\ (DEV)/
+Partition\ (TST)/
+Partition\ (PRD)/
+System\ Information/Partitions/DEM.prt.yml
+System\ Information/Partitions/DEV.prt.yml
+System\ Information/Partitions/TST.prt.yml
+System\ Information/Partitions/PRD.prt.yml

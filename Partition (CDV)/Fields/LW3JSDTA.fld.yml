@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3JSDTA
+  Type:               String
+  Length:             10000
+  Decimals:           0
+  Default Value:      "*NULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "JSON Data"
+      Label:              "JSON Data"
+      Heading1:           "JSON"
+      Heading2:           "Data"
+      Heading3:           " "

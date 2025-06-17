@@ -1,0 +1,126 @@
+﻿File:
+  Name:                           CNTSESSN
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             CNTSESSN
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( *NOMAX) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE Storefront Session"
+
+  Real Fields:
+  - LW3GUID:
+      Type:               Alphanumeric
+      Length:             64
+      Decimals:           0
+
+  - LW3SESTAT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3WEBUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3ASSC01:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CARTID:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
+  - LW3PGUID:
+      Type:               Alphanumeric
+      Length:             64
+      Decimals:           0
+
+  - LW3JSDTA:
+      Type:               String
+      Length:             10000
+      Decimals:           0
+
+  - LW3CDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - LW3UDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  Primary Keys:
+  - LW3GUID
+
+  Logical Views:
+  - CNTSESSNL1:
+      Identifier:         CNTSESSNL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CNTSESSNL1
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By User and Customer ID"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3ASSC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - CNTSESSNL2:
+      Identifier:         CNTSESSNL2
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CNTSESSNL2
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By GUID, Web User, Customer ID"
+
+      Keys:
+      - LW3GUID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3ASSC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3CARTID
+  Type:               Signed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          3
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Cart Id"
+      Label:              "Cart Id"
+      Heading1:           "Cart"
+      Heading2:           "Id"
+      Heading3:           " "

@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               LW3LNGBO
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Back-office Language Code"
+      Label:              "B/O Language"
+      Heading1:           "B/O"
+      Heading2:           "Lng"
+      Heading3:           "cde"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(201)
+    
+    End_Com
+    
+    End_Com

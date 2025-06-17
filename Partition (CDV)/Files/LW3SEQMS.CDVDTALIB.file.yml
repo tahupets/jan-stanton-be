@@ -1,0 +1,59 @@
+﻿File:
+  Name:                           LW3SEQMS
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3SEQMS
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                Yes
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(10000     2000      3         ) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Sequence Master File"
+
+  Real Fields:
+  - LW3TRANID:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3TRDESC:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3NXTNUM:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
+  - LW3LOWEST:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
+  - LW3MAXNUM:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
+  Primary Keys:
+  - LW3TRANID

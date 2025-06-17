@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               W_CATPOS
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Reference Field:    LW3NSHOW
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Category Position"
+      Label:              "Category Positi"
+      Heading1:           "Category"
+      Heading2:           "Position"
+      Heading3:           " "

@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3LOWEST
+  Type:               Signed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "lowest Tans. Number"
+      Label:              "LoweST"
+      Heading1:           "Limit"
+      Heading2:           "Number"
+      Heading3:           " "

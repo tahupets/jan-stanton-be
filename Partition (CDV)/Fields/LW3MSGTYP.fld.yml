@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3MSGTYP
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Message Type"
+      Label:              "Message Type"
+      Heading1:           "Message"
+      Heading2:           "Type"
+      Heading3:           " "

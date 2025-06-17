@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3LNGUDS
+  Type:               NVarChar
+  Length:             100
+  Decimals:           0
+  Default Value:      "*NULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - ASQN
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Language Unicode Description"
+      Label:              "Language Unicod"
+      Heading1:           "Language"
+      Heading2:           "Unicode"
+      Heading3:           "Description"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Usepicklist(False) Componentversion(1) Height(21) Marginleft(193) Width(998)
+    
+    End_Com
+    
+    End_Com

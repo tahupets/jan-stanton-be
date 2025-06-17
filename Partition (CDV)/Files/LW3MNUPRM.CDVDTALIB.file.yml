@@ -1,0 +1,86 @@
+﻿File:
+  Name:                           LW3MNUPRM
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3MNUPRM
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         Yes
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(*NOMAX) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Menu Permissions"
+
+  Real Fields:
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3MNPRID:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3MNUID:
+      Type:               Decimal
+      Length:             10
+      Decimals:           0
+
+  - LW3MNPRAF:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3CRTUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CRTDAT:
+      Type:               Signed
+      Length:             8
+      Decimals:           0
+
+  - LW3CRTTIM:
+      Type:               Signed
+      Length:             8
+      Decimals:           0
+
+  - LW3UPDUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3UPDDAT:
+      Type:               Signed
+      Length:             8
+      Decimals:           0
+
+  - LW3UPDTIM:
+      Type:               Signed
+      Length:             8
+      Decimals:           0
+
+  Primary Keys:
+  - LW3SFID
+  - LW3MNPRID
+  - LW3MNUID

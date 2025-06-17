@@ -47,8 +47,8 @@
     
     Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
     Define_Com Class(#CNRAPILG) Name(#Processor_ApiLog) Desc('API Log Processor') Scope(*APPLICATION)
-    Define_Com Class(#CERIAUTL) Name(#Processor_ProductAttributes) Desc('Product Attributes Processor')
-    Define_Com Class(#CNRPRDPR) Name(#Processor_Products) Desc('Products Processor') Scope(*APPLICATION)
+    * * * Define_Com Class(#CERIAUTL) Name(#Processor_ProductAttributes) Desc('Product Attributes Processor')
+    * * * Define_Com Class(#CNRPRDPR) Name(#Processor_Products) Desc('Products Processor') Scope(*APPLICATION)
     
     * =======================================================
     * Component Definitions
@@ -101,7 +101,13 @@
     Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
     Define_Com Class(#Com_Home.GetStorefrontDetails.Response.Resp400.Object) Name(#Object_Resp400) Reference(*DYNAMIC)
     
+    * !NC!
+    #Utility_General.umDebugLog Iobjectname('CNSINIT') Idebugtext('in usGetSiteInitialize')
+    
     #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    * !NC!
+    #Utility_General.umDebugLog Iobjectname('CNSINIT') Idebugtext('after umWriteLog')
     
     #LW3RETCOD := *BLANKS
     
@@ -109,6 +115,9 @@
     If (#Operation.TryBind( #uContext ))
     
     #Global_DataModel.umGetStorefrontDetails Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    * !NC!
+    #Utility_General.umDebugLog Iobjectname('CNSINIT') Idebugtext('after umGetStorefrontDetails')
     
     If Cond(#LW3RETCOD = 'OK')
     #LW3SFID := #Global_DataModel.upStorefrontId
@@ -121,6 +130,9 @@
     #LW3CURCD := #Global_DataModel.upStorefrontCurrencyCode
     #FXANALYZE := #Global_DataModel.upStorefrontAnalyticsFlag
     #FXANACCT := #Global_DataModel.upStorefrontAnalyticsAccountId
+    
+    * !NC!
+    #Utility_General.umDebugLog Iobjectname('CNSINIT') Idebugtext('Storefront Id - ' + #LW3SFID.asString)
     
     * Transfer field values to mapped fields in the schema "storefrontResponseObject"
     Set Com(#Object_StorefrontResponse) Com_Fields(*ALL)
@@ -164,7 +176,7 @@
     If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
     
     #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Oreturncode(#LW3RETCOD) Ihttpheaders(#uContext.Request.Headers)
-    #Processor_ProductAttributes.umGetImagePath Ivariablename('PRODUCT_IMAGE_PATH')
+    * * * #Processor_ProductAttributes.umGetImagePath Ivariablename('PRODUCT_IMAGE_PATH')
     
     If Cond(#LW3RETCOD = 'OK')
     
@@ -172,8 +184,8 @@
     
     * #COM_OWNER.umGetProductCategories
     * #COM_OWNER.umGetPrimaryMenus Iarray_Menu(#Array_Menu)
-    #COM_OWNER.umGetBestSellers
-    #COM_OWNER.umGetRecommendedItems
+    * * * #COM_OWNER.umGetBestSellers
+    * * * #COM_OWNER.umGetRecommendedItems
     
     #uJsonWriter.EndObject
     
@@ -233,7 +245,6 @@
     
     #uJsonWriter.BeginObject
     
-    #COM_OWNER.umGetProductCategories
     #COM_OWNER.umGetPrimaryMenus Iarray_Menu(#Array_Menu)
     
     #uJsonWriter.EndObject
@@ -269,105 +280,6 @@
     * =======================================================
     * Method Definitions
     * =======================================================
-    * =======================================================
-    * Mthroutine ....: umGetProductCategories
-    * Description....: Get Product Categories
-    * =======================================================
-    Mthroutine Name(umGetProductCategories) Desc('Get Product Categories') Access(*PRIVATE)
-    
-    #W_CATPOS := 0
-    
-    #uJsonWriter.BeginArray Membername('categories')
-    
-    Select Fields(#XG_LW3C01 *EXCLUDING #LW3CATSEQ) From_File(LW3C01L1) With_Key(#Global_DataModel.upStorefrontId 'CAT') Io_Error(*NEXT) Val_Error(*NEXT)
-    * Do not include if flag is not set to Y
-    Continue If(#LW3SHWTPF <> 'Y')
-    Continue If(#LW3CATID = 0)
-    
-    Fetch Fields(#LW3CATNAM #LW3CATIMG #LW3CATSNM) From_File(LW3C01ML) With_Key(#Global_DataModel.upStorefrontId #LW3CATID #Global_DataModel.upCurrentLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
-    
-    #LW3URL := #LW3CATURL.Trim.LowerCase
-    
-    Add_Entry To_List(#LS_CATEGORY)
-    
-    #uJsonWriter.BeginObject
-    #uJsonWriter.WriteDecimal Membername('categoryId') Value(#LW3CATID)
-    #uJsonWriter.WriteString Membername('categoryName') Value(#LW3CATNAM)
-    #uJsonWriter.WriteDecimal Membername('categoryIndent') Value(#LW3CINDT)
-    #uJsonWriter.WriteString Membername('isPrimaryCategory') Value(#LW3CATPRI)
-    #uJsonWriter.WriteString Membername('isCategoryEndNode') Value(#LW3CATEND)
-    #uJsonWriter.WriteString Membername('productCategoryType') Value(#LW3PCTYP)
-    #uJsonWriter.WriteString Membername('categoryURL') Value(#LW3URL)
-    #uJsonWriter.WriteDecimal Membername('categoryPosition') Value(#W_CATPOS)
-    #uJsonWriter.WriteString Membername('categoryImage') Value(#LW3CATIMG)
-    #uJsonWriter.WriteDecimal Membername('categoryOrder') Value(#LW3CATORD)
-    
-    * If not an end-node, check for child categories
-    If Cond(#LW3CATEND <> 'Y')
-    #COM_OWNER.umGetProductSubCategories Icategoryid(#LW3CATID)
-    Endif
-    
-    #uJsonWriter.EndObject
-    
-    Endselect
-    
-    #uJsonWriter.EndArray
-    
-    Endroutine
-    
-    * =======================================================
-    * Mthroutine ....: umGetProductSubCategories
-    * Description....: Get Product Sub Categories
-    * =======================================================
-    
-    Mthroutine Name(umGetProductSubCategories) Desc('Get Product Sub Categories') Access(*PRIVATE)
-    
-    Define_Map For(*INPUT) Class(#LW3CATID) Name(#iCategoryId)
-    
-    If Cond(#iCategoryId > 0)
-    
-    #uJsonWriter.BeginArray Membername('subCategories')
-    
-    Select Fields(#LW3SFID #LW3CATID #LW3CATSUB) From_File(LW3C02) With_Key(#Global_DataModel.upStorefrontId #iCategoryId) Io_Error(*NEXT) Val_Error(*NEXT)
-    
-    Continue If(#LW3CATSUB = 0)
-    
-    Fetch Fields(#LW3CATNAM #LW3CATPRI #LW3CATEND #LW3PCTYP #LW3CATURL) From_File(LW3C01) With_Key(#Global_DataModel.upStorefrontId #LW3CATSUB) Io_Error(*NEXT) Val_Error(*NEXT)
-    If_Status Is(*OKAY)
-    
-    #LW3URL := #LW3CATURL.Trim.LowerCase
-    
-    Add_Entry To_List(#LS_CATEGORY)
-    
-    #uJsonWriter.BeginObject
-    
-    #uJsonWriter.WriteDecimal Membername('categoryId') Value(#LW3CATID)
-    #uJsonWriter.WriteString Membername('categoryName') Value(#LW3CATNAM)
-    #uJsonWriter.WriteDecimal Membername('categoryIndent') Value(#LW3CINDT)
-    #uJsonWriter.WriteString Membername('isPrimaryCategory') Value(#LW3CATPRI)
-    #uJsonWriter.WriteString Membername('isCategoryEndNode') Value(#LW3CATEND)
-    #uJsonWriter.WriteString Membername('productCategoryType') Value(#LW3PCTYP)
-    #uJsonWriter.WriteDecimal Membername('categoryToShow') Value(#LW3NSHOW)
-    #uJsonWriter.WriteString Membername('categoryURL') Value(#LW3URL)
-    #uJsonWriter.WriteDecimal Membername('categoryPosition') Value(#W_CATPOS)
-    #uJsonWriter.WriteString Membername('categoryImage') Value(#LW3CATIMG)
-    #uJsonWriter.WriteDecimal Membername('categoryOrder') Value(#LW3CATORD)
-    
-    * If not an end-node, check for child categories
-    If Cond(#LW3CATEND <> 'Y')
-    #COM_OWNER.umGetProductSubCategories Icategoryid(#LW3CATSUB)
-    Endif
-    
-    #uJsonWriter.EndObject
-    Endif
-    Endselect
-    
-    #uJsonWriter.EndArray
-    
-    Endif
-    
-    Endroutine
-    
     * =======================================================
     * Mthroutine ....: umGetPrimaryMenus
     * Description....: Get Primary Menu Items
@@ -552,327 +464,327 @@
     Endroutine
     
     
-    * =======================================================
-    * Mthroutine ....: umGetBestSellers
-    * Description....: Get Best Sellers List
-    * =======================================================
-    Mthroutine Name(umGetBestSellers) Desc('Get Best Sellers')
-    
-    Define_Map For(*INPUT) Class(#LW3CATID) Name(#iSelectedCategoryId) Mandatory(0)
-    
-    Define_Com Class(#PRIM_BOLN) Name(#L_ProductExistsFlag)
-    
-    #uJsonWriter.BeginArray Membername('bestsellers')
-    
-    #LW3URL := 'lansaweb?srve=uc2+partition=' + *partition + 'language=' + *language
-    #LW3ADDURL := 'lansaweb?srve=uc2+partition=' + *partition + 'language=' + *language
-    
-    * Check if category is selected
-    If Cond(#iSelectedCategoryId <> 0)
-    * get category type
-    Fetch Fields(#LW3PCTYP) From_File(LW3C01) With_Key(#Global_DataModel.upStorefrontId #iSelectedCategoryId) Io_Error(*NEXT) Val_Error(*NEXT)
-    
-    * best seller overrides
-    Select Fields(#LW3ITEMCD) From_File(LW3OVRBS1) With_Key(#Global_DataModel.upStorefrontId #iSelectedCategoryId) Io_Error(*NEXT) Val_Error(*NEXT)
-    If Cond(#BSLCNT < 3)
-    * check stock and get price
-    #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
-    
-    If Cond((#LW3STKAVL > 0) *Or (#Global_DataModel.upUserIndicator = 'B'))
-    #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
-    
-    #COM_OWNER.umAddBestSellerToJson
-    Endif
-    Else
-    Leave
-    Endif
-    Endselect
-    
-    Else
-    * no category or artist selected, default view* no category or artist selected, default view
-    Select Fields(#LW3ITEMCD) From_File(LW3OVRBS1) With_Key(#Global_DataModel.upStorefrontId) Io_Error(*NEXT) Val_Error(*NEXT)
-    
-    If Cond(#BSLCNT < 20)
-    * check stock and get price
-    #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
-    
-    If Cond((#LW3STKAVL > 0) *Or (#Global_DataModel.upUserIndicator = 'B'))
-    #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
-    #COM_OWNER.umAddBestSellerToJson
-    Endif
-    Else
-    Leave
-    Endif
-    Endselect
-    Endif
-    
-    * if there are not 3 overrides, add from best seller file (LW3BSELL)
-    If Cond(#iSelectedCategoryId <> 0)
-    * get category type
-    Fetch Fields(#LW3PCTYP) From_File(LW3C01) With_Key(#Global_DataModel.upStorefrontId #iSelectedCategoryId) Io_Error(*NEXT) Val_Error(*NEXT)
-    
-    * category/collection selection
-    Select Fields(#LW3ITEMCD) From_File(LW3BSSELL1) With_Key(#Global_DataModel.upStorefrontId 'N') Io_Error(*NEXT) Val_Error(*NEXT)
-    If Cond(#BSLCNT < 3)
-    * check stock and get price
-    #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
-    
-    If Cond((#LW3STKAVL <= 0) *And (#Global_DataModel.upUserIndicator <> 'B'))
-    #LW3SLDOUT := 'Y'
-    Update Fields(#LW3SLDOUT) In_File(LW3BSELL) With_Key(#LW3SFID #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
-    Continue
-    Endif
-    
-    * check that item exists in category or subcategory
-    #L_ProductExistsFlag := False
-    
-    Selectlist Named(#LS_CATEGORY)
-    Check_For In_File(LW3C03) With_Key(#Global_DataModel.upStorefrontId #LW3CATID #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
-    If_Status Is(*EQUALKEY)
-    #L_ProductExistsFlag := True
-    Leave
-    Endif
-    Endselect
-    
-    Continue If(*Not #L_ProductExistsFlag)
-    
-    #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
-    
-    #COM_OWNER.umAddBestSellerToJson
-    
-    Else
-    Leave
-    Endif
-    Endselect
-    
-    Else
-    If Cond(#LW3ARTIST <> *BLANK)
-    * artist selection
-    * currently no artist page to view
-    Select Fields(#LW3ITEMCD) From_File(LW3BSSELL2) With_Key(#LW3SFID #LW3ARTIST 'N') Io_Error(*NEXT) Val_Error(*NEXT)
-    Add_Entry To_List(#LS_ARTIST)
-    Endselect
-    
-    Select Fields(#LW3ITEMCD) From_File(LW3BSSELL3) With_Key(#LW3SFID #LW3ARTIST N) Io_Error(*NEXT) Val_Error(*NEXT)
-    Add_Entry To_List(#LS_ARTIST)
-    Endselect
-    
-    Sort_List Named(#LS_ARTIST) By_Fields((#LW3BSQTY *DESCEND))
-    
-    Selectlist Named(#LS_ARTIST)
-    If Cond(#BSLCNT < 3)
-    * check stock and get price
-    #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
-    
-    If Cond((#LW3STKAVL <= 0) *And (#LW3CUSIND <> 'B'))
-    #LW3SLDOUT := 'Y'
-    Update Fields(#LW3SLDOUT) In_File(LW3BSELL) With_Key(#LW3SFID #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
-    Continue
-    Endif
-    
-    #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
-    
-    #COM_OWNER.umAddBestSellerToJson
-    
-    Else
-    Leave
-    Endif
-    Endselect
-    
-    Else
-    * no category selected, default view
-    Select Fields(#LW3ITEMCD) From_File(LW3BSSELL1) With_Key(#LW3SFID 'N') Io_Error(*NEXT) Val_Error(*NEXT)
-    If Cond(#BSLCNT < 3)
-    * check stock and get price
-    #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
-    
-    If Cond((#LW3STKAVL <= 0) *And (#LW3CUSIND <> 'B'))
-    #LW3SLDOUT := 'Y'
-    Update Fields(#LW3SLDOUT) In_File(LW3BSELL) With_Key(#LW3SFID #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
-    Continue
-    Endif
-    
-    #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
-    
-    #COM_OWNER.umAddBestSellerToJson
-    
-    Else
-    Leave
-    Endif
-    Endselect
-    Endif
-    Endif
-    
-    #uJsonWriter.EndArray
-    
-    Endroutine
-    
-    * =======================================================
-    * Mthroutine ....: umAddBestSellerToJson
-    * Description....: Add Best Seller to Json
-    * =======================================================
-    Mthroutine Name(umAddBestSellerToJson) Desc('Add Best Seller to Json')
-    
-    #uJsonWriter.BeginObject
-    #uJsonWriter.WriteString Membername('LW3ITEMCD') Value(#LW3ITEMCD)
-    #uJsonWriter.WriteString Membername('LW3IDESC') Value(#LW3IDESC)
-    #uJsonWriter.WriteString Membername('LW3IMAGE') Value(#LW3IMAGE)
-    #uJsonWriter.WriteDecimal Membername('LW3LPRICE') Value(#LW3LPRICE)
-    #uJsonWriter.WriteDecimal Membername('LW3QTYRQS') Value(#LW3QTYRQS)
-    #uJsonWriter.WriteString Membername('LW3URL') Value(#LW3URL)
-    #uJsonWriter.WriteString Membername('LW3ADDURL') Value(#LW3ADDURL)
-    #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
-    #uJsonWriter.EndObject
-    
-    Endroutine
-    
-    * =======================================================
-    * Mthroutine ....: umCheckStock
-    * Description....: Check item stock availability
-    * =======================================================
-    Mthroutine Name(umCheckStock) Desc('Check item availability') Access(*PRIVATE)
-    Define_Map For(*INPUT) Class(#LW3ITEMCD) Name(#iItemCode)
-    Define_Map For(*OUTPUT) Class(#LW3STKAVL) Name(#oStockAvl)
-    Define_Map For(*OUTPUT) Class(#LW3IDESC) Name(#oItemDesc)
-    Define_Map For(*OUTPUT) Class(#LW3LPRICE) Name(#oPrice)
-    
-    #FXCUSID := #Global_DataModel.upCustomerId
-    #FXSHIPID := *null
-    #FXITEM := #iItemCode
-    #FXORDQTY := 1
-    
-    Exchange Fields(#FXCUSID #FXSHIPID #FXITEM #FXORDQTY)
-    Call Process(*DIRECT) Function(LW3APRC)
-    
-    #oStockAvl := #FXQTY
-    #oItemDesc := #FXDESC
-    #oPrice := #FXPRICE
-    Endroutine
-    
-    * =======================================================
-    * Mthroutine ....: umBuildProductInfoDisplay
-    * Description....: Build the information displayed for a product
-    * =======================================================
-    Mthroutine Name(umBuildProductInfoDisplay) Help('Build the information displayed for a product') Access(*PRIVATE)
-    Define_Map For(*OUTPUT) Class(#LW3URL) Name(#oUrl)
-    Define_Map For(*OUTPUT) Class(#LW3IMAGE) Name(#oImage)
-    Define_Map For(*OUTPUT) Class(#D_LPRICE) Name(#oDispPrice)
-    
-    Define_Com Class(#LW3IMAGE) Name(#L_imagePath)
-    #LW3QTYRQS := 0
-    #oUrl := '/' + #Global_DataModel.upCurrentLanguage + '/product/'
-    
-    * Product Image
-    #Processor_Products.umGetProductMainImage Iitemcode(#LW3ITEMCD) Oimageurl(#oImage) Ostatus(#LW3RETCOD)
-    
-    * Prepare currency field for display
-    #Utility_General.umFormatDisplayPrice Inumericvalue(#LW3LPRICE) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#oDispPrice)
-    
-    Endroutine
-    
-    * =======================================================
-    * Mthroutine ....: umGetRecommendedItems
-    * Description....: Build personal recommendations by calling ms cognitive recommendations api
-    * =======================================================
-    Mthroutine Name(umGetRecommendedItems) Desc('Get Recommended Items') Help('Build personal recommendations by calling ms cognitive recommendations api')
-    
-    * * * Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("MSCOGAPIKEY") Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * * =======================================================
+    * * * * Mthroutine ....: umGetBestSellers
+    * * * * Description....: Get Best Sellers List
+    * * * * =======================================================
+    * * * Mthroutine Name(umGetBestSellers) Desc('Get Best Sellers')
     * * *
-    * * * #Request.Options.AddHeader Name("x-api-key") Value(#LW3SVVALP)
-    * * * #Request.Content.ContentInfo.MediaType := 'application/x-www-form-urlencoded'
+    * * * Define_Map For(*INPUT) Class(#LW3CATID) Name(#iSelectedCategoryId) Mandatory(0)
     * * *
-    * * * Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("MSCOGSCHEME") Io_Error(*NEXT) Val_Error(*NEXT)
-    * * * #Url.SetScheme( #LW3SVVALP )
-    * * * Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("MSCOGHOST") Io_Error(*NEXT) Val_Error(*NEXT)
-    * * * #Url.SetHost( #LW3SVVALP )
-    * * * Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("MSCOGPATH") Io_Error(*NEXT) Val_Error(*NEXT)
-    * * * #Url.SetPath( (#LW3SVVALP) )
+    * * * Define_Com Class(#PRIM_BOLN) Name(#L_ProductExistsFlag)
     * * *
-    * * * #Url.AddQueryString( "recommendationCount" "3" )
-    * * * If Cond(#CALLWAM = "WPRDPGE")
-    * * * #Url.AddQueryString( "itemId" #LW3ITEMCD )
-    * * * #Request.DoGet Url(#Url)
+    * * * #uJsonWriter.BeginArray Membername('bestsellers')
+    * * *
+    * * * #LW3URL := 'lansaweb?srve=uc2+partition=' + *partition + 'language=' + *language
+    * * * #LW3ADDURL := 'lansaweb?srve=uc2+partition=' + *partition + 'language=' + *language
+    * * *
+    * * * * Check if category is selected
+    * * * If Cond(#iSelectedCategoryId <> 0)
+    * * * * get category type
+    * * * Fetch Fields(#LW3PCTYP) From_File(LW3C01) With_Key(#Global_DataModel.upStorefrontId #iSelectedCategoryId) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * *
+    * * * * best seller overrides
+    * * * Select Fields(#LW3ITEMCD) From_File(LW3OVRBS1) With_Key(#Global_DataModel.upStorefrontId #iSelectedCategoryId) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * If Cond(#BSLCNT < 3)
+    * * * * check stock and get price
+    * * * #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
+    * * *
+    * * * If Cond((#LW3STKAVL > 0) *Or (#Global_DataModel.upUserIndicator = 'B'))
+    * * * #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
+    * * *
+    * * * #COM_OWNER.umAddBestSellerToJson
+    * * * Endif
     * * * Else
-    * * * #Url.AddQueryString( "userID" #LW3ASSC01 )
-    * * * #Request.DoPost Url(#Url)
+    * * * Leave
     * * * Endif
-    
-    * * * If Cond(#Request.Response.IsSuccessfulRequest *And #Request.Response.IsSuccessHttpStatusCode)
-    * * * #Reader.SetSourceHttpResponse Httpresponse(#Request.Response)
-    * * * #Reader.SetSourceHttpResponse Httpresponse(#Request.Response)
-    * * * #Reader.BeginArrayWithPath( "/" )
-    * * * Clr_List Named(#LS_RECOITEMS)
-    * * * #STD_NUM := 1
+    * * * Endselect
     * * *
-    * * * * #LW3ITEMCD #LW3IDESC #LW3IMAGE #D_LPRICE #LW3URL
-    
-    #uJsonWriter.BeginArray Membername('recommended')
-    
-    * !NC! - Recommended items are hardcoded
-    #Utility_General.umFormatDisplayPrice Inumericvalue(1279.95) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#D_LPRICE)
-    #uJsonWriter.BeginObject
-    #uJsonWriter.WriteString Membername('LW3ITEMCD') Value('HXP3S')
-    #uJsonWriter.WriteString Membername('LW3IDESC') Value('Hippo XP3 Complete Set')
-    #uJsonWriter.WriteString Membername('LW3IMAGE') Value('https://res.cloudinary.com/dahqgdx87/image/upload//v1745547539/BK9/Product%20Images/hpmqpf5pupipbmpj16zw.jpg')
-    #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
-    #uJsonWriter.EndObject
-    
-    #Utility_General.umFormatDisplayPrice Inumericvalue(57.25) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#D_LPRICE)
-    
-    #uJsonWriter.BeginObject
-    #uJsonWriter.WriteString Membername('LW3ITEMCD') Value('2005')
-    #uJsonWriter.WriteString Membername('LW3IDESC') Value('Five Iron - Infiniti 500 Iron')
-    #uJsonWriter.WriteString Membername('LW3IMAGE') Value('https://res.cloudinary.com/dahqgdx87/image/upload//v1745547220/BK9/Product%20Images/tsys02yxojdyx29dbthb.jpg')
-    #uJsonWriter.WriteString Membername('LW3URL') Value('/ENG/PRODUCT/')
-    #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
-    #uJsonWriter.EndObject
-    
-    #Utility_General.umFormatDisplayPrice Inumericvalue(99.00) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#D_LPRICE)
-    
-    #uJsonWriter.BeginObject
-    #uJsonWriter.WriteString Membername('LW3ITEMCD') Value('0036')
-    #uJsonWriter.WriteString Membername('LW3IDESC') Value('Infiniti J5 Putter 36in')
-    #uJsonWriter.WriteString Membername('LW3IMAGE') Value('https://res.cloudinary.com/dahqgdx87/image/upload//v1745545526/BK9/Product%20Images/ptmyxa5rppszy1upidd9.jpg')
-    #uJsonWriter.WriteString Membername('LW3URL') Value('/ENG/PRODUCT/')
-    #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
-    #uJsonWriter.EndObject
-    
-    #Utility_General.umFormatDisplayPrice Inumericvalue(57.25) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#D_LPRICE)
-    
-    #uJsonWriter.BeginObject
-    #uJsonWriter.WriteString Membername('LW3ITEMCD') Value('2007')
-    #uJsonWriter.WriteString Membername('LW3IDESC') Value('Seven Iron - Infiniti 500 Iron')
-    #uJsonWriter.WriteString Membername('LW3IMAGE') Value('https://res.cloudinary.com/dahqgdx87/image/upload//v1745547227/BK9/Product%20Images/nns6bx3h6y0vxmmsd03u.jpg')
-    #uJsonWriter.WriteString Membername('LW3URL') Value('/ENG/PRODUCT/')
-    #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
-    #uJsonWriter.EndObject
-    
-    #uJsonWriter.EndArray
-    
-    * * * * Begin_Loop Using(#STD_NUM)
-    * * * * #Reader.ReadElementAtIndex Index(#STD_NUM) Found(#w_found)
-    * * * * If Cond(#W_FOUND)
-    * * * * #LW3ITEMCD := #Reader.ReadStringWithPath( (#STD_NUM.AsString + "/recommendedItemId") ).AsNativeString
-    * * * * #FXITEM := #LW3ITEMCD.UpperCase
-    * * * * #FXORDQTY := 1
-    * * * * Exchange Fields(#FXCUSID #FXSHIPID #FXITEM #FXORDQTY)
-    * * * * Call Process(*DIRECT) Function(LW3APRC)
-    * * * * #LW3IDESC := #FXDESC
-    * * * * #LW3LPRICE := #FXPRICE
-    * * * * #uEditmask.uEditField Unumberfield(#lw3lprice) Udecpoint(#LW3DPSYM) Uthousep(#LW3TSSYM) Ureturnfield(#D_LPRICE)
-    * * * * #STD_TEXT := *BLANK
-    * * * * Substring Field(#LW3ITEMCD) Into_Field(#STD_TEXT)
-    * * * * #LW3IMAGE := '/img/' + #LW3SNAM.LowerCase + "item/thumb/" + #STD_TEXT + "_th.jpg"
-    * * * * #COM_OWNER.umRewrite2 Iurlkey('PRODUCT') Ourl(#LW3URL)
-    * * * *
-    * * * * Add_Entry To_List(#LS_RECOITEMS)
-    * * * * Else
-    * * * * Leave
-    * * * * Endif
-    * * * * End_Loop
+    * * * Else
+    * * * * no category or artist selected, default view* no category or artist selected, default view
+    * * * Select Fields(#LW3ITEMCD) From_File(LW3OVRBS1) With_Key(#Global_DataModel.upStorefrontId) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * *
+    * * * If Cond(#BSLCNT < 20)
+    * * * * check stock and get price
+    * * * #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
+    * * *
+    * * * If Cond((#LW3STKAVL > 0) *Or (#Global_DataModel.upUserIndicator = 'B'))
+    * * * #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
+    * * * #COM_OWNER.umAddBestSellerToJson
     * * * Endif
-    
-    Endroutine
+    * * * Else
+    * * * Leave
+    * * * Endif
+    * * * Endselect
+    * * * Endif
+    * * *
+    * * * * if there are not 3 overrides, add from best seller file (LW3BSELL)
+    * * * If Cond(#iSelectedCategoryId <> 0)
+    * * * * get category type
+    * * * Fetch Fields(#LW3PCTYP) From_File(LW3C01) With_Key(#Global_DataModel.upStorefrontId #iSelectedCategoryId) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * *
+    * * * * category/collection selection
+    * * * Select Fields(#LW3ITEMCD) From_File(LW3BSSELL1) With_Key(#Global_DataModel.upStorefrontId 'N') Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * If Cond(#BSLCNT < 3)
+    * * * * check stock and get price
+    * * * #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
+    * * *
+    * * * If Cond((#LW3STKAVL <= 0) *And (#Global_DataModel.upUserIndicator <> 'B'))
+    * * * #LW3SLDOUT := 'Y'
+    * * * Update Fields(#LW3SLDOUT) In_File(LW3BSELL) With_Key(#LW3SFID #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * Continue
+    * * * Endif
+    * * *
+    * * * * check that item exists in category or subcategory
+    * * * #L_ProductExistsFlag := False
+    * * *
+    * * * Selectlist Named(#LS_CATEGORY)
+    * * * Check_For In_File(LW3C03) With_Key(#Global_DataModel.upStorefrontId #LW3CATID #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * If_Status Is(*EQUALKEY)
+    * * * #L_ProductExistsFlag := True
+    * * * Leave
+    * * * Endif
+    * * * Endselect
+    * * *
+    * * * Continue If(*Not #L_ProductExistsFlag)
+    * * *
+    * * * #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
+    * * *
+    * * * #COM_OWNER.umAddBestSellerToJson
+    * * *
+    * * * Else
+    * * * Leave
+    * * * Endif
+    * * * Endselect
+    * * *
+    * * * Else
+    * * * If Cond(#LW3ARTIST <> *BLANK)
+    * * * * artist selection
+    * * * * currently no artist page to view
+    * * * Select Fields(#LW3ITEMCD) From_File(LW3BSSELL2) With_Key(#LW3SFID #LW3ARTIST 'N') Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * Add_Entry To_List(#LS_ARTIST)
+    * * * Endselect
+    * * *
+    * * * Select Fields(#LW3ITEMCD) From_File(LW3BSSELL3) With_Key(#LW3SFID #LW3ARTIST N) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * Add_Entry To_List(#LS_ARTIST)
+    * * * Endselect
+    * * *
+    * * * Sort_List Named(#LS_ARTIST) By_Fields((#LW3BSQTY *DESCEND))
+    * * *
+    * * * Selectlist Named(#LS_ARTIST)
+    * * * If Cond(#BSLCNT < 3)
+    * * * * check stock and get price
+    * * * #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
+    * * *
+    * * * If Cond((#LW3STKAVL <= 0) *And (#LW3CUSIND <> 'B'))
+    * * * #LW3SLDOUT := 'Y'
+    * * * Update Fields(#LW3SLDOUT) In_File(LW3BSELL) With_Key(#LW3SFID #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * Continue
+    * * * Endif
+    * * *
+    * * * #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
+    * * *
+    * * * #COM_OWNER.umAddBestSellerToJson
+    * * *
+    * * * Else
+    * * * Leave
+    * * * Endif
+    * * * Endselect
+    * * *
+    * * * Else
+    * * * * no category selected, default view
+    * * * Select Fields(#LW3ITEMCD) From_File(LW3BSSELL1) With_Key(#LW3SFID 'N') Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * If Cond(#BSLCNT < 3)
+    * * * * check stock and get price
+    * * * #COM_OWNER.umCheckStock Iitemcode(#LW3ITEMCD) Oitemdesc(#LW3IDESC) Oprice(#LW3LPRICE) Ostockavl(#LW3STKAVL)
+    * * *
+    * * * If Cond((#LW3STKAVL <= 0) *And (#LW3CUSIND <> 'B'))
+    * * * #LW3SLDOUT := 'Y'
+    * * * Update Fields(#LW3SLDOUT) In_File(LW3BSELL) With_Key(#LW3SFID #LW3ITEMCD) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * Continue
+    * * * Endif
+    * * *
+    * * * #COM_OWNER.umBuildProductInfoDisplay Odispprice(#D_LPRICE) Oimage(#LW3IMAGE) Ourl(#LW3URL)
+    * * *
+    * * * #COM_OWNER.umAddBestSellerToJson
+    * * *
+    * * * Else
+    * * * Leave
+    * * * Endif
+    * * * Endselect
+    * * * Endif
+    * * * Endif
+    * * *
+    * * * #uJsonWriter.EndArray
+    * * *
+    * * * Endroutine
+    * * *
+    * * * * =======================================================
+    * * * * Mthroutine ....: umAddBestSellerToJson
+    * * * * Description....: Add Best Seller to Json
+    * * * * =======================================================
+    * * * Mthroutine Name(umAddBestSellerToJson) Desc('Add Best Seller to Json')
+    * * *
+    * * * #uJsonWriter.BeginObject
+    * * * #uJsonWriter.WriteString Membername('LW3ITEMCD') Value(#LW3ITEMCD)
+    * * * #uJsonWriter.WriteString Membername('LW3IDESC') Value(#LW3IDESC)
+    * * * #uJsonWriter.WriteString Membername('LW3IMAGE') Value(#LW3IMAGE)
+    * * * #uJsonWriter.WriteDecimal Membername('LW3LPRICE') Value(#LW3LPRICE)
+    * * * #uJsonWriter.WriteDecimal Membername('LW3QTYRQS') Value(#LW3QTYRQS)
+    * * * #uJsonWriter.WriteString Membername('LW3URL') Value(#LW3URL)
+    * * * #uJsonWriter.WriteString Membername('LW3ADDURL') Value(#LW3ADDURL)
+    * * * #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
+    * * * #uJsonWriter.EndObject
+    * * *
+    * * * Endroutine
+    * * *
+    * * * * =======================================================
+    * * * * Mthroutine ....: umCheckStock
+    * * * * Description....: Check item stock availability
+    * * * * =======================================================
+    * * * Mthroutine Name(umCheckStock) Desc('Check item availability') Access(*PRIVATE)
+    * * * Define_Map For(*INPUT) Class(#LW3ITEMCD) Name(#iItemCode)
+    * * * Define_Map For(*OUTPUT) Class(#LW3STKAVL) Name(#oStockAvl)
+    * * * Define_Map For(*OUTPUT) Class(#LW3IDESC) Name(#oItemDesc)
+    * * * Define_Map For(*OUTPUT) Class(#LW3LPRICE) Name(#oPrice)
+    * * *
+    * * * #FXCUSID := #Global_DataModel.upCustomerId
+    * * * #FXSHIPID := *null
+    * * * #FXITEM := #iItemCode
+    * * * #FXORDQTY := 1
+    * * *
+    * * * Exchange Fields(#FXCUSID #FXSHIPID #FXITEM #FXORDQTY)
+    * * * Call Process(*DIRECT) Function(LW3APRC)
+    * * *
+    * * * #oStockAvl := #FXQTY
+    * * * #oItemDesc := #FXDESC
+    * * * #oPrice := #FXPRICE
+    * * * Endroutine
+    * * *
+    * * * * =======================================================
+    * * * * Mthroutine ....: umBuildProductInfoDisplay
+    * * * * Description....: Build the information displayed for a product
+    * * * * =======================================================
+    * * * Mthroutine Name(umBuildProductInfoDisplay) Help('Build the information displayed for a product') Access(*PRIVATE)
+    * * * Define_Map For(*OUTPUT) Class(#LW3URL) Name(#oUrl)
+    * * * Define_Map For(*OUTPUT) Class(#LW3IMAGE) Name(#oImage)
+    * * * Define_Map For(*OUTPUT) Class(#D_LPRICE) Name(#oDispPrice)
+    * * *
+    * * * Define_Com Class(#LW3IMAGE) Name(#L_imagePath)
+    * * * #LW3QTYRQS := 0
+    * * * #oUrl := '/' + #Global_DataModel.upCurrentLanguage + '/product/'
+    * * *
+    * * * * Product Image
+    * * * #Processor_Products.umGetProductMainImage Iitemcode(#LW3ITEMCD) Oimageurl(#oImage) Ostatus(#LW3RETCOD)
+    * * *
+    * * * * Prepare currency field for display
+    * * * #Utility_General.umFormatDisplayPrice Inumericvalue(#LW3LPRICE) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#oDispPrice)
+    * * *
+    * * * Endroutine
+    * * *
+    * * * * =======================================================
+    * * * * Mthroutine ....: umGetRecommendedItems
+    * * * * Description....: Build personal recommendations by calling ms cognitive recommendations api
+    * * * * =======================================================
+    * * * Mthroutine Name(umGetRecommendedItems) Desc('Get Recommended Items') Help('Build personal recommendations by calling ms cognitive recommendations api')
+    * * *
+    * * * * * * Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("MSCOGAPIKEY") Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * * * *
+    * * * * * * #Request.Options.AddHeader Name("x-api-key") Value(#LW3SVVALP)
+    * * * * * * #Request.Content.ContentInfo.MediaType := 'application/x-www-form-urlencoded'
+    * * * * * *
+    * * * * * * Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("MSCOGSCHEME") Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * * * * #Url.SetScheme( #LW3SVVALP )
+    * * * * * * Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("MSCOGHOST") Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * * * * #Url.SetHost( #LW3SVVALP )
+    * * * * * * Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("MSCOGPATH") Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * * * * #Url.SetPath( (#LW3SVVALP) )
+    * * * * * *
+    * * * * * * #Url.AddQueryString( "recommendationCount" "3" )
+    * * * * * * If Cond(#CALLWAM = "WPRDPGE")
+    * * * * * * #Url.AddQueryString( "itemId" #LW3ITEMCD )
+    * * * * * * #Request.DoGet Url(#Url)
+    * * * * * * Else
+    * * * * * * #Url.AddQueryString( "userID" #LW3ASSC01 )
+    * * * * * * #Request.DoPost Url(#Url)
+    * * * * * * Endif
+    * * *
+    * * * * * * If Cond(#Request.Response.IsSuccessfulRequest *And #Request.Response.IsSuccessHttpStatusCode)
+    * * * * * * #Reader.SetSourceHttpResponse Httpresponse(#Request.Response)
+    * * * * * * #Reader.SetSourceHttpResponse Httpresponse(#Request.Response)
+    * * * * * * #Reader.BeginArrayWithPath( "/" )
+    * * * * * * Clr_List Named(#LS_RECOITEMS)
+    * * * * * * #STD_NUM := 1
+    * * * * * *
+    * * * * * * * #LW3ITEMCD #LW3IDESC #LW3IMAGE #D_LPRICE #LW3URL
+    * * *
+    * * * #uJsonWriter.BeginArray Membername('recommended')
+    * * *
+    * * * * !NC! - Recommended items are hardcoded
+    * * * #Utility_General.umFormatDisplayPrice Inumericvalue(1279.95) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#D_LPRICE)
+    * * * #uJsonWriter.BeginObject
+    * * * #uJsonWriter.WriteString Membername('LW3ITEMCD') Value('HXP3S')
+    * * * #uJsonWriter.WriteString Membername('LW3IDESC') Value('Hippo XP3 Complete Set')
+    * * * #uJsonWriter.WriteString Membername('LW3IMAGE') Value('https://res.cloudinary.com/dahqgdx87/image/upload//v1745547539/BK9/Product%20Images/hpmqpf5pupipbmpj16zw.jpg')
+    * * * #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
+    * * * #uJsonWriter.EndObject
+    * * *
+    * * * #Utility_General.umFormatDisplayPrice Inumericvalue(57.25) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#D_LPRICE)
+    * * *
+    * * * #uJsonWriter.BeginObject
+    * * * #uJsonWriter.WriteString Membername('LW3ITEMCD') Value('2005')
+    * * * #uJsonWriter.WriteString Membername('LW3IDESC') Value('Five Iron - Infiniti 500 Iron')
+    * * * #uJsonWriter.WriteString Membername('LW3IMAGE') Value('https://res.cloudinary.com/dahqgdx87/image/upload//v1745547220/BK9/Product%20Images/tsys02yxojdyx29dbthb.jpg')
+    * * * #uJsonWriter.WriteString Membername('LW3URL') Value('/ENG/PRODUCT/')
+    * * * #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
+    * * * #uJsonWriter.EndObject
+    * * *
+    * * * #Utility_General.umFormatDisplayPrice Inumericvalue(99.00) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#D_LPRICE)
+    * * *
+    * * * #uJsonWriter.BeginObject
+    * * * #uJsonWriter.WriteString Membername('LW3ITEMCD') Value('0036')
+    * * * #uJsonWriter.WriteString Membername('LW3IDESC') Value('Infiniti J5 Putter 36in')
+    * * * #uJsonWriter.WriteString Membername('LW3IMAGE') Value('https://res.cloudinary.com/dahqgdx87/image/upload//v1745545526/BK9/Product%20Images/ptmyxa5rppszy1upidd9.jpg')
+    * * * #uJsonWriter.WriteString Membername('LW3URL') Value('/ENG/PRODUCT/')
+    * * * #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
+    * * * #uJsonWriter.EndObject
+    * * *
+    * * * #Utility_General.umFormatDisplayPrice Inumericvalue(57.25) Idecimalsymbol(#LW3DPSYM) Ithousandsymbol(#LW3TSSYM) Icurrencysymbol(#LW3CURSM) Oreturnfield(#D_LPRICE)
+    * * *
+    * * * #uJsonWriter.BeginObject
+    * * * #uJsonWriter.WriteString Membername('LW3ITEMCD') Value('2007')
+    * * * #uJsonWriter.WriteString Membername('LW3IDESC') Value('Seven Iron - Infiniti 500 Iron')
+    * * * #uJsonWriter.WriteString Membername('LW3IMAGE') Value('https://res.cloudinary.com/dahqgdx87/image/upload//v1745547227/BK9/Product%20Images/nns6bx3h6y0vxmmsd03u.jpg')
+    * * * #uJsonWriter.WriteString Membername('LW3URL') Value('/ENG/PRODUCT/')
+    * * * #uJsonWriter.WriteString Membername('D_LPRICE') Value(#D_LPRICE)
+    * * * #uJsonWriter.EndObject
+    * * *
+    * * * #uJsonWriter.EndArray
+    * * *
+    * * * * * * * Begin_Loop Using(#STD_NUM)
+    * * * * * * * #Reader.ReadElementAtIndex Index(#STD_NUM) Found(#w_found)
+    * * * * * * * If Cond(#W_FOUND)
+    * * * * * * * #LW3ITEMCD := #Reader.ReadStringWithPath( (#STD_NUM.AsString + "/recommendedItemId") ).AsNativeString
+    * * * * * * * #FXITEM := #LW3ITEMCD.UpperCase
+    * * * * * * * #FXORDQTY := 1
+    * * * * * * * Exchange Fields(#FXCUSID #FXSHIPID #FXITEM #FXORDQTY)
+    * * * * * * * Call Process(*DIRECT) Function(LW3APRC)
+    * * * * * * * #LW3IDESC := #FXDESC
+    * * * * * * * #LW3LPRICE := #FXPRICE
+    * * * * * * * #uEditmask.uEditField Unumberfield(#lw3lprice) Udecpoint(#LW3DPSYM) Uthousep(#LW3TSSYM) Ureturnfield(#D_LPRICE)
+    * * * * * * * #STD_TEXT := *BLANK
+    * * * * * * * Substring Field(#LW3ITEMCD) Into_Field(#STD_TEXT)
+    * * * * * * * #LW3IMAGE := '/img/' + #LW3SNAM.LowerCase + "item/thumb/" + #STD_TEXT + "_th.jpg"
+    * * * * * * * #COM_OWNER.umRewrite2 Iurlkey('PRODUCT') Ourl(#LW3URL)
+    * * * * * * *
+    * * * * * * * Add_Entry To_List(#LS_RECOITEMS)
+    * * * * * * * Else
+    * * * * * * * Leave
+    * * * * * * * Endif
+    * * * * * * * End_Loop
+    * * * * * * Endif
+    * * *
+    * * * Endroutine
     
     * =======================================================
     * Mthroutine ....: umSetHttpResponseMessages

@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3LNGSEQ
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Sequence number"
+      Label:              "Sequence number"
+      Heading1:           "Sequence"
+      Heading2:           "number"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(193)
+    
+    End_Com
+    
+    End_Com

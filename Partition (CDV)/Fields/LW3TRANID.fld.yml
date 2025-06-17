@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3TRANID
+  Type:               Alpha
+  Length:             4
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Transaction ID"
+      Label:              "Trans"
+      Heading1:           "ID"
+      Heading2:           " "
+      Heading3:           " "

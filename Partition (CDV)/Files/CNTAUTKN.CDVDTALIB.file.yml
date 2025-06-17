@@ -1,0 +1,83 @@
+﻿File:
+  Name:                           CNTAUTKN
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             CNTAUTKN
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(*NOMAX) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Storefront Authorization Tokens"
+
+  Real Fields:
+  - LW3RFSTKN:
+      Type:               String
+      Length:             512
+      Decimals:           0
+
+  - LW3GUID:
+      Type:               Alphanumeric
+      Length:             64
+      Decimals:           0
+
+  - LW3CSRFTK:
+      Type:               String
+      Length:             512
+      Decimals:           0
+
+  - LW3USEDTK:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3CDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - LW3UDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  Logical Views:
+  - CNTAUTKNL1:
+      Identifier:         CNTAUTKNL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CNTAUTKNL1
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Refresh Token"
+
+      Keys:
+      - LW3RFSTKN:
+          Key Order:          Descending
+          Numeric Ordering:   Unsigned
+
+      - LW3CDSTMP:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

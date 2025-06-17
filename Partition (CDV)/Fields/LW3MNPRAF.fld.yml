@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3MNPRAF
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Menu Permission Active Flag (Y/N)"
+      Label:              "Menu Permission"
+      Heading1:           "Menu"
+      Heading2:           "Permission"
+      Heading3:           "Active (Y/N)"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Usepicklist(False) Componentversion(1) Height(21) Marginleft(184) Width(233)
+    
+    End_Com
+    
+    End_Com

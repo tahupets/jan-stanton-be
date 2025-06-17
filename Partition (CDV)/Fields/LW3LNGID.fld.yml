@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               LW3LNGID
+  Type:               Alpha
+  Length:             4
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Language ID"
+      Label:              "Language ID"
+      Heading1:           "Language ID"
+      Heading2:           " "
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(193)
+    
+    End_Com
+    
+    End_Com

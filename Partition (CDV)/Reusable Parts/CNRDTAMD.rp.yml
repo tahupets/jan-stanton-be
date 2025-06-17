@@ -1,0 +1,372 @@
+﻿Reusable Part:
+  Name:               CNRDTAMD
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE Storefront Data Model"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Reusable Part
+    * Platform        : REST APIs
+    * Name            : CNRDTAMD
+    * Identifier      : CNRDTAMD
+    * Ancestor        : PRIM_OBJT
+    * Written By      : Jan Metica
+    * Written On      : 28th August 2024
+    * Description     : CE Storefront Data Model
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    
+    * Session Information
+    Define_Com Class(#LW3GUID) Name(#L_GUID)
+    
+    * Storefront Information
+    Define_Com Class(#LW3SFID) Name(#L_StorefrontId)
+    Define_Com Class(#LW3NAME) Name(#L_StorefrontName)
+    Define_Com Class(#LW3SNAM) Name(#L_StorefrontShortName)
+    Define_Com Class(#LW3B2BIND) Name(#L_StorefrontIndicator)
+    Define_Com Class(#LW3CURCD) Name(#L_StorefrontCurrencyCode)
+    Define_Com Class(#LW3CURSM) Name(#L_StorefrontCurrencySymbol)
+    Define_Com Class(#LW3DPSYM) Name(#L_StorefrontDecimalPointSymbol)
+    Define_Com Class(#LW3TSSYM) Name(#L_StorefrontThousandSeparatorSymbol)
+    Define_Com Class(#FXANALYZE) Name(#L_StorefrontAnalyticsFlag)
+    Define_Com Class(#FXANACCT) Name(#L_StorefrontAnalyticsAccountId)
+    
+    * User Information
+    Define_Com Class(#LW3WEBUSR) Name(#L_UserId)
+    Define_Com Class(#LW3CEMAIL) Name(#L_UserEmail)
+    Define_Com Class(#LW3CHFNME) Name(#L_UserFirstName)
+    Define_Com Class(#LW3CHLNME) Name(#L_UserLastName)
+    Define_Com Class(#LW3CUSIND) Name(#L_UserIndicator)
+    Define_Com Class(#LW3WEBC01) Name(#L_CustomerId)
+    
+    * Cart Information
+    Define_Com Class(#LW3CARTID) Name(#L_CartId)
+    Define_Com Class(#LW3ITMCNT) Name(#L_CartItemCount)
+    Define_Com Class(#LW3UITMCT) Name(#L_CartUniqueItemCount)
+    Define_Com Class(#LW3ORDTOT) Name(#L_CartOrderTotal)
+    Define_Com Class(#D_ORDTOT) Name(#L_CartDisplayOrderTotal)
+    
+    * System Information
+    Define_Com Class(#PRIM_ALPH) Name(#L_DataLibrary)
+    Define_Com Class(#LW3LNGCOD) Name(#L_CurrentLanguage)
+    
+    * =======================================================
+    * Property Definitions
+    * =======================================================
+    
+    * Session Information
+    Define_Pty Name(upGUID) Get(*AUTO #L_GUID) Set(*AUTO #L_GUID)
+    
+    * Storefront Information
+    Define_Pty Name(upStorefrontId) Get(*AUTO #L_StorefrontId) Set(*AUTO #L_StorefrontId)
+    Define_Pty Name(upStorefrontName) Get(*AUTO #L_StorefrontName) Set(*AUTO #L_StorefrontName)
+    Define_Pty Name(upStorefrontShortName) Get(*AUTO #L_StorefrontShortName) Set(*AUTO #L_StorefrontShortName)
+    Define_Pty Name(upStorefrontIndicator) Get(*AUTO #L_StorefrontIndicator) Set(*AUTO #L_StorefrontIndicator)
+    Define_Pty Name(upStorefrontCurrencyCode) Get(*AUTO #L_StorefrontCurrencyCode) Set(*AUTO #L_StorefrontCurrencyCode)
+    Define_Pty Name(upStorefrontCurrencySymbol) Get(*AUTO #L_StorefrontCurrencySymbol) Set(*AUTO #L_StorefrontCurrencySymbol)
+    Define_Pty Name(upStorefrontDecimalPointSymbol) Get(*AUTO #L_StorefrontDecimalPointSymbol) Set(*AUTO #L_StorefrontDecimalPointSymbol)
+    Define_Pty Name(upStorefrontThousandSeparatorSymbol) Get(*AUTO #L_StorefrontThousandSeparatorSymbol) Set(*AUTO #L_StorefrontThousandSeparatorSymbol)
+    Define_Pty Name(upStorefrontAnalyticsFlag) Get(*AUTO #L_StorefrontAnalyticsFlag) Set(*AUTO #L_StorefrontAnalyticsFlag)
+    Define_Pty Name(upStorefrontAnalyticsAccountId) Get(*AUTO #L_StorefrontAnalyticsAccountId) Set(*AUTO #L_StorefrontAnalyticsAccountId)
+    
+    * User Information
+    Define_Pty Name(upUserId) Get(*AUTO #L_UserId) Set(*AUTO #L_UserId)
+    Define_Pty Name(upUserEmail) Get(*AUTO #L_UserEmail) Set(*AUTO #L_UserEmail)
+    Define_Pty Name(upUserFirstName) Get(*AUTO #L_UserFirstName) Set(*AUTO #L_UserFirstName)
+    Define_Pty Name(upUserLastName) Get(*AUTO #L_UserLastName) Set(*AUTO #L_UserLastName)
+    Define_Pty Name(upUserIndicator) Get(*AUTO #L_UserIndicator) Set(*AUTO #L_UserIndicator)
+    Define_Pty Name(upCustomerId) Get(*AUTO #L_CustomerId) Set(*AUTO #L_CustomerId)
+    
+    * Cart Information
+    Define_Pty Name(upCartId) Get(*AUTO #L_CartId) Set(*AUTO #L_CartId)
+    Define_Pty Name(upCartItemCount) Get(*AUTO #L_CartItemCount) Set(*AUTO #L_CartItemCount)
+    Define_Pty Name(upCartUniqueItemCount) Get(*AUTO #L_CartUniqueItemCount) Set(*AUTO #L_CartUniqueItemCount)
+    Define_Pty Name(upCartOrderTotal) Get(*AUTO #L_CartOrderTotal) Set(*AUTO #L_CartOrderTotal)
+    Define_Pty Name(upCartDisplayOrderTotal) Get(*AUTO #L_CartDisplayOrderTotal) Set(*AUTO #L_CartDisplayOrderTotal)
+    
+    * System information
+    Define_Pty Name(upCurrentLanguage) Get(*AUTO #L_CurrentLanguage) Set(*AUTO #L_CurrentLanguage)
+    Define_Pty Name(upDataLibrary) Get(getDataLibrary) Set(*AUTO #L_DataLibrary)
+    Define_Pty Name(upDataLibraryForQuery) Get(getDataLibraryForQuery)
+    
+    * =======================================================
+    * Property Routine Definitions
+    * =======================================================
+    
+    Ptyroutine Name(getDataLibraryForQuery)
+    Define_Map For(*OUTPUT) Class(#PRIM_ALPH) Name(#oDataLibraryForQuery)
+    
+    If Cond(#L_DataLibrary <> *BLANKS)
+    #oDataLibraryForQuery := #L_DataLibrary + '.'
+    Endif
+    Endroutine
+    
+    Ptyroutine Name(getDataLibrary)
+    Define_Map For(*OUTPUT) Class(#PRIM_ALPH) Name(#oDataLibrary)
+    
+    If Cond(#L_DataLibrary = *BLANKS)
+    If Cond(*OSAPI = 'IBMI')
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('DATA_LIBRARY1') Ilanguage('') Oalphavalue(#oDataLibrary)
+    Else
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('DATA_LIBRARY_LCL1') Ilanguage('') Oalphavalue(#oDataLibrary)
+    Endif
+    
+    Else
+    #oDataLibrary := #L_DataLibrary
+    Endif
+    Endroutine
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umGetStorefrontDetails
+    * Description....: Get Storefront Details
+    * =======================================================
+    Mthroutine Name(umGetStorefrontDetails) Desc('Get Storefront Details')
+    
+    Define_Map For(*INPUT) Class(#HOSTURL) Name(#iDomain) Mandatory('') Desc('Site Domain') Help('Site Domain')
+    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpRequestHeaders) Name(#iHttpHeaders) Mandatory(*NULL) Desc('Http Headers') Help('Http Headers') Pass(*BY_REFERENCE)
+    
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode) Desc('Return Code') Help('Return Code')
+    
+    #L_StorefrontId #L_StorefrontShortName #L_StorefrontIndicator #L_StorefrontCurrencyCode #L_StorefrontCurrencySymbol #L_StorefrontDecimalPointSymbol #L_StorefrontThousandSeparatorSymbol := *NULL
+    
+    #L_CurrentLanguage := #COM_OWNER.umGetLanguageFromLocale( #iHttpHeaders )
+    
+    #LW3DOMAIN := #iDomain
+    
+    If Cond(#LW3DOMAIN = *BLANKS)
+    If_Ref Com(#iHttpHeaders<'Host'>) Is_Not(*NULL)
+    #LW3DOMAIN := #iHttpHeaders<'Host'>.Value
+    Endif
+    Endif
+    
+    * Fetch if #LW3DOMAIN is existing in the file
+    Fetch Fields(#LW3DOMAIN) From_File(CNTSDML) With_Key(#LW3DOMAIN.UpperCase) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Fetch Fields(#LW3SFID #LW3NAME #LW3SNAM #LW3B2BIND #LW3CURCD #LW3CURSM #LW3DPSYM #LW3TSSYM #FXANALYZE #FXANACCT) From_File(LW3SFRTL1) With_Key(#LW3DOMAIN.UpperCase) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If_Status Is(*OKAY)
+    
+    * If there are no entries in the ML file, just use the value from the storefront master file
+    Fetch Fields(#LW3NAME) From_File(LW3SFML) With_Key(#LW3SFID #L_CurrentLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    #L_StorefrontId := #LW3SFID
+    #L_StorefrontName := #LW3NAME
+    #L_StorefrontShortName := #LW3SNAM
+    #L_StorefrontIndicator := #LW3B2BIND
+    #L_StorefrontCurrencyCode := #LW3CURCD
+    #L_StorefrontCurrencySymbol := #LW3CURSM
+    #L_StorefrontDecimalPointSymbol := #LW3DPSYM
+    #L_StorefrontThousandSeparatorSymbol := #LW3TSSYM
+    #L_StorefrontAnalyticsFlag := #FXANALYZE
+    #L_StorefrontAnalyticsAccountId := #FXANACCT
+    
+    #oReturnCode := 'OK'
+    
+    Else
+    #oReturnCode := 'ER'
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetSessionInformation
+    * Description....: Get Session Information
+    * =======================================================
+    Mthroutine Name(umGetSessionInformation) Desc('Get Session Information')
+    
+    Define_Map For(*INPUT) Class(#LW3GUID) Name(#iGUID)
+    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpRequestHeaders) Name(#iHttpHeaders) Mandatory(*NULL) Desc('Http Headers') Help('Http Headers') Pass(*BY_REFERENCE)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    * Json Objects
+    Define_Com Class(#XPRIM_Json) Name(#Json)
+    Define_Com Class(#PRIM_JSON.Document) Name(#JsonDocument)
+    Define_Com Class(#PRIM_JSON.Node) Name(#JsonValueNode) Reference(*DYNAMIC)
+    Define_Com Class(#XPRIM_ErrorInfo) Name(#ErrorInfo)
+    
+    #L_GUID := #iGUID
+    
+    #L_CurrentLanguage := #COM_OWNER.umGetLanguageFromLocale( #iHttpHeaders )
+    
+    #LW3GUID #LW3SESTAT #LW3WEBUSR #LW3ASSC01 #LW3CARTID #LW3JSDTA := *NULL
+    
+    * Fetch Fields(#LW3GUID #LW3SESTAT #LW3WEBUSR #LW3ASSC01 #LW3JSDTA) From_File(CNTSESSNL2) With_Key(#iGUID #iWebUser) Io_Error(*NEXT) Val_Error(*NEXT)
+    Fetch Fields(#LW3GUID #LW3SESTAT #LW3WEBUSR #LW3ASSC01 #LW3CARTID #LW3JSDTA) From_File(CNTSESSNL2) With_Key(#iGUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    #oReturnCode := 'OK'
+    
+    #Json.ParseString String(#LW3JSDTA) Errorinfo(#ErrorInfo)
+    
+    If Cond(#ErrorInfo.OK)
+    
+    #JsonDocument.LoadFromString Inputstring(#Json.Text)
+    
+    * Retrieve Storefront Information
+    Set_Ref Com(#JsonValueNode) To(#JsonDocument.RootNode.Item<'storefront'>)
+    #L_StorefrontId := #JsonValueNode.Item<'id'>.AsDecimal
+    #L_StorefrontShortName := #JsonValueNode.Item<'shortName'>.asString
+    #L_StorefrontIndicator := #JsonValueNode.Item<'indicator'>.asString
+    #L_StorefrontCurrencyCode := #JsonValueNode.Item<'currencyCode'>.asString
+    #L_StorefrontCurrencySymbol := #JsonValueNode.Item<'currencySymbol'>.asString
+    #L_StorefrontDecimalPointSymbol := #JsonValueNode.Item<'decimalPointSymbol'>.asString
+    #L_StorefrontThousandSeparatorSymbol := #JsonValueNode.Item<'thousandSeparatorSymbol'>.asString
+    
+    * Retrieve User Information
+    Set_Ref Com(#JsonValueNode) To(#JsonDocument.RootNode.Item<'user'>)
+    #L_UserId := #JsonValueNode.Item<'userid'>.asString
+    #L_UserEmail := #JsonValueNode.Item<'email'>.asString
+    #L_UserFirstName := #JsonValueNode.Item<'firstName'>.asString
+    #L_UserLastName := #JsonValueNode.Item<'lastName'>.asString
+    #L_UserIndicator := #JsonValueNode.Item<'customerIndicator'>.asString
+    #L_CustomerId := #JsonValueNode.Item<'selectedCustomer'>.asString
+    
+    * Retrieve Cart Information
+    Set_Ref Com(#JsonValueNode) To(#JsonDocument.RootNode.Item<'cart'>)
+    #L_CartId := #JsonValueNode.Item<'cartid'>.AsDecimal
+    #L_CartItemCount := #JsonValueNode.Item<'count'>.asDecimal
+    #L_CartUniqueItemCount := #JsonValueNode.Item<'uniquecount'>.asDecimal
+    #L_CartOrderTotal := #JsonValueNode.Item<'ordertotal'>.asDecimal
+    #L_CartDisplayOrderTotal := #JsonValueNode.Item<'dispordertotal'>.asString
+    
+    * Retrieve System Information
+    Set_Ref Com(#JsonValueNode) To(#JsonDocument.RootNode.Item<'system'>)
+    * #L_CurrentLanguage := #JsonValueNode.Item<'language'>.asString
+    #L_DataLibrary := #JsonValueNode.Item<'datalibrary'>.asString
+    
+    Endif
+    
+    Else
+    #oReturnCode := 'ER'
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildSessionPayload
+    * Description....: Build Session Payload
+    * =======================================================
+    Mthroutine Name(umBuildSessionPayload) Desc('Build Session Payload')
+    
+    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpRequestHeaders) Name(#iHttpHeaders) Mandatory(*NULL) Desc('Http Headers') Help('Http Headers') Pass(*BY_REFERENCE)
+    Define_Map For(*RESULT) Class(#LW3JSDTA) Name(#rJSONData)
+    
+    Define_Com Class(#XPRIM_Json) Name(#Json)
+    Define_Com Class(#XPRIM_JsonObject) Name(#Object_JSON_Root) Reference(*DYNAMIC)
+    Define_Com Class(#XPRIM_JsonObject) Name(#Object_JSON_Storefront) Reference(*DYNAMIC)
+    Define_Com Class(#XPRIM_JsonObject) Name(#Object_JSON_User) Reference(*DYNAMIC)
+    Define_Com Class(#XPRIM_JsonObject) Name(#Object_JSON_Cart) Reference(*DYNAMIC)
+    Define_Com Class(#XPRIM_JsonObject) Name(#Object_JSON_System) Reference(*DYNAMIC)
+    
+    * Create root for JSON document
+    #Object_JSON_Root <= #Json.CreateRootObject
+    
+    * Create Storefront Header Object
+    #Object_JSON_Storefront <= #Object_JSON_Root.InsertObject( 'storefront' )
+    
+    * Add values under Storefront Object
+    #Object_JSON_Storefront.InsertNumber Key('id') Number(#L_StorefrontId)
+    #Object_JSON_Storefront.InsertString Key('shortName') String(#L_StorefrontShortName)
+    #Object_JSON_Storefront.InsertString Key('indicator') String(#L_StorefrontIndicator)
+    #Object_JSON_Storefront.InsertString Key('currencyCode') String(#L_StorefrontCurrencyCode)
+    #Object_JSON_Storefront.InsertString Key('currencySymbol') String(#L_StorefrontCurrencySymbol)
+    #Object_JSON_Storefront.InsertString Key('decimalPointSymbol') String(#L_StorefrontDecimalPointSymbol)
+    #Object_JSON_Storefront.InsertString Key('thousandSeparatorSymbol') String(#L_StorefrontThousandSeparatorSymbol)
+    
+    * Create User Header Object
+    #Object_JSON_User <= #Object_JSON_Root.InsertObject( 'user' )
+    
+    * Add values under User Object
+    #Object_JSON_User.InsertString Key('userid') String(#L_UserId)
+    #Object_JSON_User.InsertString Key('email') String(#L_UserEmail)
+    #Object_JSON_User.InsertString Key('firstName') String(#L_UserFirstName)
+    #Object_JSON_User.InsertString Key('lastName') String(#L_UserLastName)
+    #Object_JSON_User.InsertString Key('customerIndicator') String(#L_UserIndicator)
+    #Object_JSON_User.InsertString Key('selectedCustomer') String(#L_CustomerId)
+    
+    * Create Cart Header Object
+    #Object_JSON_Cart <= #Object_JSON_Root.InsertObject( 'cart' )
+    
+    #Object_JSON_Cart.InsertNumber Key('cartid') Number(#L_CartId)
+    #Object_JSON_Cart.InsertNumber Key('count') Number(#L_CartItemCount)
+    #Object_JSON_Cart.InsertNumber Key('uniquecount') Number(#L_CartUniqueItemCount)
+    #Object_JSON_Cart.InsertNumber Key('ordertotal') Number(#L_CartOrderTotal)
+    #Object_JSON_Cart.InsertString Key('dispordertotal') String(#L_CartDisplayOrderTotal)
+    
+    * Create System Header Object
+    #Object_JSON_System <= #Object_JSON_Root.InsertObject( 'system' )
+    
+    #L_CurrentLanguage := #COM_OWNER.umGetLanguageFromLocale( #iHttpHeaders )
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('DATA_LIBRARY1') Ilanguage(#L_CurrentLanguage) Oalphavalue(#L_DataLibrary)
+    
+    #Object_JSON_System.InsertString Key('language') String(#L_CurrentLanguage)
+    #Object_JSON_System.InsertString Key('datalibrary') String(#L_DataLibrary)
+    
+    #rJSONData := #Object_JSON_Root.SerializeAsString.AsNativeString.Trim
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetLanguageFromLocale
+    * Description....: Get Language Code from Locale
+    * =======================================================
+    Mthroutine Name(umGetLanguageFromLocale) Desc('Get Language Code from Locale')
+    
+    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpRequestHeaders) Name(#iHttpHeaders) Mandatory(*NULL) Desc('Http Headers') Help('Http Headers') Pass(*BY_REFERENCE)
+    Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rLanguageCode)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_Locale)
+    
+    If_Ref Com(#iHttpHeaders) Is_Not(*NULL)
+    If_Ref Com(#iHttpHeaders.Item<'Accept-Language'>) Is_Not(*NULL)
+    #L_Locale := #iHttpHeaders<'Accept-Language'>.Value
+    
+    Fetch Fields(#LW3LNGID) From_File(LW3LNGL2) With_Key(#L_Locale) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #rLanguageCode := #LW3LNGID
+    Endif
+    Endif
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umClearUserInformation
+    * Description....: Clear User Information
+    * =======================================================
+    Mthroutine Name(umClearUserInformation) Desc('Clear User Information')
+    #L_UserId #L_UserEmail #L_UserIndicator #L_UserFirstName #L_UserLastName #L_CustomerId := *NULL
+    Endroutine
+    
+    End_Com
+    

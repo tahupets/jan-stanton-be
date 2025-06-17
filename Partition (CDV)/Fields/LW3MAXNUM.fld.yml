@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3MAXNUM
+  Type:               Signed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Maximum Trans Number"
+      Label:              "Max"
+      Heading1:           "Number"
+      Heading2:           " "
+      Heading3:           " "

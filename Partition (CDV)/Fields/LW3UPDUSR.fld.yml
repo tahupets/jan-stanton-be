@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3UPDUSR
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Update Web User Name Stamp"
+      Label:              "Update Web user"
+      Heading1:           "Update Web"
+      Heading2:           "User"
+      Heading3:           "Stamp"

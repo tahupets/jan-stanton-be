@@ -1,0 +1,33 @@
+﻿Field:
+  Name:               LW3UPDTIM
+  Type:               Signed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Output Attributes:
+  - TIMU
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Update Time Stamp"
+      Label:              "Update Time Sta"
+      Heading1:           "Update"
+      Heading2:           "Time"
+      Heading3:           "Stamp"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Usepicklist(False) Componentversion(1) Height(21) Width(304)
+    
+    End_Com
+    
+    End_Com

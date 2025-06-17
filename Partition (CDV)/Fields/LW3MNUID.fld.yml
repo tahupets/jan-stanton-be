@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               LW3MNUID
+  Type:               Packed
+  Length:             10
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Menu Id"
+      Label:              "Menu Id"
+      Heading1:           "Menu"
+      Heading2:           "Id"
+      Heading3:           " "

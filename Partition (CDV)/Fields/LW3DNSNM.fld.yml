@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3DNSNM
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Do not show in Navigation Menu"
+      Label:              "Do not show in"
+      Heading1:           "Do"
+      Heading2:           "not"
+      Heading3:           "show"

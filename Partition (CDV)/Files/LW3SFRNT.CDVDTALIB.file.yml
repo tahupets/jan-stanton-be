@@ -1,0 +1,212 @@
+﻿File:
+  Name:                           LW3SFRNT
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3SFRNT
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 100000 10000 10) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Store Front Master"
+
+  Real Fields:
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3SFSEQ:
+      Type:               Decimal
+      Length:             3
+      Decimals:           0
+
+  - LW3NAME:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - LW3SNAM:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3SFCSS:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - LW3SFIMG:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3IDTFLG:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3DOMAIN:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - LW3JDEC01:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3EMLEML:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3CRQEML:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3CATITM:
+      Type:               Alphanumeric
+      Length:             15
+      Decimals:           0
+
+  - LW3B2BIND:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3IGP2:
+      Type:               String
+      Length:             6
+      Decimals:           0
+
+  - LW3BRNDF:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - FXANALYZE:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - FXANACCT:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3CURCD:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3CURSM:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3DPSYM:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3TSSYM:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3UCSVF:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3SMEDF:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3SFTHEM:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  Primary Keys:
+  - LW3SFID
+  - LW3SFSEQ
+
+  Logical Views:
+  - LW3SFRTL1:
+      Identifier:         LW3SFRTL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3SFRTL1
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Domain"
+
+      Keys:
+      - LW3DOMAIN:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  File Level Triggers:
+  - LW3SFID:
+    - Trigger for LW3SFRNT:
+        Function:           LW3MT13
+        Trigger Points:
+        - Before Insert
+        - Before Update
+
+  Access Routes:
+  - LW3SFRNT01:
+      Description:        LW3USRL5
+      File:               LW3USRL5
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3SFID
+
+  - LW3SFRNT02:
+      Description:        LW3ITMINF
+      File:               LW3ITMINF
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3SFID

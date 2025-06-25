@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               LW3FLTNCD
+  Type:               Packed
+  Length:             10
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Filter Numeric Code"
+      Label:              "Filter Numeric"
+      Heading1:           "Filter"
+      Heading2:           "Numeric"
+      Heading3:           "Code"

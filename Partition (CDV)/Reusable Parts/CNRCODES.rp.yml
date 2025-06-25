@@ -1,0 +1,63 @@
+﻿Reusable Part:
+  Name:               CNRCODES
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE Code Table Utility"
+
+  Source: |
+    * ========================================================
+    * Copyright       : (C) CE Next 2025
+    * Type            : Reusable Part
+    * Platform        : Web Application Module (Visual LANSA)
+    * Name            : CNRCODES
+    * Identifier      : CNRCODES
+    * Ancestor        : PRIM_OBJT
+    * Written By      : LANSAJAN
+    * Written On      : 18th June 2025
+    * Description     : CE Code Table Utility
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc App Trkr #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umGetCodeDescriptionByCode
+    * Description....: Get Code Description By Code
+    * =======================================================
+    Mthroutine Name(umGetCodeDescriptionByCode) Desc('Get Code Description By Code') Help('Get Code Description By Code')
+    Define_Map For(*INPUT) Class(#LW3CTYPE) Name(#iCodeType) Desc('Code Type')
+    Define_Map For(*INPUT) Class(#LW3CODE) Name(#iCode) Desc('Code')
+    Define_Map For(*RESULT) Class(#LW3CDES) Name(#rCodeDescription) Desc('Code Description')
+    
+    #LW3CDES := *NULL
+    Fetch Fields(#LW3CDES) From_File(LW3CODES) With_Key(#iCodeType #iCode) Io_Error(*NEXT) Val_Error(*NEXT)
+    #rCodeDescription := #LW3CDES
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetCodeByDescription
+    * Description....: Get Code By Description
+    * =======================================================
+    Mthroutine Name(umGetCodeByDescription) Desc('Get Code By Description') Help('Get Code By Description')
+    Define_Map For(*INPUT) Class(#LW3CTYPE) Name(#iCodeType) Desc('Code Type')
+    Define_Map For(*INPUT) Class(#LW3CDES) Name(#iCodeDescription) Desc('Code Description')
+    Define_Map For(*RESULT) Class(#LW3CODE) Name(#rCode) Desc('Code')
+    
+    #LW3CODE := *NULL
+    Fetch Fields(#LW3CODE) From_File(LW3CODL3) With_Key(#iCodeDescription #iCodeType) Io_Error(*NEXT) Val_Error(*NEXT)
+    #rCode := #LW3CODE
+    Endroutine
+    
+    End_Com

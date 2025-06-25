@@ -1,0 +1,34 @@
+﻿Field:
+  Name:               LW3IATVL
+  Type:               String
+  Length:             2048
+  Decimals:           0
+  Default Value:      "*NULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Item Attribute Value"
+      Label:              "Item Attribute"
+      Heading1:           "Item"
+      Heading2:           "Attribute"
+      Heading3:           "Value"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(555)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'std_varchar.std_varchar') Name(#Weblet) Defaultweblet(True)
+    
+    End_Com
+    
+    End_Com

@@ -1,0 +1,31 @@
+﻿Field:
+  Name:               LW3CSEQ
+  Type:               Packed
+  Length:             4
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          1
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Code Sequence"
+      Label:              "Code Sequence"
+      Heading1:           "Code"
+      Heading2:           "Sequence"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Usepicklist(False) Componentversion(1) Height(21) Width(225)
+    
+    End_Com
+    
+    End_Com

@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3FLTECN
+  Type:               Packed
+  Length:             7
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Filter Entry Count"
+      Label:              "Filter Entry Co"
+      Heading1:           "Filter"
+      Heading2:           "Entry"
+      Heading3:           "Count"

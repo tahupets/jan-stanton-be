@@ -1,0 +1,190 @@
+﻿File:
+  Name:                           LW3CODES
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3CODES
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(10000     2000      3         ) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Code descriptions"
+
+  Real Fields:
+  - LW3CTYPE:
+      Type:               Alphanumeric
+      Length:             6
+      Decimals:           0
+
+  - LW3CODE:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3LNGCOD:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3CSEQ:
+      Type:               Decimal
+      Length:             4
+      Decimals:           0
+
+  - LW3CDES:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  Primary Keys:
+  - LW3CTYPE
+  - LW3CODE
+  - LW3LNGCOD
+
+  Logical Views:
+  - LW3CODL1:
+      Identifier:         LW3CODL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3CODL1
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Codes by Code/Type"
+
+      Keys:
+      - LW3CODE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CTYPE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3CODL2:
+      Identifier:         LW3CODL2
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3CODL2
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Type selected Code definition"
+
+      Keys:
+      - LW3CTYPE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3LNGCOD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      Select/Omit Criteria:
+      - Action:             Select
+        Type:               Values
+        Field Name:         LW3CODE
+        Values:
+        - "'#'"
+
+  - LW3CODL3:
+      Identifier:         LW3CODL3
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3CODL3
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Desc/Type/Code"
+
+      Keys:
+      - LW3CDES:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CTYPE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CODE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3CODL4:
+      Identifier:         LW3CODL4
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3CODL4
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By type/lng/code"
+
+      Keys:
+      - LW3CTYPE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3LNGCOD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CODE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3CODL5:
+      Identifier:         LW3CODL5
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3CODL5
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Type/Sequence"
+
+      Keys:
+      - LW3CTYPE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CSEQ:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  File Level Triggers:
+  - LW3CTYPE:
+    - Trigger for LW3CODES:
+        Function:           LW3MT15
+        Trigger Points:
+        - Before Insert
+        - Before Update

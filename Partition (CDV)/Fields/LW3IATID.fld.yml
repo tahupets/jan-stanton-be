@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3IATID
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Item Attribute Type ID"
+      Label:              "Item Attribute"
+      Heading1:           "Item"
+      Heading2:           "Attribute"
+      Heading3:           "Type"

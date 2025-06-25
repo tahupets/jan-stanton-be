@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3CTYPE
+  Type:               Alpha
+  Length:             6
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Code Type"
+      Label:              "Code Type"
+      Heading1:           "Code"
+      Heading2:           "Type"
+      Heading3:           " "

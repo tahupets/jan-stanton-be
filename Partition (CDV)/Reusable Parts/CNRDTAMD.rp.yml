@@ -368,5 +368,19 @@
     #L_UserId #L_UserEmail #L_UserIndicator #L_UserFirstName #L_UserLastName #L_CustomerId := *NULL
     Endroutine
     
+    * =======================================================
+    * Mthroutine ....: umGetCustomerIdForQuery
+    * Description....: Get Customer Id for Query
+    * =======================================================
+    Mthroutine Name(umGetCustomerIdForQuery) Desc('Get Customer Id for Query')
+    Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rCustomerId)
+    
+    If Cond(#L_CustomerId = *BLANKS)
+    #rCustomerId := '0'
+    Else
+    #rCustomerId := #L_CustomerId
+    Endif
+    Endroutine
+    
     End_Com
     

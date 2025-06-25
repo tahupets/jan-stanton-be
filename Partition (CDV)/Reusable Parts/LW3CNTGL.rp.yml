@@ -1,0 +1,359 @@
+﻿Reusable Part:
+  Name:               LW3CNTGL
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Constants Global"
+
+  Source: |
+    * ========================================================
+    * Copyright       : (C) Stanton App, 2016
+    * Type            : Reusable Part
+    * Platform        : Web Application Module (Visual LANSA)
+    * Name            : LW3CNTGL
+    * Identifier      : LW3CNTGL
+    * Ancestor        : PRIM_OBJT
+    * Written By      : LANSAJAN
+    * Written On      : 3rd November 2022
+    * Description     : Constants Global
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc App Trkr #)
+    * -------------------------------------------------------
+    * Urriah     : 2022/11/17 : Added Swatch and Sample Product Type, Gitlab #249
+    * -------------------------------------------------------
+    * Urriah     : 2022/12/16 : Added Swatch New properties, Gitlab #285
+    * -------------------------------------------------------
+    * Urriah     : 2023/02/27 : Added Misc Fee Charge Type properties
+    * -------------------------------------------------------
+    * Urriah     : 2023/04/12 : Added umIsHardSurface method
+    * -------------------------------------------------------
+    * Urriah     : 2023/05/04 : Added the Premade Rug and Trim Product types properties
+    * -------------------------------------------------------
+    * Urriah     : 2024/02/29 : Added the Laminate Product types properties
+    * -------------------------------------------------------
+    * Urriah     : 2024/09/18 : Added the SPC and WPC
+    * -------------------------------------------------------
+    * Urriah     : 2025/02/24 : Added Fine Hardwood
+    * =======================================================
+    
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    
+    * FXURLFLT values
+    Define_Com Class(#PRIM_ALPH) Name(#L_UrlFilter_Porcelain) Value('PORCELAIN')
+    Define_Com Class(#PRIM_ALPH) Name(#L_UrlFilter_Ceramic) Value('CERAMIC')
+    Define_Com Class(#PRIM_ALPH) Name(#L_UrlFilter_GlassMosaic) Value('GLASS_MOSAIC')
+    Define_Com Class(#PRIM_ALPH) Name(#L_UrlFilter_RecycledGlass) Value('RECYCLED_GLASS')
+    Define_Com Class(#PRIM_ALPH) Name(#L_UrlFilter_Bullnose) Value('BULLNOSE')
+    Define_Com Class(#PRIM_ALPH) Name(#L_UrlFilter_Laminate) Value('LAMINATE')
+    Define_Com Class(#PRIM_ALPH) Name(#L_UrlFilter_WPC) Value('WPC')
+    Define_Com Class(#PRIM_ALPH) Name(#L_UrlFilter_SPC) Value('SPC')
+    Define_Com Class(#PRIM_ALPH) Name(#L_UrlFilter_Hardsurface) Value('HARD_SURFACE')
+    Define_Com Class(#PRIM_ALPH) Name(#L_UrlFilter_MoldingTrim) Value('MOLDING_TRIM')
+    Define_Com Class(#PRIM_ALPH) Name(#L_UrlFilter_FineHardwood) Value('FINEHARDWOOD')
+    
+    * Order Line type
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_Tile) Value('T2')
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_Glass) Value('GL')
+    * Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_Porcelain) Value('PO')
+    * Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_Ceramic) Value('CE')
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_Bullnose) Value('BN')
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_Laminate) Value('LM')
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_BroadloomCut) Value('BC')
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_HardSurface) Value('HS')
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_LuxVinylTrim) Value('MT')
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_PromoItem) Value('PM')
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_PremadeRug) Value('PR')
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_RunnerCut) Value('RC')
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_CustomRug) Value('RG')
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_Swatch) Value('SW')
+    Define_Com Class(#PRIM_ALPH) Name(#L_OrdLin_CarpetTile) Value('TL')
+    
+    * Product Type values
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_CarpetTile) Value('T')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_CarpetPlank) Value('P')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_HardSurfaceTile) Value('H')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_HardSurfacePlank) Value('I')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_Porcelain) Value('F')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_GlassMosaic) Value('J')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_Bullnose) Value('G')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_Trim) Value('M')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_Sample) Value('S')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_Swatch) Value('W')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_PremadeRug) Value('R')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_Laminate) Value('L')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_FineHardwood) Value('K')
+    Define_Com Class(#PRIM_ALPH) Name(#L_PrdTyp_Carpet) Value('C')
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_SubTyp_WPC) Value('A')
+    Define_Com Class(#PRIM_ALPH) Name(#L_SubTyp_SPC) Value('B')
+    
+    * Hard Surface values
+    Define_Com Class(#PRIM_ALPH) Name(#L_HS_CoreMat_Ceramic) Value('CERAMIC')
+    Define_Com Class(#PRIM_ALPH) Name(#L_HS_TypFlr_RecycledGlass) Value('RECYCLED GLASS')
+    
+    * G#305 - Misc Fee Charge Type
+    Define_Com Class(#PRIM_ALPH) Name(#L_MiscFeeType_FreightHandling) Value('FT')
+    Define_Com Class(#PRIM_ALPH) Name(#L_MiscFeeType_HardSurfaceFreight) Value('HS')
+    Define_Com Class(#PRIM_ALPH) Name(#L_MiscFeeType_Serging) Value('LB')
+    Define_Com Class(#PRIM_ALPH) Name(#L_MiscFeeType_UpchargeMinQty) Value('MC')
+    Define_Com Class(#PRIM_ALPH) Name(#L_MiscFeeType_OnlineRugConfigDiscount) Value('RD')
+    Define_Com Class(#PRIM_ALPH) Name(#L_MiscFeeType_StewardshipAssessment) Value('SA')
+    Define_Com Class(#PRIM_ALPH) Name(#L_MiscFeeType_SalesTax) Value('TX')
+    
+    * PNC FDICode
+    Define_Com Class(#PRIM_ALPH) Name(#L_FDICode_InvoicePayment) Value('INVPAY')
+    Define_Com Class(#PRIM_ALPH) Name(#L_FDICode_B2BCheckout) Value('B2BCHK')
+    Define_Com Class(#PRIM_ALPH) Name(#L_FDICode_B2CCheckout) Value('B2CCHK')
+    
+    * =======================================================
+    * Property Definitions
+    * =======================================================
+    
+    * FXURLFLT values
+    Define_Pty Name(upUrlFilter_Porcelain) Get(*AUTO #L_UrlFilter_Porcelain) Set(*AUTO #L_UrlFilter_Porcelain)
+    Define_Pty Name(upUrlFilter_Ceramic) Get(*AUTO #L_UrlFilter_Ceramic) Set(*AUTO #L_UrlFilter_Ceramic)
+    Define_Pty Name(upUrlFilter_GlassMosaic) Get(*AUTO #L_UrlFilter_GlassMosaic) Set(*AUTO #L_UrlFilter_GlassMosaic)
+    Define_Pty Name(upUrlFilter_RecycledGlass) Get(*AUTO #L_UrlFilter_RecycledGlass) Set(*AUTO #L_UrlFilter_RecycledGlass)
+    Define_Pty Name(upUrlFilter_Bullnose) Get(*AUTO #L_UrlFilter_Bullnose) Set(*AUTO #L_UrlFilter_Bullnose)
+    Define_Pty Name(upUrlFilter_Laminate) Get(*AUTO #L_UrlFilter_Laminate) Set(*AUTO #L_UrlFilter_Laminate)
+    Define_Pty Name(upUrlFilter_SPC) Get(*AUTO #L_UrlFilter_SPC) Set(*AUTO #L_UrlFilter_SPC)
+    Define_Pty Name(upUrlFilter_WPC) Get(*AUTO #L_UrlFilter_WPC) Set(*AUTO #L_UrlFilter_WPC)
+    Define_Pty Name(upUrlFilter_HardSurface) Get(*AUTO #L_UrlFilter_Hardsurface) Set(*AUTO #L_UrlFilter_Hardsurface)
+    Define_Pty Name(upUrlFilter_MoldingTrim) Get(*AUTO #L_UrlFilter_MoldingTrim) Set(*AUTO #L_UrlFilter_MoldingTrim)
+    Define_Pty Name(upUrlFilter_FineHardwood) Get(*AUTO #L_UrlFilter_FineHardwood) Set(*AUTO #L_UrlFilter_FineHardwood)
+    
+    * Product Type values
+    Define_Pty Name(upPrdTyp_CarpetTile) Desc('L00PTYP = T') Get(*AUTO #L_PrdTyp_CarpetTile) Set(*AUTO #L_PrdTyp_CarpetTile)
+    Define_Pty Name(upPrdTyp_CarpetPlank) Desc('L00PTYP = P') Get(*AUTO #L_PrdTyp_CarpetPlank) Set(*AUTO #L_PrdTyp_CarpetPlank)
+    Define_Pty Name(upPrdTyp_HardSurfaceTile) Desc('L00PTYP = H') Get(*AUTO #L_PrdTyp_HardSurfaceTile) Set(*AUTO #L_PrdTyp_HardSurfaceTile)
+    Define_Pty Name(upPrdTyp_HardSurfacePlank) Desc('L00PTYP = I') Get(*AUTO #L_PrdTyp_HardSurfacePlank) Set(*AUTO #L_PrdTyp_HardSurfacePlank)
+    Define_Pty Name(upPrdTyp_Porcelain) Desc('L00PTYP = F') Get(*AUTO #L_PrdTyp_Porcelain) Set(*AUTO #L_PrdTyp_Porcelain)
+    Define_Pty Name(upPrdTyp_GlassMosaic) Desc('L00PTYP = J') Get(*AUTO #L_PrdTyp_GlassMosaic) Set(*AUTO #L_PrdTyp_GlassMosaic)
+    Define_Pty Name(upPrdTyp_Bullnose) Desc('L00PTYP = G') Get(*AUTO #L_PrdTyp_Bullnose) Set(*AUTO #L_PrdTyp_Bullnose)
+    Define_Pty Name(upPrdTyp_Sample) Desc('L00PTYP = S') Get(*AUTO #L_PrdTyp_Sample) Set(*AUTO #L_PrdTyp_Sample)
+    Define_Pty Name(upPrdTyp_Swatch) Desc('L00PTYP = W') Get(*AUTO #L_PrdTyp_Swatch) Set(*AUTO #L_PrdTyp_Swatch)
+    Define_Pty Name(upPrdTyp_PremadeRug) Desc('L00PTYP = R') Get(*AUTO #L_PrdTyp_PremadeRug) Set(*AUTO #L_PrdTyp_PremadeRug)
+    Define_Pty Name(upPrdTyp_Trim) Desc('L00PTYP = M') Get(*AUTO #L_PrdTyp_Trim) Set(*AUTO #L_PrdTyp_Trim)
+    Define_Pty Name(upPrdTyp_Laminate) Desc('L00PTYP = L') Get(*AUTO #L_PrdTyp_Laminate) Set(*AUTO #L_PrdTyp_Laminate)
+    Define_Pty Name(upPrdTyp_FineHardwood) Desc('L00PTYP = K') Get(*AUTO #L_PrdTyp_FineHardwood) Set(*AUTO #L_PrdTyp_FineHardwood)
+    Define_Pty Name(upPrdTyp_Carpet) Desc('L00PTYP = C') Get(*AUTO #L_PrdTyp_Carpet) Set(*AUTO #L_PrdTyp_Carpet)
+    
+    * Subtype
+    Define_Pty Name(upSubType_WPC) Desc('WPC') Get(*AUTO #L_SubTyp_WPC) Set(*AUTO #L_SubTyp_WPC)
+    Define_Pty Name(upSubType_SPC) Desc('SPC') Get(*AUTO #L_SubTyp_SPC) Set(*AUTO #L_SubTyp_SPC)
+    
+    * Order Line Type
+    * Define_Pty Name(upOrdLin_Porcelain) Desc('Order Line type for Porcelain') Get(*AUTO #L_OrdLin_Porcelain) Set(*AUTO #L_OrdLin_Porcelain)
+    * Define_Pty Name(upOrdLin_Ceramic) Desc('Order Line type for Ceramic') Get(*AUTO #L_OrdLin_Ceramic) Set(*AUTO #L_OrdLin_Ceramic)
+    Define_Pty Name(upOrdLin_Tile) Desc('Order Line type for Tile') Get(*AUTO #L_OrdLin_Tile) Set(*AUTO #L_OrdLin_Tile)
+    Define_Pty Name(upOrdLin_Glass) Desc('Order Line type for Glass') Get(*AUTO #L_OrdLin_Glass) Set(*AUTO #L_OrdLin_Glass)
+    Define_Pty Name(upOrdLin_Bullnose) Desc('Order Line type for Bullnose') Get(*AUTO #L_OrdLin_Bullnose) Set(*AUTO #L_OrdLin_Bullnose)
+    Define_Pty Name(upOrdLin_Laminate) Desc('Order Line type for Laminate') Get(*AUTO #L_OrdLin_Laminate) Set(*AUTO #L_OrdLin_Laminate)
+    
+    Define_Pty Name(upOrdLin_Broadloom) Desc('Order Line type for Broadloom Cut') Get(*AUTO #L_OrdLin_BroadloomCut) Set(*AUTO #L_OrdLin_BroadloomCut)
+    Define_Pty Name(upOrdLin_HardSurface) Desc('Order Line type for Hard Surface') Get(*AUTO #L_OrdLin_HardSurface) Set(*AUTO #L_OrdLin_HardSurface)
+    Define_Pty Name(upOrdLin_LuxVinylTrim) Desc('Order Line type for Trims') Get(*AUTO #L_OrdLin_LuxVinylTrim) Set(*AUTO #L_OrdLin_LuxVinylTrim)
+    Define_Pty Name(upOrdLin_PromoItems) Desc('Order Line type for Promotional Items') Get(*AUTO #L_OrdLin_PromoItem) Set(*AUTO #L_OrdLin_PromoItem)
+    Define_Pty Name(upOrdLin_PremadeRug) Desc('Order Line type for Premade Rug') Get(*AUTO #L_OrdLin_PremadeRug) Set(*AUTO #L_OrdLin_PremadeRug)
+    Define_Pty Name(upOrdLin_Runner) Desc('Order Line type for Runner') Get(*AUTO #L_OrdLin_RunnerCut) Set(*AUTO #L_OrdLin_RunnerCut)
+    Define_Pty Name(upOrdLin_CustomRug) Desc('Order Line type for Custom Rug') Get(*AUTO #L_OrdLin_CustomRug) Set(*AUTO #L_OrdLin_CustomRug)
+    Define_Pty Name(upOrdLin_Swatch) Desc('Order Line type for Swatch') Get(*AUTO #L_OrdLin_Swatch) Set(*AUTO #L_OrdLin_Swatch)
+    Define_Pty Name(upOrdLin_CarpetTile) Desc('Order Line type for Carpet Tile') Get(*AUTO #L_OrdLin_CarpetTile) Set(*AUTO #L_OrdLin_CarpetTile)
+    
+    * Hard Surface values
+    Define_Pty Name(upHS_CoreMat_Ceramic) Get(*AUTO #L_HS_CoreMat_Ceramic) Set(*AUTO #L_HS_CoreMat_Ceramic)
+    Define_Pty Name(upHS_TypeFlr_RecycledGlass) Get(*AUTO #L_HS_TypFlr_RecycledGlass) Set(*AUTO #L_HS_TypFlr_RecycledGlass)
+    
+    * Conditions
+    Define_Pty Name(upQuery_Filter_Laminate) Desc('LFIP100 dependent') Get(getQuery_Filter_Laminate)
+    Define_Pty Name(upQuery_Filter_Porcelain) Desc('LFIP100 and FIP351 dependent') Get(getQuery_Filter_Porcelain)
+    Define_Pty Name(upQuery_Filter_Ceramic) Desc('LFIP100 and FIP351 dependent') Get(getQuery_Filter_Ceramic)
+    Define_Pty Name(upQuery_Filter_GlassMosaic) Desc('LFIP100 and LFIP130 dependent') Get(getQuery_Filter_GlassMosaic)
+    Define_Pty Name(upQuery_Filter_RecycledGlass) Desc('LFIP100 and LFIP130 dependent') Get(getQuery_Filter_RecycledGlass)
+    Define_Pty Name(upQuery_Filter_Bullnose) Desc('LFIP100 and FIP351 dependent') Get(getQuery_Filter_Bullnose)
+    Define_Pty Name(upQuery_Filter_CoordinatingProducts) Desc('Trims and Bullnose') Get(getQuery_Filter_CoordinatingProducts)
+    Define_Pty Name(upQuery_Filter_WPC) Desc('WPC Subtype') Get(getQuery_Filter_WPC)
+    Define_Pty Name(upQuery_Filter_SPC) Desc('SPC Subtype') Get(getQuery_Filter_SPC)
+    Define_Pty Name(upQuery_Filter_FineHardwood) Desc('Fine Hardwood') Get(getQuery_Filter_FineHardwood)
+    
+    
+    * G#285 - New properties with no AND condition at the beginning
+    Define_Pty Name(upQuery_Filter_Porcelain_Bare) Desc('Same as upQuery_Filter_Porcelain but with no AND') Get(getQuery_Filter_Porcelain_Bare)
+    Define_Pty Name(upQuery_Filter_Ceramic_Bare) Desc('Same as upQuery_Filter_Ceramic but with no AND') Get(getQuery_Filter_Ceramic_Bare)
+    Define_Pty Name(upQuery_Filter_GlassMosaic_Bare) Desc('Same as upQuery_Filter_GlassMosaic but with no AND') Get(getQuery_Filter_GlassMosaic_Bare)
+    Define_Pty Name(upQuery_Filter_RecycledGlass_Bare) Desc('Same as upQuery_Filter_RecycledGlass but with no AND') Get(getQuery_Filter_RecycledGlass_Bare)
+    
+    * G#305 - Misc Fee Charge Type
+    Define_Pty Name(upMiscFeeType_FreightHandling) Desc('Misc Fee Type - Freight Handling') Get(*AUTO #L_MiscFeeType_FreightHandling) Set(*AUTO #L_MiscFeeType_FreightHandling)
+    Define_Pty Name(upMiscFeeType_HardSurfaceFreight) Desc('Misc Fee Type - Hard Surface Freight') Get(*AUTO #L_MiscFeeType_HardSurfaceFreight) Set(*AUTO #L_MiscFeeType_HardSurfaceFreight)
+    Define_Pty Name(upMiscFeeType_Serging) Desc('Misc Fee Type - Serging') Get(*AUTO #L_MiscFeeType_Serging) Set(*AUTO #L_MiscFeeType_Serging)
+    Define_Pty Name(upMiscFeeType_OnlineRugConfigDiscount) Desc('Misc Fee Type - Online Rug Config Discount') Get(*AUTO #L_MiscFeeType_OnlineRugConfigDiscount) Set(*AUTO #L_MiscFeeType_OnlineRugConfigDiscount)
+    Define_Pty Name(upMiscFeeType_StewardshipAssessment) Desc('Misc Fee Type - Stewardship Assessment') Get(*AUTO #L_MiscFeeType_StewardshipAssessment) Set(*AUTO #L_MiscFeeType_StewardshipAssessment)
+    Define_Pty Name(upMiscFeeType_SalesTax) Desc('Misc Fee Type - Sales Tax') Get(*AUTO #L_MiscFeeType_SalesTax) Set(*AUTO #L_MiscFeeType_SalesTax)
+    
+    * PNC FDICode
+    Define_Pty Name(upPNC_FDICode_InvoicePayment) Desc('FDICode for Invoice Payment') Get(*AUTO #L_FDICode_InvoicePayment) Set(*AUTO #L_FDICode_InvoicePayment)
+    Define_Pty Name(upPNC_FDICode_B2BCheckout) Desc('FDICode for Invoice Payment') Get(*AUTO #L_FDICode_B2BCheckout) Set(*AUTO #L_FDICode_B2BCheckout)
+    Define_Pty Name(upPNC_FDICode_B2CCheckout) Desc('FDICode for Invoice Payment') Get(*AUTO #L_FDICode_B2CCheckout) Set(*AUTO #L_FDICode_B2CCheckout)
+    
+    
+    
+    * =======================================================
+    * Property Routines
+    * =======================================================
+    
+    Ptyroutine Name(getQuery_Filter_Laminate)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " And ATTR.L00PTYP = '" + #L_PrdTyp_Laminate + "'"
+    Endroutine
+    
+    Ptyroutine Name(getQuery_Filter_Porcelain)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " And (ATTR.L00PTYP = '" + #L_PrdTyp_Porcelain + "' And HSMF.F340CCODE <> '" + #L_HS_CoreMat_Ceramic + "')"
+    Endroutine
+    
+    Ptyroutine Name(getQuery_Filter_Ceramic)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " And (ATTR.L00PTYP = '" + #L_PrdTyp_Porcelain + "' And HSMF.F340CCODE = '" + #L_HS_CoreMat_Ceramic + "')"
+    Endroutine
+    
+    Ptyroutine Name(getQuery_Filter_GlassMosaic)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " And (ATTR.L00PTYP = '" + #L_PrdTyp_GlassMosaic + "' And XDTL.L130DVAL <> '" + #L_HS_TypFlr_RecycledGlass + "')"
+    Endroutine
+    
+    Ptyroutine Name(getQuery_Filter_RecycledGlass)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " And (ATTR.L00PTYP = '" + #L_PrdTyp_GlassMosaic + "' And XDTL.L130DVAL = '" + #L_HS_TypFlr_RecycledGlass + "')"
+    Endroutine
+    
+    Ptyroutine Name(getQuery_Filter_Bullnose)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " And ATTR.L00PTYP = '" + #L_PrdTyp_Bullnose + "'"
+    Endroutine
+    
+    Ptyroutine Name(getQuery_Filter_CoordinatingProducts)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " And ATTR.L00PTYP In ('" + #L_PrdTyp_Trim + "', '" + #L_PrdTyp_Bullnose + "')"
+    Endroutine
+    
+    * G#285 - New property routines for the new properties. These are used in the Product List's F2K Brand Search
+    Ptyroutine Name(getQuery_Filter_Porcelain_Bare)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " (ATTR.L00PTYP = '" + #L_PrdTyp_Porcelain + "' And HSMF.F340CCODE <> '" + #L_HS_CoreMat_Ceramic + "')"
+    Endroutine
+    
+    Ptyroutine Name(getQuery_Filter_Ceramic_Bare)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " (ATTR.L00PTYP = '" + #L_PrdTyp_Porcelain + "' And HSMF.F340CCODE = '" + #L_HS_CoreMat_Ceramic + "')"
+    Endroutine
+    
+    Ptyroutine Name(getQuery_Filter_GlassMosaic_Bare)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " (ATTR.L00PTYP = '" + #L_PrdTyp_GlassMosaic + "' And XDTL.L130DVAL <> '" + #L_HS_TypFlr_RecycledGlass + "')"
+    Endroutine
+    
+    Ptyroutine Name(getQuery_Filter_RecycledGlass_Bare)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " (ATTR.L00PTYP = '" + #L_PrdTyp_GlassMosaic + "' And XDTL.L130DVAL = '" + #L_HS_TypFlr_RecycledGlass + "')"
+    Endroutine
+    
+    Ptyroutine Name(getQuery_Filter_WPC)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " And (ATTR.L00PTYP = '" + #L_PrdTyp_HardSurfacePlank + "' And PSUBF.F54STYP = '" + #L_SubTyp_WPC + "')"
+    Endroutine
+    
+    Ptyroutine Name(getQuery_Filter_SPC)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " And (ATTR.L00PTYP = '" + #L_PrdTyp_HardSurfacePlank + "' And PSUBF.F54STYP = '" + #L_SubTyp_SPC + "')"
+    Endroutine
+    
+    Ptyroutine Name(getQuery_Filter_FineHardwood)
+    Define_Map For(*OUTPUT) Class(#LW3QSEL) Name(#oQueryString)
+    
+    #oQueryString := " And (ATTR.L00PTYP = '" + #L_PrdTyp_FineHardwood + "')"
+    Endroutine
+    
+    * =======================================================
+    * Method Routines
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umIsCoordinatingProduct
+    * Description....: Test if product type is a coordinating product
+    * =======================================================
+    Mthroutine Name(umIsCoordinatingProduct) Desc('Test if product type is a coordinating product') Help('Test if product type is a coordinating product')
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType)
+    Define_Map For(*RESULT) Class(#PRIM_BOLN) Name(#rResult)
+    
+    #rResult := (#iProductType = #L_PrdTyp_Trim) Or (#iProductType = #L_PrdTyp_Bullnose)
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umIsOrderedByPiece
+    * Description....: Test if the product is ordered by piece based on product type
+    * =======================================================
+    Mthroutine Name(umIsOrderedByPiece) Desc('File: FIP051HSEA - Ordered by piece') Help('Test if the product is ordered by piece based on product type')
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType)
+    Define_Map For(*RESULT) Class(#PRIM_BOLN) Name(#rResult)
+    
+    #rResult := (#iProductType = #L_PrdTyp_Trim) Or (#iProductType = #L_PrdTyp_Bullnose) Or (#iProductType = #L_PrdTyp_GlassMosaic)
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umIsTileOnly
+    * Description....: Test if product type is a tile
+    * =======================================================
+    Mthroutine Name(umIsTileOnly) Desc('Test if product type is a tile') Help('Test if product type is a tile')
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType)
+    Define_Map For(*RESULT) Class(#PRIM_BOLN) Name(#rResult)
+    
+    #rResult := (#iProductType = #L_PrdTyp_CarpetPlank) Or (#iProductType = #L_PrdTyp_CarpetTile) Or (#iProductType = #L_PrdTyp_HardSurfacePlank) Or (#iProductType = #L_PrdTyp_HardSurfaceTile) Or (#iProductType = #L_PrdTyp_Porcelain) Or (#iProductType = #L_PrdTyp_Laminate) Or (#iProductType = #L_PrdTyp_FineHardwood)
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umIsUrlTileOnly
+    * Description....: Test if the url type is for tile
+    * =======================================================
+    Mthroutine Name(umIsUrlTileOnly) Desc('Test if the url type is for tile') Help('Test if the url type is for tile')
+    Define_Map For(*INPUT) Class(#FXURLFLT) Name(#iUrlFilter)
+    Define_Map For(*RESULT) Class(#PRIM_BOLN) Name(#rResult)
+    
+    #rResult := (#iUrlFilter = #L_UrlFilter_Porcelain) Or (#iUrlFilter = #L_UrlFilter_Ceramic) Or (#iUrlFilter = #L_UrlFilter_GlassMosaic) Or (#iUrlFilter = #L_UrlFilter_RecycledGlass)
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umIsHardSurface
+    * Description....: Test if product type is a Hard Surface
+    *                : Values used are used to define the is_hard_surface variable in most XSLs
+    * =======================================================
+    Mthroutine Name(umIsHardSurface) Desc('Test if product type is a Hard Surface') Help('Test if product type is a Hard Surface')
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType)
+    Define_Map For(*RESULT) Class(#PRIM_BOLN) Name(#rResult)
+    
+    #rResult := (#iProductType = #L_PrdTyp_HardSurfacePlank) Or (#iProductType = #L_PrdTyp_HardSurfaceTile) Or (#iProductType = #L_PrdTyp_Porcelain) Or (#iProductType = #L_PrdTyp_GlassMosaic) Or (#iProductType = #L_PrdTyp_Laminate) Or (#iProductType = #L_PrdTyp_FineHardwood)
+    Endroutine
+    
+    End_Com

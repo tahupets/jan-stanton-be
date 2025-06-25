@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3FLTTYP
+  Type:               Alpha
+  Length:             100
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Filter Type"
+      Label:              "Filter Type"
+      Heading1:           "Filter"
+      Heading2:           "Type"
+      Heading3:           " "

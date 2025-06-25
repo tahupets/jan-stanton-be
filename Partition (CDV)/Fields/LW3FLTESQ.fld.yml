@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3FLTESQ
+  Type:               Packed
+  Length:             4
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Filter Entry Sequence"
+      Label:              "Filter Entry Se"
+      Heading1:           "Filter"
+      Heading2:           "Entry"
+      Heading3:           "Sequence"

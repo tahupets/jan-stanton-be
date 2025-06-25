@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3FLTACD
+  Type:               Alpha
+  Length:             100
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Filter Alpha Code"
+      Label:              "Filter Alpha Co"
+      Heading1:           "Filter"
+      Heading2:           "Alpha"
+      Heading3:           "Code"

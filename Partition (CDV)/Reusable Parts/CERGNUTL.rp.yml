@@ -142,6 +142,39 @@
     Endroutine
     
     * =======================================================
+    * Mthroutine ....: umEscapeSpecialChars
+    * Description....: Escape special characters before using them in SQL queries
+    * =======================================================
+    Mthroutine Name(umEscapeSpecialChars) Help('Escape special characters before using them in SQL queries')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iString) Desc('String') Help('String')
+    
+    Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rResultString) Desc('Result String')
+    
+    #rResultString := #iString.ReplaceAll( "'" "''" )
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umDisplaySpecialChar
+    * Description....: Display value with special characters which are replaced with placeover characters
+    * =======================================================
+    Mthroutine Name(umDisplaySpecialChar)
+    Define_Map For(*INPUT) Class(#STD_NVARC) Name(#iText)
+    Define_Map For(*RESULT) Class(#STD_NVARC) Name(#rText)
+    
+    #rText := #iText
+    
+    * Replace | with  ™
+    If Cond(#rText.Contains( (124).asUnicodeString ))
+    #rText := #rText.ReplaceAll( (124).asUnicodeString (8482).AsUnicodeString )
+    Endif
+    
+    * Replace ^ with ®
+    If Cond(#rText.Contains( (94).asUnicodeString ))
+    #rText := #rText.ReplaceAll( (94).asUnicodeString (174).AsUnicodeString )
+    Endif
+    Endroutine
+    
+    * =======================================================
     * Mthroutine ....: umDebugLog
     * Description....: Log entry to CNTDEBUG
     * =======================================================

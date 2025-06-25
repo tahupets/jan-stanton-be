@@ -34,6 +34,8 @@
     * =======================================================
     
     Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    Define_Com Class(#LW3CNTGL) Name(#Global_Constants) Desc('Global Constants') Help('Global Constants') Scope(*APPLICATION)
+    
     
     * =======================================================
     * Method Definitions
@@ -60,6 +62,185 @@
     
     Endif
     
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umCheckProprietary
+    * Description....: Check Proprietary for B2B and B2C
+    * =======================================================
+    Mthroutine Name(umCheckProprietary) Desc('Check Proprietary for B2B and B2C') Help('Check Proprietary for B2B and B2C')
+    Define_Map For(*INPUT) Class(#C1CGRP) Name(#iCustomerGroupNumber) Mandatory(0)
+    Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rString)
+    
+    If Cond(#Global_DataModel.upStorefrontIndicator = 'B')
+    #rString += " AND ((ATTR.L00PROPRI <> 'Y') Or ((ATTR.L00PROPRI = 'Y') AND (ATTR.L00PROPCUS IN (" + #FXCUSID + ", " + #iCustomerGroupNumber.asString + "))))"
+    Else
+    #rString += " AND ((ATTR.L00PROPRI <> 'Y') Or ((ATTR.L00PROPRI = 'Y') AND ((ATTR.L00PROPB2C = 'Y') OR ((ATTR.L00PTYP IN ('S', 'W')) AND (ATTR.L00PROPCUS = " + #Global_DataModel.umGetCustomerIdForQuery + ")))))"
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umApplyURLFilterToQuery
+    * Description....: If URL filter is provided, ensure that the query retrieval is conditioned based on it
+    * =======================================================
+    Mthroutine Name(umApplyUrlFilterToQuery) Desc('Apply Url Filter to Query') Help('If URL filter is provided, ensure that the query retrieval is conditioned based on it')
+    
+    Define_Map For(*INPUT) Class(#FXURLFLT) Name(#iSeachType)
+    Define_Map For(*RESULT) Class(#LW3QSEL) Name(#rQueryString)
+    
+    Case Of_Field(#iSeachType)
+    
+    When Value_Is(= 'RESIDENTIAL')
+    * AppTrk #13373 - 07/29/2020 - Include Commercial in Residential Menu Filter
+    * #rQueryString := " And ATTR.L00PTYP In ('C', 'N', 'B', 'X', 'R') And ATTR.L00USAGE <> 'COMMERCIAL'"
+    #rQueryString := " And ATTR.L00PTYP In ('C', 'N', 'B', 'X', 'R')"
+    
+    When Value_Is(= 'COMMERCIAL')
+    #rQueryString := " And (ATTR.L00PTYP In ('C', 'P', 'T') And ATTR.L00USAGE = 'COMMERCIAL')"
+    
+    When Value_Is(= 'HARD_SURFACE')
+    #rQueryString := " And ATTR.L00PTYP In ('H', 'I')"
+    
+    When Value_Is(= 'STOCKEDRUG')
+    #rQueryString := " And ATTR.L00PTYP = 'R'"
+    
+    When Value_Is(= 'INDOOROUTDOOR')
+    #rQueryString := " And ATTR.L00USAGE = 'INDOOR / OUTDOOR'"
+    
+    When Value_Is(= 'MOLDING_TRIM')
+    #rQueryString := " And ATTR.L00PTYP = 'M'"
+    
+    * 06/19/2024 - Jan - Adding Laminate Filter
+    When Value_Is(= #Global_Constants.upUrlFilter_Laminate)
+    #rQueryString := #Global_Constants.upQuery_Filter_Laminate
+    
+    * Added by Jan - 3rd Nov 2022 - GitLab Issue #227
+    When Value_Is(= #Global_Constants.upUrlFilter_Porcelain)
+    #rQueryString := #Global_Constants.upQuery_Filter_Porcelain
+    
+    When Value_Is(= #Global_Constants.upUrlFilter_Ceramic)
+    #rQueryString := #Global_Constants.upQuery_Filter_Ceramic
+    
+    When Value_Is(= #Global_Constants.upUrlFilter_GlassMosaic)
+    #rQueryString := #Global_Constants.upQuery_Filter_GlassMosaic
+    
+    When Value_Is(= #Global_Constants.upUrlFilter_RecycledGlass)
+    #rQueryString := #Global_Constants.upQuery_Filter_RecycledGlass
+    
+    When Value_Is(= #Global_Constants.upUrlFilter_Bullnose)
+    #rQueryString := #Global_Constants.upQuery_Filter_Bullnose
+    
+    * G#131 - Add new URL Filters for the Lux Vinyl Subtypes
+    When Value_Is(= #Global_Constants.upUrlFilter_WPC)
+    #rQueryString := #Global_Constants.upQuery_Filter_WPC
+    
+    When Value_Is(= #Global_Constants.upUrlFilter_SPC)
+    #rQueryString := #Global_Constants.upQuery_Filter_SPC
+    
+    * G#151 - Fine Hardwood
+    When Value_Is(= #Global_Constants.upUrlFilter_FineHardwood)
+    #rQueryString := #Global_Constants.upQuery_Filter_FineHardwood
+    
+    Endcase
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umShouldWeHideInB2BOtherStyles
+    * Description....: Should we hide for F2K products
+    * =======================================================
+    Mthroutine Name(umShouldWeHideInB2BOtherStyles)
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyle)
+    Define_Map For(*RESULT) Class(#PRIM_BOLN) Name(#rResult)
+    
+    * Check if we should flag the style itself first
+    #rResult := #COM_OWNER.umShouldWeHideInB2B( #iStyle )
+    
+    * If not, check the other styles related to it
+    If Cond(#rResult = False)
+    * Read LFIP134 for similar styles.
+    #L134STYL1 #L134STYL2 #L134STYL3 #L134STYL4 #L134STYL5 #L134STYL6 #L134STYL7 #L134STYL8 #L134STYL9 #L134ST001 := *NULL
+    
+    #LW3QSEL := "Select DISTINCT L134STYL1, L134STYL2, L134STYL3, L134STYL4, L134STYL5, L134STYL6, L134STYL7, L134STYL8, L134STYL9, L134STYL10 "
+    #LW3QSEL += " From LFIP134 Where"
+    #LW3QSEL += " (L134STYL1 = '" + #iStyle + "') Or "
+    #LW3QSEL += " (L134STYL2 = '" + #iStyle + "') Or "
+    #LW3QSEL += " (L134STYL3 = '" + #iStyle + "') Or "
+    #LW3QSEL += " (L134STYL4 = '" + #iStyle + "') Or "
+    #LW3QSEL += " (L134STYL5 = '" + #iStyle + "') Or "
+    #LW3QSEL += " (L134STYL6 = '" + #iStyle + "') Or "
+    #LW3QSEL += " (L134STYL7 = '" + #iStyle + "') Or "
+    #LW3QSEL += " (L134STYL8 = '" + #iStyle + "') Or "
+    #LW3QSEL += " (L134STYL9 = '" + #iStyle + "') Or "
+    #LW3QSEL += " (L134STYL10 = '" + #iStyle + "')"
+    
+    Select_Sql Fields(#L134STYL1 #L134STYL2 #L134STYL3 #L134STYL4 #L134STYL5 #L134STYL6 #L134STYL7 #L134STYL8 #L134STYL9 #L134ST001) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    
+    * Call umShouldWeHideInB2B until it finds a hit
+    If Cond((#L134STYL1 <> '') And (#rResult = False))
+    #rResult := #COM_OWNER.umShouldWeHideInB2B( #L134STYL1 )
+    Endif
+    
+    If Cond((#L134STYL2 <> '') And (#rResult = False))
+    #rResult := #COM_OWNER.umShouldWeHideInB2B( #L134STYL2 )
+    Endif
+    
+    If Cond((#L134STYL3 <> '') And (#rResult = False))
+    #rResult := #COM_OWNER.umShouldWeHideInB2B( #L134STYL3 )
+    Endif
+    
+    If Cond((#L134STYL4 <> '') And (#rResult = False))
+    #rResult := #COM_OWNER.umShouldWeHideInB2B( #L134STYL4 )
+    Endif
+    
+    If Cond((#L134STYL5 <> '') And (#rResult = False))
+    #rResult := #COM_OWNER.umShouldWeHideInB2B( #L134STYL5 )
+    Endif
+    
+    If Cond((#L134STYL6 <> '') And (#rResult = False))
+    #rResult := #COM_OWNER.umShouldWeHideInB2B( #L134STYL6 )
+    Endif
+    
+    If Cond((#L134STYL7 <> '') And (#rResult = False))
+    #rResult := #COM_OWNER.umShouldWeHideInB2B( #L134STYL7 )
+    Endif
+    
+    If Cond((#L134STYL8 <> '') And (#rResult = False))
+    #rResult := #COM_OWNER.umShouldWeHideInB2B( #L134STYL8 )
+    Endif
+    
+    If Cond((#L134STYL9 <> '') And (#rResult = False))
+    #rResult := #COM_OWNER.umShouldWeHideInB2B( #L134STYL9 )
+    Endif
+    
+    If Cond((#L134ST001 <> '') And (#rResult = False))
+    #rResult := #COM_OWNER.umShouldWeHideInB2B( #L134ST001 )
+    Endif
+    Endif
+    
+    Endroutine
+    
+    * * =======================================================
+    * * Mthroutine ....: umShouldWeHideInB2B
+    * * Description....: Return true if HDEB2C is found for the style/style+color. Pass both the Style and Tile-Style so that even the trims would be removed
+    * * =======================================================
+    Mthroutine Name(umShouldWeHideInB2B)
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyle)
+    Define_Map For(*RESULT) Class(#PRIM_BOLN) Name(#rResult)
+    
+    #rResult := False
+    
+    If Cond(#iStyle <> '')
+    * If Style is found, Flag true to remove
+    Check_For In_File(LW3CODES) With_Key('HDEB2C' #iStyle) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    #rResult := True
+    Endif
+    Endif
     Endroutine
     
     

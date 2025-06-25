@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3FLTDSC
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Filter Description"
+      Label:              "Filter Descript"
+      Heading1:           "Filter"
+      Heading2:           "Description"
+      Heading3:           " "

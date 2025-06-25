@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3FLTSLF
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Filter Selected Flag"
+      Label:              "Filter Selected"
+      Heading1:           "Filter"
+      Heading2:           "Selected"
+      Heading3:           "Flag"

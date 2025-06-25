@@ -1492,7 +1492,7 @@
             WriteOnly:          No
 
             Properties:
-            - LW3SFID:
+            - storefrontId:
                 Description:        Storefront Id
                 Type:               Field
                 Field Name:         LW3SFID
@@ -1502,7 +1502,7 @@
                 ReadOnly:           No
                 WriteOnly:          No
 
-            - LW3SNAM:
+            - storefrontShortName:
                 Description:        Storefront Short Name
                 Type:               Field
                 Field Name:         LW3SNAM
@@ -1512,7 +1512,7 @@
                 ReadOnly:           No
                 WriteOnly:          No
 
-            - LW3B2BIND:
+            - storefrontIndicator:
                 Description:        Storefront Indicator
                 Type:               Field
                 Field Name:         LW3B2BIND
@@ -1522,7 +1522,7 @@
                 ReadOnly:           No
                 WriteOnly:          No
 
-            - LW3CURCD:
+            - currencyCode:
                 Description:        Currency Code
                 Type:               Field
                 Field Name:         LW3CURCD
@@ -1532,7 +1532,7 @@
                 ReadOnly:           No
                 WriteOnly:          No
 
-            - LW3CURSM:
+            - currencySymbol:
                 Description:        Currency Symbol
                 Type:               Field
                 Field Name:         LW3CURSM
@@ -1542,7 +1542,7 @@
                 ReadOnly:           No
                 WriteOnly:          No
 
-            - LW3DPSYM:
+            - decimalPointSymbol:
                 Description:        Decimal Point Symbol
                 Type:               Field
                 Field Name:         LW3DPSYM
@@ -1552,7 +1552,7 @@
                 ReadOnly:           No
                 WriteOnly:          No
 
-            - LW3TSSYM:
+            - thousandSeparatorSymbol:
                 Description:        Thousand Separator Symbol
                 Type:               Field
                 Field Name:         LW3TSSYM

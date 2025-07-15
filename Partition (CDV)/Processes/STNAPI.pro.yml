@@ -1,0 +1,24 @@
+﻿Process:
+  Name:                      STNAPI
+  Menu Style:                SAA/CUA
+  Anticipated Usage:         Light
+  Optimize For Remote Comms: No
+  Enable For Web:            No
+  Generate XML:              No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Stanton APIs"
+
+  Functions:
+  - LW3STPR:
+      Name:               LW3STPR
+      Display on Menu:    No
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Stanton Product Retrieval API"
+
+      Allowed Next Functions:
+      - "*ANY"

@@ -1,0 +1,2322 @@
+﻿ServerModule:
+  Name:               CNSPRDDTL
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Storefront Product Details"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Server Module
+    * Platform        : REST APIs
+    * Name            : CNSPROD
+    * Identifier      : CNSPROD
+    * Ancestor        : PRIM_SRVM
+    * Written By      : Jan Metica
+    * Written On      : 2nd October 2024
+    * Description     : Storefront Products
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Begin_Com Role(*EXTENDS #PRIM_SRVM)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    Define_Com Class(#LW3CNTGL) Name(#Global_Constants) Desc('Global Constants') Help('Global Constants') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CNRCODES) Name(#Utility_Codes) Desc('Code Table Utility') Help('Code Table Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERMLUTL) Name(#Utility_Multilinguals) Desc('Multilingual Utility') Help('Multilinguals Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    * * * Define_Com Class(#CERIAUTL) Name(#Processor_ProductAttributes) Desc('Product Attributes Processor')
+    Define_Com Class(#CNRAPILG) Name(#Processor_ApiLog) Desc('API Log Processor') Scope(*APPLICATION)
+    Define_Com Class(#CNRPRDPR) Name(#Processor_Products) Desc('Products Processor') Scope(*APPLICATION)
+    Define_Com Class(#LW3PRAPI) Name(#Processor_Pricing) Desc('Product Pricing Processor') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Collections
+    * =======================================================
+    
+    * =======================================================
+    * Simple Field Definitions
+    * =======================================================
+    
+    Define Field(#W_CASEPERPACK) Type(*DEC) Length(7) Decimals(0)
+    Define Field(#W_CASEPERPALLET) Type(*DEC) Length(7) Decimals(0)
+    
+    Define Field(#W_LCOUNT2) Reffld(#LISTCOUNT) Desc('WL_PRDLST Counter')
+    
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    
+    * =======================================================
+    * List Definitions
+    * =======================================================
+    
+    * Passed to LW3STPR - Product Retrieval API List
+    Def_List Name(#WL_PRDLST) Fields(#LW3ROWTYP #L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN #P010RPRC #P010CPRC #P010UOM #P010SMPRC #P010SHPRC #F55ROLL #F55DLOT #F55WTHF #F55WTHI #F55LTHF #F55LTHI #F55UPRICE #LW3ROLCNT #LW3SLDOUT) Counter(#W_LCOUNT2) Type(*WORKING) Entrys(*MAX)
+    * Passed to LW3STPR - Search Attribute List
+    Def_List Name(#WL_SRCATTRLST) Fields(#LW3FLTNAM #LW3FLTVAL) Type(*WORKING) Entrys(*MAX)
+    
+    * =======================================================
+    * Srvroutine Definitions
+    * =======================================================
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSPRDDTL/product
+    * Operation: GetProduct
+    *
+    * Request
+    *    Parameter: style
+    *               color
+    *    Schema   : none
+    *
+    * Response
+    *    Schema   : (OK) responseObject
+    *             : (ER)
+    *
+    * Action  : Build the details for a product selection
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetProduct) Response(*HTTP #uContext) Desc('Get Product Details')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetProduct) Name(#Operation)
+    Define_Com Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#Object_Response) Reference(*DYNAMIC)
+    
+    * * * Define_Com Class(#PRIM_NMBR) Name(#L_NumberOfProductsFound)
+    Define_Com Class(#PRIM_BOLN) Name(#L_AuthSuccess) Value(False)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If_Ref Com(#uContext.Request.Headers<'Authorization'>) Is(*NULL)
+    * No authorization passed so get Storefront Details from the passed in domain
+    #Global_DataModel.umGetStorefrontDetails Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    If Cond(#LW3RETCOD = 'OK')
+    #L_AuthSuccess := True
+    Endif
+    
+    Else
+    * Authorization has been passed so authenticate the access token
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #uContext.Request.Headers<'Authorization'>.Value #LW3GUID ))
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    If Cond(#LW3RETCOD = 'OK')
+    #L_AuthSuccess := True
+    Endif
+    Endif
+    
+    Endif
+    
+    If Cond(#L_AuthSuccess)
+    
+    Set_Ref Com(#Object_Response) To(*CREATE_AS #Com_Home.GetProduct.Response.ContentJson.Object)
+    
+    #COM_OWNER.umGetProductDetails Istyledescription(#Operation.Request.styleDesc) Icolordescription(#Operation.Request.colorDesc) Iresponseobject(#Object_Response) Oreturncode(#LW3RETCOD)
+    
+    * Set the copy of the response object as the content returned by this endpoint
+    #Operation.Response.SetContentJson Content(#Object_Response)
+    
+    Endif
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umGetProductDetails
+    * Description....: Search for Products
+    * =======================================================
+    Mthroutine Name(umGetProductDetails) Desc('Get Product Details')
+    
+    Define_Map For(*INPUT) Class(#L00SDESC) Name(#iStyleDescription)
+    Define_Map For(*INPUT) Class(#L00CDESC) Name(#iColorDescription)
+    
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    Define_Com Class(#P010CPRC) Name(#L_AdjustedPrice) Desc('Adjusted Price based on MSRP')
+    
+    Define_Com Class(#L00STYLE) Name(#L_CurrentProductStyleCode)
+    Define_Com Class(#L00COLOR) Name(#L_CurrentProductColorCode)
+    Define_Com Class(#L00PTYP) Name(#L_CurrentProductType)
+    
+    #oReturnCode := 'ER'
+    
+    Clr_List Named(#WL_PRDLST)
+    
+    #FXSFID := #Global_DataModel.upStorefrontId
+    #FXWEBUSR #LW3WEBUSR := #Global_DataModel.upUserId
+    #FXPRDRTP := 'STK'
+    #FXCUSID := #Global_DataModel.umGetCustomerIdForQuery
+    #FXCUSIND := #Global_DataModel.upStorefrontIndicator
+    #FXSTYLDS := #iStyleDescription
+    #FXCOLRDS := #iColorDescription
+    #FXFNDURL := 'Y'
+    #FXDTARCD := 'ALL'
+    
+    * Apply markups after calling the retrieval API
+    Exchange Fields(#FXSFID #FXWEBUSR #FXPRDRTP #FXCUSID #FXSTYLDS #FXCOLRDS #FXFNDURL #FXCUSIND #FXDTARCD #LW3NITMF #LW3SWSRF #LW3WEBUSR)
+    Call Process(*DIRECT) Function(LW3STPR) If_Error(*NEXT) Pass_Lst(#WL_SRCATTRLST #WL_PRDLST)
+    
+    If Cond(#FXRETCD = OK)
+    
+    * #134
+    #WL_PRDLST := *NULL
+    Loc_Entry In_List(#WL_PRDLST) Where(#LW3ROWTYP = 'STK')
+    If_Status Is(*OKAY)
+    
+    #oReturnCode := 'OK'
+    
+    #L_CurrentProductType := #L00PTYP
+    #L_CurrentProductStyleCode := #L00STYLE
+    #L_CurrentProductColorCode := #L00COLOR
+    
+    If Cond(#Global_Constants.umIsCoordinatingProduct( #L00PTYP ))
+    #COM_OWNER.umBuildAvailableStyles Iresponseobject(#iResponseObject)
+    Else
+    #COM_OWNER.umBuildAvailableColors Iresponseobject(#iResponseObject)
+    Endif
+    
+    #COM_OWNER.umBuildCoordinates Icurrentproductstylecode(#L_CurrentProductStyleCode) Icurrentproductcolorcode(#L_CurrentProductColorCode) Iresponseobject(#iResponseObject)
+    
+    If Cond(#L00PCAT = 'R')
+    * Build Available Lengths for Premade Rugs
+    #COM_OWNER.umBuildAvailableLengths Iresponseobject(#iResponseObject)
+    Endif
+    
+    #COM_OWNER.umBuildProductDetails Iresponseobject(#iResponseObject)
+    
+    Endif
+    
+    If Cond((#L00PTYP = #Global_Constants.upPrdTyp_Porcelain) Or (#L00PTYP = #Global_Constants.upPrdTyp_GlassMosaic) Or (#L00PTYP = #Global_Constants.upPrdTyp_Bullnose))
+    #COM_OWNER.umGetAvailableSizes Bstyledesc(#L00SDESC) Bcolordesc(#L00CDESC) Bproducttype(#L00PTYP) Iresponseobject(#iResponseObject)
+    Endif
+    
+    #COM_OWNER.umBuildNoServiceStates Iresponseobject(#iResponseObject)
+    
+    * !NC! - Check this when testing Premade Rugs
+    * * * * If the item is a Premade Rug, display the price and size of the smallest available length
+    * * * If Cond(#L00PTYP = 'R')
+    * * * #LW3LPRICE := #@UnitPrice
+    * * * #uEditmask.uEditField Unumberfield(#@UnitPrice) Udecpoint(#LW3DPSYM) Uthousep(#LW3TSSYM) Ureturnfield(#D_LPRICE)
+    * * * #L00WTHFT := #@RugWidthFeet
+    * * * #L00WTHIN := #@RugWidthInches
+    * * * Endif
+    
+    * 2025/06/27 - Move proper case transformations to Frontend
+    If Cond((#L00CNAME.UpperCase = 'UNCLASSIFIED') Or (#L00COLCD = 'UNCL'))
+    #L00CNAME := *NULL
+    Endif
+    
+    #iResponseObject.details.pageTitle := (#Utility_Codes.umGetCodeDescriptionByCode( 'BRNDSC' 'ST' ) + ' | ' + #COM_OWNER.umGenerateTitle( #L00DVBR #L00SDESC #L00CDESC ))
+    
+    * Retrieve extended details from LFIP130
+    #COM_OWNER.umGetExtendedSKUDetails Istylecode(#L00STYLE) Icolorcode(#L00COLOR) Isizecode(#L00SIZE) Ibackingcode(#L00BACK) Iproducttype(#L00PTYP) Iresponseobject(#iResponseObject)
+    
+    * G#295 - B2B - Boxes / Sq Ft Per Pallet Stock Check
+    If Cond(*Not #Global_Constants.umIsOrderedByPiece( #L00PTYP ))
+    #LW3QSEL := "SELECT F2SCSE, F2SPLT FROM FIP020T WHERE F2STYL = '" + #L00STYLE + "' AND F2CLR = '" + #L00COLOR + "' AND F2SIZE = '" + #L00SIZE + "' AND F2BACK = '" + #L00BACK + "'"
+    
+    Select_Sql Fields(#W_CASEPERPACK #W_CASEPERPALLET) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    #iResponseObject.details.standardCasePerPack := #W_CASEPERPACK
+    #iResponseObject.details.standardCasePerPallet := #W_CASEPERPALLET
+    
+    Endif
+    
+    #iResponseObject.details.dimension := #Processor_Products.umGetSizeDescription( #L00PTYP #L00STYLE #L00SIZE #L00COLOR #L00BACK )
+    
+    
+    * ----------------------- after umGetProductDetails
+    
+    If Cond((#L00DEC1 = 1) And ((#L00PTYP = #Global_Constants.upPrdTyp_Carpet) Or (#L00PTYP = #Global_Constants.upPrdTyp_PremadeRug) Or (#L00PTYP = #Global_Constants.upPrdTyp_HardSurfacePlank) Or (#L00PTYP = #Global_Constants.upPrdTyp_Laminate) Or (#L00PTYP = #Global_Constants.upPrdTyp_HardSurfaceTile) Or (#L00PTYP = #Global_Constants.upPrdTyp_Porcelain) Or (#L00PTYP = #Global_Constants.upPrdTyp_GlassMosaic) Or (#L00PTYP = #Global_Constants.upPrdTyp_FineHardwood) Or (#L00PTYP = #Global_Constants.upPrdTyp_Bullnose)))
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('VISUALIZE_IT_ICON') Ilanguage('') Oalphavalue(#iResponseObject.details.visualize.icon)
+    Endif
+    
+    #COM_OWNER.umBuildProductVideos Ibrand(#L00DVBR) Istylecode(#L00STYLE) Iresponseobject(#iResponseObject)
+    
+    * 2025/06/27 - Jan - Commented out for now for the POC
+    * * * #COM_OWNER.umSetCanonicalUrl Istyledescription(#L00SDESC) Icolordescription(#L00CDESC)
+    
+    * Get product descriptions from BrandFolder using their APIs
+    #iResponseObject.details.brandFolder.productDesc := #COM_OWNER.umGetBrandFolderProductDesc( #L00STYLE #L00COLOR )
+    If Cond(#iResponseObject.details.brandFolder.productDesc = *BLANKS)
+    #iResponseObject.details.brandFolder.productDesc := #COM_OWNER.umGetBrandFolderProductDesc( #L00STYLE )
+    Endif
+    
+    Else
+    #oReturnCode := 'ER'
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildAvailableStyles
+    * Description....: Build Available Styles for a Coordinating Product
+    * =======================================================
+    Mthroutine Name(umBuildAvailableStyles) Desc('Build Available Styles') Help('Data comes from WL_PRDLST with LW3ROWTYP as "STY"')
+    
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    Selectlist Named(#WL_PRDLST) Where(#LW3ROWTYP = 'STY')
+    Add_Entry To_List(#iResponseObject.styles)
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildAvailableColors
+    * Description....: Build Available Colors
+    * =======================================================
+    Mthroutine Name(umBuildAvailableColors) Desc('Build Available Colors') Help('Data comes from WL_PRDLST with LW3ROWTYP as "COL"')
+    
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    Selectlist Named(#WL_PRDLST) Where(#LW3ROWTYP = 'COL')
+    Add_Entry To_List(#iResponseObject.colors)
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildCoordinates
+    * Description....: Build Coordinates
+    * =======================================================
+    Mthroutine Name(umBuildCoordinates) Desc('Build Coordinates') Help('Data comes from WL_PRDLST with LW3ROWTYP as "COR"')
+    
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iCurrentProductStyleCode)
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iCurrentProductColorCode)
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    Selectlist Named(#WL_PRDLST) Where(#LW3ROWTYP = "COR")
+    #L07CPCAT := *NULL
+    Fetch Fields(#L07CPCAT) From_File(LFIP107) With_Key(#iCurrentProductStyleCode #iCurrentProductColorCode #L00STYLE #L00COLOR) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Add_Entry To_List(#iResponseObject.coordinates)
+    #iResponseObject.coordinates.CurrentItem.redirectCreateRug := (#L07CPCAT = 'B') And (#Global_Constants.umIsHardSurface( #L00PTYP ))
+    
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildAvailableLengths
+    * Description....: Build Available Lengths for Premade Rugs / Stocked Area Rugs
+    * =======================================================
+    Mthroutine Name(umBuildAvailableLengths) Desc('Build Available Lengths') Help('Data comes from WL_PRDLST with LW3ROWTYP as "ALN"')
+    
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    * 2025/06/26 - Jan - Ignore B2B and pricing for now for Stanton Rebrand POC
+    
+    * For Premade Rugs
+    * * * #@UnitPrice #@RugWidthFeet #@RugWidthInches := *NULL
+    Selectlist Named(#WL_PRDLST) Where(#LW3ROWTYP = 'ALN')
+    
+    * * * #Processor_Pricing.umGetPrice Iipcst#(#LW3WEBC01) Iipstyl(#L00STYLE) Iipclr(#L00COLOR) Iipsize(#L00SIZE) Iipback(#L00BACK) Iipaexrt('Y') Bopcprc(#P010CPRC) Boprprc(#P010RPRC) Bopsmprc(#P010SMPRC) Bopshprc(#P010SHPRC) Boppedate(#OPPEDATE) Boppaply(#OPPAPLY) Icusind(#LW3CUSIND)
+    
+    * * * #@AdjustedPrice := #P010CPRC
+    * * * #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype('PRODUCTTYPE') Iorderlinetype('') Iproducttype(#L00PTYP) Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcarpettile(#LW3MSRPTL) Imarkuphardsurface(#LW3MSRPHS) Bcalculatedprice(#@AdjustedPrice)
+    
+    * Compute Width and Length
+    #Utility_General.umInchesToFeetAndInches Iinches(#L00WDTIN) Ototalfeet(#LW3RGWTF) Ototalinches(#LW3RGWTI)
+    #Utility_General.umInchesToFeetAndInches Iinches(#L00LTHIN) Ototalfeet(#LW3RGLTF) Ototalinches(#LW3RGLTI)
+    
+    Add_Entry To_List(#iResponseObject.lengths)
+    
+    * !NC! - Change LW3CRDVIS and LW3MSRPCP to be in the Data Model later
+    If Cond(((#LW3CRDVIS *EQ 'Y') *And (#LW3MSRPCP *EQ *ZERO)) Or (#Global_DataModel.upStorefrontIndicator = 'C'))
+    * * * #LW3ALTKEY := #L00STYLE + '/' + #L00COLOR + '/' + #L00SIZE + '/' + #L00BACK
+    #iResponseObject.lengths.CurrentItem.description := #LW3RGWTF.asString + "' " + #LW3RGWTI.asString + '" x ' + #LW3RGLTF.asString + "' " + #LW3RGLTI.asString
+    
+    Else
+    * * * * Price Display
+    * * * #uEditmask.uEditField Unumberfield(#@AdjustedPrice) Udecpoint(#LW3DPSYM) Uthousep(#LW3TSSYM) Ureturnfield(#D_SALEPRC)
+    * * * #LW3ALTKEY := #L00STYLE + '/' + #L00COLOR + '/' + #L00SIZE + '/' + #L00BACK
+    * * * * G#67 - This is the old format with labels
+    * * * * #LW3ALTDSC := 'Wth: ' + #LW3RGWTF.asString + "' " + #LW3RGWTI.asString + '" x Lth: ' + #LW3RGLTF.asString + "' " + #LW3RGLTI.asString + '" ' + #LW3CURSM + #D_SALEPRC + " /ea"
+    * * * #LW3ALTDSC := #LW3RGWTF.asString + "' " + #LW3RGWTI.asString + '" x ' + #LW3RGLTF.asString + "' " + #LW3RGLTI.asString + '" ' + #LW3CURSM + #D_SALEPRC + " /ea"
+    Endif
+    
+    * * * If Cond((#@UnitPrice = 0) Or (#@UnitPrice > #@AdjustedPrice))
+    * * * * G#265 - End - 20221117
+    * * * #@UnitPrice := #@AdjustedPrice
+    * * * #@RugWidthFeet := #LW3RGWTF
+    * * * #@RugWidthInches := #LW3RGLTI
+    * * * Endif
+    
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildProductDetails
+    * Description....: Build Product Details Information
+    * =======================================================
+    Mthroutine Name(umBuildProductDetails) Desc('Build Product Details Information') Help('Data comes from WL_PRDLST with LW3ROWTYP as "STK"')
+    
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    * 2025/06/26 - Jan - Ignore B2B and pricing for now for Stanton Rebrand POC
+    
+    #WL_PRDLST := *NULL /* Clear all fields but not the working list */
+    
+    Loc_Entry In_List(#WL_PRDLST) Where(#LW3ROWTYP = 'STK')
+    If_Status Is(*OKAY)
+    
+    If Cond(#Global_DataModel.upStorefrontIndicator = 'B')
+    * * * #Processor_Pricing.umGetPrice( #LW3WEBC01 #L00STYLE #L00COLOR #L00SIZE #L00BACK 'Y' #P010CPRC #P010RPRC #P010SMPRC #P010SHPRC #OPPEDATE #OPPAPLY #LW3CUSIND )
+    Endif
+    
+    * 2025/06/26 - Jan - simply return a boolean for Dropped Products for now, and check whether the frontend can handle the rest
+    * * * * If this is a dropped product, do not display it and return to the Home Page
+    * * * If Cond(#L00DROP = 'Y')
+    * * * #MultilingualReader.umDisplayMultilingualMessage Ivariablename('MSG_ITEM_ALREADY_DROPPED') Ilanguage(*LANGUAGE) Isubstitutionvariable(#L00SDESC + ' ' + #L00CDESC)
+    * * * If Cond(#LW3CUSIND = 'B')
+    * * * Transfer Toroutine(#WB2CHMPGE.hompge1)
+    * * * Else
+    * * * Transfer Toroutine(#WPRDSRCH.productSearch)
+    * * * Endif
+    * * * Endif
+    
+    #iResponseObject.details.dropped := (#L00DROP = 'Y')
+    
+    * Do not retrieve Available Widths for Premade Rugs here
+    If Cond(#L00PTYP <> 'R')
+    #COM_OWNER.umBuildAvailableWidths Istyledescription(#L00SDESC) Icolordescription(#L00CDESC) Imsrppricingflag(#LW3MSRPPF) Imsrpcarpetmarkup(#LW3MSRPCP) Iresponseobject(#iResponseObject)
+    Endif
+    
+    Endif
+    
+    #COM_OWNER.umBuildRoomScenes Ibrand(#L00DVBR) Icolor(#L00COLOR) Iroomsceneimage(#L00RMSCEN) Iroom1color(#L00RM1CLR) Iroomsceneimage2(#L00RMS001) Iroom2color(#L00RM2CLR) Iroomsceneimage3(#L00RMS002) Iroom3color(#L00RM3CLR) Iimageprofile(#L00IMGPRO) Iroomprofilecolor(#L00PROFCL) Iimagegroupshot(#L00IMGGRO) Iresponseobject(#iResponseObject)
+    
+    #COM_OWNER.umBuildUomInfoDisplay Ibrand(#L00DVBR) Iproducttype(#L00PTYP) Iuom(#P010UOM) Isquarefeetperbox(#L00INT1) Iresponseobject(#iResponseObject) Osquarefeetperbox(#LW3SFPBX)
+    
+    * * * #@AdjustedPrice := #P010CPRC
+    * * * #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype('PRODUCTTYPE') Iorderlinetype('') Iproducttype(#L00PTYP) Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcarpettile(#LW3MSRPTL) Imarkuphardsurface(#LW3MSRPHS) Bcalculatedprice(#@AdjustedPrice)
+    * * *
+    * * * If Cond(#P010CPRC > 0)
+    * * * #uEditmask.uEditField Unumberfield(#@AdjustedPrice) Udecpoint(#LW3DPSYM) Uthousep(#LW3TSSYM) Ureturnfield(#D_LPRICE)
+    * * * Else
+    * * * #D_LPRICE := *BLANKS
+    * * * Endif
+    
+    * * * * G#12 - Set Priceflag filter. Do not show price if Markup is not available for the product type
+    * * * #W_SHOWPRICEFLAG := TRUE
+    * * * * If the user is to see retail price only and there is no markup, then no price should display (the price field should not display at all). The reasoning here is that the super user wants the sub user to not be able to see the dealer price.
+    * * * If Cond(#LW3CRDVIS = 'Y')
+    * * * If Cond((#LW3MSRPCP = 0) And (#LW3MSRPPR = 0) And (#LW3MSRPTL = 0) And (#LW3MSRPHS = 0))
+    * * * #W_SHOWPRICEFLAG := FALSE
+    * * * Endif
+    * * * Else
+    * * * If Cond(#LW3MSRPPF = 'Y')
+    * * * Case Of_Field(#L00PTYP)
+    * * * When Value_Is(= #Global_Constants.upPrdTyp_PremadeRug)
+    * * * If Cond(#LW3MSRPPR = 0)
+    * * * #W_SHOWPRICEFLAG := FALSE
+    * * * Endif
+    * * *
+    * * * When Value_Is(= #Global_Constants.upPrdTyp_CarpetTile = #Global_Constants.upPrdTyp_CarpetPlank)
+    * * * If Cond(#LW3MSRPTL = 0)
+    * * * #W_SHOWPRICEFLAG := FALSE
+    * * * Endif
+    * * *
+    * * * * #G#151
+    * * * * When Value_Is(= #Global_Constants.upPrdTyp_HardSurfaceTile = #Global_Constants.upPrdTyp_HardSurfacePlank = #Global_Constants.upPrdTyp_Trim)
+    * * * When Value_Is(= #Global_Constants.upPrdTyp_HardSurfaceTile = #Global_Constants.upPrdTyp_HardSurfacePlank = #Global_Constants.upPrdTyp_Trim = #Global_Constants.upPrdTyp_FineHardwood)
+    * * * If Cond(#LW3MSRPHS = 0)
+    * * * #W_SHOWPRICEFLAG := FALSE
+    * * * Endif
+    * * *
+    * * * Otherwise
+    * * * If Cond(#LW3MSRPCP = 0)
+    * * * #W_SHOWPRICEFLAG := FALSE
+    * * * Endif
+    * * * Endcase
+    * * * Endif
+    * * * Endif
+    
+    * Get data for the Rersources Tab
+    #Processor_Products.umGetResources I_L00dvbr(#L00DVBR) I_L00fibrlb(#L00FIBRLB) I_L00ptyp(#L00PTYP) I_L00style(#L00STYLE) O_Cleaningandcare(#iResponseObject.resources.cleaningAndCare) O_Fiber(#iResponseObject.resources.fiber) O_Installationguide(#iResponseObject.resources.installationGuide) O_Warranty(#iResponseObject.resources.warranty) I_L00size(#L00SIZE) I_F54styp(#Processor_Products.umGetSubType( #L00PCAT #L00PTYP #L00STYLE #L00BACK )) O_Specsheet(#iResponseObject.resources.specSheet) O_Triminfo(#iResponseObject.resources.trimInfo)
+    
+    * * * * G#205 - Set size to a smaller dimension to ease up on loading time
+    * * * #Utility.umResizeImageDimensions Bimageurl(#L00IMGFLA) Isyssetvar('IMAGE_URI_REPLACE1') Iheight(555)
+    
+    #iResponseObject.details.brandDesc := #Processor_Products.umGetBrandDescription( #L00DVBR #L00PTYP #L00STYLE #L00COLOR #L00SIZE #L00BACK )
+    #iResponseObject.tagManager.brandDesc := #iResponseObject.details.brandDesc
+    
+    #iResponseObject.details.typeDesc := #Processor_Products.umGetProdTypeDescription( #L00PTYP #L00PCAT #L00STYLE #L00BACK #L00COLOR #L00SIZE )
+    
+    * For Trims Only
+    If Cond(#Global_Constants.umIsCoordinatingProduct( #L00PTYP ))
+    If Cond(*Not #L00INT2.IsNull)
+    #iResponseObject.details.lockingSystem := #Utility_Codes.umGetCodeDescriptionByCode( 'LCKSYS' #L00INT2.AsString )
+    Endif
+    
+    If Cond(*Not #L00INT3.IsNull)
+    #iResponseObject.details.coreMaterial := #Utility_Codes.umGetCodeDescriptionByCode( 'CORMAT' #L00INT3.AsString )
+    Endif
+    Endif
+    
+    * If this product is a premade rug, compute its width for display
+    If Cond(#L00PTYP = 'R')
+    #Utility_General.umInchesToFeetAndInches Iinches(#L00WDTIN) Ototalfeet(#L00WTHFT) Ototalinches(#L00WTHIN)
+    Endif
+    
+    * Set all field values associated to the details object
+    Set Com(#iResponseObject.details) Com_Fields(*ALL)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildRunnerAvailableWidths
+    * Description....: Use this to check and build a list of available widths for the current product
+    * =======================================================
+    Mthroutine Name(umBuildAvailableWidths) Desc('Build Available Widths') Help('Use this to check and build a list of available widths for the current product')
+    
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    Define_Map For(*INPUT) Class(#LW3SDESC) Name(#iStyleDescription) Desc('Style Description')
+    Define_Map For(*INPUT) Class(#LW3CDESC) Name(#iColorDescription) Desc('Color Description')
+    Define_Map For(*INPUT) Class(#LW3MSRPPF) Name(#iMSRPPricingFlag) Desc('MSRP Pricing Flag')
+    Define_Map For(*INPUT) Class(#LW3MSRPCP) Name(#iMSRPCarpetMarkup) Desc('MSRP Carpet Markup')
+    
+    Define_Com Class(#P010CPRC) Name(#@AdjustedPrice) Desc('Adjusted Price based on MSRP')
+    
+    #iStyleDescription := #Utility_General.umEscapeSpecialChars( #iStyleDescription )
+    #iColorDescription := #Utility_General.umEscapeSpecialChars( #iColorDescription )
+    
+    If Cond(#Global_DataModel.upStorefrontIndicator = 'B')
+    * * * #LW3QSEL := "SELECT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00WTHFT, ATTR.L00WTHIN, PRICE.P010CPRC, PRICE.P010UOM, ATTR.L00WDTIN, ATTR.L00LTHIN, ATTR.L00DROP FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #iCustomerNumber.Trim + " AND PRICE.P010CPRC > 0 AND ATTR.L00SDESC = '" + #iStyleDescription + "' AND ATTR.L00CDESC = '" + #iColorDescription + "' " + #COM_OWNER.umCheckProprietary( #iStorefrontIndicator #iCustomerNumber )
+    * * *
+    * * * Select_Sql Fields(#LW3STYLE #LW3COLOR #LW3SIZE #LW3BACK #LW3WTHFT #LW3WTHIN #LW3CUTPRC #LW3UOM #L00WDTIN #L00LTHIN #L00DROP) Io_Error(*NEXT) Using(#LW3QSEL)
+    * * * * * 2021/08/05 - Gitlab#31 - Only show widths of non-dropped products
+    * * * If Cond(#L00DROP <> Y)
+    * * * #COM_OWNER.umSetAvailableWidthDetails Imsrppricingflag(#iMSRPPricingFlag)
+    * * * Add_Entry To_List(#WL_AVAILABLEWIDTHS)
+    * * * Endif
+    * * * Endselect
+    
+    Else
+    
+    #LW3QSEL := "SELECT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00WTHFT, ATTR.L00WTHIN, ATTR.L00WDTIN, ATTR.L00LTHIN, ATTR.L00DROP FROM LFIP100 ATTR WHERE L00SDESC = '" + #iStyleDescription + "' AND L00CDESC = '" + #iColorDescription + "' AND (L00PTYP <> 'S' AND L00PTYP <> 'W') " + #Processor_Products.umCheckProprietary
+    
+    Select_Sql Fields(#LW3STYLE #LW3COLOR #LW3SIZE #LW3BACK #LW3WTHFT #LW3WTHIN #L00WDTIN #L00LTHIN #L00DROP) Io_Error(*NEXT) Using(#LW3QSEL)
+    * * 2021/08/05 - Gitlab#31 - Only show widths of non-dropped products
+    If Cond(#L00DROP <> Y)
+    #COM_OWNER.umSetAvailableWidthDetails Iproducttype(#L00PTYP) Iwidthfeet(#LW3WTHFT) Iwidthinches(#LW3WTHIN) Ilengthinches(#L00LTHIN) Ofullwidth(#LW3FULWTH) Imsrppricingflag(#iMSRPPricingFlag)
+    Add_Entry To_List(#iResponseObject.widths)
+    Endif
+    Endselect
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSetAvailableWidthDetails
+    * Description....: Set Available Width Details
+    * =======================================================
+    Mthroutine Name(umSetAvailableWidthDetails) Desc('Set Available Width Details') Help('Set Available Width Details')
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType)
+    Define_Map For(*INPUT) Class(#L00WTHFT) Name(#iWidthFeet)
+    Define_Map For(*INPUT) Class(#L00WDTIN) Name(#iWidthInches)
+    Define_Map For(*INPUT) Class(#L00LTHIN) Name(#iLengthInches)
+    Define_Map For(*INPUT) Class(#LW3MSRPPF) Name(#iMSRPPricingFlag) Desc('MSRP Pricing Flag')
+    Define_Map For(*OUTPUT) Class(#LW3FULWTH) Name(#oFullWidth)
+    #LW3FULWTH := *NULL
+    
+    Case Of_Field(#iProductType)
+    When Value_Is(= 'T' = 'P')
+    #oFullWidth := #iWidthInches.asstring + '" x ' + #iLengthInches.asstring + '"'
+    
+    Otherwise
+    If Cond(#iWidthFeet > 0)
+    #oFullWidth := #iWidthFeet.asString + "' "
+    Endif
+    If Cond(#iWidthInches > 0)
+    If Cond(#LW3FULWTH <> *BLANKS)
+    #oFullWidth += " "
+    Endif
+    #oFullWidth += #iWidthInches.asString + '"'
+    Endif
+    Endcase
+    
+    * * * If Cond(#iMSRPPricingFlag = 'Y')
+    * * * #LW3CUTPRC := #Utility.umPriceUplift( #LW3CUTPRC #LW3MSRPCP )
+    * * * Endif
+    * * * #uEditmask.uEditField Unumberfield(#LW3CUTPRC) Udecpoint(#LW3DPSYM) Uthousep(#LW3TSSYM) Ureturnfield(#D_CUTPRC)
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildRoomScenes
+    * Description....: Build Room Scene List
+    * =======================================================
+    Mthroutine Name(umBuildRoomScenes) Desc('Build Room Scene List') Help('Build Room Scene List')
+    
+    Define_Map For(*INPUT) Class(#L00DVBR) Name(#iBrand)
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iColor)
+    Define_Map For(*INPUT) Class(#L00RMSCEN) Name(#iRoomSceneImage)
+    Define_Map For(*INPUT) Class(#L00RM1CLR) Name(#iRoom1Color)
+    Define_Map For(*INPUT) Class(#L00RMS001) Name(#iRoomSceneImage2)
+    Define_Map For(*INPUT) Class(#L00RM2CLR) Name(#iRoom2Color)
+    Define_Map For(*INPUT) Class(#L00RMS002) Name(#iRoomSceneImage3)
+    Define_Map For(*INPUT) Class(#L00RM3CLR) Name(#iRoom3Color)
+    Define_Map For(*INPUT) Class(#L00IMGPRO) Name(#iImageProfile)
+    Define_Map For(*INPUT) Class(#L00PROFCL) Name(#iRoomProfileColor)
+    Define_Map For(*INPUT) Class(#L00IMGGRO) Name(#iImageGroupShot)
+    
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    * Room Scenes
+    * #238 - For F2K, only show room scenes that match the color code
+    If Cond(#iBrand = 'F2K')
+    If Cond((#iRoomSceneImage <> *BLANKS) And (#iColor = #iRoom1Color))
+    #LW3IMAGE := #iRoomSceneImage
+    Add_Entry To_List(#iResponseObject.roomScenes)
+    Endif
+    If Cond((#iRoomSceneImage2 <> *BLANKS) And (#iColor = #iRoom2Color))
+    #LW3IMAGE := #iRoomSceneImage2
+    Add_Entry To_List(#iResponseObject.roomScenes)
+    Endif
+    If Cond((#iRoomSceneImage3 <> *BLANKS) And (#iColor = #iRoom3Color))
+    #LW3IMAGE := #iRoomSceneImage3
+    Add_Entry To_List(#iResponseObject.roomScenes)
+    Endif
+    If Cond((#iImageProfile <> *BLANKS) And (#iColor = #iRoomProfileColor))
+    #LW3IMAGE := #iImageProfile
+    Add_Entry To_List(#iResponseObject.roomScenes)
+    Endif
+    
+    Else
+    If Cond(#iRoomSceneImage <> *BLANKS)
+    #LW3IMAGE := #iRoomSceneImage
+    Add_Entry To_List(#iResponseObject.roomScenes)
+    Endif
+    If Cond(#iRoomSceneImage2 <> *BLANKS)
+    #LW3IMAGE := #iRoomSceneImage2
+    Add_Entry To_List(#iResponseObject.roomScenes)
+    Endif
+    If Cond(#iRoomSceneImage3 <> *BLANKS)
+    #LW3IMAGE := #iRoomSceneImage3
+    Add_Entry To_List(#iResponseObject.roomScenes)
+    Endif
+    If Cond(#iImageProfile <> *BLANKS)
+    #LW3IMAGE := #iImageProfile
+    Add_Entry To_List(#iResponseObject.roomScenes)
+    Endif
+    Endif
+    
+    If Cond(#iImageGroupShot <> *BLANKS)
+    #LW3IMAGE := #iImageGroupShot
+    Add_Entry To_List(#iResponseObject.roomScenes)
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildUomInfoDisplay
+    * Description....: Build UOM Information for Display
+    * =======================================================
+    Mthroutine Name(umBuildUomInfoDisplay) Desc('Build UOM Information for Display') Help('Build UOM Information for Display')
+    
+    Define_Map For(*INPUT) Class(#L00DVBR) Name(#iBrand)
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType)
+    Define_Map For(*INPUT) Class(#P010UOM) Name(#iUom)
+    Define_Map For(*INPUT) Class(#L00INT1) Name(#iSquareFeetPerBox)
+    
+    Define_Map For(*OUTPUT) Class(#LW3SFPBX) Name(#oSquareFeetPerBox)
+    
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    Case Of_Field(#iUom)
+    When Value_Is(= 'SY')
+    #iResponseObject.details.uom := 'sq yd'
+    
+    When Value_Is(= 'CT')
+    If Cond(#Global_Constants.umIsOrderedByPiece( #iProductType ))
+    #iResponseObject.details.uom := 'pc'
+    Else
+    #iResponseObject.details.uom := #iUom.LowerCase
+    Endif
+    Otherwise
+    #iResponseObject.details.uom := #iUom.LowerCase
+    Endcase
+    
+    * 04/08/2020 - Square Foot per box for Hard Surface
+    If Cond(((#iBrand = 'SHS') Or (#iBrand = 'SST') Or (#iBrand = 'F2K')) And (#iSquareFeetPerBox > 0))
+    #oSquareFeetPerBox := #iSquareFeetPerBox / 100
+    Else
+    #oSquareFeetPerBox := 0
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetAvailableSizes
+    * Description....: Get Available Sizes
+    * =======================================================
+    Mthroutine Name(umGetAvailableSizes) Desc('Get Available Sizes')
+    
+    * Maps defined as *BOTH are intended to preserve the values when going back from this method
+    Define_Map For(*BOTH) Class(#L00SDESC) Name(#bStyleDesc)
+    Define_Map For(*BOTH) Class(#L00CDESC) Name(#bColorDesc)
+    Define_Map For(*BOTH) Class(#L00PTYP) Name(#bProductType)
+    
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    #L134STYL1 #L134CLR1 #L134SIZE1 #L134BACK1 #L134STYL2 #L134CLR2 #L134SIZE2 #L134BACK2 #L134STYL3 #L134CLR3 #L134SIZE3 #L134BACK3 #L134STYL4 #L134CLR4 #L134SIZE4 #L134BACK4 #L134STYL5 #L134CLR5 #L134SIZE5 #L134BACK5 #L134STYL6 #L134CLR6 #L134SIZE6 #L134BACK6 #L134STYL7 #L134CLR7 #L134SIZE7 #L134BACK7 #L134STYL8 #L134CLR8 #L134SIZE8 #L134BACK8 #L134STYL9 #L134CLR9 #L134SIZE9 #L134BACK9 #L134ST001 #L134CLR10 #L134SI001 #L134BA001 := *NULL
+    
+    #LW3QSEL := "Select L134STYL1, L134CLR1, L134SIZE1, L134BACK1, L134STYL2, L134CLR2, L134SIZE2, L134BACK2, L134STYL3, L134CLR3, L134SIZE3, L134BACK3, L134STYL4, L134CLR4, L134SIZE4, L134BACK4, L134STYL5, L134CLR5, L134SIZE5, L134BACK5, L134STYL6, L134CLR6, L134SIZE6, L134BACK6, L134STYL7, L134CLR7, L134SIZE7, L134BACK7, L134STYL8, L134CLR8, L134SIZE8, L134BACK8, L134STYL9, L134CLR9, L134SIZE9, L134BACK9, L134STYL10, L134CLR10, L134SIZE10, L134BACK10"
+    #LW3QSEL += " From LFIP134 Where"
+    #LW3QSEL += " (L134STYL1 = '" + #L00STYLE + "' And L134CLR1 = '" + #L00COLOR + "' And L134SIZE1 = '" + #L00SIZE + "' And L134BACK1 = '" + #L00BACK + "') Or "
+    #LW3QSEL += " (L134STYL2 = '" + #L00STYLE + "' And L134CLR2 = '" + #L00COLOR + "' And L134SIZE2 = '" + #L00SIZE + "' And L134BACK2 = '" + #L00BACK + "') Or "
+    #LW3QSEL += " (L134STYL3 = '" + #L00STYLE + "' And L134CLR3 = '" + #L00COLOR + "' And L134SIZE3 = '" + #L00SIZE + "' And L134BACK3 = '" + #L00BACK + "') Or "
+    #LW3QSEL += " (L134STYL4 = '" + #L00STYLE + "' And L134CLR4 = '" + #L00COLOR + "' And L134SIZE4 = '" + #L00SIZE + "' And L134BACK4 = '" + #L00BACK + "') Or "
+    #LW3QSEL += " (L134STYL5 = '" + #L00STYLE + "' And L134CLR5 = '" + #L00COLOR + "' And L134SIZE5 = '" + #L00SIZE + "' And L134BACK5 = '" + #L00BACK + "') Or "
+    #LW3QSEL += " (L134STYL6 = '" + #L00STYLE + "' And L134CLR6 = '" + #L00COLOR + "' And L134SIZE6 = '" + #L00SIZE + "' And L134BACK6 = '" + #L00BACK + "') Or "
+    #LW3QSEL += " (L134STYL7 = '" + #L00STYLE + "' And L134CLR7 = '" + #L00COLOR + "' And L134SIZE7 = '" + #L00SIZE + "' And L134BACK7 = '" + #L00BACK + "') Or "
+    #LW3QSEL += " (L134STYL8 = '" + #L00STYLE + "' And L134CLR8 = '" + #L00COLOR + "' And L134SIZE8 = '" + #L00SIZE + "' And L134BACK8 = '" + #L00BACK + "') Or "
+    #LW3QSEL += " (L134STYL9 = '" + #L00STYLE + "' And L134CLR9 = '" + #L00COLOR + "' And L134SIZE9 = '" + #L00SIZE + "' And L134BACK9 = '" + #L00BACK + "') Or "
+    #LW3QSEL += " (L134STYL10 = '" + #L00STYLE + "' And L134CLR10 = '" + #L00COLOR + "' And L134SIZE10 = '" + #L00SIZE + "' And L134BACK10 = '" + #L00BACK + "')"
+    
+    Select_Sql Fields(#L134STYL1 #L134CLR1 #L134SIZE1 #L134BACK1 #L134STYL2 #L134CLR2 #L134SIZE2 #L134BACK2 #L134STYL3 #L134CLR3 #L134SIZE3 #L134BACK3 #L134STYL4 #L134CLR4 #L134SIZE4 #L134BACK4 #L134STYL5 #L134CLR5 #L134SIZE5 #L134BACK5 #L134STYL6 #L134CLR6 #L134SIZE6 #L134BACK6 #L134STYL7 #L134CLR7 #L134SIZE7 #L134BACK7 #L134STYL8 #L134CLR8 #L134SIZE8 #L134BACK8 #L134STYL9 #L134CLR9 #L134SIZE9 #L134BACK9 #L134ST001 #L134CLR10 #L134SI001 #L134BA001) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    #COM_OWNER.umAddToAvailableSizeList Istylecode(#L134STYL1) Icolorcode(#L134CLR1) Isizecode(#L134SIZE1) Ibackingcode(#L134BACK1) Bstyledesc(#bStyleDesc) Bcolordesc(#bColorDesc) Bproducttype(#bProductType) Iresponseobject(#iResponseObject)
+    #COM_OWNER.umAddToAvailableSizeList Istylecode(#L134STYL2) Icolorcode(#L134CLR2) Isizecode(#L134SIZE2) Ibackingcode(#L134BACK2) Bstyledesc(#bStyleDesc) Bcolordesc(#bColorDesc) Bproducttype(#bProductType) Iresponseobject(#iResponseObject)
+    #COM_OWNER.umAddToAvailableSizeList Istylecode(#L134STYL3) Icolorcode(#L134CLR3) Isizecode(#L134SIZE3) Ibackingcode(#L134BACK3) Bstyledesc(#bStyleDesc) Bcolordesc(#bColorDesc) Bproducttype(#bProductType) Iresponseobject(#iResponseObject)
+    #COM_OWNER.umAddToAvailableSizeList Istylecode(#L134STYL4) Icolorcode(#L134CLR4) Isizecode(#L134SIZE4) Ibackingcode(#L134BACK4) Bstyledesc(#bStyleDesc) Bcolordesc(#bColorDesc) Bproducttype(#bProductType) Iresponseobject(#iResponseObject)
+    #COM_OWNER.umAddToAvailableSizeList Istylecode(#L134STYL5) Icolorcode(#L134CLR5) Isizecode(#L134SIZE5) Ibackingcode(#L134BACK5) Bstyledesc(#bStyleDesc) Bcolordesc(#bColorDesc) Bproducttype(#bProductType) Iresponseobject(#iResponseObject)
+    #COM_OWNER.umAddToAvailableSizeList Istylecode(#L134STYL6) Icolorcode(#L134CLR6) Isizecode(#L134SIZE6) Ibackingcode(#L134BACK6) Bstyledesc(#bStyleDesc) Bcolordesc(#bColorDesc) Bproducttype(#bProductType) Iresponseobject(#iResponseObject)
+    #COM_OWNER.umAddToAvailableSizeList Istylecode(#L134STYL7) Icolorcode(#L134CLR7) Isizecode(#L134SIZE7) Ibackingcode(#L134BACK7) Bstyledesc(#bStyleDesc) Bcolordesc(#bColorDesc) Bproducttype(#bProductType) Iresponseobject(#iResponseObject)
+    #COM_OWNER.umAddToAvailableSizeList Istylecode(#L134STYL8) Icolorcode(#L134CLR8) Isizecode(#L134SIZE8) Ibackingcode(#L134BACK8) Bstyledesc(#bStyleDesc) Bcolordesc(#bColorDesc) Bproducttype(#bProductType) Iresponseobject(#iResponseObject)
+    #COM_OWNER.umAddToAvailableSizeList Istylecode(#L134STYL9) Icolorcode(#L134CLR9) Isizecode(#L134SIZE9) Ibackingcode(#L134BACK9) Bstyledesc(#bStyleDesc) Bcolordesc(#bColorDesc) Bproducttype(#bProductType) Iresponseobject(#iResponseObject)
+    #COM_OWNER.umAddToAvailableSizeList Istylecode(#L134ST001) Icolorcode(#L134CLR10) Isizecode(#L134SI001) Ibackingcode(#L134BA001) Bstyledesc(#bStyleDesc) Bcolordesc(#bColorDesc) Bproducttype(#bProductType) Iresponseobject(#iResponseObject)
+    
+    * * * Sort_List Named(#iResponseObject.sizes) By_Fields(#F2WDSC #L00SDESC)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umAddToAvailableSizeList
+    * Description....: Add to Available Size List
+    * =======================================================
+    Mthroutine Name(umAddToAvailableSizeList) Desc('Add to Available Size List')
+    
+    * Maps defined as *BOTH are intended to preserve the values when going back from this method
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyleCode)
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iColorCode)
+    Define_Map For(*INPUT) Class(#L00SIZE) Name(#iSizeCode)
+    Define_Map For(*INPUT) Class(#L00BACK) Name(#iBackingCode)
+    Define_Map For(*BOTH) Class(#L00SDESC) Name(#bStyleDesc)
+    Define_Map For(*BOTH) Class(#L00CDESC) Name(#bColorDesc)
+    Define_Map For(*BOTH) Class(#L00PTYP) Name(#bProductType)
+    
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    If Cond(#iStyleCode <> *BLANKS)
+    
+    #LW3SELECT := *NULL
+    Fetch Fields(#L00SDESC #L00CDESC #L00PTYP) From_File(LFIL1001) With_Key(#iStyleCode #iColorCode #iSizeCode #iBackingCode) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    * G#143 - use FIP020T if trim
+    If Cond(#Global_Constants.upPrdTyp_Trim = #L00PTYP)
+    #F2WDSC := #Processor_Products.umGetSizeDescription( #L00PTYP #iStyleCode #iSizeCode #iColorCode #iBackingCode )
+    Else
+    * G#321 - get the Size Description from FIP020, replace the #W_AS_SIZECODE if record is found
+    #F2WDSC := *NULL
+    Fetch Fields(#F2WDSC) From_File(FIL020A1) With_Key(#iStyleCode #iSizeCode #iColorCode #iBackingCode) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    
+    * Set LW3SELECT as Y if this is the current product
+    If Cond((#L00STYLE = #iStyleCode) And (#L00COLOR = #iColorCode) And (#L00SIZE = #iSizeCode) And (#L00BACK = #iBackingCode))
+    #LW3SELECT := 'Y'
+    Endif
+    
+    * G#321 - get the Size Description from FIP020, replace the #W_AS_SIZECODE if record is found
+    If Cond(#F2WDSC = '')
+    #F2WDSC := #iSizeCode
+    Endif
+    
+    If Cond(#L00PTYP = #Global_Constants.upPrdTyp_Bullnose)
+    #F2WDSC += ' Mosaic'
+    Endif
+    
+    Add_Entry To_List(#iResponseObject.sizes)
+    Endif
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildNoServiceStates
+    * Description....: For F2K Brand only where some states are not serviced
+    * =======================================================
+    Mthroutine Name(umBuildNoServiceStates) Desc('Build No Service States') Help('For F2K Brand only where some states are not serviced')
+    
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    Select Fields(#LW3CODE #LW3CDES) From_File(LW3CODL5) With_Key('NOF2KS') Io_Error(*NEXT) Val_Error(*NEXT)
+    Continue If(#LW3CODE = '#')
+    
+    Add_Entry To_List(#iResponseObject.noServiceStates)
+    #iResponseObject.noServiceStates.CurrentItem.state := #LW3CDES
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGenerateTitle
+    * Description....: Generate Title based on Brand, Style and Color
+    * =======================================================
+    Mthroutine Name(umGenerateTitle)
+    Define_Map For(*INPUT) Class(#L00DVBR) Name(#iBrand)
+    Define_Map For(*INPUT) Class(#L00SDESC) Name(#iStyle)
+    Define_Map For(*INPUT) Class(#L00CDESC) Name(#iColor)
+    
+    Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rTitle)
+    
+    * Get the Brand Desription from the Code Table
+    If Cond(#iBrand <> '')
+    #rTitle := #Utility_Codes.umGetCodeDescriptionByCode( 'BRAND' #iBrand )
+    
+    * Concatenate the Style and Color
+    #rTitle := #rTitle.Trim + ' | ' + #iStyle.Trim + ' ' + #iColor
+    Else
+    #rTitle := #iStyle.Trim + ' ' + #iColor
+    Endif
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetExtendedSKUDetails
+    * Description....: Get Extended SKU Details
+    * =======================================================
+    Mthroutine Name(umGetExtendedSKUDetails) Desc('Get Extended SKU Details')
+    
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyleCode)
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iColorCode)
+    Define_Map For(*INPUT) Class(#L00SIZE) Name(#iSizeCode)
+    Define_Map For(*INPUT) Class(#L00BACK) Name(#iBackingCode)
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType)
+    
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    Define_Com Class(#PRIM_LCOL<#LW3ESKUD>) Name(#ExtendedSKUCollection) Reference(*DYNAMIC)
+    
+    Set_Ref Com(#ExtendedSKUCollection) To(*CREATE_AS #PRIM_LCOL<#LW3ESKUD>)
+    
+    Clr_List Named(#ExtendedSKUCollection)
+    
+    #Processor_Products.umGetExtendedSKUDetails Istyle(#iStyleCode) Icolor(#iColorCode) Isize(#iSizeCode) Iback(#iBackingCode) Iproducttype(#iProductType) O_Extendeddetaillist(#ExtendedSKUCollection)
+    
+    Selectlist Named(#ExtendedSKUCollection)
+    Add_Entry To_List(#iResponseObject.extendedDetails)
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildProductVideos
+    * Description....: Build Product Videos
+    * =======================================================
+    Mthroutine Name(umBuildProductVideos) Desc('Build Product Videos')
+    
+    Define_Map For(*INPUT) Class(#L00DVBR) Name(#iBrand)
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyleCode)
+    Define_Map For(*INPUT) Class(#Com_Home.GetProduct.Response.ContentJson.Object) Name(#iResponseObject) Pass(*BY_REFERENCE)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_VimeoParameters)
+    
+    If Cond(#iBrand = 'SRC')
+    * Grab a video for style + colour, if not available get for just style
+    #iResponseObject.details.videos.byColor := #Utility_Codes.umGetCodeDescriptionByCode( 'PRDVD2' (#L00STYLE + '+' + #L00COLOR) )
+    If Cond(#iResponseObject.details.videos.byColor = *blanks)
+    #iResponseObject.details.videos.byColor := #Utility_Codes.umGetCodeDescriptionByCode( 'PRDVD1' #L00STYLE )
+    Endif
+    Endif
+    
+    If Cond(#iResponseObject.details.videos.byColor = *BLANKS)
+    #iResponseObject.details.videos.videoUrl := #Utility_Codes.umGetCodeDescriptionByCode( 'PRDVD1' #iStyleCode )
+    Endif
+    
+    * G#142 - Get Vimeo Parameters
+    If Cond((#iResponseObject.details.videos.videoUrl <> '') Or (#iResponseObject.details.videos.byColor <> ''))
+    * If the video is a Vimeo embed link, get the VIMEO_PARMS and VIMEO_ALLOW System Settings
+    If Cond(#iResponseObject.details.videos.videoUrl.UpperCase.Contains( 'VIMEO' ))
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('VIMEO_PARMS') Ilanguage('') Oalphavalue(#L_VimeoParameters)
+    
+    #iResponseObject.details.videos.videoUrl := #iResponseObject.details.videos.videoUrl.Trim + #L_VimeoParameters
+    Endif
+    
+    If Cond(#iResponseObject.details.videos.byColor.UpperCase.Contains( 'VIMEO' ))
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('VIMEO_PARMS') Ilanguage('') Oalphavalue(#L_VimeoParameters)
+    
+    #iResponseObject.details.videos.byColor := #iResponseObject.details.videos.byColor.Trim + #L_VimeoParameters
+    Endif
+    
+    If Cond((#iResponseObject.details.videos.videoUrl.UpperCase.Contains( 'VIMEO' )) Or (#iResponseObject.details.videos.byColor.UpperCase.Contains( 'VIMEO' )))
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('VIMEO_ALLOW') Ilanguage('') Oalphavalue(#iResponseObject.details.videos.vimeoAllowFlag)
+    Endif
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetBrandFolderProductDesc
+    * Description....: Get Brand Folder Product Description
+    * =======================================================
+    Mthroutine Name(umGetBrandFolderProductDesc) Desc('Get Brand Folder Product Description')
+    
+    Define_Map For(*INPUT) Class(#FXSTYLCD) Name(#iStyleCode)
+    Define_Map For(*INPUT) Class(#FXSTYLCD) Name(#iColorCode) Mandatory('')
+    Define_Map For(*RESULT) Class(#LW3CNTSTR) Name(#rProductDescription)
+    
+    #FXSTYLCD := #iStyleCode
+    #FXCOLRCD := #iColorCode
+    
+    Exchange Fields(#FXSTYLCD #FXCOLRCD)
+    * G#169 - Add Exit_Used(*NEXT) in the call
+    Call Process(*DIRECT) Function(LW3BFDA) Exit_Used(*NEXT) If_Error(*NEXT)
+    
+    If Cond(#FXRETCD = 'OK')
+    #rProductDescription := #FXCNTSTR
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSetHttpResponseMessages
+    * Description....: Set Http Response Messages
+    * =======================================================
+    Mthroutine Name(umSetHttpResponseMessages) Desc('Set Http Response Messages') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3VARNAM) Name(#iVariableName)
+    Define_Map For(*INPUT) Class(#LW3MSGTYP) Name(#iMessageType)
+    Define_Map For(*INPUT) Class(#LW3FLDNAM) Name(#iFieldName) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iMessageDetails) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iSubstitutionVariable1) Mandatory('')
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Add_Entry To_List(#iArray_HttpResponse)
+    #iArray_HttpResponse.CurrentItem.code := #iVariableName
+    #iArray_HttpResponse.CurrentItem.type := #iMessageType
+    #iArray_HttpResponse.CurrentItem.message := #Utility_Multilinguals.umGetMultilingualText( #iVariableName #Global_DataModel.upCurrentLanguage )
+    
+    If Cond(#iFieldName <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.field := #iFieldName
+    Endif
+    If Cond(#iMessageDetails <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.detail := #iMessageDetails
+    Endif
+    If Cond(#iSubstitutionVariable1 <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.substitutions.Add Value(#iSubstitutionVariable1)
+    Endif
+    
+    Endroutine
+    
+    End_Com
+    
+
+  API Definition:
+    Language Handling:       NoAction
+    Partition Handling:      PathVariable
+    Publish as Swagger V2:   Yes
+    Publish as OpenAPI V3:   Yes
+    ServicePath:             /CNSPRDDTL
+
+    Paths:
+    - /product:
+
+        Operations:
+        - GetProduct:
+            Verb:               Get
+            Server Routine:     usGetProduct
+            Deprecated:         No
+
+            Parameters:
+            - style:
+                Location:           Query
+                Style:              Default
+                Required:           No
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Style Code
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            - color:
+                Location:           Query
+                Style:              Default
+                Required:           No
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Color Code
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            - size:
+                Location:           Query
+                Style:              Default
+                Required:           No
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Size Code
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            - back:
+                Location:           Query
+                Style:              Default
+                Required:           No
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Backing Code
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            - styleDesc:
+                Location:           Query
+                Style:              Default
+                Required:           No
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Style Description
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            - colorDesc:
+                Location:           Query
+                Style:              Default
+                Required:           No
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Color Description
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Description:        Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - details:
+                          Type:               Reference
+                          Reference Name:     responseProductDetailsObject
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                      - extendedDetails:
+                          Description:        Extended Details Array
+                          Type:               Array
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Items:
+                          - Description:        Extended Details Object
+                            Type:               Object
+                            Format:             Unspecified
+                            Required:           No
+                            Nullable:           No
+                            ReadOnly:           No
+                            WriteOnly:          No
+
+                            Properties:
+                            - type:
+                                Description:        Detail Type
+                                Type:               Field
+                                Field Name:         L130DTYP
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - value:
+                                Description:        Detail Value
+                                Type:               Field
+                                Field Name:         LW3DTLVL
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                      - styles:
+                          Description:        Available Styles
+                          Type:               Array
+                          Format:             Unspecified
+                          Required:           No
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Items:
+                          - Description:        Available Styles Object
+                            Type:               Object
+                            Format:             Unspecified
+                            Required:           No
+                            Nullable:           No
+                            ReadOnly:           No
+                            WriteOnly:          No
+
+                            Properties:
+                            - brand:
+                                Description:        Brand
+                                Type:               Field
+                                Field Name:         L00DVBR
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - type:
+                                Description:        Product Type
+                                Type:               Field
+                                Field Name:         L00PTYP
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - style:
+                                Description:        Style Code
+                                Type:               Field
+                                Field Name:         L00STYLE
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - color:
+                                Description:        Color Code
+                                Type:               Field
+                                Field Name:         L00COLOR
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - size:
+                                Description:        Size Code
+                                Type:               Field
+                                Field Name:         L00SIZE
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - back:
+                                Description:        Backing Code
+                                Type:               Field
+                                Field Name:         L00BACK
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - styleDesc:
+                                Description:        Style Description
+                                Type:               Field
+                                Field Name:         L00SDESC
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - colorDesc:
+                                Description:        Color Description
+                                Type:               Field
+                                Field Name:         L00CDESC
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - primaryColor:
+                                Description:        Primary Color
+                                Type:               Field
+                                Field Name:         L00CLR1
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - imageFlatShot:
+                                Description:        Image Flat Shot
+                                Type:               Field
+                                Field Name:         L00IMGFLA
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                      - colors:
+                          Description:        Available Colors
+                          Type:               Array
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Items:
+                          - Description:        Available Colors Object
+                            Type:               Object
+                            Format:             Unspecified
+                            Required:           No
+                            Nullable:           No
+                            ReadOnly:           No
+                            WriteOnly:          No
+
+                            Properties:
+                            - type:
+                                Description:        Product Type
+                                Type:               Field
+                                Field Name:         L00PTYP
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - style:
+                                Description:        Style Code
+                                Type:               Field
+                                Field Name:         L00STYLE
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - color:
+                                Description:        Color Code
+                                Type:               Field
+                                Field Name:         L00COLOR
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - size:
+                                Description:        Size Code
+                                Type:               Field
+                                Field Name:         L00SIZE
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - back:
+                                Description:        Backing Code
+                                Type:               Field
+                                Field Name:         L00BACK
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - styleDesc:
+                                Description:        Style Description
+                                Type:               Field
+                                Field Name:         L00SDESC
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - colorDesc:
+                                Description:        Color Description
+                                Type:               Field
+                                Field Name:         L00CDESC
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - primaryColor:
+                                Description:        Primary Color
+                                Type:               Field
+                                Field Name:         L00CLR1
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - imageFlatShot:
+                                Description:        Image Flat Shot
+                                Type:               Field
+                                Field Name:         L00IMGFLA
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                      - coordinates:
+                          Description:        Available Coordinates
+                          Type:               Array
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Items:
+                          - Description:        Available Coordinates Object
+                            Type:               Object
+                            Format:             Unspecified
+                            Required:           No
+                            Nullable:           No
+                            ReadOnly:           No
+                            WriteOnly:          No
+
+                            Properties:
+                            - type:
+                                Description:        Product Type
+                                Type:               Field
+                                Field Name:         L00PTYP
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - style:
+                                Description:        Style Code
+                                Type:               Field
+                                Field Name:         L00STYLE
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - color:
+                                Description:        Color Code
+                                Type:               Field
+                                Field Name:         L00COLOR
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - size:
+                                Description:        Size Code
+                                Type:               Field
+                                Field Name:         L00SIZE
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - back:
+                                Description:        Backing Code
+                                Type:               Field
+                                Field Name:         L00BACK
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - styleDesc:
+                                Description:        Style Description
+                                Type:               Field
+                                Field Name:         L00SDESC
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - colorDesc:
+                                Description:        Color Description
+                                Type:               Field
+                                Field Name:         L00CDESC
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - primaryColor:
+                                Description:        Primary Color
+                                Type:               Field
+                                Field Name:         L00CLR1
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - imageFlatShot:
+                                Description:        Image Flat Shot
+                                Type:               Field
+                                Field Name:         L00IMGFLA
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - pattern:
+                                Description:        Pattern Type
+                                Type:               Field
+                                Field Name:         L00PATERN
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - lookfeel:
+                                Description:        Look and Feel
+                                Type:               Field
+                                Field Name:         L00LOOK
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - redirectCreateRug:
+                                Description:        Redirect to Create a Rug
+                                Type:               Boolean
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                      - lengths:
+                          Description:        Available Lengths
+                          Type:               Array
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Items:
+                          - Description:        Available Lengths Object
+                            Type:               Object
+                            Format:             Unspecified
+                            Required:           No
+                            Nullable:           No
+                            ReadOnly:           No
+                            WriteOnly:          No
+
+                            Properties:
+                            - size:
+                                Description:        Size Code
+                                Type:               Field
+                                Field Name:         L00SIZE
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - back:
+                                Description:        Backing Code
+                                Type:               Field
+                                Field Name:         L00BACK
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - description:
+                                Description:        Length Description
+                                Type:               String
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                      - widths:
+                          Description:        Available Widths
+                          Type:               Array
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Items:
+                          - Description:        Available Widths Object
+                            Type:               Object
+                            Format:             Unspecified
+                            Required:           No
+                            Nullable:           No
+                            ReadOnly:           No
+                            WriteOnly:          No
+
+                            Properties:
+                            - size:
+                                Description:        Size Code
+                                Type:               Field
+                                Field Name:         L00SIZE
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - back:
+                                Description:        Backing Code
+                                Type:               Field
+                                Field Name:         L00BACK
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - displayWidth:
+                                Description:        Display Width
+                                Type:               Field
+                                Field Name:         LW3FULWTH
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - displayPrice:
+                                Description:        DIsplayed Price
+                                Type:               Field
+                                Field Name:         D_CUTPRC
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - uom:
+                                Description:        Unit of Measure
+                                Type:               Field
+                                Field Name:         LW3UOM
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                      - sizes:
+                          Description:        Available Sizes
+                          Type:               Array
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Items:
+                          - Description:        Available Sizes Object
+                            Type:               Object
+                            Format:             Unspecified
+                            Required:           No
+                            Nullable:           No
+                            ReadOnly:           No
+                            WriteOnly:          No
+
+                            Properties:
+                            - select:
+                                Description:        Select
+                                Type:               Boolean
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - styleDesc:
+                                Description:        Style Description
+                                Type:               Field
+                                Field Name:         L00SDESC
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - colorDesc:
+                                Description:        Color Description
+                                Type:               Field
+                                Field Name:         L00CDESC
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                            - size:
+                                Description:        Size Code
+                                Type:               Field
+                                Field Name:         F2WDSC
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                      - roomScenes:
+                          Description:        Room Scenes
+                          Type:               Array
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Items:
+                          - Description:        Room Scenes Object
+                            Type:               Object
+                            Format:             Unspecified
+                            Required:           No
+                            Nullable:           No
+                            ReadOnly:           No
+                            WriteOnly:          No
+
+                            Properties:
+                            - image:
+                                Description:        Room Scene Image
+                                Type:               Field
+                                Field Name:         LW3IMAGE
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                      - resources:
+                          Description:        Resources Object
+                          Type:               Object
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Properties:
+                          - cleaningAndCare:
+                              Description:        Cleaning and Care
+                              Type:               String
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - fiber:
+                              Description:        Fiber
+                              Type:               String
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - installationGuide:
+                              Description:        Installation Guide
+                              Type:               String
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - warranty:
+                              Description:        Warranty
+                              Type:               String
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - specSheet:
+                              Description:        Specification Sheet
+                              Type:               String
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - trimInfo:
+                              Description:        Trim Info
+                              Type:               String
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                      - noServiceStates:
+                          Description:        No Service States Array
+                          Type:               Array
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Items:
+                          - Description:        No Service States Object
+                            Type:               Object
+                            Format:             Unspecified
+                            Required:           No
+                            Nullable:           No
+                            ReadOnly:           No
+                            WriteOnly:          No
+
+                            Properties:
+                            - state:
+                                Description:        State
+                                Type:               String
+                                Format:             Unspecified
+                                Required:           Yes
+                                Nullable:           No
+                                ReadOnly:           No
+                                WriteOnly:          No
+
+                      - tagManager:
+                          Description:        Google Tag Manager
+                          Type:               Object
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Properties:
+                          - brandDesc:
+                              Description:        Brand Description
+                              Type:               String
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+    Components:
+      Schema:
+        Types:
+        - httpResponseArray:
+            Description:        Http Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        Http Response Object
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - code:
+                  Description:        Multilingual Variable Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - message:
+                  Description:        Multilingual Variable Unicode Text
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - type:
+                  Description:        Message Type
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - field:
+                  Description:        Field Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - detail:
+                  Description:        Message Detail
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - substitutions:
+                  Description:        Substitution Variables
+                  Type:               Array
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+                  Items:
+                  - Description:        values
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+        - responseProductDetailsObject:
+            Description:        Response Product Details Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - brand:
+                Description:        Brand
+                Type:               Field
+                Field Name:         L00DVBR
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - brandDesc:
+                Description:        Brand Description
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - type:
+                Description:        Product Type
+                Type:               Field
+                Field Name:         L00PTYP
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - typeDesc:
+                Description:        Product Type Description
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - style:
+                Description:        Style Code
+                Type:               Field
+                Field Name:         L00STYLE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - color:
+                Description:        Color Code
+                Type:               Field
+                Field Name:         L00COLOR
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - size:
+                Description:        Size Code
+                Type:               Field
+                Field Name:         L00SIZE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - back:
+                Description:        Backing Code
+                Type:               Field
+                Field Name:         L00BACK
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - styleDesc:
+                Description:        Style Description
+                Type:               Field
+                Field Name:         L00SDESC
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - colorDesc:
+                Description:        Color Description
+                Type:               Field
+                Field Name:         L00CDESC
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - collection:
+                Description:        Collection
+                Type:               Field
+                Field Name:         L00CNAME
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - pattern:
+                Description:        Pattern Repeat
+                Type:               Field
+                Field Name:         L00PATRNR
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - construction:
+                Description:        Construction
+                Type:               Field
+                Field Name:         L00CONSTR
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - fiber3:
+                Description:        Fiber 03
+                Type:               Field
+                Field Name:         L00FIBER3
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - radiantClass:
+                Description:        Radiant Class
+                Type:               Field
+                Field Name:         L00RPC
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - widthFeet:
+                Description:        Width Feet
+                Type:               Field
+                Field Name:         L00WTHFT
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - widthInches:
+                Description:        Width Inches
+                Type:               Field
+                Field Name:         L00WTHIN
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - uom:
+                Description:        Unit of Measure
+                Type:               Field
+                Field Name:         LW3PRCUOM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - wearLayer:
+                Description:        Wear Layer
+                Type:               Field
+                Field Name:         L00CHAR1
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - totalThickness:
+                Description:        Total Thickness
+                Type:               Field
+                Field Name:         L00CHAR2
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - squareFeetPerBox:
+                Description:        Square Feet Per Box
+                Type:               Field
+                Field Name:         LW3SFPBX
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - usage:
+                Description:        Usage
+                Type:               Field
+                Field Name:         L00USAGE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - installationMethod:
+                Description:        Installation Method
+                Type:               Field
+                Field Name:         L00CHAR3
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - dimension:
+                Description:        Dimension
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - standardCasePerPack:
+                Description:        Standard Case Per Pack
+                Type:               Number
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - standardCasePerPallet:
+                Description:        Standard Case Per Pallet
+                Type:               Number
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - lockingSystem:
+                Description:        Locking System
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - coreMaterial:
+                Description:        Core Material
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - price:
+                Description:        Price
+                Type:               Field
+                Field Name:         LW3LPRICE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - displayPrice:
+                Description:        Display Price
+                Type:               Field
+                Field Name:         D_LPRICE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - imageFlatShot:
+                Description:        Image Flat Shot
+                Type:               Field
+                Field Name:         L00IMGFLA
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - pageTitle:
+                Description:        Page Title
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - videos:
+                Description:        Product Videos Object
+                Type:               Object
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+                Properties:
+                - byColor:
+                    Description:        Video By Color
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - videoUrl:
+                    Description:        Product VIdeo Url
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - vimeoAllowFlag:
+                    Description:        Vimeo Allow Flag
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+            - visualize:
+                Description:        Visualize Object
+                Type:               Object
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+                Properties:
+                - icon:
+                    Description:        Visualize It Icon
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+            - brandFolder:
+                Description:        BrandFolder Object
+                Type:               Object
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+                Properties:
+                - productDesc:
+                    Description:        BrandFolder Product Description
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+            - dropped:
+                Description:        Dropped Flag
+                Type:               Boolean
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00USAGE
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "USAGE"
+      Label:              "USAGE"
+      Heading1:           "USAGE"
+      Heading2:           " "
+      Heading3:           " "

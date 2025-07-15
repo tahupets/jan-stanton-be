@@ -1,0 +1,396 @@
+﻿File:
+  Name:                           LFIP100A
+  File Type:                      IBM i Other File
+  Library:                        CDVDTALIB
+  Record Format Name:             LFIR100A
+  Module Library:                 Partition Module Library
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       Yes
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "B2B - Product Master Flat File Extension"
+
+  Real Fields:
+  - L0ADVBR:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - L0APCAT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L0ACNAME:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - L0ASTYLE:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - L0ACOLOR:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - L0ASIZE:
+      Type:               Alphanumeric
+      Length:             6
+      Decimals:           0
+
+  - L0ABACK:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - L0AFNSH:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - L0ACDESC:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L0AUSG1:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - L0AUSG2:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - L0AUSG3:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - L0AUSG4:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - L0AUSG5:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - L0ACHAR1:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L0ACHAR2:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L0ACHAR3:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L0ACHAR4:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L0ACHAR5:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L0ACHAR6:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L0ACHAR7:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L0ACHAR8:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L0ACHAR9:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L0ACHAR0:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L0AFLAG1:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L0AFLAG2:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L0AFLAG3:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L0AFLAG4:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L0AFLAG5:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L0AFLAG6:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L0AFLAG7:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L0AFLAG8:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L0AFLAG9:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L0AFLAG0:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L0AINT1:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0AINT2:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0AINT3:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0AINT4:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0AINT5:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0AINT6:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0AINT7:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0AINT8:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0AINT9:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0AINT0:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0ADEC1:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0ADEC2:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0ADEC3:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0ADEC4:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0ADEC5:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0ADEC6:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0ADEC7:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0ADEC8:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0ADEC9:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L0ADEC0:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  Primary Keys:
+  - L0ADVBR
+  - L0APCAT
+  - L0ACNAME
+  - L0ASTYLE
+  - L0ACOLOR
+  - L0ASIZE
+  - L0ABACK
+
+  Logical Views:
+  - LFIL100AA:
+      Identifier:         LFIL100AA
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LFIR100A
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "B2B - Product Master Flat File Extension"
+
+      Fields:
+      - L0ADVBR
+      - L0APCAT
+      - L0ACNAME
+      - L0ASTYLE
+      - L0ACOLOR
+      - L0ASIZE
+      - L0ABACK
+      - L0AFNSH
+      - L0ACDESC
+      - L0AUSG1
+      - L0AUSG2
+      - L0AUSG3
+      - L0AUSG4
+      - L0AUSG5
+      - L0ACHAR1
+      - L0ACHAR2
+      - L0ACHAR3
+      - L0ACHAR4
+      - L0ACHAR5
+      - L0ACHAR6
+      - L0ACHAR7
+      - L0ACHAR8
+      - L0ACHAR9
+      - L0ACHAR0
+      - L0AFLAG1
+      - L0AFLAG2
+      - L0AFLAG3
+      - L0AFLAG4
+      - L0AFLAG5
+      - L0AFLAG6
+      - L0AFLAG7
+      - L0AFLAG8
+      - L0AFLAG9
+      - L0AFLAG0
+      - L0AINT1
+      - L0AINT2
+      - L0AINT3
+      - L0AINT4
+      - L0AINT5
+      - L0AINT6
+      - L0AINT7
+      - L0AINT8
+      - L0AINT9
+      - L0AINT0
+      - L0ADEC1
+      - L0ADEC2
+      - L0ADEC3
+      - L0ADEC4
+      - L0ADEC5
+      - L0ADEC6
+      - L0ADEC7
+      - L0ADEC8
+      - L0ADEC9
+      - L0ADEC0
+
+      Keys:
+      - L0ASTYLE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L0ACOLOR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L0ASIZE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L0ABACK:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

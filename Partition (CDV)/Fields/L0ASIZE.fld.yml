@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L0ASIZE
+  Type:               Alpha
+  Length:             6
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SIZE CODE"
+      Label:              "SIZE CODE"
+      Heading1:           "SIZE CODE"
+      Heading2:           " "
+      Heading3:           " "

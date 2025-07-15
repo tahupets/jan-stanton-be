@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L0ACDESC
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CORE MATERIAL DESC"
+      Label:              "CORE MATERIAL"
+      Heading1:           "CORE MATERIAL DESC"
+      Heading2:           " "
+      Heading3:           " "

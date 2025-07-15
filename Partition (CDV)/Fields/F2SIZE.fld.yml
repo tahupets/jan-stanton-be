@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2SIZE
+  Type:               Alpha
+  Length:             6
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Size Code"
+      Label:              "Size Code"
+      Heading1:           "Size"
+      Heading2:           "Code"
+      Heading3:           " "

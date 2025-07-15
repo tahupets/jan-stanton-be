@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2BACK
+  Type:               Alpha
+  Length:             2
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Back Code"
+      Label:              "Back Code"
+      Heading1:           "Back"
+      Heading2:           "Code"
+      Heading3:           " "

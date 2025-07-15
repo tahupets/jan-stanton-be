@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00GROPRN
+  Type:               Packed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "IMAGE - GROUP RANK"
+      Label:              "IMAGE - GROUP"
+      Heading1:           "IMAGE - GROUP RANK"
+      Heading2:           " "
+      Heading3:           " "

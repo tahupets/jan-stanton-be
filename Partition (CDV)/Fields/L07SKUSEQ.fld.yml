@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L07SKUSEQ
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SEQUENCE#"
+      Label:              "SEQUENCE#"
+      Heading1:           "SEQUENCE#"
+      Heading2:           " "
+      Heading3:           " "

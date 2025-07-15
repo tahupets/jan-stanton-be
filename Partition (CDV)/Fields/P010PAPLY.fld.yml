@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010PAPLY
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Promos Applied"
+      Label:              "Promos Applied"
+      Heading1:           "Promos Applied"
+      Heading2:           " "
+      Heading3:           " "

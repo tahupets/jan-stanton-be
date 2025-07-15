@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2IBK
+  Type:               Alpha
+  Length:             2
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "INV BACKING CODE"
+      Label:              "INV BACKING"
+      Heading1:           "INV BK"
+      Heading2:           "CODE"
+      Heading3:           " "

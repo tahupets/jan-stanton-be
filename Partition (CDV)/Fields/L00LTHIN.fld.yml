@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00LTHIN
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "LENGTH INCHES"
+      Label:              "LENGTH INCHES"
+      Heading1:           "LENGTH INCHES"
+      Heading2:           " "
+      Heading3:           " "

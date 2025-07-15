@@ -1,0 +1,19 @@
+﻿Reusable Part:
+  Name:               LW3ESKUD
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Extended SKU Details Data Object"
+
+  Source: |
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT *LISTFIELDS #ListFields)
+    
+    * Def_List Name(#WL_EXTENDEDDETAILS) Fields(#L130DTYP #LW3DTLVL) Type(*WORKING) Entrys(*MAX)
+    
+    Group_By Name(#ListFields) Fields(#L130DTYP #LW3DTLVL)
+    
+    End_Com
+    

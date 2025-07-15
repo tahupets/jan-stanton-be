@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00IMGPRO
+  Type:               Alpha
+  Length:             250
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "IMAGE - PROFILE"
+      Label:              "IMAGE - PROFILE"
+      Heading1:           "IMAGE - PROFILE"
+      Heading2:           " "
+      Heading3:           " "

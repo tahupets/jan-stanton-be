@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010SMPRC
+  Type:               Packed
+  Length:             5
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SF Mch Srged Price"
+      Label:              "SF Mch Srged"
+      Heading1:           "SF Mch Srged Price"
+      Heading2:           " "
+      Heading3:           " "

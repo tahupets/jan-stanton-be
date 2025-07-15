@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3MSRPRG
+  Type:               Packed
+  Length:             15
+  Decimals:           3
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "MSRP Rug Percentage"
+      Label:              "MSRP Rug Percen"
+      Heading1:           "MSRP"
+      Heading2:           "Rug"
+      Heading3:           "Percentage"

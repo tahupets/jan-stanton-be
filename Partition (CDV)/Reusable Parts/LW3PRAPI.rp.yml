@@ -1,0 +1,223 @@
+﻿Reusable Part:
+  Name:               LW3PRAPI
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Pricing API"
+
+  Source: |
+    * **************************************************
+    *
+    * COMPONENT:  LW3PRAPI - Pricing API
+    *
+    * **************************************************
+    * ============== AMENDMENTS =============================
+    * Reference...: xxxxx
+    * Changed by..: xxxxx
+    * Changed on..: xxxxx
+    * Description : xxxxx
+    * =======================================================
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    * =======================================================
+    * Working Fields
+    * =======================================================
+    Define Field(#IPCST#) Type(*PACKED) Length(6) Decimals(0)
+    Define Field(#IPSTYL) Type(*CHAR) Length(5)
+    Define Field(#IPCLR) Type(*CHAR) Length(5)
+    Define Field(#IPSIZE) Type(*CHAR) Length(6)
+    Define Field(#IPBACK) Type(*CHAR) Length(2)
+    Define Field(#IPAEXRT) Type(*CHAR) Length(1)
+    Define Field(#OPCPRC) Type(*PACKED) Length(6) Decimals(2)
+    Define Field(#OPRPRC) Type(*PACKED) Length(6) Decimals(2)
+    Define Field(#OPSMPRC) Type(*PACKED) Length(5) Decimals(2)
+    Define Field(#OPSHPRC) Type(*PACKED) Length(5) Decimals(2)
+    Define Field(#OPPEDATE) Type(*PACKED) Length(6) Decimals(0)
+    Define Field(#OPRTNCD) Type(*CHAR) Length(10)
+    *
+    * * =======================================================
+    * * Mthroutine ....: umGetPrice
+    * * Description....: Call pricing API CIR320
+    * * =======================================================
+    Mthroutine Name(umGetPrice)
+    Define_Map For(*INPUT) Class(#LW3WEBC01) Name(#iIPCST#)
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iIPSTYL)
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iIPCLR)
+    Define_Map For(*INPUT) Class(#L00SIZE) Name(#iIPSIZE)
+    Define_Map For(*INPUT) Class(#L00BACK) Name(#iIPBACK)
+    Define_Map For(*INPUT) Class(#STD_ALPHA) Name(#iIPAEXRT)
+    Define_Map For(*BOTH) Class(#P010CPRC) Name(#bOPCPRC)
+    Define_Map For(*BOTH) Class(#P010RPRC) Name(#bOPRPRC)
+    Define_Map For(*BOTH) Class(#P010SMPRC) Name(#bOPSMPRC)
+    Define_Map For(*BOTH) Class(#P010SHPRC) Name(#bOPSHPRC)
+    Define_Map For(*BOTH) Class(#P010EFDT) Name(#bOPPEDATE) Desc('Promo Effectivity Date')
+    Define_Map For(*BOTH) Class(#STD_ALPHA) Name(#bOPPAPLY)
+    * Safety net, Do not call the API under B2C. Return 0 values
+    Define_Map For(*INPUT) Class(#LW3CUSIND) Name(#iCUSIND)
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iForceAPICall) Mandatory(True) Desc('Forced call to API')
+    
+    Define_Map For(*RESULT) Class(#STD_OBJ) Name(#rReturnCode)
+    
+    If Cond(#iCUSIND = B)
+    * #COM_OWNER.umSQLDebugMessage( (' BEFORE - ' + #iIPSTYL + '-' + #iIPCLR + '-' + #iIPSIZE + '-' + #iIPBACK) (#iForceAPICall + '-' + #bOPCPRC.AsString + '-' + #bOPRPRC.AsString + '-' + #bOPSMPRC.AsString + '-' + #bOPSHPRC.AsString) )
+    
+    * Call API Only if
+    * - Force parameter is true, always call if this is the case.
+    * - all 4 Price fields are empty
+    If Cond((#iForceAPICall = True) Or ((#bOPCPRC = 0) And (#bOPRPRC = 0) And (#bOPSMPRC = 0) And (#bOPSHPRC = 0)))
+    * Need to use workfields when calling an RPGLE API. The Define_Map fields will cause an error when used.
+    #IPCST# := #iIPCST#.AsNumber
+    #IPSTYL := #iIPSTYL
+    #IPCLR := #iIPCLR
+    #IPSIZE := #iIPSIZE
+    #IPBACK := #iIPBACK
+    #IPAEXRT := #iIPAEXRT
+    
+    #OPCPRC #OPRPRC #OPSMPRC #OPSHPRC #OPRTNCD #OPPEDATE := *NULL
+    
+    * #COM_OWNER.umSQLDebugMessage( (' Before CIR320 ' + #IPSTYL + #IPCLR + #IPSIZE + #IPBACK) (' ' + #STD_DTIMX.Now.Date.AsString + ' <= ' + #OPPEDATE.AsDate( MMDDYY ).AsString + ' --> ' + #OPCPRC.AsString + '-' + #OPRPRC.AsString + '-' + #OPSMPRC.AsString + '-' + #OPSHPRC.AsString) )
+    
+    Call Pgm(CIR320) Parm(#IPCST# #IPSTYL #IPCLR #IPSIZE #IPBACK #IPAEXRT #OPCPRC #OPRPRC #OPSMPRC #OPSHPRC #OPPEDATE #OPRTNCD) Num_Len(*DEFINED) If_Error(*NEXT)
+    
+    #rReturnCode := #OPRTNCD
+    
+    If Cond(#OPRTNCD = 'NO_ERRORS')
+    #bOPCPRC := #OPCPRC
+    #bOPRPRC := #OPRPRC
+    #bOPSMPRC := #OPSMPRC
+    #bOPSHPRC := #OPSHPRC
+    #bOPPEDATE := #OPPEDATE
+    
+    * #COM_OWNER.umSQLDebugMessage( (' After CIR320 ' + #IPSTYL + #IPCLR + #IPSIZE + #IPBACK) (' ' + #STD_DTIMX.Now.Date.AsString + ' <= ' + #OPPEDATE.AsDate( MMDDYY ).AsString + ' --> ' + #OPCPRC.AsString + '-' + #OPRPRC.AsString + '-' + #OPSMPRC.AsString + '-' + #OPSHPRC.AsString) )
+    
+    * If the CIR320 API is actually run (as opposed to being bypassed) and there is a date in field #OPPEDATE, and the date is not in the past, then the value of #bOPPAPLY should be set to "Y" if no date or in the past then set to "N".
+    If Cond(#OPPEDATE <> 0)
+    If Cond(#STD_DTIMX.Now.Date <= #OPPEDATE.AsDate( MMDDYY ))
+    #bOPPAPLY := 'Y'
+    Else
+    #bOPPAPLY := 'N'
+    Endif
+    Else
+    #bOPPAPLY := 'N'
+    Endif
+    * #COM_OWNER.umSQLDebugMessage( (' RP API Call ') (#OPPEDATE.AsString) )
+    Endif
+    
+    * #COM_OWNER.umSQLDebugMessage( (' AFTER - ') (#iForceAPICall + '-' + #bOPCPRC.AsString + '-' + #bOPRPRC.AsString + '-' + #bOPSMPRC.AsString + '-' + #bOPSHPRC.AsString) )
+    
+    * Else
+    * Return same values if #iForceAPICall is trie or if values are already present.
+    Endif
+    * Else
+    * * Safety net, Do not call the API under B2C. Return 0 values
+    * #bOPCPRC #bOPRPRC #bOPSMPRC #bOPSHPRC := 0
+    Endif
+    Endroutine
+    
+    * * =======================================================
+    * * Mthroutine ....: umGetPrice_2
+    * * Description....: Old GetPrice version
+    * * =======================================================
+    Mthroutine Name(umGetPrice_2)
+    * Define_Map For(*INPUT) Class(#LW3WEBC01) Name(#iIPCST#)
+    * Define_Map For(*INPUT) Class(#L00STYLE) Name(#iIPSTYL)
+    * Define_Map For(*INPUT) Class(#L00COLOR) Name(#iIPCLR)
+    * Define_Map For(*INPUT) Class(#L00SIZE) Name(#iIPSIZE)
+    * Define_Map For(*INPUT) Class(#L00BACK) Name(#iIPBACK)
+    * Define_Map For(*INPUT) Class(#STD_ALPHA) Name(#iIPAEXRT)
+    * Define_Map For(*OUTPUT) Class(#P010CPRC) Name(#bOPCPRC)
+    * Define_Map For(*OUTPUT) Class(#P010RPRC) Name(#bOPRPRC)
+    * Define_Map For(*OUTPUT) Class(#P010SMPRC) Name(#bOPSMPRC)
+    * Define_Map For(*OUTPUT) Class(#P010SHPRC) Name(#bOPSHPRC)
+    * Define_Map For(*OUTPUT) Class(#P010EFDT) Name(#bOPPEDATE)
+    *
+    * Define_Map For(*INPUT) Class(#LW3CUSIND) Name(#iCUSIND)
+    *
+    * Define_Map For(*RESULT) Class(#STD_OBJ) Name(#rReturnCode)
+    *
+    * * Need to use workfields when calling an RPGLE API. The Define_Map fields will cause an error when used.
+    * #IPCST# := #iIPCST#.AsNumber
+    * #IPSTYL := #iIPSTYL
+    * #IPCLR := #iIPCLR
+    * #IPSIZE := #iIPSIZE
+    * #IPBACK := #iIPBACK
+    * #IPAEXRT := #iIPAEXRT
+    *
+    * #OPCPRC #OPRPRC #OPSMPRC #OPSHPRC #bOPCPRC #bOPRPRC #bOPSMPRC #bOPSHPRC #OPRTNCD #OPPEDATE := *NULL
+    *
+    * If Cond(#iCUSIND = B)
+    * * CIR320 parameters and definitions
+    * * IPCST#   PACKED(6:0);  // CUSTOMER
+    * * IPSTYL   CHAR(5);      // STYLE
+    * * IPCLR    CHAR(5);      // COLOR  - OPTIONAL
+    * * IPSIZE   CHAR(6);      // SIZE
+    * * IPBACK   CHAR(2);      // BACK
+    * * IPAEXRT  CHAR(1);      // APPLY EXCHANGE RATE
+    * * OPCPRC   PACKED(6:2);  // CUT OR PREMADE RUG UNIT PRICE
+    * * OPRPRC   PACKED(6:2);  // ROLL UNIT PRICE (BRDLOOM ONLY)
+    * * OPSMPRC  PACKED(5:2);  // MACHINE SURGE SF: 25+SF
+    * * OPSHPRC  PACKED(5:2);  // HAND SURGE SF: 25+SF
+    * * OPPEDate Packed(6:0);   // Promo End Date - MDY
+    * *
+    * * OPRtnCd  Char(10);      // Return Code
+    * Call Pgm(CIR320) Parm(#IPCST# #IPSTYL #IPCLR #IPSIZE #IPBACK #IPAEXRT #OPCPRC #OPRPRC #OPSMPRC #OPSHPRC #OPPEDATE #OPRTNCD) Num_Len(*DEFINED) If_Error(*NEXT)
+    *
+    * #rReturnCode := #OPRTNCD
+    *
+    * If Cond(#OPRTNCD = 'NO_ERRORS')
+    * #bOPCPRC := #OPCPRC
+    * #bOPRPRC := #OPRPRC
+    * #bOPSMPRC := #OPSMPRC
+    * #bOPSHPRC := #OPSHPRC
+    * #bOPPEDATE := #OPPEDATE
+    *
+    * * #COM_OWNER.umSQLDebugMessage( (' RP API Call ') (#OPPEDATE.AsString) )
+    * Endif
+    * Endif
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSQLDebugMessage
+    * Description....: Long/SQL Debug Message
+    * =======================================================
+    Mthroutine Name(umSQLDebugMessage) Desc('SQL Debug Message')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iHeaderMessage)
+    Define_Map For(*INPUT) Class(#LW3QSEL) Name(#iQueryString)
+    Define Field(#wCOUNT) Reffld(#STD_COUNT)
+    
+    #COM_OWNER.umLW3DEBUG( #iHeaderMessage )
+    
+    #wCOUNT := 1
+    Dountil Cond(#wCOUNT >= #iQueryString.CurChars)
+    #COM_OWNER.umLW3DEBUG( #iQueryString.SubString( #wCOUNT 80 ) )
+    
+    #wCOUNT += 80
+    Enduntil
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umLW3DEBUG
+    * Description....: Debug Message
+    * =======================================================
+    Mthroutine Name(umLW3DEBUG)
+    Define_Map For(*INPUT) Class(#LW3MSGTXT) Name(#iLW3MSGTXT)
+    
+    Message Msgtxt(#iLW3MSGTXT)
+    
+    * #WAMNAM := #COM_OWNER.Name
+    * #LW3MSGTXT := #iLW3MSGTXT
+    * Insert Fields(#WAMNAM #LW3MSGTXT) To_File(LW3DEBUG) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umDebugTime
+    * Description....: Return Current time as a message
+    * =======================================================
+    Mthroutine Name(umDebugTime)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iTitle)
+    
+    #COM_OWNER.umSQLDebugMessage Iheadermessage(#iTitle) Iquerystring(#STD_DTIMX.Now.AsLocalizedDateTime.AsCustomDisplayString( "YYYMMDD" "HH:mm:ss:fff" ))
+    Endroutine
+    End_Com

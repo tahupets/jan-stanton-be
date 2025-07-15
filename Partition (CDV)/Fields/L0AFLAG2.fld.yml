@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L0AFLAG2
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "FLAG 2"
+      Label:              "FLAG 2"
+      Heading1:           "FLAG 2"
+      Heading2:           " "
+      Heading3:           " "

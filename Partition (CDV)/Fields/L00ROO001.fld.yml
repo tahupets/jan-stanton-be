@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00ROO001
+  Type:               Alpha
+  Length:             25
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "ROOM SCENE TYPE 2"
+      Label:              "ROOM SCENE TYPE"
+      Heading1:           "ROOM SCENE TYPE 2"
+      Heading2:           " "
+      Heading3:           " "

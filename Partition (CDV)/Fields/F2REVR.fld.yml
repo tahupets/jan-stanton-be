@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2REVR
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "REVERSED ROLL  (DEFAULT IS NO)?"
+      Label:              "REVERSED ROLL"
+      Heading1:           "REVERSED"
+      Heading2:           "ROLL?"
+      Heading3:           " "

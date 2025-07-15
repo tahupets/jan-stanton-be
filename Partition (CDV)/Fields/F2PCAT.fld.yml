@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2PCAT
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PRODUCT CATEGORY"
+      Label:              "PRODUCT"
+      Heading1:           "PRODUCT"
+      Heading2:           "CATEGORY"
+      Heading3:           " "

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2FBRD
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "FIBER/YARN BRAND CODE"
+      Label:              "FIBER/YARN"
+      Heading1:           "FIBER/YARN"
+      Heading2:           "BRAND CODE"
+      Heading3:           " "

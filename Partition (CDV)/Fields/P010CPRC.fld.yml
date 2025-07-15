@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010CPRC
+  Type:               Packed
+  Length:             6
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Cut Prc"
+      Label:              "Cut Prc"
+      Heading1:           "Cut Prc"
+      Heading2:           " "
+      Heading3:           " "

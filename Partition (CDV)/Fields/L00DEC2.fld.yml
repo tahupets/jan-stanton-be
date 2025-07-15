@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00DEC2
+  Type:               Packed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DECIMAL 2"
+      Label:              "DECIMAL 2"
+      Heading1:           "DECIMAL 2"
+      Heading2:           " "
+      Heading3:           " "

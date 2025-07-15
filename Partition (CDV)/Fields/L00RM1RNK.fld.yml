@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00RM1RNK
+  Type:               Packed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "IMAGE - ROOM 1 RANK"
+      Label:              "IMAGE - ROOM 1"
+      Heading1:           "IMAGE - ROOM 1 RANK"
+      Heading2:           " "
+      Heading3:           " "

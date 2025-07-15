@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010EFDT
+  Type:               Packed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Efective Date"
+      Label:              "Efective Date"
+      Heading1:           "Efective Date"
+      Heading2:           " "
+      Heading3:           " "

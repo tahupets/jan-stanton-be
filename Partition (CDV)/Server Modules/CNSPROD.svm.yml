@@ -886,7 +886,7 @@
     * Issue #211 - Add F2K for Hard Surfaces
     #LW3SELECT #LW3CDES := *NULL
     Select Fields(#LW3CODE #LW3CDES) From_File(LW3CODL5) Where(#LW3CODE <> '#') With_Key('HSBRND') Io_Error(*NEXT) Val_Error(*NEXT)
-    If Cond(#LW3CUSIND = 'B')
+    If Cond(#Global_DataModel.upStorefrontIndicator = 'B')
     Loc_Entry In_List(#WL_PRDLST) Where(#L00DVBR = #LW3CODE) Ret_Entry(*NO)
     If_Status Is(*OKAY)
     Add_Entry To_List(#iResponseFilters.brands)
@@ -1005,7 +1005,9 @@
     * * * Endif
     * * * End_Loop
     
-    * Carpet Width - Retrieve from logical keyed by Code Type and Sequence
+    If Cond(((#iSearchType = #Global_Constants.upUrlFilter_HardSurface) Or (#iSearchType = #Global_Constants.upUrlFilter_WPC) Or (#iSearchType = #Global_Constants.upUrlFilter_SPC)) Or ((#Global_Constants.umIsUrlTileOnly( #iSearchType ) Or (#iSearchType = #Global_Constants.upUrlFilter_Laminate) Or (#iSearchType = #Global_Constants.upUrlFilter_FineHardwood))))
+    
+    * Hard Surface Widths - Retrieve from logical keyed by Code Type and Sequence
     Select Fields(#LW3CODE #LW3CDES) From_File(LW3CODL5) With_Key('HDSUWT') Io_Error(*NEXT) Val_Error(*NEXT)
     Continue If(#LW3CODE = '#')
     
@@ -1017,16 +1019,27 @@
     #L_HardSurfaceWidthDesc := #LW3CDES
     
     * * * Loc_Entry In_List(#WL_PRDLST) Where((#L00SIZE = #HSWTHCOD) And ((((#iSearchType = #Global_Constants.upUrlFilter_HardSurface) Or (#FXURLFLT = #Global_Constants.upUrlFilter_WPC) Or (#iSearchType = #Global_Constants.upUrlFilter_SPC)) And (#L00PTYP = #Global_Constants.upPrdTyp_HardSurfacePlank)) Or (#Global_Constants.umIsUrlTileOnly( #iSearchType )) Or (#iSearchType = #Global_Constants.upUrlFilter_Laminate) Or (#FXURLFLT = #Global_Constants.upUrlFilter_FineHardwood) Or ((#W_BRAND = 'F2K') And (#W_BRAND = #L00DVBR))))
-    Loc_Entry In_List(#WL_PRDLST) Where((#L00SIZE = #L_HardSurfaceWidthCode) And ((((#iSearchType = #Global_Constants.upUrlFilter_HardSurface) Or (#FXURLFLT = #Global_Constants.upUrlFilter_WPC) Or (#iSearchType = #Global_Constants.upUrlFilter_SPC)) And (#L00PTYP = #Global_Constants.upPrdTyp_HardSurfacePlank)) Or (#Global_Constants.umIsUrlTileOnly( #iSearchType )) Or (#iSearchType = #Global_Constants.upUrlFilter_Laminate) Or (#FXURLFLT = #Global_Constants.upUrlFilter_FineHardwood)))
-    If_Status Is(*OKAY)
-    * Check if any Flooring Type filters are selected
-    * * * If Cond(#iRequestFilters.floorings.Count > 0)
-    * * * If Cond(#L_IsHardSurfacePlanksSeleced)
-    * * * Add_Entry To_List(#iResponseFilters.dimensions)
-    * * * #iResponseFilters.dimensions.CurrentItem.dimension := #L_HardSurfaceWidthCode
-    * * * #iResponseFilters.dimensions.CurrentItem.description := #L_HardSurfaceWidthDesc
-    * * * Endif
-    * * * Else
+    
+    * * * Loc_Entry In_List(#WL_PRDLST) Where((#L00SIZE = #L_HardSurfaceWidthCode) And ((((#iSearchType = #Global_Constants.upUrlFilter_HardSurface) Or (#FXURLFLT = #Global_Constants.upUrlFilter_WPC) Or (#iSearchType = #Global_Constants.upUrlFilter_SPC)) And (#L00PTYP = #Global_Constants.upPrdTyp_HardSurfacePlank)) Or (#Global_Constants.umIsUrlTileOnly( #iSearchType )) Or (#iSearchType = #Global_Constants.upUrlFilter_Laminate) Or (#iSearchType = #Global_Constants.upUrlFilter_FineHardwood)))
+    
+    * 2025/07/01 - Do two separate Loc_Entry conditions to improve performance
+    If Cond(((#iSearchType = #Global_Constants.upUrlFilter_HardSurface) Or (#iSearchType = #Global_Constants.upUrlFilter_WPC) Or (#iSearchType = #Global_Constants.upUrlFilter_SPC)))
+    Loc_Entry In_List(#WL_PRDLST) Where((#L00SIZE = #L_HardSurfaceWidthCode) And (#L00PTYP = #Global_Constants.upPrdTyp_HardSurfacePlank)) Ret_Status(#LW3COLSTS)
+    Endif
+    
+    If Cond((#Global_Constants.umIsUrlTileOnly( #iSearchType ) Or (#iSearchType = #Global_Constants.upUrlFilter_Laminate) Or (#iSearchType = #Global_Constants.upUrlFilter_FineHardwood)))
+    Loc_Entry In_List(#WL_PRDLST) Where(#L00SIZE = #L_HardSurfaceWidthCode) Ret_Status(#LW3COLSTS)
+    Endif
+    
+    If Cond(#LW3COLSTS = 'OK')
+    * * Check if any Flooring Type filters are selected
+    * * * * If Cond(#iRequestFilters.floorings.Count > 0)
+    * * * * If Cond(#L_IsHardSurfacePlanksSeleced)
+    * * * * Add_Entry To_List(#iResponseFilters.dimensions)
+    * * * * #iResponseFilters.dimensions.CurrentItem.dimension := #L_HardSurfaceWidthCode
+    * * * * #iResponseFilters.dimensions.CurrentItem.description := #L_HardSurfaceWidthDesc
+    * * * * Endif
+    Else
     Add_Entry To_List(#iResponseFilters.dimensions)
     #iResponseFilters.dimensions.CurrentItem.dimension := #L_HardSurfaceWidthCode
     #iResponseFilters.dimensions.CurrentItem.description := #L_HardSurfaceWidthDesc
@@ -1038,14 +1051,15 @@
     
     Endif
     
+    Endif
+    
     * END:   Hard Surface Dimensions Filter
     * -----------------------------------------
     
-    Endif
+    Else
     
     * -----------------------------------------
     * START: Collections Filter
-    
     Select Fields(#LW3CODE #LW3CDES) From_File(LW3CODL5) With_Key('COLLEC') Io_Error(*NEXT) Val_Error(*NEXT)
     Continue If(#LW3CODE = '#')
     * If B2B, only show filter options for the available products for this customer
@@ -1080,7 +1094,6 @@
     
     * -----------------------------------------
     * START: Fiber Primary & Secondary Type Filter
-    
     Select Fields(#LW3CODE #LW3CDES) From_File(LW3CODL5) With_Key('FIBTYP') Io_Error(*NEXT) Val_Error(*NEXT)
     Continue If(#LW3CODE = '#')
     #L_IsRecordAddedToList := False
@@ -1337,6 +1350,8 @@
     
     * END:   Look and Feel Filter
     * -----------------------------------------
+    
+    Endif
     
     If Cond(#iResponseFilters.ToJsonString.AsValue = *BLANKS)
     #oReturnCode := 'ER'
@@ -1660,7 +1675,7 @@
     Define_Map For(*BOTH) Class(#PRIM_ALPH) Name(#bQuery)
     
     * G#147 - Include logic to add subtype for search/all and for B2C. Excel issue #8
-    If Cond((#FXURLFLT = #Global_Constants.upUrlFilter_SPC) Or (#FXURLFLT = #Global_Constants.upUrlFilter_WPC) Or (#FXURLFLT = #Global_Constants.upUrlFilter_HardSurface) Or (#FXURLFLT = '') Or (#LW3CUSIND = 'C'))
+    If Cond((#FXURLFLT = #Global_Constants.upUrlFilter_SPC) Or (#FXURLFLT = #Global_Constants.upUrlFilter_WPC) Or (#FXURLFLT = #Global_Constants.upUrlFilter_HardSurface) Or (#FXURLFLT = '') Or (#Global_DataModel.upStorefrontIndicator = 'C'))
     #bQuery += " Left Join FIP054 PSUBF ON PSUBF.F54STYL = ATTR.L00STYLE and PSUBF.F54BACK = ATTR.L00BACK and PSUBF.F54PCAT = ATTR.L00PCAT and PSUBF.F54PTYP = ATTR.L00PTYP "
     Endif
     Endroutine
@@ -1692,8 +1707,8 @@
     Clr_List Named(#WL_PRDLST)
     
     #FXPRDRTP := 'SRH'
-    #FXCUSID := #LW3WEBC01
-    #FXCUSIND := #LW3CUSIND
+    #FXCUSID := #Global_DataModel.upCustomerId
+    #FXCUSIND := #Global_DataModel.upStorefrontIndicator
     #FXBRAND := #LW3BRNCD
     #FXDTARCD := 'DTL'
     #LW3WEBUSR := #STDWEBUSR
@@ -2216,8 +2231,6 @@
     * * *
     * * * #LW3QSEL += #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
     * * *
-    * * * * * !NC!
-    * * * * #COM_OWNER.umSQLDebugMessage Iheadermessage('Product List - Price Range - B2B') Iquerystring(#LW3QSEL)
     * * *
     * * * Select_Sql Fields(#FXSRNPRC #FXERNPRC) Io_Error(*NEXT) Using(#LW3QSEL)
     * * * If Cond(#LW3MSRPPF = 'Y')

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2SSDC
+  Type:               Alpha
+  Length:             8
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SHORT STYLE DESCRIPTION"
+      Label:              "SHORT STYLE"
+      Heading1:           "SHORT STYLE"
+      Heading2:           "DESCRIPTION"
+      Heading3:           " "

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L07IMGCOR
+  Type:               Alpha
+  Length:             250
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "IMAGE - COORD SHOT"
+      Label:              "IMAGE - COORD"
+      Heading1:           "IMAGE - COORD SHOT"
+      Heading2:           " "
+      Heading3:           " "

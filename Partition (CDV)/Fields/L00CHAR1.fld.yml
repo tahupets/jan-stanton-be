@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00CHAR1
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CHARACTER 1"
+      Label:              "CHARACTER 1"
+      Heading1:           "CHARACTER 1"
+      Heading2:           " "
+      Heading3:           " "

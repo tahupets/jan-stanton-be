@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2RCDT
+  Type:               Packed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "RECORD CREATION DATE"
+      Label:              "RECORD CREATION"
+      Heading1:           "RECORD CREATION"
+      Heading2:           "DATE"
+      Heading3:           " "

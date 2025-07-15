@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L07FMLSDT
+  Type:               Packed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "LAST CHANGE DATE"
+      Label:              "LAST CHANGE"
+      Heading1:           "LAST CHANGE"
+      Heading2:           "DATE"
+      Heading3:           " "

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2STYL
+  Type:               Alpha
+  Length:             5
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "STYLE CODE"
+      Label:              "STYLE CODE"
+      Heading1:           "STYLE"
+      Heading2:           "CODE"
+      Heading3:           " "

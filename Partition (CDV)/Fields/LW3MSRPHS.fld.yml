@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3MSRPHS
+  Type:               Packed
+  Length:             15
+  Decimals:           3
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "MSRP Hard Surface"
+      Label:              "MSRP Hard Surfa"
+      Heading1:           "MSRP"
+      Heading2:           "Hard"
+      Heading3:           "Surface"

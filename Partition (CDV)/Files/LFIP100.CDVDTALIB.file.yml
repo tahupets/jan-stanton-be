@@ -1,0 +1,922 @@
+﻿File:
+  Name:                           LFIP100
+  File Type:                      IBM i Other File
+  Library:                        CDVDTALIB
+  Record Format Name:             LFIR100
+  Module Library:                 Partition Module Library
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "B2B - Product Master Flat File"
+
+  Real Fields:
+  - L00DVBR:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - L00PCAT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L00CNAME:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - L00STYLE:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - L00COLOR:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - L00SIZE:
+      Type:               Alphanumeric
+      Length:             6
+      Decimals:           0
+
+  - L00BACK:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - L00PTYP:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L00SDESC:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - L00CDESC:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - L00WTHFT:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - L00WTHIN:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - L00BDESC:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - L00STDLTH:
+      Type:               Decimal
+      Length:             4
+      Decimals:           0
+
+  - L00PRDG:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - L00F2F:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L00DROP:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L00DROPDT:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L00PROPRI:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L00PROPCU:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00PROPCUS
+
+  - L00PROPB2:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00PROPB2C
+
+  - L00CLR1:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00CLR2:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00PATRNR:
+      Type:               Alphanumeric
+      Length:             60
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00PATRNRP
+
+  - L00CONSTR:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00LOOK:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00USAGE:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00FIBER1:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00FIBER2:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00FIBER3:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00PATERN:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00PATERN1
+
+  - L00PAT001:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00PATERN2
+
+  - L00FIBRLB:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00FIBRLBL
+
+  - L00CPYRGT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L00MXWTHF:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00MXWTHFT
+
+  - L00MXWTHI:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00MXWTHIN
+
+  - L00SKUSEQ:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - L00INTROD:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00INTRODT
+
+  - L00IMGFLA:
+      Type:               Alphanumeric
+      Length:             250
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00IMGFLAT
+
+  - L00IMGPRO:
+      Type:               Alphanumeric
+      Length:             250
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00IMGPROF
+
+  - L00RMSCEN:
+      Type:               Alphanumeric
+      Length:             250
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00RMSCEN1
+
+  - L00RMS001:
+      Type:               Alphanumeric
+      Length:             250
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00RMSCEN2
+
+  - L00RMS002:
+      Type:               Alphanumeric
+      Length:             250
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00RMSCEN3
+
+  - L00IMGGRO:
+      Type:               Alphanumeric
+      Length:             250
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00IMGGROP
+
+  - L00FLATCL:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00FLATCLR
+
+  - L00FLATRN:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00FLATRNK
+
+  - L00PROFCL:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00PROFCLR
+
+  - L00PROFRN:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00PROFRNK
+
+  - L00RM1CLR:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - L00RM1RNK:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - L00RM2CLR:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - L00RM2RNK:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - L00RM3CLR:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - L00RM3RNK:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - L00GROPCL:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00GROPCLR
+
+  - L00GROPRN:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00GROPRNK
+
+  - L00ROLONL:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00ROLONLY
+
+  - L00RPC:
+      Type:               Alphanumeric
+      Length:             15
+      Decimals:           0
+
+  - L00PATPRD:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00CHAR1:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00CHAR2:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00CHAR3:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00CHAR4:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00CHAR5:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L00FLAG1:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L00FLAG2:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L00FLAG3:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L00FLAG4:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L00FLAG5:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L00INT1:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L00INT2:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L00INT3:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L00INT4:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L00INT5:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L00DEC1:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L00DEC2:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L00DEC3:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L00DEC4:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L00DEC5:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - L00COLCD:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - L00ROOMTY:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00ROOMTY1
+
+  - L00ROO001:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00ROOMTY2
+
+  - L00ROO002:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L00ROOMTY3
+
+  - L00WDTIN:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - L00LTHIN:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  Primary Keys:
+  - L00DVBR
+  - L00PCAT
+  - L00CNAME
+  - L00STYLE
+  - L00COLOR
+  - L00SIZE
+  - L00BACK
+
+  Logical Views:
+  - LFIL1001:
+      Identifier:         LFIL1001
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LFIR100
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "B2B - Product Master Flat File Styl, Col"
+
+      Fields:
+      - L00DVBR
+      - L00PCAT
+      - L00CNAME
+      - L00STYLE
+      - L00COLOR
+      - L00SIZE
+      - L00BACK
+      - L00PTYP
+      - L00SDESC
+      - L00CDESC
+      - L00WTHFT
+      - L00WTHIN
+      - L00BDESC
+      - L00STDLTH
+      - L00PRDG
+      - L00F2F
+      - L00DROP
+      - L00DROPDT
+      - L00PROPRI
+      - L00PROPCU
+      - L00PROPB2
+      - L00CLR1
+      - L00CLR2
+      - L00PATRNR
+      - L00CONSTR
+      - L00LOOK
+      - L00USAGE
+      - L00FIBER1
+      - L00FIBER2
+      - L00FIBER3
+      - L00PATERN
+      - L00PAT001
+      - L00FIBRLB
+      - L00CPYRGT
+      - L00MXWTHF
+      - L00MXWTHI
+      - L00SKUSEQ
+      - L00INTROD
+      - L00IMGFLA
+      - L00IMGPRO
+      - L00RMSCEN
+      - L00RMS001
+      - L00RMS002
+      - L00IMGGRO
+      - L00FLATCL
+      - L00FLATRN
+      - L00PROFCL
+      - L00PROFRN
+      - L00RM1CLR
+      - L00RM1RNK
+      - L00RM2CLR
+      - L00RM2RNK
+      - L00RM3CLR
+      - L00RM3RNK
+      - L00GROPCL
+      - L00GROPRN
+      - L00ROLONL
+      - L00RPC
+      - L00PATPRD
+      - L00CHAR1
+      - L00CHAR2
+      - L00CHAR3
+      - L00CHAR4
+      - L00CHAR5
+      - L00FLAG1
+      - L00FLAG2
+      - L00FLAG3
+      - L00FLAG4
+      - L00FLAG5
+      - L00INT1
+      - L00INT2
+      - L00INT3
+      - L00INT4
+      - L00INT5
+      - L00DEC1
+      - L00DEC2
+      - L00DEC3
+      - L00DEC4
+      - L00DEC5
+      - L00COLCD
+      - L00ROOMTY
+      - L00ROO001
+      - L00ROO002
+      - L00WDTIN
+      - L00LTHIN
+
+      Keys:
+      - L00STYLE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L00COLOR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L00SIZE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L00BACK:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LFIL1002:
+      Identifier:         LFIL1002
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LFIR100
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "B2B - Product Master Flat File Styl, Col"
+
+      Fields:
+      - L00DVBR
+      - L00PCAT
+      - L00CNAME
+      - L00STYLE
+      - L00COLOR
+      - L00SIZE
+      - L00BACK
+      - L00PTYP
+      - L00SDESC
+      - L00CDESC
+      - L00WTHFT
+      - L00WTHIN
+      - L00BDESC
+      - L00STDLTH
+      - L00PRDG
+      - L00F2F
+      - L00DROP
+      - L00DROPDT
+      - L00PROPRI
+      - L00PROPCU
+      - L00PROPB2
+      - L00CLR1
+      - L00CLR2
+      - L00PATRNR
+      - L00CONSTR
+      - L00LOOK
+      - L00USAGE
+      - L00FIBER1
+      - L00FIBER2
+      - L00FIBER3
+      - L00PATERN
+      - L00PAT001
+      - L00FIBRLB
+      - L00CPYRGT
+      - L00MXWTHF
+      - L00MXWTHI
+      - L00SKUSEQ
+      - L00INTROD
+      - L00IMGFLA
+      - L00IMGPRO
+      - L00RMSCEN
+      - L00RMS001
+      - L00RMS002
+      - L00IMGGRO
+      - L00FLATCL
+      - L00FLATRN
+      - L00PROFCL
+      - L00PROFRN
+      - L00RM1CLR
+      - L00RM1RNK
+      - L00RM2CLR
+      - L00RM2RNK
+      - L00RM3CLR
+      - L00RM3RNK
+      - L00GROPCL
+      - L00GROPRN
+      - L00ROLONL
+      - L00RPC
+      - L00PATPRD
+      - L00CHAR1
+      - L00CHAR2
+      - L00CHAR3
+      - L00CHAR4
+      - L00CHAR5
+      - L00FLAG1
+      - L00FLAG2
+      - L00FLAG3
+      - L00FLAG4
+      - L00FLAG5
+      - L00INT1
+      - L00INT2
+      - L00INT3
+      - L00INT4
+      - L00INT5
+      - L00DEC1
+      - L00DEC2
+      - L00DEC3
+      - L00DEC4
+      - L00DEC5
+      - L00COLCD
+      - L00ROOMTY
+      - L00ROO001
+      - L00ROO002
+      - L00WDTIN
+      - L00LTHIN
+
+      Keys:
+      - L00PCAT:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L00STYLE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L00COLOR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L00SIZE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L00BACK:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LFIL1003:
+      Identifier:         LFIL1003
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LFIR100
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "B2B - Product Master Flat File: Fiber1,"
+
+      Fields:
+      - L00DVBR
+      - L00PCAT
+      - L00CNAME
+      - L00STYLE
+      - L00COLOR
+      - L00SIZE
+      - L00BACK
+      - L00PTYP
+      - L00SDESC
+      - L00CDESC
+      - L00WTHFT
+      - L00WTHIN
+      - L00BDESC
+      - L00STDLTH
+      - L00PRDG
+      - L00F2F
+      - L00DROP
+      - L00DROPDT
+      - L00PROPRI
+      - L00PROPCU
+      - L00PROPB2
+      - L00CLR1
+      - L00CLR2
+      - L00PATRNR
+      - L00CONSTR
+      - L00LOOK
+      - L00USAGE
+      - L00FIBER1
+      - L00FIBER2
+      - L00FIBER3
+      - L00PATERN
+      - L00PAT001
+      - L00FIBRLB
+      - L00CPYRGT
+      - L00MXWTHF
+      - L00MXWTHI
+      - L00SKUSEQ
+      - L00INTROD
+      - L00IMGFLA
+      - L00IMGPRO
+      - L00RMSCEN
+      - L00RMS001
+      - L00RMS002
+      - L00IMGGRO
+      - L00FLATCL
+      - L00FLATRN
+      - L00PROFCL
+      - L00PROFRN
+      - L00RM1CLR
+      - L00RM1RNK
+      - L00RM2CLR
+      - L00RM2RNK
+      - L00RM3CLR
+      - L00RM3RNK
+      - L00GROPCL
+      - L00GROPRN
+      - L00ROLONL
+      - L00RPC
+      - L00PATPRD
+      - L00CHAR1
+      - L00CHAR2
+      - L00CHAR3
+      - L00CHAR4
+      - L00CHAR5
+      - L00FLAG1
+      - L00FLAG2
+      - L00FLAG3
+      - L00FLAG4
+      - L00FLAG5
+      - L00INT1
+      - L00INT2
+      - L00INT3
+      - L00INT4
+      - L00INT5
+      - L00DEC1
+      - L00DEC2
+      - L00DEC3
+      - L00DEC4
+      - L00DEC5
+      - L00COLCD
+      - L00ROOMTY
+      - L00ROO001
+      - L00ROO002
+      - L00WDTIN
+      - L00LTHIN
+
+      Keys:
+      - L00FIBER1:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L00STYLE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L00COLOR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L00SIZE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L00BACK:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

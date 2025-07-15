@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00INT1
+  Type:               Packed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "INTEGER 1"
+      Label:              "INTEGER 1"
+      Heading1:           "INTEGER 1"
+      Heading2:           " "
+      Heading3:           " "

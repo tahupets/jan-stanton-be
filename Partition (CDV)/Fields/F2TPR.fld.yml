@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2TPR
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "T.P.R. PRODUCT (DEFAULT IS NO)?"
+      Label:              "T.P.R. PRODUCT"
+      Heading1:           "T.P.R."
+      Heading2:           "PRODUCT?"
+      Heading3:           " "

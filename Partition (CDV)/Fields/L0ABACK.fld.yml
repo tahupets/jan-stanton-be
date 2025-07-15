@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L0ABACK
+  Type:               Alpha
+  Length:             2
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "BACKING CODE"
+      Label:              "BACKING CODE"
+      Heading1:           "BACKING CODE"
+      Heading2:           " "
+      Heading3:           " "

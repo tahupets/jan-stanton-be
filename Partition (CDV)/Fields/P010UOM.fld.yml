@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010UOM
+  Type:               Alpha
+  Length:             2
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Price UOM"
+      Label:              "Price UOM"
+      Heading1:           "Price UOM"
+      Heading2:           " "
+      Heading3:           " "

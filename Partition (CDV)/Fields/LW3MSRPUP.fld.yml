@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3MSRPUP
+  Type:               Packed
+  Length:             15
+  Decimals:           3
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "MSRP Uplift Percentage"
+      Label:              "MSRP Uplift Per"
+      Heading1:           "MSRP"
+      Heading2:           "Uplift"
+      Heading3:           "Percentage"

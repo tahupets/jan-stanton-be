@@ -1,0 +1,2802 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * ========================================================
+    * Copyright       : (C) Stanton, 2016
+    * Type            : Function
+    * Platform        : Web Application Modules (Visual LANSA)
+    * Name            : LW3STPR
+    * Identifier      : LW3STPR
+    * Process         : LW3API
+    * Function        : LW3STPR
+    * Written By      : LANSAJAN
+    * Written On      : 19th April 2016
+    * Description     : Stanton Product Retrieval API
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc App Trkr #)
+    * -------------------------------------------------------
+    * Jan Metica : 02/20/2020 : Hard Surface Integration
+    * =======================================================
+    * ============== AMENDMENTS =============================
+    * Reference...: https://gitlab.com/lansa/stanton-carpet/-/issues/31
+    * Changed by..: Lansa Urriah
+    * Changed on..: 2021/08/05
+    * Description : show the first non-dropped product for Stock Product Details (Both B2B and B2C
+    * =======================================================
+    * Reference...: https://gitlab.com/lansa/stanton-carpet/-/issues/42
+    * Changed by..: Lansa Urriah
+    * Changed on..: 2021/10/11
+    * Description : New filter for WPRDLST, added multiselect filter for Hard-Surface Width
+    * =======================================================
+    * Reference...: https://gitlab.com/lansa/stanton-carpet/-/issues/69
+    * Changed by..: Lansa Urriah
+    * Changed on..: 2021/10/18
+    * Description : Apply Promo Details validation for Promo Item List to remove items out of range. This is achieved by fixing the reloading logic and saving/carrying over the min/max price and length range (this wasnt being done previously)
+    * =======================================================
+    * Reference...: https://gitlab.com/lansa/stanton-carpet/-/issues/28
+    * Changed by..: Lansa Urriah
+    * Changed on..: 2022/03/02
+    * Description : Gitlab issue required me to upload data into LW3Codes, changes here will support searching for items with TM and R symbols
+    *             : Price and Length range had issues and I had to fix said issues for the filter to properly work
+    * =======================================================
+    * Reference...: https://gitlab.com/lansa/stanton-carpet/-/issues/134
+    * Changed by..: Jan Metica
+    * Changed on..: 2021/10/18
+    * Description : Add Molding Trim Product Type. Utilize collections for additional fields outside of the flat file LFIP100
+    * =======================================================
+    * Reference...: https://gitlab.com/lansa/stanton-carpet/-/issues/217
+    * Changed by..: Lansa Urriah
+    * Changed on..: 2022/10/04
+    * Description : when in /search/StantonDWF, remove all Lux Vinyl Trim records from the search
+    * =======================================================
+    * Reference...: https://gitlab.com/lansa/stanton-carpet/-/issues/249
+    * Changed by..: Lansa Urriah
+    * Changed on..: 2022/11/17
+    * Description : Filter out Swatches and Samples in the New Intro Products
+    * =======================================================
+    * Reference...: https://gitlab.com/lansa/stanton-carpet/-/issues/29
+    * Changed by..: Lansa Urriah
+    * Changed on..: 2023/01/25
+    * Description : Add condition to remove Dropped products in the New Introductions List
+    * =======================================================
+    * Reference...: https://gitlab.com/lansa/stanton-carpet/-/issues/72
+    * Changed by..: Lansa Urriah
+    * Changed on..: 2023/09/08
+    * Description : Fix B2C Product Search query to include Storefront
+    * =======================================================
+    * Reference...: https://gitlab.com/lansa/stanton-carpet/-/issues/45
+    * Changed by..: Lansa Urriah
+    * Changed on..: 2023/10/10
+    * Description : Add L00PTYP in umGetAvailableStyles
+    * =======================================================
+    * Reference...: https://github.com/Stanton-Flooring/LANSA/issues/93
+    * Changed by..: Jan Metica
+    * Changed on..: 2024/02/28
+    * Description : Addition of "Laminate" product type
+    * =======================================================
+    * Reference...: https://github.com/Stanton-Flooring/LANSA/issues/151
+    * Changed by..: Urriah
+    * Changed on..: 2025/02/24
+    * Description : Fine Hardwood Integration
+    * =======================================================
+    
+    * --------------------------------
+    * Input/Output
+    * --------------------------------
+    * Fields (in):
+    *
+    * FXPRDRTP - Product Retrieval Type. Possible values: (STK - Stock Products | PRM - Promotional Products | NEW - New Stock Products Only | SRH - Normal Stock Search | SRP - Promotional Items Search)
+    * FXCUSID - Customer Code. Alphanumeric value that needs to be converted to numeric(6,0)
+    * FXSTYLCD - Style Code
+    * FXCOLRCD - Color Code
+    * FXSIZECD - Size Code
+    * FXBACKCD - Backing Code
+    * FXCUSIND - B2B/B2C Flag
+    * FXBRAND - Brand
+    * MSRP Pricing Flag - Markup Flag *ignore for now*
+    * FXSRCTXT - Search Text
+    * FXDTARCD - Data Returned Code. Possible values: (DTL - Get Product Details | COL - Get Alternate Colors | COR - Get Coordinates | ALL - Get Product Details, Alternate Colors and Coordinates)
+    * FXDROPFLG - Dropped Product Flag - Only retrieve Dropped Products if this is 'Y'
+    * FXURLFLT - Url Filter (Possible values: RESIDENTIAL | COMMERCIAL | HARD_SURFACE | STOCKEDRUG )
+    * FXCATURL - Category Url
+    * FXSFID - Storefront Id
+    * FXNEWPRDF - New Products Flag (Y/N)
+    *
+    * --------------------------------
+    * Fields (out):
+    *
+    * FXRETCD - Return Code
+    * FXRETMSG - Return Message
+    *
+    * --------------------------------
+    * Lists (in):
+    *
+    * #WL_SRCATTRLST - Search Attribute List
+    *  Fields:
+    *   LW3FLTNAM - Filter Name
+    *   LW3FLTVAL - Filter Value
+    *
+    * --------------------------------
+    * Lists (out):
+    *
+    * n/a
+    * --------------------------------
+    
+    Function Options(*DIRECT) Rcv_List(#WL_SRCATTRLST #WL_PRDLST)
+    
+    * =======================================================
+    * Components
+    * =======================================================
+    Define_Com Class(#LW3CodeUtility) Name(#CodeUtility) Desc('Code Utility RP') Scope(*APPLICATION)
+    Define_Com Class(#LW3MultilingualReader) Name(#MultilingualReader) Desc('Multilingual Variable Reader RP') Scope(*APPLICATION)
+    * Define_Com Class(#LW3ConfigReader) Name(#Utility_SystemSettings) Desc('System Configuration Reader RP') Scope(*APPLICATION)
+    Define_Com Class(#LW3ConfigReader) Name(#Utility_SystemSettingsPrev) Desc('System Configuration Reader RP') Scope(*APPLICATION)
+    Define_Com Class(#LW3CEUtilities) Name(#Utility) Desc('CE Utility') Scope(*APPLICATION)
+    Define_Com Class(#LW3MarkupUtility) Name(#MarkupUtility) Desc('Markup Utility RP') Scope(*APPLICATION)
+    Define_Com Class(#LW3CNTGL) Name(#Global_Constants) Desc('Global Constants') Help('Global Constants') Scope(*APPLICATION)
+    
+    * G#35
+    Define_Com Class(#LW3PRAPI) Name(#Utility_API) Scope(*APPLICATION)
+    
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    
+    Define_Com Class(#PRIM_BOLN) Name(#L_DecorativeWaterProofFilterApplies)
+    * Working Fields
+    * =======================================================
+    
+    Define Field(#W_DAYSTHRESHOLD) Decimals(0) Reffld(#LW3SVVNUM) Desc('Days Threshold')
+    Define Field(#W_STRINGDATE) Type(*CHAR) Length(10) Desc('String Date')
+    Define Field(#W_PRODCOLLECTION) Reffld(#L00CNAME) Desc('Product Collection')
+    
+    Define Field(#W_STYLECODE) Reffld(#L00STYLE) Desc('Style Code')
+    Define Field(#W_COLORCODE) Reffld(#L00COLOR) Desc('Color Code')
+    Define Field(#W_SIZECODE) Reffld(#L00SIZE) Desc('Size Code')
+    Define Field(#W_BACKINGCODE) Reffld(#L00BACK) Desc('Backing Code')
+    Define Field(#W_PRODUCTTYPE) Reffld(#L00PTYP) Desc('Product Type')
+    
+    
+    Define Field(#wCompletelyDroppedFlag) Type(*BOOLEAN) Desc('Indicate if Product is dropped')
+    Define Field(#wFirstRecord) Type(*BOOLEAN) Desc('Indicate if record is first record.')
+    
+    * G#69 - temp fields, used to store data to avoid overwriting the values when the header is read  and updated
+    * G#28 - replace STD_QSEL (256) is too short to store some values. use LW3QSEL (9999) as a reference field  to store a bigger value
+    Define Field(#wTemporary_AttachFiltersAndCheckProprietary) Reffld(#LW3QSEL)
+    
+    Define Field(#W_PRICERANGELOW) Reffld(#FXSRNPRC)
+    Define Field(#W_PRICERANGEHIGH) Reffld(#FXERNPRC)
+    Define Field(#W_PRICERANGEMIN) Reffld(#FXSRNPRC) Desc('Minimum Price Range')
+    Define Field(#W_PRICERANGEMAX) Reffld(#FXERNPRC) Desc('Maximum Price Range')
+    
+    Define Field(#W_LENGTHRANGELOW) Reffld(#FXSRNLTH)
+    Define Field(#W_LENGTHRANGEHIGH) Reffld(#FXERNLTH)
+    Define Field(#W_LENGTHRANGEMIN) Reffld(#FXSRNLTH) Desc('Minimum Length Range')
+    Define Field(#W_LENGTHRANGEMAX) Reffld(#FXERNLTH) Desc('Maximum Length Range')
+    
+    * G#69 these wTemp fields will be used to store the values being passed by the promo list page
+    Define Field(#wTemp_SRNLTHF) Reffld(#F55LTHF)
+    Define Field(#wTemp_ERNLTHF) Reffld(#F55LTHF)
+    Define Field(#wTemp_SRNLTHI) Reffld(#F55LTHI)
+    Define Field(#wTemp_ERNLTHI) Reffld(#F55LTHI)
+    
+    Define Field(#SRNLTHF) Reffld(#F55LTHF) Desc('Start Range Length - Feet')
+    Define Field(#ERNLTHF) Reffld(#F55LTHF) Desc('End Range Length - Feet')
+    Define Field(#SRNLTHI) Reffld(#F55LTHI) Desc('Start Range Length - Inches')
+    Define Field(#ERNLTHI) Reffld(#F55LTHI) Desc('End Range Length - Inches')
+    
+    Define_Com Class(#PRIM_NMBR) Name(#L_TotalProductLengthInches)
+    Define_Com Class(#PRIM_NMBR) Name(#L_TotalMinLengthInches)
+    Define_Com Class(#PRIM_NMBR) Name(#L_TotalMaxLengthInches)
+    
+    * G#180
+    Define Field(#w_CommercialFlag) Type(*BOOLEAN)
+    Define Field(#w_BuildFlooringType) Type(*BOOLEAN)
+    Define Field(#w_FirstRecord) Type(*BOOLEAN)
+    
+    * G#169
+    Define Field(#w_BlankString) Type(*BOOLEAN)
+    
+    * G#217
+    Define Field(#wBrandSHSFound) Type(*BOOLEAN) Desc('Turn on if Brand SHS was found')
+    Define Field(#wBrandOnly) Type(*BOOLEAN) Desc('Turn on if Brand SHS was found')
+    
+    * G#35
+    Define Field(#OPPEDATE) Type(*PACKED) Length(6) Decimals(0)
+    Define Field(#OPPAPLY) Type(*CHAR) Length(1)
+    * =======================================================
+    * Group By
+    * =======================================================
+    
+    Group_By Name(#XG_RETURNFIELDS) Fields(#FXRETCD #FXRETMSG)
+    
+    * =======================================================
+    * Working Lists
+    * =======================================================
+    
+    Def_List Name(#WL_SRCATTRLST) Fields(#LW3FLTNAM #LW3FLTVAL) Type(*WORKING) Entrys(*MAX)
+    Def_List Name(#WL_PRDLST) Fields(#LW3ROWTYP #L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN #P010RPRC #P010CPRC #P010UOM #P010SMPRC #P010SHPRC #F55ROLL #F55DLOT #F55WTHF #F55WTHI #F55LTHF #F55LTHI #F55UPRICE #LW3ROLCNT #LW3SLDOUT) Counter(#LISTCOUNT) Type(*WORKING) Entrys(*MAX)
+    
+    * =======================================================
+    * Mainline
+    * =======================================================
+    
+    Exchange Fields(#FXRETCD #FXRETMSG #LW3QSEL) Option(*ALWAYS)
+    
+    #COM_OWNER.umInitialize
+    
+    * * ////////////////////////////////////////
+    * * *!NC! Change library for testing only
+    * #LW3LIBR := 'CAMS/'
+    * * ////////////////////////////////////////
+    
+    Case Of_Field(#FXPRDRTP)
+    
+    * Processing New Items
+    When Value_Is(= 'NEW')
+    
+    If Cond((#FXDTARCD = 'DTL') Or (#FXDTARCD = 'NHS'))
+    #COM_OWNER.umRetrieveNewIntroductionsList Idatareturncode(#FXDTARCD) Oreturncode(#FXRETCD)
+    Return
+    
+    Else
+    #FXRETMSG := 'Invalid Data Returned Code'
+    
+    Endif
+    
+    * Promotional Items
+    When Value_Is(= 'PRM')
+    
+    Case Of_Field(#FXDTARCD)
+    
+    When Value_Is(= 'DTL')
+    
+    #COM_OWNER.umRetrievePromotionalItemsList Oreturncode(#FXRETCD)
+    Exchange Fields(#FXSRNPRC #FXERNPRC #FXSRNLTH #FXERNLTH)
+    Return
+    
+    When Value_Is(= 'ALL')
+    
+    #COM_OWNER.umRetrievePromotionalItemDetails Oreturncode(#FXRETCD)
+    Return
+    
+    Otherwise
+    #FXRETMSG := 'Invalid Data Returned Code'
+    
+    Endcase
+    
+    * Product Search
+    When Value_Is(= 'SRH')
+    
+    If Cond(#FXDTARCD = 'DTL')
+    
+    #COM_OWNER.umProductSearch
+    
+    #FXRETCD := 'OK'
+    Exchange Fields(#FXSRNPRC #FXERNPRC)
+    Return
+    
+    Else
+    #FXRETMSG := 'Invalid Data Returned Code'
+    
+    Endif
+    
+    * Stock Product Details
+    When Value_Is(= 'STK')
+    
+    Case Of_Field(#FXDTARCD)
+    
+    When Value_Is(= 'DTL' = 'ALL')
+    
+    #COM_OWNER.umGetProductDetails
+    
+    #FXRETCD := 'OK'
+    Return
+    
+    * Available Colors
+    When Value_Is(= 'COL')
+    #COM_OWNER.umGetAvailableColors Igetpricedproducts(#FXCUSIND = 'B') Istylecode(#FXSTYLCD) Icolorcode(#FXCOLRCD) Isizecode(#FXSIZECD) Ibackingcode(#FXBACKCD)
+    
+    * check value of field #LW3CRDVIS
+    If Cond(#LW3CRDVIS *EQ 'Y')
+    #F55UPRICE #F55UPRCCA #P010SHPRC #P010SMPRC #P010CPRC #P010RPRC := 0
+    Endif
+    
+    #FXRETCD := 'OK'
+    Return
+    
+    * Coordinates
+    When Value_Is(= 'COR')
+    #COM_OWNER.umGetCoordinates Igetpricedproducts(#FXCUSIND = 'B') Iproductcollection(#L00CNAME) Istylecode(#FXSTYLCD) Icolorcode(#FXCOLRCD) Isizecode(#FXSIZECD) Ibackingcode(#FXBACKCD)
+    
+    
+    * check value of field #LW3CRDVIS
+    If Cond(#LW3CRDVIS *EQ 'Y')
+    #F55UPRICE #F55UPRCCA #P010SHPRC #P010SMPRC #P010CPRC #P010RPRC := 0
+    Endif
+    
+    #FXRETCD := 'OK'
+    Return
+    
+    Otherwise
+    #FXRETMSG := 'Invalid Data Returned Code'
+    
+    Endcase
+    
+    * Promotional Items Search
+    When Value_Is(= 'SRP')
+    
+    * Premade Rugs
+    When Value_Is(= 'PRG')
+    
+    #LW3ROWTYP := 'STK'
+    
+    Case Of_Field(#FXDTARCD)
+    
+    When Value_Is(= 'DTL')
+    * G#35
+    * #LW3QSEL := "SELECT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0 AND ATTR.L00PTYP = 'R' " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    #LW3QSEL := "SELECT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND ATTR.L00PTYP = 'R' " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    
+    * * !NC!
+    * Message Msgtxt('Premade Rugs')
+    * #STD_COUNT := 1
+    * Dountil Cond(#STD_COUNT >= #LW3QSEL.CurChars)
+    * Message Msgtxt(#LW3QSEL.SubString( #STD_COUNT 50 ))
+    * #STD_COUNT += 50
+    * Enduntil
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN #P010RPRC #P010CPRC #P010UOM #P010SMPRC #P010SHPRC) Io_Error(*NEXT) Using(#LW3QSEL)
+    If Cond(#LW3MSRPPF = 'Y')
+    * G#35
+    #Utility_API.umGetPrice( #FXCUSID #L00STYLE #L00COLOR #L00SIZE #L00BACK 'Y' #P010CPRC #P010RPRC #P010SMPRC #P010SHPRC #OPPEDATE #OPPAPLY #FXCUSIND )
+    
+    #P010CPRC := ((#LW3MSRPRG / 100) * #P010CPRC) + #P010CPRC
+    Endif
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    * Get Minimum/Maximum Price for Query
+    * G#35
+    * #LW3QSEL := "SELECT MIN(PRICE.P010CPRC), MAX(PRICE.P010CPRC) FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0 AND ATTR.L00PTYP = 'R' " + #COM_OWNER.umCheckProprietary
+    #LW3QSEL := "SELECT MIN(PRICE.P010CPRC), MAX(PRICE.P010CPRC) FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND ATTR.L00PTYP = 'R' " + #COM_OWNER.umCheckProprietary
+    
+    Select_Sql Fields(#FXSRNPRC #FXERNPRC) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    If Cond(#LW3MSRPPF = 'Y')
+    #FXSRNPRC := ((#LW3MSRPRG / 100) * #FXSRNPRC) + #FXSRNPRC
+    #FXERNPRC := ((#LW3MSRPRG / 100) * #FXERNPRC) + #FXERNPRC
+    Endif
+    
+    * check value of field #LW3CRDVIS
+    If Cond(#LW3CRDVIS *EQ 'Y')
+    #F55UPRICE #F55UPRCCA #P010SHPRC #P010SMPRC #P010CPRC #P010RPRC := 0
+    Endif
+    
+    Exchange Fields(#FXSRNPRC #FXERNPRC)
+    #FXRETCD := 'OK'
+    Return
+    
+    Endcase
+    
+    * Filters
+    When Value_Is(= 'FLT')
+    
+    If Cond(#FXCUSIND = 'B')
+    
+    #COM_OWNER.umGetDataForfiltersB2B
+    
+    * check value of field #LW3CRDVIS
+    If Cond(#LW3CRDVIS *EQ 'Y')
+    #F55UPRICE #F55UPRCCA #P010SHPRC #P010SMPRC #P010CPRC #P010RPRC := 0
+    Endif
+    
+    #FXRETCD := 'OK'
+    Return
+    
+    Else
+    #COM_OWNER.umGetDataForfiltersB2C
+    
+    #FXRETCD := 'OK'
+    Return
+    Endif
+    
+    * Room Scenes
+    When Value_Is(= 'RMS')
+    
+    Case Of_Field(#FXDTARCD)
+    
+    When Value_Is(= 'LST')
+    
+    #LW3ROWTYP := 'STK'
+    
+    If Cond(#FXCUSIND = 'B')
+    * #LW3QSEL := "SELECT ATTR.L00CNAME, ATTR.L00RMSCEN1 FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010RPRC > 0 " + #COM_OWNER.umAttachFiltersToQuery + #COM_OWNER.umCheckProprietary
+    * #LW3QSEL := "SELECT DISTINCT(ATTR.L00CNAME), (SELECT ATTR2.L00RMSCEN1 FROM LFIP100 ATTR2 JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010CST# = 001257 AND PRICE.P010RPRC > 0 AND ATTR2.L00CNAME = ATTR.L00CNAME AND ATTR2.L00RMSCEN1 <> '' FETCH FIRST ROW ONLY) as Image FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010RPRC > 0 AND ATTR.L00CNAME <> '' AND ATTR.L00RMSCEN1 <> ''" + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00CNAME"
+    * G#35
+    * #LW3QSEL := "SELECT * FROM (SELECT ATTR.L00CNAME, ATTR.L00RMSCEN1, ROW_NUMBER() OVER (PARTITION BY ATTR.L00CNAME ORDER BY ATTR.L00CNAME) AS RowNumber FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0" + #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00CNAME) AS A WHERE A.RowNumber = 1"
+    #LW3QSEL := "SELECT * FROM (SELECT ATTR.L00CNAME, ATTR.L00RMSCEN1, ROW_NUMBER() OVER (PARTITION BY ATTR.L00CNAME ORDER BY ATTR.L00CNAME) AS RowNumber FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00CNAME) AS A WHERE A.RowNumber = 1"
+    
+    Else
+    * #LW3QSEL := "SELECT DISTINCT(ATTR.L00CNAME), (SELECT ATTR2.L00RMSCEN1 FROM LFIP100 ATTR2 WHERE ATTR2.L00CNAME = ATTR.L00CNAME AND ATTR2.L00RMSCEN1 <> '' FETCH FIRST ROW ONLY) as Image FROM LFIP100 ATTR WHERE ATTR.L00CNAME <> '' AND ATTR.L00RMSCEN1 <> '' AND ATTR.L00DVBR = '" + #FXBRAND + "' " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00CNAME"
+    * #LW3QSEL := "SELECT * FROM (SELECT ATTR.L00CNAME, ATTR.L00RMSCEN1, ROW_NUMBER() OVER (PARTITION BY ATTR.L00CNAME ORDER BY ATTR.L00CNAME) AS RowNumber FROM LFIP100 ATTR WHERE ATTR.L00DVBR = '" + #FXBRAND + "'" + #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00CNAME) AS A WHERE A.RowNumber = 1"
+    #LW3QSEL := "SELECT * FROM (SELECT ATTR.L00CNAME, ATTR.L00RMSCEN1, ROW_NUMBER() OVER (PARTITION BY ATTR.L00CNAME ORDER BY ATTR.L00CNAME) AS RowNumber FROM LFIP100 ATTR WHERE ATTR.L00DVBR <> ''" + #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00CNAME) AS A WHERE A.RowNumber = 1"
+    Endif
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Roomscene Gallery') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00CNAME #L00RMSCEN) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Otherwise
+    
+    #FXRETCD := 'ER'
+    #FXRETMSG := 'Invalid Data Return Code'
+    
+    Endcase
+    
+    Otherwise
+    #FXRETMSG := 'Invalid Product Retrieval Type'
+    
+    Endcase
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umInitialize
+    * Description....: Initialization
+    * =======================================================
+    Mthroutine Name(umInitialize) Desc('Initialization')
+    
+    Clr_List Named(#WL_PRDLST)
+    
+    #FXRETCD := 'ER'
+    
+    If_Null Field(#FXSHOWMSG)
+    #FXSHOWMSG := 'Y'
+    Endif
+    
+    * If Customer Number is blank, assign it the value of '0' to ensure that the queries below would not encounter issues
+    If_Null Field(#FXCUSID)
+    #FXCUSID := '0'
+    Endif
+    
+    * If the passed in Style or Color Description contains single quotes, escape these quotes by doubling them up
+    If Cond(#FXSTYLDS.Contains( "'" ))
+    #FXSTYLDS := #Utility.umEscapeSpecialChars( #FXSTYLDS )
+    Endif
+    If Cond(#FXCOLRDS.Contains( "'" ))
+    #FXCOLRDS := #Utility.umEscapeSpecialChars( #FXCOLRDS )
+    Endif
+    
+    If Cond((#LW3WEBUSR *EQ *blank) *And (#FXWEBUSR *NE *blank))
+    #LW3WEBUSR := #FXWEBUSR
+    Endif
+    
+    If Cond(#FXCUSIND = 'B')
+    #LW3CRDVIS := *blank
+    Fetch Fields(#LW3CRDVIS) From_File(LW3WUSER) With_Key(#LW3WEBUSR) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * Check for Canadian DDP account
+    #C1PFG0 := *NULL
+    Fetch Fields(#C1CGRP #C1PFG0) From_File(CIP010) With_Key(#FXCUSID.asNumber) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    
+    * Get Active Pricing File
+    #LW3ACTFIL := #Utility_SystemSettingsPrev.uGetValue( 'ACTIVE_PRICING_FILE' ).Trim
+    If_Null Field(#LW3ACTFIL)
+    #LW3ACTFIL := 'LPRP0010'
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetNewIntroThreshold
+    * Description....: Get New Intro Threshold
+    * =======================================================
+    Mthroutine Name(umGetNewIntroThreshold) Desc('Get New Intro Threshold')
+    
+    Define_Map For(*INPUT) Class(#LW3SVVALP) Name(#iSysVarName)
+    Define_Map For(*OUTPUT) Class(#PRIM_NMBR) Name(#oThresholdDays)
+    Define_Map For(*OUTPUT) Class(#PRIM_ALPH) Name(#oCurrentDate)
+    
+    #Utility_SystemSettingsPrev.uGetValue Uikey(#iSysVarName) Uonumericvalue(#oThresholdDays)
+    #oCurrentDate := #STD_DATEX.Now.AsDisplayString( CCYYsMMsDD ).ReplaceAll( '/' '-' )
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umRetrieveNewIntroductionsList
+    * Description....: Retrieve a list of New Introductions
+    * =======================================================
+    Mthroutine Name(umRetrieveNewIntroductionsList) Desc('Retrieve New Introductions List') Help('Retrieve a list of New Introductions')
+    
+    Define_Map For(*INPUT) Class(#FXDTARCD) Name(#iDataReturnCode) Help('Possible values are "DTL" or "NHS"')
+    Define_Map For(*OUTPUT) Class(#FXRETCD) Name(#oReturnCode)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_SysVarName)
+    
+    #LW3ROWTYP := 'STK'
+    
+    If Cond(#FXCUSIND = 'B')
+    #L_SysVarName := 'NEW_PROD_THRESHOLD'
+    Else
+    #L_SysVarName := 'B2C_NEW_PRD_TRSHLD'
+    Endif
+    
+    #COM_OWNER.umGetNewIntroThreshold Isysvarname(#L_SysVarName) Ocurrentdate(#W_STRINGDATE) Othresholddays(#W_DAYSTHRESHOLD)
+    
+    * Check B2B/B2C Flag
+    If Cond(#FXCUSIND = 'B')
+    
+    * #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR JOIN CIP500 AS CUSTBRAND ON CUSTBRAND.C5CUST = " + #FXCUSID.Trim + " AND CUSTBRAND.C5DVBR = ATTR.L00DVBR JOIN PRL201B AS AUTO ON CUSTBRAND.C5CUST = AUTO.P21CST1 AND CUSTBRAND.C5DVBR = AUTO.P21DVBR WHERE '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END AND ATTR.L00SKUSEQ = 1 AND ((ATTR.L00PTYP = 'C') OR (ATTR.L00PTYP = 'N')) AND ATTR.L00FLAG4 = 'I'" + #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00INTRODT DESC"
+    
+    * * * #LW3QSEL := "Select * From " + #LW3LIBR + "LFIP100 As ATTR "
+    * 2022/10/14 - Include product category/type in the query (https://gitlab.com/lansa/stanton-carpet/-/issues/230#note_1133088871)
+    #LW3QSEL := "Select DISTINCT ATTR.L00DVBR, ATTR.L00PCAT, ATTR.L00PTYP, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT, ATTR.L00INTRODT From " + #LW3LIBR + "LFIP100 As ATTR "
+    #LW3QSEL += " Join " + #LW3LIBR + "CIP500 As CUSTBRAND On CUSTBRAND.C5CUST = " + #FXCUSID.Trim + " AND CUSTBRAND.C5DVBR = ATTR.L00DVBR"
+    #LW3QSEL += " Join " + #LW3LIBR + "PRL201B AS AUTO ON CUSTBRAND.C5CUST = AUTO.P21CST1 AND CUSTBRAND.C5DVBR = AUTO.P21DVBR And AUTO.P21CMPY = ATTR.L00FLAG5 "
+    
+    * Added by Jan - 4th Nov 2022 - GitLab Issue #227
+    #LW3QSEL += " Left Join FIP340 HSMF On HSMF.F340STYL = ATTR.L00STYLE And HSMF.F340CLR = ATTR.L00COLOR And HSMF.F340SIZE = ATTR.L00SIZE And HSMF.F340BACK = ATTR.L00BACK"
+    
+    * https://gitlab.com/lansa/stanton-carpet/-/issues/5
+    * Move the P21CMPY from the WHERE condition into the JOIN condition, value should be equal to ATTR.L00FLAG5 rather than the constant S
+    * #LW3QSEL += " Where ATTR.L00SKUSEQ = 1 AND ATTR.L00FLAG4 = 'I' And AUTO.P21CMPY = 'S'"
+    * #LW3QSEL += " Where ATTR.L00SKUSEQ = 1 AND ATTR.L00FLAG4 = 'I'  "
+    * G#291 - Start - Remove Dropped Products
+    #LW3QSEL += " Where ATTR.L00SKUSEQ = 1 AND ATTR.L00FLAG4 = 'I' AND ATTR.L00DROP <> 'Y' "
+    
+    
+    * For new arrivals, filters need to be considered
+    If Cond(#FXNEWPRDF = 'Y')
+    #LW3QSEL += " And '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END "
+    
+    #LW3QSEL += #COM_OWNER.umAttachFiltersToQuery + #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
+    Else
+    * * !NC!
+    If Cond(#iDataReturnCode <> 'NHS')
+    #LW3QSEL += " And '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END "
+    Endif
+    
+    * * * If Cond(#iDataReturnCode = 'NHS')
+    * * * * Retrieve New Hard Surfaces
+    * * * #LW3QSEL += " AND ((ATTR.L00PCAT = 'T') And ((ATTR.L00PTYP = 'H') Or (ATTR.L00PTYP = 'I' )))"
+    * * * Else
+    * * * * Retrieve carpets
+    * * * #LW3QSEL += " AND ((ATTR.L00PTYP = 'C') OR (ATTR.L00PTYP = 'N'))"
+    * * * Endif
+    
+    Endif
+    
+    #LW3QSEL += #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00INTRODT DESC"
+    
+    * #Utility.umSQLDebugMessage Iheadermessage('B2B New Introductions - ' + #iDataReturnCode) Iquerystring(#LW3QSEL)
+    
+    * * * Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00PTYP #L00SDESC #L00CDESC #L00IMGFLA #L00INTROD) Io_Error(*NEXT) Using(#LW3QSEL)
+    * G#249 - 20221117 - Add condition to remove swatches and samples
+    Continue If((#L00PTYP = #Global_Constants.upPrdTyp_Swatch) Or (#L00PTYP = #Global_Constants.upPrdTyp_Sample))
+    
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Else
+    
+    * #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR WHERE L00DVBR = '" + #FXBRAND + "' AND '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END AND ATTR.L00SKUSEQ = 1 AND ((ATTR.L00PTYP = 'C') OR (ATTR.L00PTYP = 'N')) AND ATTR.L00FLAG4 = 'I'" + #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00INTRODT DESC"
+    * #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR WHERE '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END AND ATTR.L00SKUSEQ = 1 AND ((ATTR.L00PTYP = 'C') OR (ATTR.L00PTYP = 'N')) AND ATTR.L00FLAG4 = 'I'" + #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00INTRODT DESC"
+    
+    * * * #LW3QSEL := "SELECT * FROM " + #LW3LIBR + "LFIP100 AS ATTR"
+    * 2022/10/14 - Include product category/type in the query (https://gitlab.com/lansa/stanton-carpet/-/issues/230#note_1133088871)
+    #LW3QSEL := "Select DISTINCT ATTR.L00DVBR, ATTR.L00PCAT, ATTR.L00PTYP, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT, ATTR.L00INTRODT From " + #LW3LIBR + "LFIP100 As ATTR "
+    
+    * Added by Jan - 4th Nov 2022 - GitLab Issue #227
+    #LW3QSEL += " Left Join FIP340 HSMF On HSMF.F340STYL = ATTR.L00STYLE And HSMF.F340CLR = ATTR.L00COLOR And HSMF.F340SIZE = ATTR.L00SIZE And HSMF.F340BACK = ATTR.L00BACK"
+    
+    * G#291 - Start - Remove dropped products
+    * #LW3QSEL += " Where ATTR.L00FLAG4 = 'I' And ATTR.L00SKUSEQ = 1 "
+    #LW3QSEL += " Where ATTR.L00FLAG4 = 'I' And ATTR.L00SKUSEQ = 1 And ATTR.L00DROP <> 'Y' "
+    
+    * For new arrivals, filters need to be considered
+    If Cond(#FXNEWPRDF = 'Y')
+    #LW3QSEL += " And '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END"
+    
+    #LW3QSEL += #COM_OWNER.umAttachFiltersToQuery + #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
+    Else
+    If Cond(#iDataReturnCode <> 'NHS')
+    #LW3QSEL += " And '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END"
+    Endif
+    
+    If Cond(#iDataReturnCode = 'NHS')
+    * Retrieve New Hard Surfaces
+    * #LW3QSEL += " AND (((ATTR.L00PTYP = 'H') Or (ATTR.L00PTYP = 'I')))"
+    * #LW3QSEL += " AND ((ATTR.L00PCAT = 'T') And ((ATTR.L00PTYP = 'H') Or (ATTR.L00PTYP = 'I' ) Or (ATTR.L00PTYP = '" + #Global_Constants.upPrdTyp_Laminate + "' )))"
+    * G#151
+    #LW3QSEL += " AND ((ATTR.L00PCAT = '" + #Global_Constants.upPrdTyp_CarpetTile + "') And ((ATTR.L00PTYP = '" + #Global_Constants.upPrdTyp_HardSurfacePlank + "') Or (ATTR.L00PTYP = '" + #Global_Constants.upPrdTyp_HardSurfaceTile + "' ) Or (ATTR.L00PTYP = '" + #Global_Constants.upPrdTyp_Laminate + "' ) Or (ATTR.L00PTYP = '" + #Global_Constants.upPrdTyp_FineHardwood + "' )))"
+    Else
+    * * G#222 - Start - Show PTYP F,G,H,I,J
+    * * Retrieve carpets
+    * #LW3QSEL += " AND ((ATTR.L00PTYP = 'C') OR (ATTR.L00PTYP = 'N'))"
+    * #LW3QSEL += " AND (((ATTR.L00PTYP = 'C') OR (ATTR.L00PTYP = 'N')) OR ((ATTR.L00PCAT = 'T') AND (ATTR.L00PTYP IN('F','G','H','I','J'))))"
+    * #LW3QSEL += " AND (((ATTR.L00PTYP = 'C') OR (ATTR.L00PTYP = 'N')) OR ((ATTR.L00PCAT = 'T') AND (ATTR.L00PTYP IN('" + #Global_Constants.upPrdTyp_Porcelain + "','" + #Global_Constants.upPrdTyp_Bullnose + "','" + #Global_Constants.upPrdTyp_HardSurfaceTile + "','" + #Global_Constants.upPrdTyp_HardSurfacePlank + "','" + #Global_Constants.upPrdTyp_GlassMosaic + "','" + #Global_Constants.upPrdTyp_Laminate + "'))))"
+    * G#151
+    #LW3QSEL += " AND (((ATTR.L00PTYP = 'C') OR (ATTR.L00PTYP = 'N')) OR ((ATTR.L00PCAT = 'T') AND (ATTR.L00PTYP IN('" + #Global_Constants.upPrdTyp_Porcelain + "','" + #Global_Constants.upPrdTyp_Bullnose + "','" + #Global_Constants.upPrdTyp_HardSurfaceTile + "','" + #Global_Constants.upPrdTyp_HardSurfacePlank + "','" + #Global_Constants.upPrdTyp_GlassMosaic + "','" + #Global_Constants.upPrdTyp_Laminate + "','" + #Global_Constants.upPrdTyp_FineHardwood + "'))))"
+    * * G#222 - End
+    Endif
+    Endif
+    
+    #LW3QSEL += #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00INTRODT DESC"
+    
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('B2C New Introductions - ' + #iDataReturnCode) Iquerystring(#LW3QSEL)
+    
+    * * * Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00PTYP #L00SDESC #L00CDESC #L00IMGFLA #L00INTROD) Io_Error(*NEXT) Using(#LW3QSEL)
+    * G#249 - 20221117 - Add condition to remove swatches and samples
+    Continue If((#L00PTYP = #Global_Constants.upPrdTyp_Swatch) Or (#L00PTYP = #Global_Constants.upPrdTyp_Sample))
+    
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Endif
+    
+    * check value of field #LW3CRDVIS
+    If Cond(#LW3CRDVIS *EQ 'Y')
+    #F55UPRICE #F55UPRCCA #P010SHPRC #P010SMPRC #P010CPRC #P010RPRC := 0
+    Endif
+    
+    #oReturnCode := 'OK'
+    
+    Endroutine
+    
+    * * =======================================================
+    * * Mthroutine ....: umRetrieveNewHardSurface
+    * * Description....: Retrieve a list of new hard surfaces
+    * * =======================================================
+    * Mthroutine Name(umRetrieveNewHardSurface) Desc('Retrieve New Introductions List') Help('Retrieve a list of New Introductions')
+    *
+    * Define_Map For(*OUTPUT) Class(#FXRETCD) Name(#oReturnCode)
+    *
+    * #LW3ROWTYP := 'STK'
+    *
+    * If Cond(#FXCUSIND = 'B')
+    * #Utility_SystemSettings.uGetValue Uikey('NEW_PROD_THRESHOLD') Uonumericvalue(#W_DAYSTHRESHOLD)
+    * Else
+    * #Utility_SystemSettings.uGetValue Uikey('B2C_NEW_PRD_TRSHLD') Uonumericvalue(#W_DAYSTHRESHOLD)
+    * Endif
+    *
+    * #W_STRINGDATE := #STD_DATEX.Now.AsDisplayString( CCYYsMMsDD ).ReplaceAll( '/' '-' )
+    *
+    * * Check B2B/B2C Flag
+    * If Cond(#FXCUSIND = 'B')
+    *
+    * #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR JOIN CIP500 AS CUSTBRAND ON CUSTBRAND.C5CUST = " + #FXCUSID.Trim + " AND CUSTBRAND.C5DVBR = ATTR.L00DVBR JOIN PRL201B AS AUTO ON CUSTBRAND.C5CUST = AUTO.P21CST1 AND CUSTBRAND.C5DVBR = AUTO.P21DVBR WHERE '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END AND ATTR.L00SKUSEQ = 1 AND ((ATTR.L00PTYP = 'C') OR (ATTR.L00PTYP = 'N')) AND ATTR.L00FLAG4 = 'I'" + #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00INTRODT DESC"
+    *
+    * * #COM_OWNER.umSQLDebugMessage Iheadermessage('B2B New Introductions') Iquerystring(#LW3QSEL)
+    *
+    * Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    * Add_Entry To_List(#WL_PRDLST)
+    * Endselect
+    *
+    * Else
+    *
+    * * #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR WHERE L00DVBR = '" + #FXBRAND + "' AND '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END AND ATTR.L00SKUSEQ = 1 AND ((ATTR.L00PTYP = 'C') OR (ATTR.L00PTYP = 'N')) AND ATTR.L00FLAG4 = 'I'" + #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00INTRODT DESC"
+    * #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR WHERE '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END AND ATTR.L00SKUSEQ = 1 AND ((ATTR.L00PTYP = 'C') OR (ATTR.L00PTYP = 'N')) AND ATTR.L00FLAG4 = 'I'" + #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00INTRODT DESC"
+    *
+    * * #COM_OWNER.umSQLDebugMessage Iheadermessage('B2C New Introductions') Iquerystring(#LW3QSEL)
+    *
+    * Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    * Add_Entry To_List(#WL_PRDLST)
+    * Endselect
+    *
+    * Endif
+    *
+    * * check value of field #LW3CRDVIS
+    * If Cond(#LW3CRDVIS *EQ 'Y')
+    * #F55UPRICE #F55UPRCCA #P010SHPRC #P010SMPRC #P010CPRC #P010RPRC := 0
+    * Endif
+    *
+    * #oReturnCode := 'OK'
+    *
+    * Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umRetrievePromotionalItemsList
+    * Description....: Retrieve Promotional Items List
+    * =======================================================
+    Mthroutine Name(umRetrievePromotionalItemsList) Desc('Retrieve Promotional Items List') Help('Retrieve the list of available promotional items')
+    
+    Define_Map For(*OUTPUT) Class(#FXRETCD) Name(#oReturnCode)
+    
+    #FXSRNPRC := #W_PRICERANGELOW
+    #FXERNPRC := #W_PRICERANGEHIGH
+    #FXSRNLTH := #W_LENGTHRANGELOW
+    #FXERNLTH := #W_LENGTHRANGEHIGH
+    
+    * G#69 - Store the values passed from the Promo List page into these temp fields
+    #W_PRICERANGELOW := #FXSRNPRC
+    #W_PRICERANGEHIGH := #FXERNPRC
+    
+    * G#69 Initial run, these fields are still null, #FXSRNPRC, #FXERNPRC, #FXSRNLTH, #FXERNLTH
+    If Cond(#FXSRNLTH = '')
+    #W_LENGTHRANGELOW := ''
+    Else
+    * If Value was passed
+    * Parse length filter string to feet and inches
+    #COM_OWNER.parseLengthFilter Ilength(#FXSRNLTH) Ofeet(#wTemp_SRNLTHF) Oinches(#wTemp_SRNLTHI)
+    
+    #L_TotalMinLengthInches := #Utility.umFeetToInches( #wTemp_SRNLTHF #wTemp_SRNLTHI )
+    #W_LENGTHRANGELOW := #L_TotalMinLengthInches.AsString
+    Endif
+    If Cond(#FXERNLTH = '')
+    #W_LENGTHRANGEHIGH := ''
+    Else
+    * If Value was passed
+    * Parse length filter string to feet and inches
+    #COM_OWNER.parseLengthFilter Ilength(#FXERNLTH) Ofeet(#wTemp_ERNLTHF) Oinches(#wTemp_ERNLTHI)
+    
+    #L_TotalMaxLengthInches := #Utility.umFeetToInches( #wTemp_ERNLTHF #wTemp_ERNLTHI )
+    #W_LENGTHRANGEHIGH := #L_TotalMaxLengthInches.AsString
+    Endif
+    
+    * G#69 reset these values and get the default min-max price and length range. It is needed as they are the fields useds for both sending the Low and High Price and Length Range from the WAM and used to get the Min and Max range as well
+    #FXSRNPRC #FXERNPRC #FXSRNLTH #FXERNLTH := *NULL
+    
+    * Get Minimum/Maximum Price for Query
+    If Cond(#C1PFG0 = 'Y')
+    #LW3QSEL := "SELECT MIN(SKU.F55UPRCCAN), MAX(SKU.F55UPRCCAN) "
+    Else
+    #LW3QSEL := "SELECT MIN(SKU.F55UPRICE), MAX(SKU.F55UPRICE) "
+    Endif
+    
+    #LW3QSEL += " FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    
+    If Cond(#C1PFG0 = 'Y')
+    #LW3QSEL += " AND SKU.F55UPRCCAN <> 0"
+    Else
+    #LW3QSEL += " AND SKU.F55UPRICE <> 0"
+    Endif
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Promotional Items - Price Filter') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#FXSRNPRC #FXERNPRC) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    * G#28 - This markup option generates a different value, I copied how the item markup is added and used the same value
+    #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype('PRODUCTTYPE') Iorderlinetype('') Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcarpettile(#LW3MSRPTL) Imarkuphardsurface(#LW3MSRPHS) Iproducttype(#L00PTYP) Bcalculatedprice(#FXSRNPRC)
+    #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype('PRODUCTTYPE') Iorderlinetype('') Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcarpettile(#LW3MSRPTL) Imarkuphardsurface(#LW3MSRPHS) Iproducttype(#L00PTYP) Bcalculatedprice(#FXERNPRC)
+    * #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype('ORDERLINETYPE') Iorderlinetype('PM') Imarkuppromotions(#LW3MSRPPM) Iproducttype(#F55PCAT) Bcalculatedprice(#FXSRNPRC)
+    * #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype('ORDERLINETYPE') Iorderlinetype('PM') Imarkuppromotions(#LW3MSRPPM) Iproducttype(#F55PCAT) Bcalculatedprice(#FXERNPRC)
+    
+    * G#69 - In the initial run, the Low and High Price range values are blanks. Use the Min and Max values
+    If Cond((#W_PRICERANGELOW = 0) And (#W_PRICERANGEHIGH = 0))
+    #W_PRICERANGELOW := #FXSRNPRC
+    #W_PRICERANGEHIGH := #FXERNPRC
+    Endif
+    
+    * Get Minimum/Maximum Length - Feet
+    #LW3QSEL := "SELECT MIN(SKU.F55LTHF), MAX(SKU.F55LTHF) FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0) AND SKU.F55LTHF <> 0"
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Get Minimum/Maximum Length - Feet') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#SRNLTHF #ERNLTHF) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    * Get Minimum Length - Inches
+    #LW3QSEL := "SELECT MIN(SKU.F55LTHI) FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0) AND SKU.F55LTHF = " + #SRNLTHF.asstring
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Get Minimum Length - Inches') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#SRNLTHI) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    * Get Maximum Length - Inches
+    #LW3QSEL := "SELECT MAX(SKU.F55LTHI) FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0) AND SKU.F55LTHF = " + #ERNLTHF.asstring
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Get Maximum Length - Inches') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#ERNLTHI) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    * G#69 - After getting the Min/Max Price and Length ranges, get the Promo Products List
+    #LW3ROWTYP := 'PRM'
+    
+    * #LW3QSEL := "SELECT ATTR.L00CNAME, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00CLR1, ATTR.L00IMGFLAT, SKU.F55UOM, MIN(SKU.F55UPRICE), MIN(SKU.F55UPRCCAN), COUNT(*) AS ROLLS, (SELECT COUNT(*) FROM LFIP1155 SKU2 JOIN LFIP100 ATTR2 ON SKU2.F55STYL = ATTR2.L00STYLE AND SKU2.F55CLR = ATTR2.L00COLOR AND SKU2.F55SIZE = ATTR2.L00SIZE AND SKU2.F55BACK = ATTR2.L00BACK WHERE (SKu2.F55ODATE > 0 OR SKU2.F55OTIME > 0) AND ATTR.L00SDESC = ATTR2.L00SDESC AND ATTR.L00CDESC = ATTR2.L00CDESC) as OUT_OF_STOCK FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL WHERE (FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0) GROUP BY ATTR.L00CNAME, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00CLR1, ATTR.L00IMGFLAT, SKU.F55UOM"
+    
+    * G#69 - Not entirely sure, but this line is placed here to avoid an error
+    #wTemporary_AttachFiltersAndCheckProprietary := #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    
+    #LW3QSEL := "SELECT ATTR.L00CNAME, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00CLR1, ATTR.L00IMGFLAT, SKU.F55UOM, SKU.F55PCAT, MIN(SKU.F55UPRICE), MIN(SKU.F55UPRCCAN), COUNT(*) AS ROLLS, (SELECT COUNT(*) FROM LFIP1155 SKU2 JOIN LFIP100 ATTR2 ON SKU2.F55STYL = ATTR2.L00STYLE AND SKU2.F55CLR = ATTR2.L00COLOR AND SKU2.F55SIZE = ATTR2.L00SIZE AND SKU2.F55BACK = ATTR2.L00BACK WHERE (SKu2.F55ODATE > 0 OR SKU2.F55OTIME > 0) AND ATTR.L00SDESC = ATTR2.L00SDESC AND ATTR.L00CDESC = ATTR2.L00CDESC) as OUT_OF_STOCK FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0)"
+    
+    If Cond(#C1PFG0 = 'Y')
+    #LW3QSEL += " AND SKU.F55UPRCCAN <> 0"
+    Else
+    #LW3QSEL += " AND SKU.F55UPRICE <> 0"
+    Endif
+    
+    #LW3QSEL += " GROUP BY ATTR.L00CNAME, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00CLR1, ATTR.L00IMGFLAT, SKU.F55UOM, SKU.F55PCAT"
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Promotional Items List') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00CNAME #L00SDESC #L00CDESC #L00CLR1 #L00IMGFLA #L00CHAR4 #F55PCAT #F55UPRICE #F55UPRCCA #LW3ROLCNT #LW3OTOSTK) Io_Error(*NEXT) Using(#LW3QSEL)
+    * #com_owner.umlw3debug( (#L00CDESC + ' ' + #W_PRICERANGELOW.AsString + ' <= ' + #F55UPRICE.AsString + ' <= ' + #W_PRICERANGEHIGH.asstring) )
+    
+    * G#69 - Not sure why this line is placed here as the #F55LTHF and #F55LTHI fields are blank at this point
+    * Filter by minimum/maximum length inches
+    If Cond(#F55LTHF = #SRNLTHF)
+    Continue If(#F55LTHI < #SRNLTHI)
+    Endif
+    If Cond(#F55LTHF = #ERNLTHF)
+    Continue If(#F55LTHI > #ERNLTHI)
+    Endif
+    
+    * Check if there is a need to display Canadian Price
+    If Cond(#C1PFG0 = 'Y')
+    #F55UPRICE := #F55UPRCCA
+    Endif
+    
+    * If the number of available rolls is equal to the amount of out of stock items, then this product is out of stock
+    If Cond(#LW3ROLCNT = #LW3OTOSTK)
+    #LW3SLDOUT := 'Y'
+    Else
+    #LW3SLDOUT := 'N'
+    * If Cond(#LW3MSRPPF = 'Y')
+    * If Cond(#F55PCAT = 'R')
+    * #F55UPRICE := ((#LW3MSRPPR / 100) * #F55UPRICE) + #F55UPRICE
+    * Else
+    * #F55UPRICE := ((#LW3MSRPCP / 100) * #F55UPRICE) + #F55UPRICE
+    * Endif
+    * Endif
+    
+    * #COM_OWNER.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Iproducttype(#F55PCAT) Bcalculatedprice(#F55UPRICE)
+    
+    * #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype('PRODUCTTYPE') Iorderlinetype('') Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcarpettile(#LW3MSRPTL) Iproducttype(#F55PCAT) Bcalculatedprice(#F55UPRICE)
+    
+    #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype('ORDERLINETYPE') Iorderlinetype('PM') Imarkuppromotions(#LW3MSRPPM) Iproducttype(#F55PCAT) Bcalculatedprice(#F55UPRICE)
+    Endif
+    
+    * G#69 check if price is within range
+    Continue If(*Not ((#W_PRICERANGELOW <= #F55UPRICE) And (#F55UPRICE <= #W_PRICERANGEHIGH)))
+    
+    * #com_owner.umlw3debug( (#L00CDESC + ' ' + #W_PRICERANGELOW.AsString + ' <= ' + #F55UPRICE.AsString + ' <= ' + #W_PRICERANGEHIGH.asstring) )
+    
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    #COM_OWNER.convertFeetToInches Ifeet(#SRNLTHF) Iinches(#SRNLTHI) Olength(#FXSRNLTH)
+    #COM_OWNER.convertFeetToInches Ifeet(#ERNLTHF) Iinches(#ERNLTHI) Olength(#FXERNLTH)
+    * G#69 - At this point, the Min and Max length range values should have values, if length range are blanks, set them to the min and max values
+    If Cond((#W_LENGTHRANGELOW = '') And (#FXSRNLTH <> ''))
+    #W_LENGTHRANGELOW := #FXSRNLTH
+    Endif
+    
+    If Cond((#W_LENGTHRANGEHIGH = '') And (#FXERNLTH <> ''))
+    #W_LENGTHRANGEHIGH := #FXERNLTH
+    Endif
+    
+    If Cond(#LW3CRDVIS *EQ 'Y')
+    #F55UPRICE #P010SHPRC #P010SMPRC #P010CPRC #P010RPRC := 0
+    Endif
+    * G#69 - if totalmin and totalmax values are blanks, use the default values
+    If Cond((#L_TotalMinLengthInches = 0) And (#L_TotalMaxLengthInches = 0))
+    #L_TotalMinLengthInches := #Utility.umFeetToInches( #SRNLTHF #SRNLTHI )
+    #L_TotalMaxLengthInches := #Utility.umFeetToInches( #ERNLTHF #ERNLTHI )
+    #FXSRNLTH := #L_TotalMinLengthInches.AsString
+    #FXERNLTH := #L_TotalMaxLengthInches.AsString
+    Endif
+    
+    * G#28 - Since the original query does not have any way to filter the via the length range, we need to run the Promo Item Details  logic to filter out items out of the lenght range
+    
+    * G#69 - Need to run the details logic to filter the Length Range
+    Selectlist Named(#WL_PRDLST)
+    * Use umFormatApostrophe to avoid records with Apostrophe in their values
+    #LW3QSEL := "SELECT SKU.F55LTHF, SKU.F55LTHI FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE ATTR.L00SDESC = '" + #COM_OWNER.umFormatApostrophe( #L00SDESC ) + "' AND ATTR.L00CDESC = '" + #COM_OWNER.umFormatApostrophe( #L00CDESC ) + "' AND (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #wTemporary_AttachFiltersAndCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0)"
+    
+    If Cond(#C1PFG0 = 'Y')
+    #LW3QSEL += " AND SKU.F55UPRCCAN <> 0"
+    Else
+    #LW3QSEL += " AND SKU.F55UPRICE <> 0"
+    Endif
+    
+    #LW3QSEL += " ORDER BY SKU.F55UPRICE"
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage(('Subtract Rolls Promotional Items - Available Lengths')) Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#F55LTHF #F55LTHI) Io_Status(#IO$STS) Io_Error(*NEXT) Using(#LW3QSEL)
+    * Get the total length in inches based on the SQL
+    #L_TotalProductLengthInches := #Utility.umFeetToInches( #F55LTHF #F55LTHI )
+    
+    * only do the logic if Roll Count is not 0
+    If Cond(#LW3ROLCNT > 0)
+    If Cond(*Not ((#L_TotalMinLengthInches <= #L_TotalProductLengthInches) And (#L_TotalProductLengthInches <= #L_TotalMaxLengthInches)))
+    * Remove the roll count if out of range
+    #LW3ROLCNT -= 1
+    
+    If Cond(#LW3ROLCNT <= 0)
+    Dlt_Entry From_List(#WL_PRDLST)
+    
+    Continue
+    Else
+    Upd_Entry In_List(#WL_PRDLST)
+    Endif
+    Endif
+    Endif
+    Endselect
+    Endselect
+    
+    * G#28 - If Min and Max values are blanks, Get the Low and High values
+    If Cond((#W_PRICERANGEMIN = 0) And (#W_PRICERANGEMAX = 0))
+    #W_PRICERANGEMIN := #W_PRICERANGELOW
+    #W_PRICERANGEMAX := #W_PRICERANGEHIGH
+    Endif
+    If Cond((#W_LENGTHRANGEMIN = '') And (#W_LENGTHRANGEMAX = ''))
+    #W_LENGTHRANGEMIN := #W_LENGTHRANGELOW
+    #W_LENGTHRANGEMAX := #W_LENGTHRANGEHIGH
+    Endif
+    
+    * G#69 - return the values for selected low and high price and length ranges
+    Exchange Fields(#W_PRICERANGELOW #W_PRICERANGEHIGH #W_LENGTHRANGELOW #W_LENGTHRANGEHIGH #W_PRICERANGEMIN #W_PRICERANGEMAX #W_LENGTHRANGEMIN #W_LENGTHRANGEMAX)
+    
+    #oReturnCode := 'OK'
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umRetrievePromotionalItemDetails
+    * Description....: Retrieve details for a promotional item
+    * =======================================================
+    Mthroutine Name(umRetrievePromotionalItemDetails) Desc('Retrieve Promotional Items Details') Help('Retrieve details for a promotional item')
+    
+    Define_Map For(*OUTPUT) Class(#FXRETCD) Name(#oReturnCode)
+    
+    #LW3ROWTYP := 'PRM'
+    
+    * 05/09/2017 - Removed check in FIP010 for available length/width for Promotions to allow details to be retrieved correctly
+    
+    If Cond(#C1PFG0 = 'Y')
+    #LW3QSEL := "SELECT ATTR.*, SKU.F55STYL, SKU.F55CLR, SKU.F55SIZE, SKU.F55BACK, SKU.F55WTHF, SKU.F55WTHI, SKU.F55LTHF, SKU.F55LTHI, (SELECT MIN(SKU.F55UPRCCAN) FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "') AS MINPRICE, SKU.F55UOM, SKU.F55PCAT"
+    Else
+    #LW3QSEL := "SELECT ATTR.*, SKU.F55STYL, SKU.F55CLR, SKU.F55SIZE, SKU.F55BACK, SKU.F55WTHF, SKU.F55WTHI, SKU.F55LTHF, SKU.F55LTHI, (SELECT MIN(SKU.F55UPRICE) FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "') AS MINPRICE, SKU.F55UOM, SKU.F55PCAT"
+    Endif
+    #LW3QSEL += " FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "'" + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    
+    If Cond(#C1PFG0 = 'Y')
+    #LW3QSEL += " AND SKU.F55UPRCCAN <> 0"
+    Else
+    #LW3QSEL += " AND SKU.F55UPRICE <> 0"
+    Endif
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Promotional Item Details') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN #F55STYL #F55CLR #F55SIZE #F55BACK #F55WTHF #F55WTHI #F55LTHF #F55LTHI #F55UPRICE #F55UOM #F55PCAT) Io_Error(*NEXT) Using(#LW3QSEL)
+    * Place the Promotional Roll's UOM to field L00CHAR4
+    #L00CHAR4 := #F55UOM
+    * * Check if showing Canadian Rates
+    * If Cond(#C1PFG0 = 'Y')
+    * #F55UPRICE := #F55UPRCCA
+    * Endif
+    * If Cond(#LW3MSRPPF = 'Y')
+    * If Cond(#F55PCAT = 'R')
+    * #F55UPRICE := ((#LW3MSRPPR / 100) * #F55UPRICE) + #F55UPRICE
+    * Else
+    * #F55UPRICE := ((#LW3MSRPCP / 100) * #F55UPRICE) + #F55UPRICE
+    * Endif
+    * Endif
+    
+    * #COM_OWNER.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Iproducttype(#F55PCAT) Bcalculatedprice(#F55UPRICE)
+    
+    * #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype('PRODUCTTYPE') Iorderlinetype('') Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcarpettile(#LW3MSRPTL) Iproducttype(#F55PCAT) Bcalculatedprice(#F55UPRICE)
+    
+    #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype('ORDERLINETYPE') Iorderlinetype('PM') Imarkuppromotions(#LW3MSRPPM) Iproducttype(#F55PCAT) Bcalculatedprice(#F55UPRICE)
+    
+    #L00STYLE := #F55STYL
+    #L00COLOR := #F55CLR
+    #L00SIZE := #F55SIZE
+    #L00BACK := #F55BACK
+    
+    Add_Entry To_List(#WL_PRDLST)
+    
+    * This should only retrieve one entry
+    Leave
+    Endselect
+    
+    #LW3ROWTYP := 'ALN' /* Available Lengths */
+    
+    * Retrieve Available Lengths
+    * 05/09/2017 - Removed check in FIP010 for available length/width for Promotions to allow details to be retrieved correctly
+    * #LW3QSEL := "SELECT SKU.F55STYL, SKU.F55CLR, SKU.F55SIZE, SKU.F55BACK, ATTR.L00SDESC, ATTR.L00CDESC, SKU.F55ROLL, SKU.F55DLOT, SKU.F55WTHF, SKU.F55WTHI, SKU.F55LTHF, SKU.F55LTHI, SKU.F55UPRICE, SKU.F55UPRCCAN, SKU.F55UOM FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "' AND (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0) ORDER BY SKU.F55UPRICE"
+    #LW3QSEL := "SELECT SKU.F55STYL, SKU.F55CLR, SKU.F55SIZE, SKU.F55BACK, ATTR.L00SDESC, ATTR.L00CDESC, SKU.F55ROLL, SKU.F55DLOT, SKU.F55WTHF, SKU.F55WTHI, SKU.F55LTHF, SKU.F55LTHI, SKU.F55UPRICE, SKU.F55UPRCCAN, SKU.F55UOM, SKU.F55PCAT FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "' AND (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0)"
+    
+    If Cond(#C1PFG0 = 'Y')
+    #LW3QSEL += " AND SKU.F55UPRCCAN <> 0"
+    Else
+    #LW3QSEL += " AND SKU.F55UPRICE <> 0"
+    Endif
+    
+    #LW3QSEL += " ORDER BY SKU.F55UPRICE"
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Promotional Items - Available Lengths') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00STYLE #L00COLOR #L00SIZE #L00BACK #L00SDESC #L00CDESC #F55ROLL #F55DLOT #F55WTHF #F55WTHI #F55LTHF #F55LTHI #F55UPRICE #F55UPRCCA #L00CHAR4) Io_Error(*NEXT) Using(#LW3QSEL)
+    If Cond(#C1PFG0 = 'Y')
+    #F55UPRICE := #F55UPRCCA
+    Endif
+    * If Cond(#LW3MSRPPF = 'Y')
+    * If Cond(#F55PCAT = 'R')
+    * #F55UPRICE := ((#LW3MSRPPR / 100) * #F55UPRICE) + #F55UPRICE
+    * Else
+    * #F55UPRICE := ((#LW3MSRPCP / 100) * #F55UPRICE) + #F55UPRICE
+    * Endif
+    * Endif
+    * #COM_OWNER.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Iproducttype(#F55PCAT) Bcalculatedprice(#F55UPRICE)
+    
+    * #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype('PRODUCTTYPE') Iorderlinetype('') Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcarpettile(#LW3MSRPTL) Iproducttype(#F55PCAT) Bcalculatedprice(#F55UPRICE)
+    
+    #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype('ORDERLINETYPE') Iorderlinetype('PM') Imarkuppromotions(#LW3MSRPPM) Iproducttype(#F55PCAT) Bcalculatedprice(#F55UPRICE)
+    
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    * check value of field #LW3CRDVIS
+    If Cond(#LW3CRDVIS *EQ 'Y')
+    #F55UPRICE #F55UPRCCA #P010SHPRC #P010SMPRC #P010CPRC #P010RPRC := 0
+    Endif
+    
+    #oReturnCode := 'OK'
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umAttachFiltersToQuery
+    * Description....: Attach Filters to Query
+    * =======================================================
+    Mthroutine Name(umAttachFiltersToQuery) Desc('Attach Filters to Query') Help('Attach Filters to Query')
+    
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iExcludeSKUSequence) Mandatory(False) Desc('Exclude SKU Sequence') Help('Set this to True if the SKU sequence should not be a part of the query')
+    Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rString)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#@IndoorOutdoorUsage) Help('Use this to identify if the usage type selected is Indoor/Outdoor')
+    Define_Com Class(#F55LTHF) Name(#MINLTHFT) Help('Minimum Length - Feet')
+    Define_Com Class(#F55LTHF) Name(#MAXLTHFT) Help('Maximum Length - Feet')
+    
+    * * G#180, Build after the Commercial flag is confirmed
+    * * Flooring Type
+    * #rString += #COM_OWNER.umMultiFilterValues( 'ATTR.L00PTYP' #CodeUtility.umGetCodeDescriptionByCode( 'FTYPDC' '#' ) #rString )
+    
+    * Pattern Type
+    Case Of_Field(#FXBRAND)
+    When Value_Is(= 'ATR')
+    #LW3CTYPE := 'ATPTTP'
+    When Value_Is(= 'ROS')
+    #LW3CTYPE := 'RSPTTP'
+    Otherwise
+    #LW3CTYPE := 'STPTTP'
+    Endcase
+    #rString += #COM_OWNER.umMultiFilterValues( 'ATTR.L00PATERN1' #CodeUtility.umGetCodeDescriptionByCode( #LW3CTYPE '#' ) #rString )
+    
+    * Color
+    #rString += #COM_OWNER.umMultiFilterValues( 'ATTR.L00CLR1' #CodeUtility.umGetCodeDescriptionByCode( 'COLOR' '#' ) #rString )
+    
+    * Look and Feel
+    Case Of_Field(#FXBRAND)
+    When Value_Is(= 'ATR')
+    #LW3CTYPE := 'ATLFTP'
+    When Value_Is(= 'ROS')
+    #LW3CTYPE := 'RSLFTP'
+    Otherwise
+    #LW3CTYPE := 'STLFTP'
+    Endcase
+    #rString += #COM_OWNER.umMultiFilterValues( 'ATTR.L00LOOK' #CodeUtility.umGetCodeDescriptionByCode( #LW3CTYPE '#' ) #rString )
+    
+    * Usage
+    #rString += #COM_OWNER.umMultiFilterValues( 'ATTR.L00USAGE' #CodeUtility.umGetCodeDescriptionByCode( 'USAGE' '#' ) #rString #@IndoorOutdoorUsage )
+    * Loc_Entry In_List(#WL_SRCATTRLST) Where((#LW3FLTNAM = #CodeUtility.umGetCodeDescriptionByCode( 'USAGE' '#' )) And (#LW3FLTVAL.uPperCase = 'INDOOR / OUTDOOR')) Ret_Entry(*NO)
+    * If_Status Is(*OKAY)
+    * #@IndoorOutdoorUsage := 'Y'
+    * Else
+    * * If the Usage Type is INDOOR/OUTDOOR, do not add it as part of the Usage filter
+    * #rString += #COM_OWNER.umSingleFilterValues( 'ATTR.L00USAGE' #CodeUtility.umGetCodeDescriptionByCode( 'USAGE' '#' ) #rString )
+    * Endif
+    
+    * Collection
+    #rString += #COM_OWNER.umSingleFilterValues( 'ATTR.L00CNAME' #CodeUtility.umGetCodeDescriptionByCode( 'COLLEC' '#' ) #rString )
+    * Fiber Type
+    If Cond(#@IndoorOutdoorUsage = 'Y')
+    #rString += #COM_OWNER.umSingleFilterValues( 'ATTR.L00FIBER1' #CodeUtility.umGetCodeDescriptionByCode( 'FIBTYP' '#' ) #rString True True )
+    Else
+    #rString += #COM_OWNER.umSingleFilterValues( 'ATTR.L00FIBER1' #CodeUtility.umGetCodeDescriptionByCode( 'FIBTYP' '#' ) #rString False True )
+    Endif
+    * Construction
+    #rString += #COM_OWNER.umSingleFilterValues( 'ATTR.L00CONSTR' #CodeUtility.umGetCodeDescriptionByCode( 'CONSTR' '#' ) #rString )
+    * Brand
+    * #rString += #COM_OWNER.umSingleFilterValues( 'ATTR.L00DVBR' #CodeUtility.umGetCodeDescriptionByCode( 'BRAND' '#' ) #rString )
+    * Changed Brand selection to multi-filter
+    #rString += #COM_OWNER.umMultiFilterValues( 'ATTR.L00DVBR' #CodeUtility.umGetCodeDescriptionByCode( 'BRAND' '#' ) #rString )
+    #rString += #COM_OWNER.umSingleFilterValues( 'ATTR.L00WTHFT' #CodeUtility.umGetCodeDescriptionByCode( 'CERPWT' '#' ) #rString False False True )
+    
+    * G#42 - New search for Hard Surface Width
+    #rString += #COM_OWNER.umMultiFilterValues( 'ATTR.L00SIZE' #CodeUtility.umGetCodeDescriptionByCode( 'HDSUWT' '#' ) #rString )
+    
+    * Room Type
+    Loc_Entry In_List(#WL_SRCATTRLST) Where((#LW3FLTNAM = #CodeUtility.umGetCodeDescriptionByCode( 'ROOMTP' '#' )) And (#LW3FLTVAL <> *BLANKS))
+    If_Status Is(*OKAY)
+    If Cond(#rString <> *BLANKS)
+    #rString += " AND "
+    Endif
+    #rString += " ((UPPER(ATTR.L00ROOMTY1) = '" + #LW3FLTVAL.UpperCase + "') OR (UPPER(ATTR.L00ROOMTY2) = '" + #LW3FLTVAL.UpperCase + "') OR (UPPER(ATTR.L00ROOMTY3) = '" + #LW3FLTVAL.UpperCase + "'))"
+    Endif
+    
+    * Price - Only For B2B
+    If Cond((#FXCUSIND = 'B') And (#FXERNPRC <> 0) And (#FXNEWPRDF <> 'Y'))
+    If Cond(#rString <> *BLANKS)
+    #rString += " AND "
+    Endif
+    If Cond(#FXPRDRTP = 'PRM')
+    * Check if displaying Canadian Rates
+    If Cond(#C1PFG0 = 'Y')
+    #rString += " SKU.F55UPRCCAN BETWEEN " + #FXSRNPRC.asString + " AND " + #FXERNPRC.asString
+    Else
+    #rString += " SKU.F55UPRICE BETWEEN " + #FXSRNPRC.asString + " AND " + #FXERNPRC.asString
+    Endif
+    Else
+    If Cond(#LW3MSRPPF = 'Y')
+    #rString += " CASE ATTR.L00PTYP WHEN 'R' THEN ((CAST(" + #LW3MSRPPR.asString + "/100 AS NUMERIC(36,2)) * PRICE.P010CPRC) + PRICE.P010CPRC) ELSE ((CAST(" + #LW3MSRPCP.asString + "/100 AS NUMERIC(36,2)) * PRICE.P010CPRC) + PRICE.P010CPRC) END BETWEEN " + #FXSRNPRC.asString + " AND " + #FXERNPRC.asString
+    Else
+    #rString += " PRICE.P010CPRC BETWEEN " + #FXSRNPRC.asString + " AND " + #FXERNPRC.asString
+    Endif
+    Endif
+    Endif
+    
+    If Cond(#rString <> *BLANKS)
+    #rString := " AND (" + #rString + ")"
+    Endif
+    
+    * Length - Only For B2B
+    If Cond((#FXCUSIND = 'B') And (#FXERNLTH <> *BLANK))
+    * Parse length filter string to feet and inches
+    #COM_OWNER.parseLengthFilter Ilength(#FXSRNLTH) Ofeet(#MINLTHFT)
+    #COM_OWNER.parseLengthFilter Ilength(#FXERNLTH) Ofeet(#MAXLTHFT)
+    
+    If Cond(#rString <> *BLANKS)
+    #rString += " AND "
+    Endif
+    If Cond(#FXPRDRTP = 'PRM')
+    #rString += " (SKU.F55LTHF BETWEEN " + #MINLTHFT.asstring + " AND " + #MAXLTHFT.asString + ")"
+    Endif
+    Endif
+    
+    * If Cond((#FXPRDRTP <> 'PRM') And (#FXPRDRTP <> 'PRG'))
+    If Cond(*Not #iExcludeSKUSequence)
+    Loc_Entry In_List(#WL_SRCATTRLST) Where((#LW3FLTNAM = #CodeUtility.umGetCodeDescriptionByCode( 'COLOR' '#' )) And (#LW3FLTVAL <> *BLANKS)) Ret_Entry(*NO)
+    If_Status Is_Not(*OKAY)
+    #rString += " AND ATTR.L00SKUSEQ = 1"
+    Endif
+    Endif
+    * Endif
+    
+    * G#180, replace Flooring Type = Commercial condition
+    * * Check for special Flooring Type filters
+    * Selectlist Named(#WL_SRCATTRLST) Where(#LW3FLTNAM.UpperCase = #CodeUtility.umGetCodeDescriptionByCode( 'FTYPDC' '#' ).UpperCase)
+    * Case Of_Field(#LW3FLTVAL.UpperCase)
+    * When Value_Is(= 'COMMERCIAL')
+    * #rString += " And (ATTR.L00PTYP In ('C', 'P', 'T') And ATTR.L00USAGE = 'COMMERCIAL')"
+    * Endcase
+    * Endselect
+    * Flooring Tyoe
+    * G#180, Get the Commercial Flag (Flooring Type = Commercial) and the Build Flooring Type Flag
+    
+    * G#169 - Switch this flag on if at this point there the string is still blanks. After the flooring type filter is built, add an "AND" if this flag is on as it will cause a syntax error without it
+    #w_BlankString := (#rString = '')
+    
+    Loc_Entry In_List(#WL_SRCATTRLST) Where((#LW3FLTNAM.UpperCase = #CodeUtility.umGetCodeDescriptionByCode( 'FTYPDC' '#' ).UpperCase) And (#LW3FLTVAL.UpperCase = 'COMMERCIAL'))
+    #w_CommercialFlag := (#IO$STS = 'OK')
+    
+    Loc_Entry In_List(#WL_SRCATTRLST) Where((#LW3FLTNAM.UpperCase = #CodeUtility.umGetCodeDescriptionByCode( 'FTYPDC' '#' ).UpperCase) And (#LW3FLTVAL.UpperCase <> 'COMMERCIAL'))
+    #w_BuildFlooringType := (#IO$STS = 'OK')
+    
+    * If no Build Floor Type flag is on, use the umMultiFilterValues or build the condition with the Commercial flooring type in mind
+    If Cond(#w_BuildFlooringType)
+    If Cond(#w_CommercialFlag)
+    * Get all Non Commercial Flooring Types and build the condition, then add an OR and the Commercial condition
+    #rString += " And (ATTR.L00PTYP In ("
+    
+    #w_FirstRecord := True
+    Selectlist Named(#WL_SRCATTRLST) Where((#LW3FLTNAM.UpperCase = #CodeUtility.umGetCodeDescriptionByCode( 'FTYPDC' '#' ).UpperCase) And (#LW3FLTVAL.UpperCase <> 'COMMERCIAL'))
+    If Cond(#w_FirstRecord)
+    #rString += "'" + #LW3FLTVAL.UpperCase + "'"
+    #w_FirstRecord := False
+    Else
+    #rString += ",'" + #LW3FLTVAL.UpperCase + "'"
+    Endif
+    Endselect
+    
+    #rString += ") OR ((ATTR.L00PTYP In ('C', 'P', 'T') And ATTR.L00USAGE = 'COMMERCIAL')))"
+    Else
+    #rString += #COM_OWNER.umMultiFilterValues( 'ATTR.L00PTYP' #CodeUtility.umGetCodeDescriptionByCode( 'FTYPDC' '#' ) #rString )
+    
+    * G#169 - If the string is previously blanks before the Flooring type is built, add an AND before the condition
+    If Cond(#w_BlankString And (#rString <> ''))
+    #rString := " AND " + #rString
+    Endif
+    Endif
+    Else
+    * If only the Commercial Flooring Type is selected, use the condition below
+    If Cond(#w_CommercialFlag)
+    #rString += " And (ATTR.L00PTYP In ('C', 'P', 'T') And ATTR.L00USAGE = 'COMMERCIAL')"
+    Endif
+    Endif
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSingleFilterValues
+    * Description....: Build the query string for single filter values
+    * =======================================================
+    Mthroutine Name(umSingleFilterValues) Desc('Signle Filter Values') Help('Build the query string for single filter values') Access(*PRIVATE)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iFieldInFile)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iFilterName)
+    Define_Map For(*INPUT) Class(#CNTDTA) Name(#iQuery)
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#isIndoorOutdoor) Mandatory(False) Help('Use this to determine if Usage is set as Indoor/Outdoor')
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#isFiberType) Mandatory(False) Help('Use this to determine if the filter is for Fiber Type')
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#isCarpetWidth) Mandatory(False) Help('Use this to determine if the filter is for Carpet Width')
+    Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rString)
+    
+    Define_Com Class(#CNTDTA) Name(#uTempString)
+    Define_Com Class(#PRIM_ALPH) Name(#CRPTWTIN)
+    
+    Loc_Entry In_List(#WL_SRCATTRLST) Where((#LW3FLTNAM = #iFilterName) And (#LW3FLTVAL <> *BLANKS))
+    If_Status Is(*OKAY)
+    * For Fiber Type, search with 2 fields (L00FIBER1 and L00FIBER2)
+    If Cond(#isFiberType)
+    #rString += " ((UPPER(L00FIBER1) = '" + #LW3FLTVAL.UpperCase + "') OR (UPPER(L00FIBER2) = '" + #LW3FLTVAL.UpperCase + "'))"
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Fiber Query') Iquerystring(#rString)
+    Endif
+    
+    * For Carpet Width, parse feet and inches from filter value
+    If Cond(#isCarpetWidth)
+    If Cond(#LW3FLTVAL.Contains( 'X' ))
+    #L00WTHFT := #LW3FLTVAL.Substring( 1, (#LW3FLTVAL.PositionOf( 'X' ) - 1) ).AsNumber
+    #CRPTWTIN := #LW3FLTVAL.Substring( (#LW3FLTVAL.PositionOf( 'X' ) + 1), #LW3FLTVAL.CurSize )
+    #CRPTWTIN := #CRPTWTIN.Trim()
+    #CRPTWTIN := #CRPTWTIN.Substring( 1, (#CRPTWTIN.CurSize - 1) )
+    #L00WTHIN := #CRPTWTIN.AsNumber
+    
+    #rString += " L00WTHFT = " + #L00WTHFT.asstring + " AND L00WTHIN = " + #L00WTHIN.asstring
+    Else
+    #L00WTHFT := #LW3FLTVAL.Substring( 1, (#LW3FLTVAL.CurSize - 1) ).AsNumber
+    #rString += " L00WTHFT = " + #L00WTHFT.asstring
+    Endif
+    Endif
+    
+    If Cond((*Not #isFiberType) *And (*Not #isCarpetWidth))
+    #rString += " UPPER(" + #iFieldInFile + ") = '" + #LW3FLTVAL.UpperCase + "'"
+    Endif
+    Endif
+    
+    * If Usage is Indoor/Outdoor, include it as a query done on Fiber Type
+    If Cond(#isIndoorOutdoor)
+    If Cond(#rString <> *BLANKS)
+    #rString := "(" + #rString + " OR " + " UPPER(" + #iFieldInFile + ") = 'UV STABILIZED ROYALTRON| POLYPROPYLENE')"
+    Else
+    #rString := " UPPER(" + #iFieldInFile + ") = 'UV STABILIZED ROYALTRON| POLYPROPYLENE'"
+    Endif
+    Endif
+    
+    If Cond((#iQuery <> *BLANKS) And (#rString <> *BLANKS))
+    If Cond(#iQuery <> *BLANKS)
+    #rString := " AND" + #rString
+    Endif
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umMultiFilterValues
+    * Description....: Build the query string for multiple filter values
+    * =======================================================
+    Mthroutine Name(umMultiFilterValues) Desc('Multi Filter Values') Help('Build the query string for multiple filter values') Access(*PRIVATE)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iFieldInFile)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iFilterName)
+    Define_Map For(*INPUT) Class(#CNTDTA) Name(#iQuery)
+    Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rString)
+    Define_Map For(*OUTPUT) Class(#PRIM_ALPH) Name(#oIsIndoorOutdoor) Mandatory(*NO)
+    
+    Define_Com Class(#CNTDTA) Name(#uTempString)
+    
+    * G#217 - Initialize the Brand SHS flag as False
+    #wBrandSHSFound := False
+    #wBrandOnly := True
+    
+    #rString += " UPPER(" + #iFieldInFile + ") IN("
+    Selectlist Named(#WL_SRCATTRLST) Where(#LW3FLTNAM.UpperCase = #iFilterName.UpperCase)
+    
+    * If filtering by Flooring Type, only add the filter if the code is a single character
+    Continue If((#LW3FLTNAM = #CodeUtility.umGetCodeDescriptionByCode( 'FTYPDC' '#' )) And (#LW3FLTVAL.CurChars > 1))
+    
+    If_Null Field(#uTempString)
+    #uTempString := "'" + #LW3FLTVAL.UpperCase + "'"
+    Else
+    #uTempString += ", '" + #LW3FLTVAL.UpperCase + "'"
+    Endif
+    
+    * If filtering by Swatch, include Product Type of 'W' as they are also Swatch Type Products
+    If Cond((#LW3FLTNAM = #CodeUtility.umGetCodeDescriptionByCode( 'FTYPDC' '#' )) And (#LW3FLTVAL.UpperCase = 'S'))
+    #uTempString += ", 'W'"
+    Endif
+    * For the Usage filter, check if Indoor/Outdoor is included
+    If Cond((#LW3FLTNAM = #CodeUtility.umGetCodeDescriptionByCode( 'USAGE' '#' )) And (#LW3FLTVAL.UpperCase = 'INDOOR / OUTDOOR'))
+    
+    Endif
+    
+    * G#217 - If Brand search only, check if only the SHS brand is selected.
+    If Cond((#iFilterName.UpperCase = 'BRAND'))
+    If Cond(#LW3FLTVAL = 'SHS')
+    #wBrandSHSFound := True
+    Endif
+    Else
+    #wBrandOnly := False
+    Endif
+    Endselect
+    
+    * If the Attribute was not included in the list, do not add it to the query
+    If_Null Field(#uTempString)
+    #rString := *BLANKS
+    Else
+    If Cond(#iQuery <> *BLANKS)
+    #rString := " AND" + #rString
+    Endif
+    #rString += #uTempString + ")"
+    Endif
+    
+    * G#217 - If Brand search and only SHS is selected, add a condition removing all L00PTYP = M records
+    If Cond((#wBrandSHSFound = True) And (#wBrandOnly = True))
+    #rString += " AND ATTR.L00PTYP <> 'M' "
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildFilterQuery
+    * Description....: Build the Filter Query String
+    * =======================================================
+    Mthroutine Name(umBuildFilterQuery)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iFieldName)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iValue)
+    Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rString)
+    
+    #rString := #iFieldName + " = '" + #iValue + "'"
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetAvailableColors
+    * Description....: Get Available Colors
+    * =======================================================
+    Mthroutine Name(umGetAvailableColors) Desc('Get Available Colors') Help('Get Available Colors')
+    
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iGetPricedProducts) Desc('Get Priced Products') Help('Set this to true if retrieving products which the current customer has pricing for. If retrieving data for New Introductions, do not retrieve priced products')
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyleCode) Desc('Style Code')
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iColorCode) Desc('Color Code')
+    Define_Map For(*INPUT) Class(#L00SIZE) Name(#iSizeCode) Desc('Size Code')
+    Define_Map For(*INPUT) Class(#L00BACK) Name(#iBackingCode) Desc('Backing Code')
+    
+    #WL_PRDLST := *NULL
+    
+    #LW3ROWTYP := 'COL'
+    
+    * If Cond(#FXCUSIND = 'B')
+    If Cond(#iGetPricedProducts)
+    * G#35
+    * #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT FROM LFIP100 AS ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL  AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00STYLE = '" + #iStyleCode + "' AND ATTR.L00SIZE = '" + #iSizeCode + "' AND ATTR.L00BACK = '" + #iBackingCode + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0" + #COM_OWNER.umCheckProprietary
+    #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT, ATTR.L00PTYP FROM LFIP100 AS ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL  AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00STYLE = '" + #iStyleCode + "' AND ATTR.L00SIZE = '" + #iSizeCode + "' AND ATTR.L00BACK = '" + #iBackingCode + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umCheckProprietary
+    
+    If Cond(#FXSTYLDS <> *BLANKS)
+    #LW3QSEL += " AND ATTR.L00SDESC = '" + #FXSTYLDS + "'"
+    Endif
+    * Only Select Dropped Products
+    If Cond(#FXDROPFLG = 'Y')
+    #LW3QSEL += " AND ATTR.L00DROP = 'Y'"
+    Else
+    #LW3QSEL += " AND ATTR.L00DROP <> 'Y'"
+    Endif
+    
+    #LW3QSEL += "Order By ATTR.L00SDESC, ATTR.L00CDESC"
+    
+    Select_Sql Fields(#L00STYLE #L00COLOR #L00SIZE #L00BACK #L00SDESC #L00CDESC #L00IMGFLA #L00PTYP) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Else
+    
+    #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT, ATTR.L00PTYP FROM LFIP100 AS ATTR WHERE ATTR.L00STYLE = '" + #iStyleCode + "' AND ATTR.L00SIZE = '" + #iSizeCode + "' AND ATTR.L00BACK = '" + #iBackingCode + "' AND ATTR.L00DROP <> 'Y' " + #COM_OWNER.umCheckProprietary
+    If Cond(#FXSTYLDS <> *BLANKS)
+    #LW3QSEL += " AND ATTR.L00SDESC = '" + #FXSTYLDS + "'"
+    Endif
+    
+    #LW3QSEL += "Order By ATTR.L00SDESC, ATTR.L00CDESC"
+    
+    Select_Sql Fields(#L00STYLE #L00COLOR #L00SIZE #L00BACK #L00SDESC #L00CDESC #L00IMGFLA #L00PTYP) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Endif
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Available Colors') Iquerystring(#LW3QSEL)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetAvailableStyles
+    * Description....: Get Available Styles
+    * =======================================================
+    Mthroutine Name(umGetAvailableStyles) Desc('Get Available Styles') Help('Get Available Styles')
+    
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iGetPricedProducts) Desc('Get Priced Products') Help('Set this to true if retrieving products which the current customer has pricing for. If retrieving data for New Introductions, do not retrieve priced products')
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyleCode) Desc('Style Code')
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iColorCode) Desc('Color Code')
+    Define_Map For(*INPUT) Class(#L00SIZE) Name(#iSizeCode) Desc('Size Code')
+    Define_Map For(*INPUT) Class(#L00BACK) Name(#iBackingCode) Desc('Backing Code')
+    
+    #WL_PRDLST := *NULL
+    
+    #LW3ROWTYP := 'STY'
+    
+    If Cond(#iGetPricedProducts)
+    
+    * Modified by Jan - 4th Nov 2022 - GitLab Issue #254
+    * #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT FROM LFIP100 AS ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL  AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00PTYP = 'M' AND ATTR.L00STYLE <> '" + #iStyleCode + "' AND ATTR.L00COLOR = 'y" + #iColorCode + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0" + #COM_OWNER.umCheckProprietary
+    * G#35
+    * #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT FROM LFIP100 AS ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL  AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 " + #Global_Constants.upQuery_Filter_CoordinatingProducts + " AND ATTR.L00STYLE <> '" + #iStyleCode + "' AND ATTR.L00COLOR = '" + #iColorCode + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0" + #COM_OWNER.umCheckProprietary
+    #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT, ATTR.L00PTYP FROM LFIP100 AS ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL  AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 " + #Global_Constants.upQuery_Filter_CoordinatingProducts + " AND ATTR.L00STYLE <> '" + #iStyleCode + "' AND ATTR.L00COLOR = '" + #iColorCode + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umCheckProprietary
+    
+    * If Cond(#FXSTYLDS <> *BLANKS)
+    * #LW3QSEL += " AND ATTR.L00SDESC = '" + #FXSTYLDS + "'"
+    * Endif
+    * Only Select Dropped Products
+    If Cond(#FXDROPFLG = 'Y')
+    #LW3QSEL += " AND ATTR.L00DROP = 'Y'"
+    Else
+    #LW3QSEL += " AND ATTR.L00DROP <> 'Y'"
+    Endif
+    
+    #LW3QSEL += "Order By ATTR.L00SDESC, ATTR.L00CDESC"
+    
+    * * * !NC!
+    * * #COM_OWNER.umSQLDebugMessage Iheadermessage('umGetAvailableStyles') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00STYLE #L00COLOR #L00SIZE #L00BACK #L00SDESC #L00CDESC #L00IMGFLA #L00PTYP) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Else
+    
+    * Modified by Jan - 4th Nov 2022 - GitLab Issue #254
+    * #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT FROM LFIP100 AS ATTR WHERE  ATTR.L00PTYP = 'M' AND ATTR.L00STYLE <> '" + #iStyleCode + "' AND ATTR.L00COLOR = '" + #iColorCode + "' AND ATTR.L00DROP <> 'Y' " + #COM_OWNER.umCheckProprietary
+    #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT, ATTR.L00PTYP FROM LFIP100 AS ATTR Where ATTR.L00STYLE <> '" + #iStyleCode + "' AND ATTR.L00COLOR = '" + #iColorCode + "' AND ATTR.L00DROP <> 'Y' " + #Global_Constants.upQuery_Filter_CoordinatingProducts + #COM_OWNER.umCheckProprietary
+    If Cond(#FXSTYLDS <> *BLANKS)
+    #LW3QSEL += " AND ATTR.L00SDESC <> '" + #FXSTYLDS + "'"
+    Endif
+    
+    #LW3QSEL += "Order By ATTR.L00SDESC, ATTR.L00CDESC"
+    
+    Select_Sql Fields(#L00STYLE #L00COLOR #L00SIZE #L00BACK #L00SDESC #L00CDESC #L00IMGFLA #L00PTYP) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Endif
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Available Styles - ' + #iColorCode) Iquerystring(#LW3QSEL)
+    
+    Endroutine
+    
+    
+    * =======================================================
+    * Mthroutine ....: umGetCoordinates
+    * Description....: Get Coordinates/Alternatives
+    * =======================================================
+    Mthroutine Name(umGetCoordinates) Desc('Get Coordinates') Help('Get Coordinates')
+    
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iGetPricedProducts) Desc('Get Priced Products') Help('Set this to true if retrieving products which the current customer has pricing for. If retrieving data for New Introductions, do not retrieve priced products')
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType) Mandatory('') Desc('Product Type')
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyleCode) Desc('Style Code')
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iColorCode) Desc('Color Code')
+    Define_Map For(*INPUT) Class(#L00SIZE) Name(#iSizeCode) Desc('Size Code')
+    Define_Map For(*INPUT) Class(#L00BACK) Name(#iBackingCode) Desc('Backing Code')
+    Define_Map For(*INPUT) Class(#L00CNAME) Name(#iProductCollection) Desc('Product Collection') Help('Product Collection')
+    
+    #WL_PRDLST := *NULL
+    
+    #LW3ROWTYP := 'COR'
+    
+    * If the Product Collection is NULL (happens when only coordinates is going to be retrieved), retrieve the current product's collection from LFIP100 first
+    If_Null Field(#iProductCollection)
+    
+    If Cond(#FXFNDURL = 'Y')
+    #LW3QSEL := "SELECT ATTR.L00CNAME, ATTR.L00PTYP, ATTR.L00SIZE FROM LFIP100 ATTR WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "' AND ATTR.L00FLAG4 = 'I' " + #COM_OWNER.umCheckProprietary
+    Else
+    #LW3QSEL := "SELECT ATTR.L00CNAME, ATTR.L00PTYP, ATTR.L00SIZE FROM LFIP100 ATTR WHERE ATTR.L00STYLE = '" + #iStyleCode + "' AND ATTR.L00COLOR = '" + #iColorCode + "' AND ATTR.L00SIZE = '" + #iSizeCode + "' AND ATTR.L00BACK = '" + #iBackingCode + "' AND ATTR.L00FLAG4 = 'I' " + #COM_OWNER.umCheckProprietary
+    Endif
+    
+    * Only Select Dropped Products
+    If Cond(#FXDROPFLG = 'Y')
+    #LW3QSEL += " AND ATTR.L00DROP = 'Y'"
+    Else
+    #LW3QSEL += " AND ATTR.L00DROP <> 'Y'"
+    Endif
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Coordinates - Product Collection') Iquerystring(#LW3QSEL)
+    
+    * Only one record should be retrieved from the unique combination of keys. The Leave is just to indicate that only one record is selected
+    Select_Sql Fields(#L00CNAME #L00PTYP #L00SIZE) From_Files((LFIP100)) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    #iProductCollection := #L00CNAME
+    Endif
+    
+    If_Null Field(#iProductType)
+    #iProductType := #L00PTYP
+    Endif
+    
+    * If Cond(#FXCUSIND = 'B')
+    If Cond(#iGetPricedProducts)
+    * G#35
+    * #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT FROM LFIP100 AS ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL  AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00CNAME = '" + #iProductCollection + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0 AND ATTR.L00PTYP = '" + #iProductType + "' AND ATTR.L00SKUSEQ = 1 AND L00FLAG4 = 'I' " + #COM_OWNER.umCheckProprietary
+    #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT, ATTR.L00PTYP FROM LFIP100 AS ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL  AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00CNAME = '" + #iProductCollection + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND ATTR.L00PTYP = '" + #iProductType + "' AND ATTR.L00SKUSEQ = 1 AND L00FLAG4 = 'I' " + #COM_OWNER.umCheckProprietary
+    * Only Select Dropped Products
+    If Cond(#FXDROPFLG = 'Y')
+    #LW3QSEL += " AND ATTR.L00DROP = 'Y'"
+    Else
+    #LW3QSEL += " AND ATTR.L00DROP <> 'Y'"
+    Endif
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Coordinates - #iGetPricedProducts ') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00STYLE #L00COLOR #L00SIZE #L00BACK #L00SDESC #L00CDESC #L00IMGFLA #L00PTYP) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Else
+    #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT, ATTR.L00PTYP FROM LFIP100 AS ATTR WHERE ATTR.L00CNAME = '" + #iProductCollection + "' AND ATTR.L00PTYP = '" + #iProductType + "' AND ATTR.L00SKUSEQ = 1 AND ATTR.L00FLAG4 = 'I' AND ATTR.L00DROP <> 'Y' " + #COM_OWNER.umCheckProprietary
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Coordinates - *NOT #iGetPricedProducts ') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00STYLE #L00COLOR #L00SIZE #L00BACK #L00SDESC #L00CDESC #L00IMGFLA #L00PTYP) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Endif
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Coordinates') Iquerystring(#LW3QSEL)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetCoordinatingBroadloom
+    * Description....: Get Coordinating broadloon
+    * =======================================================
+    Mthroutine Name(umGetCoordinatingBroadloom) Desc('Get Coordinates') Help('Get Coordinates')
+    
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iGetPricedProducts) Desc('Get Priced Products') Help('Set this to true if retrieving products which the current customer has pricing for. If retrieving data for New Introductions, do not retrieve priced products')
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyleCode) Desc('Style Code')
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iColorCode) Desc('Color Code')
+    
+    
+    #WL_PRDLST := *NULL
+    
+    #LW3ROWTYP := 'COR'
+    
+    If Cond(#iGetPricedProducts)
+    * #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT FROM LFIP100 AS ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL  AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00CNAME = '" + #iProductCollection + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0 AND ATTR.L00PTYP = '" + #iProductType + "' AND ATTR.L00SKUSEQ = 1 AND L00FLAG4 = 'I' " + #COM_OWNER.umCheckProprietary
+    
+    
+    * Select DISTINCT COORD.L07STYLE, COORD.L07COLOR, COORD.L07CSTYLE, COORD.L07CCOLOR, COORD.L07FINSH, COORD.L07IMGCORD, ATTR.L00BACK, ATTR.L00SIZE, ATTR.L00PATRNRP, ATTR.L00LOOK, COORD.L07SKUSEQ From LFIP107 As COORD Join LFIP100 As ATTR On ATTR.L00STYLE = COORD.L07CSTYLE And ATTR.L00COLOR = COORD.L07CCOLOR And ATTR.L00PCAT = COORD.L07CPCAT JOIN LPRP0010 PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK Where COORD.L07STYLE = 'BVIEW' And COORD.L07COLOR = '22527' AND PRICE.P010CST# = 007439 AND PRICE.P010CPRC > 0 AND ATTR.L00FLAG4 = 'I' AND ((ATTR.L00PROPRI <> 'Y') Or ((ATTR.L00PROPRI = 'Y') AND (ATTR.L00PROPCUS IN (007439, 0)))) AND ATTR.L00DROP <> 'Y' Order By COORD.L07SKUSEQ
+    
+    #LW3QSEL := "Select Distinct ATTR.L00DVBR, COORD.L07CSTYLE, COORD.L07CCOLOR, COORD.L07FINSH, L07IMGCORD, ATTR.L00BACK, ATTR.L00SIZE, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00PATERN1, ATTR.L00LOOK, COORD.L07SKUSEQ, ATTR.L00PTYP From LFIP107 As COORD"
+    #LW3QSEL += " Join LFIP100 As ATTR On ATTR.L00STYLE = COORD.L07CSTYLE And ATTR.L00COLOR = COORD.L07CCOLOR And ATTR.L00PCAT = COORD.L07CPCAT"
+    #LW3QSEL += " JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK"
+    #LW3QSEL += " Where COORD.L07STYLE = '" + #iStyleCode + "' And COORD.L07COLOR = '" + #iColorCode + "'"
+    * G#35
+    * #LW3QSEL += " AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0"
+    #LW3QSEL += " AND PRICE.P010CST# = " + #FXCUSID.Trim
+    #LW3QSEL += " AND ATTR.L00FLAG4 = 'I' " + #COM_OWNER.umCheckProprietary
+    
+    * Only Select Dropped Products
+    If Cond(#FXDROPFLG = 'Y')
+    #LW3QSEL += " AND ATTR.L00DROP = 'Y'"
+    Else
+    #LW3QSEL += " AND ATTR.L00DROP <> 'Y'"
+    Endif
+    #LW3QSEL += " Order By COORD.L07SKUSEQ"
+    
+    * * !NC!
+    * #Utility.umSQLDebugMessage Iheadermessage('Coordinating Broadloom - B2B') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00STYLE #L00COLOR #R010FINDS #L00IMGFLA #L00BACK #L00SIZE #L00SDESC #L00CDESC #L00PATERN #L00LOOK #L00SKUSEQ #L00PTYP) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Else
+    * #LW3QSEL := "SELECT DISTINCT ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT FROM LFIP100 AS ATTR WHERE ATTR.L00CNAME = '" + #iProductCollection + "' AND ATTR.L00PTYP = '" + #iProductType + "' AND ATTR.L00SKUSEQ = 1 AND ATTR.L00FLAG4 = 'I' AND ATTR.L00DROP <> 'Y' " + #COM_OWNER.umCheckProprietary
+    *
+    * Select_Sql Fields(#L00STYLE #L00COLOR #L00SIZE #L00BACK #L00SDESC #L00CDESC #L00IMGFLA) Io_Error(*NEXT) Using(#LW3QSEL)
+    * Add_Entry To_List(#WL_PRDLST)
+    * Endselect
+    
+    * Select Distinct COORD.L07CSTYLE, COORD.L07CCOLOR, COORD.L07FINSH, L07IMGCORD, ATTR.L00BACK, ATTR.L00SIZE, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00PATERN1, ATTR.L00LOOK, COORD.L07SKUSEQ From LFIP107 As COORD Join LFIP100 As ATTR On ATTR.L00STYLE = COORD.L07CSTYLE And ATTR.L00COLOR = COORD.L07CCOLOR And ATTR.L00PCAT = COORD.L07CPCAT Where COORD.L07STYLE = 'BVIEW' And COORD.L07COLOR = '22527'
+    
+    #LW3QSEL := "Select Distinct ATTR.L00DVBR, COORD.L07CSTYLE, COORD.L07CCOLOR, COORD.L07FINSH, L07IMGCORD, ATTR.L00BACK, ATTR.L00SIZE, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00PATERN1, ATTR.L00LOOK, COORD.L07SKUSEQ, ATTR.L00PTYP From LFIP107 As COORD"
+    #LW3QSEL += " Join LFIP100 As ATTR On ATTR.L00STYLE = COORD.L07CSTYLE And ATTR.L00COLOR = COORD.L07CCOLOR And ATTR.L00PCAT = COORD.L07CPCAT"
+    #LW3QSEL += " Where COORD.L07STYLE = '" + #iStyleCode + "' And COORD.L07COLOR = '" + #iColorCode + "'"
+    #LW3QSEL += " AND ATTR.L00FLAG4 = 'I' AND ATTR.L00DROP <> 'Y' " + #COM_OWNER.umCheckProprietary
+    #LW3QSEL += " Order By COORD.L07SKUSEQ"
+    
+    * * !NC!
+    * #Utility.umSQLDebugMessage Iheadermessage('Coordinating Broadloom - B2C') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00STYLE #L00COLOR #R010FINDS #L00IMGFLA #L00BACK #L00SIZE #L00SDESC #L00CDESC #L00PATERN #L00LOOK #L00SKUSEQ #L00PTYP) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetCoordinatingTrims
+    * Description....: Get Coordinating Trims
+    * =======================================================
+    Mthroutine Name(umGetCoordinatingTrims) Desc('Get Coordinating Trims') Help('Get Coordinating Trims')
+    
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyleCode) Desc('Style Code')
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iColorCode) Desc('Color Code')
+    
+    #WL_PRDLST := *NULL
+    
+    #LW3ROWTYP := 'COR'
+    
+    #LW3QSEL := "Select Distinct ATTR.L00PCAT, ATTR.L00PTYP, ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00IMGFLAT From FIP351 As COORD"
+    #LW3QSEL += " Join LFIP100 As ATTR On ATTR.L00STYLE = COORD.F351MSTYL And ATTR.L00COLOR = COORD.F351MCLR And ATTR.L00SIZE = COORD.F351MSIZE And ATTR.L00BACK = COORD.F351MBACK"
+    
+    If Cond(#FXCUSIND = 'B')
+    #LW3QSEL += " JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK"
+    Endif
+    
+    #LW3QSEL += " Where COORD.F351STYL = '" + #iStyleCode + "' And COORD.F351CLR = '" + #iColorCode + "'"
+    
+    If Cond(#FXCUSIND = 'B')
+    * G#35
+    * #LW3QSEL += " AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0"
+    #LW3QSEL += " AND PRICE.P010CST# = " + #FXCUSID.Trim
+    Endif
+    
+    #LW3QSEL += " AND ATTR.L00FLAG4 = 'I' " + #COM_OWNER.umCheckProprietary
+    
+    * Only Select Dropped Products
+    If Cond(#FXDROPFLG = 'Y')
+    #LW3QSEL += " AND ATTR.L00DROP = 'Y'"
+    Else
+    #LW3QSEL += " AND ATTR.L00DROP <> 'Y'"
+    Endif
+    
+    #LW3QSEL += " Order By ATTR.L00SDESC, ATTR.L00CDESC"
+    
+    * * !NC!
+    * #Utility.umSQLDebugMessage Iheadermessage('Coordinating Trims') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00PCAT #L00PTYP #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00SDESC #L00CDESC #L00IMGFLA) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umCheckProprietary
+    * Description....: Check Proprietary for B2B and B2C
+    * =======================================================
+    Mthroutine Name(umCheckProprietary) Desc('Check Proprietary for B2B and B2C') Help('Check Proprietary for B2B and B2C')
+    Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rString)
+    
+    If Cond(#FXCUSIND = 'B')
+    #rString += " AND ((ATTR.L00PROPRI <> 'Y') Or ((ATTR.L00PROPRI = 'Y') AND (ATTR.L00PROPCUS IN (" + #FXCUSID + ", " + #C1CGRP.asString + "))))"
+    Else
+    * #rString += " OR ((ATTR.L00PROPRI = 'Y') AND (ATTR.L00PROPB2C = 'Y')) )"
+    #rString += " AND ((ATTR.L00PROPRI <> 'Y') Or ((ATTR.L00PROPRI = 'Y') AND ((ATTR.L00PROPB2C = 'Y') OR ((ATTR.L00PTYP IN ('S', 'W')) AND (ATTR.L00PROPCUS = " + #FXCUSID + ")))))"
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umApplyMarkup
+    * Description....: Uplift prices based on markup values
+    * =======================================================
+    Mthroutine Name(umApplyMarkup) Desc('Apply Markup') Help('Uplift prices based on markup values')
+    
+    * Markup Values
+    Define_Map For(*INPUT) Class(#LW3MSRPPF) Name(#iRetailPricingFlag) Desc('Retail Pricing Flag') Help('If this is Y, apply the markups')
+    Define_Map For(*INPUT) Class(#LW3MSRPCP) Name(#iMarkupCarpet) Mandatory(0) Desc('Markup for Carpet') Help('Markup for Carpet')
+    Define_Map For(*INPUT) Class(#LW3MSRP) Name(#iMarkupPremadeRug) Mandatory(0) Desc('Markup for Premade Rug') Help('Markup for Premade Rug')
+    Define_Map For(*INPUT) Class(#LW3MSRP) Name(#iMarkupCustomRug) Mandatory(0) Desc('Markup for Custom Rug') Help('Markup for Custom Rug')
+    Define_Map For(*INPUT) Class(#LW3MSRP) Name(#iMarkupPromotions) Mandatory(0) Desc('Markup for Promotions') Help('Markup for Promotions')
+    Define_Map For(*INPUT) Class(#LW3MSRP) Name(#iMarkupTiles) Mandatory(0) Desc('Markup for Tiles') Help('Markup for Tiles')
+    
+    * Product Values
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType) Desc('Product Type') Help('Product Type')
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iIsPromotionalItem) Mandatory(false) Desc('Is Promotional Item') Help('Set this to True to apply Promotional Item Markup')
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iIsCustomRug) Mandatory(false) Desc('Is Custom Rug') Help('Set this to True to apply Custom Rug')
+    
+    Define_Map For(*BOTH) Class(#P010CPRC) Name(#bCalculatedPrice) Desc('Calculated Price')
+    
+    If Cond(#iRetailPricingFlag = 'Y')
+    
+    If Cond(#iIsPromotionalItem)
+    #bCalculatedPrice := ((#iMarkupPromotions / 100) * #bCalculatedPrice) + #bCalculatedPrice
+    Return
+    
+    Endif
+    
+    If Cond(#iIsCustomRug)
+    #bCalculatedPrice := ((#iMarkupCustomRug / 100) * #bCalculatedPrice) + #bCalculatedPrice
+    Return
+    
+    Endif
+    
+    Case Of_Field(#iProductType)
+    * Premade Rug
+    When Value_Is(= 'R')
+    #bCalculatedPrice := ((#LW3MSRPPR / 100) * #bCalculatedPrice) + #bCalculatedPrice
+    
+    * Tile
+    When Value_Is(= 'T' = 'P')
+    #bCalculatedPrice := ((#iMarkupTiles / 100) * #bCalculatedPrice) + #bCalculatedPrice
+    
+    * Other Product Types
+    Otherwise
+    #bCalculatedPrice := ((#iMarkupCarpet / 100) * #bCalculatedPrice) + #bCalculatedPrice
+    
+    Endcase
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umApplyURLFilterToQuery
+    * Description....: If URL filter is provided, ensure that the query retrieval is conditioned based on it
+    * =======================================================
+    Mthroutine Name(umApplyUrlFilterToQuery) Desc('Apply Url Filter to Query') Help('If URL filter is provided, ensure that the query retrieval is conditioned based on it')
+    
+    Define_Map For(*INPUT) Class(#FXURLFLT) Name(#iUrlFilter)
+    Define_Map For(*RESULT) Class(#LW3QSEL) Name(#rQueryString)
+    
+    * * !NC!
+    * Message Msgtxt('url filter - ' + #iUrlFilter)
+    
+    Case Of_Field(#iUrlFilter)
+    
+    When Value_Is(= 'RESIDENTIAL')
+    * AppTrk #13373 - 07/29/2020 - Include Commercial in Residential Menu Filter
+    * #rQueryString := " And ATTR.L00PTYP In ('C', 'N', 'B', 'X', 'R') And ATTR.L00USAGE <> 'COMMERCIAL'"
+    #rQueryString := " And ATTR.L00PTYP In ('C', 'N', 'B', 'X', 'R')"
+    
+    When Value_Is(= 'COMMERCIAL')
+    #rQueryString := " And (ATTR.L00PTYP In ('C', 'P', 'T') And ATTR.L00USAGE = 'COMMERCIAL')"
+    
+    When Value_Is(= 'HARD_SURFACE')
+    #rQueryString := " And ATTR.L00PTYP In ('H', 'I')"
+    
+    When Value_Is(= 'STOCKEDRUG')
+    #rQueryString := " And ATTR.L00PTYP = 'R'"
+    
+    When Value_Is(= 'INDOOROUTDOOR')
+    #rQueryString := " And ATTR.L00USAGE = 'INDOOR / OUTDOOR'"
+    
+    When Value_Is(= 'MOLDING_TRIM')
+    #rQueryString := " And ATTR.L00PTYP = 'M'"
+    
+    * Added by Jan - 3rd Nov 2022 - GitLab Issue #227
+    When Value_Is(= #Global_Constants.upUrlFilter_Porcelain)
+    * #rQueryString := " And ATTR.L00PTYP = '" + #Global_Constants.upPrdTyp_Porcelain + "' And HSMF.F340CCODE <> 'CERAMIC'"
+    #rQueryString := #Global_Constants.upQuery_Filter_Porcelain
+    
+    When Value_Is(= #Global_Constants.upUrlFilter_Ceramic)
+    * #rQueryString := " And ATTR.L00PTYP = '" + #Global_Constants.upPrdTyp_Porcelain + "' And HSMF.F340CCODE = 'CERAMIC'"
+    #rQueryString := #Global_Constants.upQuery_Filter_Ceramic
+    
+    When Value_Is(= #Global_Constants.upUrlFilter_GlassMosaic)
+    #rQueryString := " And ATTR.L00PTYP = '" + #Global_Constants.upPrdTyp_GlassMosaic + "'"
+    
+    When Value_Is(= #Global_Constants.upUrlFilter_RecycledGlass)
+    * !NC227! - Identify how to distinguish Recycled Glass
+    * #rQueryString := " And ATTR.L00PTYP = '" + #Global_Constants.upPrdTyp_Porcelain
+    
+    When Value_Is(= #Global_Constants.upUrlFilter_Bullnose)
+    #rQueryString := #Global_Constants.upQuery_Filter_Bullnose
+    
+    * G#151
+    When Value_Is(= #Global_Constants.upUrlFilter_FineHardwood)
+    #rQueryString := #Global_Constants.upQuery_Filter_FineHardwood
+    
+    Endcase
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetDataForfiltersB2B
+    * Description....: Use this to select data for products to build filters for B2B
+    * =======================================================
+    Mthroutine Name(umGetDataForfiltersB2B) Desc('Use this to select data for products to build filters for B2B') Help('Use this to select data for products to build filters for B2B')
+    
+    Case Of_Field(#FXDTARCD)
+    
+    When Value_Is(= 'PRM')
+    * * * * * * Change to PRM before calling umGetLengthRangeMinMax
+    * * * * * #FXPRDRTP := 'PRM'
+    * * * * *
+    * * * * * #wTemporary_AttachFiltersAndCheckProprietary := #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    * * * * *
+    * * * * * #COM_OWNER.umGetLengthRangeMinMax
+    * * * * *
+    * * * * * #COM_OWNER.convertFeetToInches Ifeet(#SRNLTHF) Iinches(#SRNLTHI) Olength(#FXSRNLTH)
+    * * * * * #COM_OWNER.convertFeetToInches Ifeet(#ERNLTHF) Iinches(#ERNLTHI) Olength(#FXERNLTH)
+    * * * * *
+    * * * * * * G#69 - At this point, the Min and Max length range values should have values, if length range are blanks, set them to the min and max values
+    * * * * * If Cond((#W_LENGTHRANGELOW = '') And (#FXSRNLTH <> ''))
+    * * * * * #W_LENGTHRANGELOW := #FXSRNLTH
+    * * * * * Endif
+    * * * * *
+    * * * * * If Cond((#W_LENGTHRANGEHIGH = '') And (#FXERNLTH <> ''))
+    * * * * * #W_LENGTHRANGEHIGH := #FXERNLTH
+    * * * * * Endif
+    * * * * *
+    * * * * * * G#69 - if totalmin and totalmax values are blanks, use the default values
+    * * * * * If Cond((#L_TotalMinLengthInches = 0) And (#L_TotalMaxLengthInches = 0))
+    * * * * * #L_TotalMinLengthInches := #Utility.umFeetToInches( #SRNLTHF #SRNLTHI )
+    * * * * * #L_TotalMaxLengthInches := #Utility.umFeetToInches( #ERNLTHF #ERNLTHI )
+    * * * * *
+    * * * * * #FXSRNLTH := #L_TotalMinLengthInches.AsString
+    * * * * * #FXERNLTH := #L_TotalMaxLengthInches.AsString
+    * * * * * Endif
+    * * * * *
+    * * * * * Message Msgtxt(' #FXSRNLTH: ' + #FXSRNLTH)
+    * * * * * Message Msgtxt(' #FXERNLTH: ' + #FXERNLTH)
+    * * * * * Message Msgtxt(' #L_TotalMinLengthInches: ' + #L_TotalMinLengthInches.asstring)
+    * * * * * Message Msgtxt(' #L_TotalMaxLengthInches ' + #L_TotalMaxLengthInches.asstring)
+    * * * * *
+    * * * * * * #W_PRICERANGEMIN := #FXSRNPRC
+    * * * * * * #W_PRICERANGEMAX := #FXERNPRC
+    * * * * * * #W_LENGTHRANGEMIN := #FXSRNLTH
+    * * * * * * #W_LENGTHRANGEMAX := #FXERNLTH
+    * * * * *
+    * * * * * * Change to PRM before calling umGetLengthRangeMinMax
+    * * * * * #FXPRDRTP := 'FLT'
+    * * * * *
+    * * * * * * * 07/03/2017 - Query before modifying to add additional filters
+    * * * * * * #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00PTYP, ATTR.L00PATERN1, ATTR.L00CLR1, ATTR.L00LOOK, ATTR.L00USAGE, ATTR.L00CNAME, ATTR.L00FIBER1, ATTR.L00CONSTR FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK WHERE SKU.F55STYL <> '' " + #COM_OWNER.umCheckProprietary
+    * * * * * * #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00PTYP, ATTR.L00PATERN1, ATTR.L00CLR1, ATTR.L00LOOK, ATTR.L00USAGE, ATTR.L00CNAME, ATTR.L00FIBER1, ATTR.L00CONSTR  FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL WHERE (FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) " + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0)"
+    * * * * * #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00PTYP, ATTR.L00PATERN1, ATTR.L00CLR1, ATTR.L00LOOK, ATTR.L00USAGE, ATTR.L00CNAME, ATTR.L00FIBER1, ATTR.L00CONSTR, ATTR.L00SDESC, ATTR.L00CDESC, SKU.F55UPRICE FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0)" + #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
+    * * * * *
+    * * * * * * !NC! - Debug Message
+    * * * * * #COM_OWNER.umSQLDebugMessage Iheadermessage('Promo Item Filter :' + #W_PRICERANGEMIN.AsString + ' < ' + #W_PRICERANGEMAX.AsString + ' #FXPRDRTP : ' + #FXPRDRTP) Iquerystring(#LW3QSEL)
+    * * * * *
+    * * * * * Select_Sql Fields(#L00DVBR #L00PTYP #L00PATERN #L00CLR1 #L00LOOk #L00USAGE #L00CNAME #L00FIBER1 #L00CONSTR #L00SDESC #L00CDESC #F55UPRICE) Io_Error(*NEXT) Using(#LW3QSEL)
+    * * * * * * Continue If(*Not ((#FXSRNPRC <= #F55UPRICE) And (#F55UPRICE <= #FXERNPRC)))
+    * * * * *
+    * * * * * Add_Entry To_List(#WL_PRDLST)
+    * * * * * Endselect
+    * * * * *
+    * * * * * * Change to PRM before calling umGetLengthRangeMinMax
+    * * * * * #FXPRDRTP := 'PRM'
+    * * * * *
+    * * * * * * * G#69 - Need to run the details logic to filter the Length Range
+    * * * * * Selectlist Named(#WL_PRDLST)
+    * * * * * * Use umFormatApostrophe to avoid records with Apostrophe in their values
+    * * * * * #LW3QSEL := "SELECT SKU.F55LTHF, SKU.F55LTHI FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE ATTR.L00SDESC = '" + #COM_OWNER.umFormatApostrophe( #L00SDESC ) + "' AND ATTR.L00CDESC = '" + #COM_OWNER.umFormatApostrophe( #L00CDESC ) + "' AND (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #wTemporary_AttachFiltersAndCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0)"
+    * * * * *
+    * * * * * If Cond(#C1PFG0 = 'Y')
+    * * * * * #LW3QSEL += " AND SKU.F55UPRCCAN <> 0"
+    * * * * * Else
+    * * * * * #LW3QSEL += " AND SKU.F55UPRICE <> 0"
+    * * * * * Endif
+    * * * * *
+    * * * * * #LW3QSEL += " ORDER BY SKU.F55UPRICE"
+    * * * * *
+    * * * * * * * !NC!
+    * * * * * * #COM_OWNER.umSQLDebugMessage Iheadermessage(('Subtract Rolls Promotional Items - Available Lengths')) Iquerystring(#LW3QSEL)
+    * * * * *
+    * * * * * Select_Sql Fields(#F55LTHF #F55LTHI) Io_Status(#IO$STS) Io_Error(*NEXT) Using(#LW3QSEL)
+    * * * * * * Get the total length in inches based on the SQL
+    * * * * * #L_TotalProductLengthInches := #Utility.umFeetToInches( #F55LTHF #F55LTHI )
+    * * * * *
+    * * * * * * only do the logic if Roll Count is not 0
+    * * * * * If Cond(#LW3ROLCNT > 0)
+    * * * * * If Cond(*Not ((#L_TotalMinLengthInches <= #L_TotalProductLengthInches) And (#L_TotalProductLengthInches <= #L_TotalMaxLengthInches)))
+    * * * * * * Remove the roll count if out of range
+    * * * * * #LW3ROLCNT -= 1
+    * * * * *
+    * * * * * If Cond(#LW3ROLCNT <= 0)
+    * * * * * Dlt_Entry From_List(#WL_PRDLST)
+    * * * * *
+    * * * * * Continue
+    * * * * * Else
+    * * * * * Upd_Entry In_List(#WL_PRDLST)
+    * * * * * Endif
+    * * * * * Endif
+    * * * * * Endif
+    * * * * * Endselect
+    * * * * * Endselect
+    
+    * * 07/03/2017 - Query before modifying to add additional filters
+    * #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00PTYP, ATTR.L00PATERN1, ATTR.L00CLR1, ATTR.L00LOOK, ATTR.L00USAGE, ATTR.L00CNAME, ATTR.L00FIBER1, ATTR.L00CONSTR FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK WHERE SKU.F55STYL <> '' " + #COM_OWNER.umCheckProprietary
+    * #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00PTYP, ATTR.L00PATERN1, ATTR.L00CLR1, ATTR.L00LOOK, ATTR.L00USAGE, ATTR.L00CNAME, ATTR.L00FIBER1, ATTR.L00CONSTR  FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL WHERE (FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) " + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0)"
+    #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00PTYP, ATTR.L00PATERN1, ATTR.L00CLR1, ATTR.L00LOOK, ATTR.L00USAGE, ATTR.L00CNAME, ATTR.L00FIBER1, ATTR.L00CONSTR  FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER#"
+    
+    * Added by Jan - 4th Nov 2022 - GitLab Issue #227
+    #LW3QSEL += " Left Join FIP340 HSMF On HSMF.F340STYL = ATTR.L00STYLE And HSMF.F340CLR = ATTR.L00COLOR And HSMF.F340SIZE = ATTR.L00SIZE And HSMF.F340BACK = ATTR.L00BACK"
+    
+    #LW3QSEL += " WHERE (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0)" + #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
+    
+    * * * * !NC! - Debug Message
+    * * * #COM_OWNER.umSQLDebugMessage Iheadermessage('Promo Item Filter') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00PTYP #L00PATERN #L00CLR1 #L00LOOk #L00USAGE #L00CNAME #L00FIBER1 #L00CONSTR) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Otherwise
+    
+    If Cond(#FXNEWPRDF = 'Y')
+    #COM_OWNER.umGetNewIntroThreshold Isysvarname('NEW_PROD_THRESHOLD') Ocurrentdate(#W_STRINGDATE) Othresholddays(#W_DAYSTHRESHOLD)
+    
+    #LW3QSEL := "Select * From " + #LW3LIBR + "LFIP100 As ATTR "
+    #LW3QSEL += " Join " + #LW3LIBR + "CIP500 As CUSTBRAND On CUSTBRAND.C5CUST = " + #FXCUSID.Trim + " AND CUSTBRAND.C5DVBR = ATTR.L00DVBR"
+    #LW3QSEL += " Join " + #LW3LIBR + "PRL201B AS AUTO ON CUSTBRAND.C5CUST = AUTO.P21CST1 AND CUSTBRAND.C5DVBR = AUTO.P21DVBR And AUTO.P21CMPY = ATTR.L00FLAG5 "
+    
+    * Added by Jan - 4th Nov 2022 - GitLab Issue #227
+    #LW3QSEL += " Left Join FIP340 HSMF On HSMF.F340STYL = ATTR.L00STYLE And HSMF.F340CLR = ATTR.L00COLOR And HSMF.F340SIZE = ATTR.L00SIZE And HSMF.F340BACK = ATTR.L00BACK"
+    
+    #LW3QSEL += " Where ATTR.L00SKUSEQ = 1 AND ATTR.L00FLAG4 = 'I'  "
+    
+    #LW3QSEL += " And '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END "
+    
+    #LW3QSEL += #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
+    #LW3QSEL += #COM_OWNER.umCheckProprietary
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('B2B Filters - New Products') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Else
+    
+    #LW3QSEL := "SELECT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK"
+    
+    * Added by Jan - 4th Nov 2022 - GitLab Issue #227
+    #LW3QSEL += " Left Join FIP340 HSMF On HSMF.F340STYL = ATTR.L00STYLE And HSMF.F340CLR = ATTR.L00COLOR And HSMF.F340SIZE = ATTR.L00SIZE And HSMF.F340BACK = ATTR.L00BACK"
+    * G#35
+    * #LW3QSEL += " WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0 " + #COM_OWNER.umCheckProprietary + #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
+    #LW3QSEL += " WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umCheckProprietary + #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
+    
+    If Cond(#FXDTARCD = 'PRG')
+    #LW3QSEL += " AND ATTR.L00PTYP = 'R'"
+    Endif
+    
+    * * !NC! - Debug Message
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Filter - ALL') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Endif
+    
+    Endcase
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetDataForfiltersB2C
+    * Description....: Use this to select data for products to build filters for B2C
+    * =======================================================
+    Mthroutine Name(umGetDataForfiltersB2C) Desc('Use this to select data for products to build filters for B2C') Help('Use this to select data for products to build filters for B2C')
+    
+    If Cond(#FXNEWPRDF = 'Y')
+    
+    #COM_OWNER.umGetNewIntroThreshold Isysvarname('B2C_NEW_PRD_TRSHLD') Ocurrentdate(#W_STRINGDATE) Othresholddays(#W_DAYSTHRESHOLD)
+    
+    #LW3QSEL := "SELECT * FROM " + #LW3LIBR + "LFIP100 AS ATTR"
+    
+    * Added by Jan - 4th Nov 2022 - GitLab Issue #227
+    #LW3QSEL += " Left Join FIP340 HSMF On HSMF.F340STYL = ATTR.L00STYLE And HSMF.F340CLR = ATTR.L00COLOR And HSMF.F340SIZE = ATTR.L00SIZE And HSMF.F340BACK = ATTR.L00BACK"
+    
+    #LW3QSEL += " Where ATTR.L00FLAG4 = 'I' And ATTR.L00SKUSEQ = 1"
+    
+    #LW3QSEL += " And '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END"
+    
+    #LW3QSEL += #COM_OWNER.umAttachFiltersToQuery + #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
+    #LW3QSEL += #COM_OWNER.umCheckProprietary + " ORDER BY ATTR.L00INTRODT DESC"
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('B2C New Arrivals Filter') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Else
+    
+    * #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR WHERE ATTR.L00FLAG4 = 'I' AND ATTR.L00PTYP <> 'W' " + #COM_OWNER.umAttachFiltersToQuery + #COM_OWNER.umCheckProprietary
+    #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR"
+    
+    * Added by Jan - 4th Nov 2022 - GitLab Issue #227
+    #LW3QSEL += " Left Join FIP340 HSMF On HSMF.F340STYL = ATTR.L00STYLE And HSMF.F340CLR = ATTR.L00COLOR And HSMF.F340SIZE = ATTR.L00SIZE And HSMF.F340BACK = ATTR.L00BACK"
+    
+    #LW3QSEL += " WHERE ATTR.L00FLAG4 = 'I' AND ATTR.L00PTYP <> 'W' " + #COM_OWNER.umAttachFiltersToQuery( (#FXURLFLT = 'MOLDING_TRIM') ) + #COM_OWNER.umCheckProprietary
+    
+    * Only Select Dropped Products
+    If Cond(#FXDROPFLG = 'Y')
+    #LW3QSEL += " AND ATTR.L00DROP = 'Y'"
+    Else
+    #LW3QSEL += " AND ATTR.L00DROP <> 'Y'"
+    Endif
+    
+    #LW3QSEL += #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('B2C Filter') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umCheckForCategoryUrl
+    * Description....: Use this to check for categories
+    * =======================================================
+    Mthroutine Name(umCheckForCategoryUrl) Desc('Use this to check for categories') Help('Use this to check for categories')
+    
+    Define_Map For(*INPUT) Class(#FXSFID) Name(#iStorefrontid)
+    Define_Map For(*INPUT) Class(#LW3CATURL) Name(#iCategoryUrl)
+    Define_Map For(*RESULT) Class(#LW3CATID) Name(#rCategoryId)
+    
+    If Cond((#iStorefrontid > 0) And (#iCategoryUrl <> *BLANKS))
+    
+    #LW3QSEL := "Select LW3CATID From LW3C01 Where LW3SFID = " + #iStorefrontid.asString + " And Lower(LW3CATURL) = '" + #iCategoryUrl.Trim.LowerCase + "'"
+    
+    #LW3CATID := *NULL
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage(' umCheckForCategoryUrl ') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#LW3CATID) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    #rCategoryId := #LW3CATID
+    
+    Endif
+    
+    Endroutine
+    
+    Mthroutine Name(convertFeetToInches) Desc('Convert Feet To Inches')
+    Define_Map For(*INPUT) Class(#F55LTHF) Name(#iFeet)
+    Define_Map For(*INPUT) Class(#F55LTHI) Name(#iInches)
+    Define_Map For(*OUTPUT) Class(#FXSRNLTH) Name(#oLength)
+    
+    * Note: Javascript of Length slider will handle the conversion back to 5' 11"
+    
+    Define_Com Class(#PRIM_NMBR) Name(#L_INCHES)
+    
+    #L_INCHES := (#iFeet * 12) + #iInches
+    
+    #oLength := #L_INCHES.asstring
+    Endroutine
+    
+    Mthroutine Name(parseLengthFilter) Desc('Parse length filter to number')
+    Define_Map For(*INPUT) Class(#FXSRNLTH) Name(#iLength)
+    Define_Map For(*OUTPUT) Class(#F55LTHF) Name(#oFeet)
+    Define_Map For(*OUTPUT) Class(#F55LTHI) Name(#oInches) Mandatory(0)
+    
+    If Cond(#FXSRNLTH = *BLANK)
+    Return
+    Endif
+    
+    #oFeet := (#iLength.Substring( 1, (#iLength.PositionOf( "'" ) - 1) ).Trim()).AsNumber
+    #oInches := (#iLength.Substring( (#iLength.PositionOf( "'" ) + 1), 2 ).Trim()).AsNumber
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umFormatApostrophe
+    * Description....: Avoid issues with data with apostrophe in their values
+    * =======================================================
+    Mthroutine Name(umFormatApostrophe)
+    Define_Map For(*INPUT) Class(#STD_DESC) Name(#iText)
+    Define_Map For(*RESULT) Class(#STD_DESC) Name(#rText)
+    
+    If Cond(#iText.Contains( "'" ))
+    #rText := #iText.ReplaceAll( "'" "''" )
+    Else
+    #rText := #iText
+    Endif
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetLengthRangeMinMax
+    * Description....:
+    * =======================================================
+    Mthroutine Name(umGetLengthRangeMinMax)
+    * G#69 Initial run, these fields are still null, #FXSRNPRC, #FXERNPRC, #FXSRNLTH, #FXERNLTH
+    If Cond(#FXSRNLTH = '')
+    #W_LENGTHRANGELOW := ''
+    Else
+    * If Value was passed
+    * Parse length filter string to feet and inches
+    #COM_OWNER.parseLengthFilter Ilength(#FXSRNLTH) Ofeet(#wTemp_SRNLTHF) Oinches(#wTemp_SRNLTHI)
+    
+    #L_TotalMinLengthInches := #Utility.umFeetToInches( #wTemp_SRNLTHF #wTemp_SRNLTHI )
+    #W_LENGTHRANGELOW := #L_TotalMinLengthInches.AsString
+    Endif
+    
+    If Cond(#FXERNLTH = '')
+    #W_LENGTHRANGEHIGH := ''
+    Else
+    * If Value was passed
+    * Parse length filter string to feet and inches
+    #COM_OWNER.parseLengthFilter Ilength(#FXERNLTH) Ofeet(#wTemp_ERNLTHF) Oinches(#wTemp_ERNLTHI)
+    
+    #L_TotalMaxLengthInches := #Utility.umFeetToInches( #wTemp_ERNLTHF #wTemp_ERNLTHI )
+    #W_LENGTHRANGEHIGH := #L_TotalMaxLengthInches.AsString
+    Endif
+    
+    * G#69 reset these values and get the default min-max price and length range. It is needed as they are the fields useds for both sending the Low and High Price and Length Range from the WAM and used to get the Min and Max range as well
+    #FXSRNLTH #FXERNLTH := *NULL
+    
+    * Get Minimum/Maximum Length - Feet
+    #LW3QSEL := "SELECT MIN(SKU.F55LTHF), MAX(SKU.F55LTHF) FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0) AND SKU.F55LTHF <> 0"
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Get Minimum/Maximum Length - Feet') Iquerystring(#LW3QSEL)
+    Select_Sql Fields(#SRNLTHF #ERNLTHF) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    * Get Minimum Length - Inches
+    #LW3QSEL := "SELECT MIN(SKU.F55LTHI) FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0) AND SKU.F55LTHF = " + #SRNLTHF.asstring
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Get Minimum Length - Inches') Iquerystring(#LW3QSEL)
+    Select_Sql Fields(#SRNLTHI) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    * Get Maximum Length - Inches
+    #LW3QSEL := "SELECT MAX(SKU.F55LTHI) FROM LFIP1155 SKU JOIN LFIP100 ATTR ON SKU.F55STYL = ATTR.L00STYLE AND SKU.F55CLR = ATTR.L00COLOR AND SKU.F55SIZE = ATTR.L00SIZE AND SKU.F55BACK = ATTR.L00BACK LEFT JOIN FIP010 FINROLLS ON FINROLLS.F1ROLL = SKU.F55ROLL LEFT JOIN UIP010 as RUGROLLS on SKU.F55ROLL = RUGROLLS.U10SER# WHERE (((FINROLLS.F1ALTF <> 0 OR FINROLLS.F1ALTI <> 0) AND SKU.F55PCAT = 'B') OR ((RUGROLLS.U10ACT = 0 AND RUGROLLS.U10STAT = '') AND SKU.F55PCAT = 'R')) " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND (F55ACT <> 9 AND F55OCST = 0) AND SKU.F55LTHF = " + #ERNLTHF.asstring
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Get Maximum Length - Inches') Iquerystring(#LW3QSEL)
+    Select_Sql Fields(#ERNLTHI) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umProductSearch
+    * Description....: Product Search
+    * =======================================================
+    Mthroutine Name(umProductSearch) Desc('Product Search')
+    
+    #LW3ROWTYP := 'STK'
+    * #COM_OWNER.umCheckForSpecialFilters
+    #LW3CATID := #COM_OWNER.umCheckForCategoryUrl( #FXSFID #FXCATURL )
+    
+    * #COM_OWNER.umLW3DEBUG( (' #LW3MSRPPF - ' + #LW3MSRPPF) )
+    
+    * Check B2B/B2C Flag
+    If Cond(#FXCUSIND = 'B')
+    
+    If Cond(#LW3MSRPPF = 'Y')
+    #LW3QSEL := "SELECT ATTR.*, PRICE.P010RPRC, CASE ATTR.L00PTYP WHEN 'R' THEN ((CAST(" + #LW3MSRPPR.asString + "/100 AS NUMERIC(36,2)) * PRICE.P010CPRC) + PRICE.P010CPRC) ELSE ((CAST(" + #LW3MSRPCP.asString + "/100 AS NUMERIC(36,2)) * PRICE.P010CPRC) + PRICE.P010CPRC) END AS CALCPRICE, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC"
+    Else
+    #LW3QSEL := "SELECT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC"
+    Endif
+    
+    #LW3QSEL += " FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK"
+    *  #134
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    
+    * Added by Jan - 4th Nov 2022 - GitLab Issue #227
+    #LW3QSEL += " Left Join FIP340 HSMF On HSMF.F340STYL = ATTR.L00STYLE And HSMF.F340CLR = ATTR.L00COLOR And HSMF.F340SIZE = ATTR.L00SIZE And HSMF.F340BACK = ATTR.L00BACK"
+    
+    If Cond(#LW3CATID > 0)
+    #LW3QSEL += " Join LW3C04 As C04 On C04.LW3STYLE = ATTR.L00STYLE And C04.LW3COLOR = ATTR.L00COLOR And C04.LW3SIZE = ATTR.L00SIZE And C04.LW3BACK = ATTR.L00BACK And C04.LW3PRDTYP = ATTR.L00PTYP And C04.LW3PRDCAT = ATTR.L00PCAT"
+    Endif
+    
+    * G#35
+    * #LW3QSEL += " WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0 "
+    #LW3QSEL += " WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #FXCUSID.Trim
+    
+    If Cond(#LW3CATID > 0)
+    #LW3QSEL += " And C04.LW3CATID = " + #LW3CATID.asString + " And C04.LW3SFID = " + #FXSFID.asstring
+    Endif
+    
+    * Only Select Dropped Products
+    If Cond(#FXDROPFLG = 'Y')
+    #LW3QSEL += " " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND ATTR.L00DROP = 'Y'"
+    Else
+    * #LW3QSEL += " " + #COM_OWNER.umAttachFiltersToQuery + #COM_OWNER.umCheckProprietary
+    #LW3QSEL += " " + #COM_OWNER.umAttachFiltersToQuery( (#LW3CATID > 0) ) + #COM_OWNER.umCheckProprietary
+    Endif
+    
+    #LW3QSEL += #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Product List - B2B') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN #P010RPRC #P010CPRC #P010UOM #P010SMPRC #P010SHPRC) Io_Error(*NEXT) Using(#LW3QSEL)
+    * G#35
+    #Utility_API.umGetPrice( #FXCUSID #L00STYLE #L00COLOR #L00SIZE #L00BACK 'Y' #P010CPRC #P010RPRC #P010SMPRC #P010SHPRC #OPPEDATE #OPPAPLY #FXCUSIND )
+    
+    * If Cond(#LW3MSRPPF = 'Y')
+    * If Cond(#L00PTYP = 'R')
+    * #P010CPRC := ((#LW3MSRPPR / 100) * #P010CPRC) + #P010CPRC
+    * Else
+    * #P010CPRC := ((#LW3MSRPCP / 100) * #P010CPRC) + #P010CPRC
+    * Endif
+    * Endif
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    * #COM_OWNER.umLW3DEBUG( (#W_PRICERANGEMIN.AsString + '<=' + #W_PRICERANGELOW.AsString + '<=' + #W_PRICERANGEHIGH.AsString + '<=' + #W_PRICERANGEMAX.asstring) )
+    
+    * Price query does not apply if Decorative Water filter is selected
+    Loc_Entry In_List(#WL_SRCATTRLST) Where((#LW3FLTNAM.UpperCase = 'BRAND') And (#LW3FLTVAL = 'SHS'))
+    If_Status Is(*OKAY)
+    #FXSRNPRC #FXERNPRC := 0
+    Else
+    * G#28 only look for the Min-Max if they are still blanks
+    If Cond((#W_PRICERANGEMIN = 0) And (#W_PRICERANGEMAX = 0))
+    * Get Minimum/Maximum Price for Query
+    #LW3QSEL := "SELECT MIN(PRICE.P010CPRC), MAX(PRICE.P010CPRC) FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK "
+    
+    * Added by Jan - 4th Nov 2022 - GitLab Issue #227
+    #LW3QSEL += " Left Join FIP340 HSMF On HSMF.F340STYL = ATTR.L00STYLE And HSMF.F340CLR = ATTR.L00COLOR And HSMF.F340SIZE = ATTR.L00SIZE And HSMF.F340BACK = ATTR.L00BACK"
+    * G#35
+    * #LW3QSEL += " WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + " AND PRICE.P010CPRC > 0 " + #COM_OWNER.umAttachFiltersToQuery + #COM_OWNER.umCheckProprietary
+    #LW3QSEL += " WHERE PRICE.P010SID# = 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery + #COM_OWNER.umCheckProprietary
+    
+    * Only Select Dropped Products
+    If Cond(#FXDROPFLG = 'Y')
+    #LW3QSEL += " AND ATTR.L00DROP = 'Y'"
+    Endif
+    
+    * * * If Cond(#FXNEWPRDF = 'Y')
+    * * * #LW3QSEL += " And '" + #W_STRINGDATE + "' <= CASE WHEN ATTR.L00INTRODT <> 0 THEN DATE(SUBSTR(CHAR(ATTR.L00INTRODT), 1, 4) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 5, 2) CONCAT '-' CONCAT SUBSTR(CHAR(ATTR.L00INTRODT), 7, 2)) + " + #W_DAYSTHRESHOLD.asString + " DAY END"
+    * * * Endif
+    
+    #LW3QSEL += #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Product List - Price Range - B2B') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#FXSRNPRC #FXERNPRC) Io_Error(*NEXT) Using(#LW3QSEL)
+    If Cond(#LW3MSRPPF = 'Y')
+    #FXSRNPRC := (#FXSRNPRC / 100) * #FXSRNPRC
+    #FXERNPRC := (#FXERNPRC / 100) * #FXERNPRC
+    Endif
+    Leave
+    Endselect
+    Endif
+    
+    Endif
+    
+    Else
+    
+    * #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR WHERE ATTR.L00DVBR = '" + #FXBRAND + "' AND ATTR.L00FLAG4 = 'I' AND ATTR.L00PTYP <> 'W' " + #COM_OWNER.umAttachFiltersToQuery + #COM_OWNER.umCheckProprietary
+    #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR"
+    
+    *  #134
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    
+    * Added by Jan - 4th Nov 2022 - GitLab Issue #227
+    #LW3QSEL += " Left Join FIP340 HSMF On HSMF.F340STYL = ATTR.L00STYLE And HSMF.F340CLR = ATTR.L00COLOR And HSMF.F340SIZE = ATTR.L00SIZE And HSMF.F340BACK = ATTR.L00BACK"
+    
+    If Cond(#LW3CATID > 0)
+    #LW3QSEL += " Join LW3C04 As C04 On C04.LW3STYLE = ATTR.L00STYLE And C04.LW3COLOR = ATTR.L00COLOR And C04.LW3SIZE = ATTR.L00SIZE And C04.LW3BACK = ATTR.L00BACK And C04.LW3PRDTYP = ATTR.L00PTYP And C04.LW3PRDCAT = ATTR.L00PCAT"
+    Endif
+    
+    #LW3QSEL += " WHERE ATTR.L00FLAG4 = 'I' AND ATTR.L00PTYP <> 'W' " + #COM_OWNER.umAttachFiltersToQuery( (#LW3CATID > 0) ) + #COM_OWNER.umCheckProprietary
+    
+    If Cond(#LW3CATID > 0)
+    * G#72 - Add Storefront value in the condition to avoid loading products from other storefront category. #FXSFID value should be 11 at this point
+    * #LW3QSEL += " And C04.LW3CATID = " + #LW3CATID.asString
+    #LW3QSEL += " And C04.LW3CATID = " + #LW3CATID.asString + " And C04.LW3SFID = " + #FXSFID.AsString
+    Endif
+    
+    * Only Select Dropped Products
+    If Cond(#FXDROPFLG = 'Y')
+    #LW3QSEL += " AND ATTR.L00DROP = 'Y'"
+    Else
+    #LW3QSEL += " AND ATTR.L00DROP <> 'Y'"
+    Endif
+    
+    #LW3QSEL += #COM_OWNER.umApplyUrlFilterToQuery( #FXURLFLT )
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Product List - B2C') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Endif
+    
+    * check value of field #LW3CRDVIS
+    If Cond(#LW3CRDVIS *EQ 'Y')
+    #F55UPRICE #F55UPRCCA #P010SHPRC #P010SMPRC #P010CPRC #P010RPRC := 0
+    Endif
+    
+    *
+    * G#28 - If Min and Max values are blanks, Get the System Setting value
+    If Cond((#W_PRICERANGEMIN = 0) And (#W_PRICERANGEMAX = 0))
+    #Utility_SystemSettingsPrev.uGetValue Uikey('CE_FILTER_MAX_PRICE') Uonumericvalue(#W_PRICERANGEMAX)
+    #Utility_SystemSettingsPrev.uGetValue Uikey('CE_FILTER_MIN_PRICE') Uonumericvalue(#W_PRICERANGEMIN)
+    Endif
+    
+    Exchange Fields(#W_PRICERANGEMIN #W_PRICERANGEMAX #W_PRICERANGELOW #W_PRICERANGEHIGH)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetProductDetails
+    * Description....: Get Product Details
+    * =======================================================
+    Mthroutine Name(umGetProductDetails) Desc('Get Product Details')
+    
+    #LW3ROWTYP := 'STK'
+    
+    If Cond(#FXCUSIND = 'B')
+    
+    * With Pricing
+    
+    * If New Item, use a different query
+    If Cond(#LW3NITMF = 'Y')
+    
+    #LW3QSEL := "SELECT DISTINCT ATTR.*, CASE WHEN ATTR.L00PTYP In ('W', 'S') Then 1 Else 0 End As PRDTYPSORT FROM LFIP100 AS ATTR"
+    * #134
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    #LW3QSEL += " JOIN CIP500 AS CUSTBRAND ON CUSTBRAND.C5CUST = " + #FXCUSID.Trim + " AND CUSTBRAND.C5DVBR = ATTR.L00DVBR"
+    
+    If Cond(#FXSWONLY = 'Y')
+    * Use color code
+    #LW3QSEL += " WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00COLOR = '" + #FXCOLRCD + "'"
+    Else
+    * Use color desc
+    #LW3QSEL += " WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "'"
+    Endif
+    
+    * #152
+    If Cond(#LW3SWSRF <> 'Y')
+    #LW3QSEL += " AND (ATTR.L00PTYP <> 'W' AND ATTR.L00PTYP <> 'S')"
+    Endif
+    
+    #LW3QSEL += " ORDER BY PRDTYPSORT"
+    
+    * * !NC! - Product Details New
+    * #COM_OWNER.umLW3DEBUG( (' STK + DTL, #LW3NITMF = Y ') )
+    * #COM_OWNER.umLW3DEBUG( (' #FXSWONLY --> ' + #FXSWONLY) )
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Product Details New B2B') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN #LW3SORTOR) Io_Error(*NEXT) Using(#LW3QSEL)
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('before continue') Iquerystring('b4 cont - ' + #L00PROPRI + ' - ' + #l00PROPCU.asString + ' - ' + #FXCUSID)
+    
+    Continue If((#L00PROPRI = 'Y') And (#L00PROPCU <> #FXCUSID.AsNumber))
+    
+    * Retrieve Pricing
+    #LW3QSEL := ''
+    Select_Sql Fields(#P010RPRC #P010CPRC #P010UOM) Using("SELECT P010RPRC, P010CPRC, P010UOM FROM " + #LW3ACTFIL + " WHERE P010SID# = 0 AND P010CST# = " + #FXCUSID.Trim + " AND P010STYL = '" + #L00STYLE + "' AND P010SIZE = '" + #L00SIZE + "' AND P010BACK = '" + #L00BACK + "'")
+    * G#35 - Use new API to get pricing
+    #Utility_API.umGetPrice( #FXCUSID #L00STYLE #L00COLOR #L00SIZE #L00BACK 'Y' #P010CPRC #P010RPRC #P010SMPRC #P010SHPRC #OPPEDATE #OPPAPLY #FXCUSIND )
+    
+    * If Cond(#LW3MSRPPF = 'Y')
+    * * If Custom Rug, uplift the price using the Custom Rug markup value
+    * If Cond(#FXOLNTYP = 'RG')
+    * #P010CPRC := ((#LW3MSRPCR / 100) * #P010CPRC) + #P010CPRC
+    * Else
+    * * //123
+    * Case Of_Field(#L00PTYP)
+    * * Premade Rug
+    * When Value_Is(= 'R')
+    * #P010CPRC := ((#LW3MSRPPR / 100) * #P010CPRC) + #P010CPRC
+    *
+    * * Tile
+    * When Value_Is(= 'T')
+    * #P010CPRC := ((#LW3MSRPTL / 100) * #P010CPRC) + #P010CPRC
+    *
+    * * Other Product Types
+    * Otherwise
+    * #P010CPRC := ((#LW3MSRPCP / 100) * #P010CPRC) + #P010CPRC
+    *
+    * Endcase
+    *
+    * Endif
+    * Endif
+    
+    * #COM_OWNER.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcustomrug(#LW3MSRPCR) Imarkuptiles(#LW3MSRPTL) Iiscustomrug(#FXOLNTYP = 'RG') Iproducttype(#L00PTYP) Bcalculatedprice(#P010CPRC)
+    
+    If Cond(#FXOLNTYP = 'RG')
+    #LW3VARTXT := 'CUSTOMRUG'
+    Else
+    #LW3VARTXT := 'PRODUCTTYPE'
+    Endif
+    
+    #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype(#LW3VARTXT) Iorderlinetype(#FXOLNTYP) Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcustomrug(#LW3MSRPCR) Imarkupcarpettile(#LW3MSRPTL) Imarkuphardsurface(#LW3MSRPHS) Iproducttype(#L00PTYP) Bcalculatedprice(#P010CPRC)
+    
+    Leave
+    Endselect
+    
+    Add_Entry To_List(#WL_PRDLST)
+    #FXRETCD := 'OK'
+    
+    * This should only retrieve one entry
+    Leave
+    Endselect
+    
+    Else
+    
+    * If product detail keys supplied is style and color description (from friendly URL), use them to get product information
+    If Cond(#FXFNDURL = 'Y')
+    
+    If Cond(#FXSWONLY = 'Y')
+    * Use color code
+    * #LW3QSEL := "SELECT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00COLOR = '" + #FXCOLRCD + "' AND PRICE.P010CPRC > 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    * #134
+    * G#35 DISTINCT
+    #LW3QSEL := "SELECT DISTINCT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC FROM LFIP100 ATTR"
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    * G#35
+    * #LW3QSEL += " JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00COLOR = '" + #FXCOLRCD + "' AND PRICE.P010CPRC > 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    #LW3QSEL += " JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00COLOR = '" + #FXCOLRCD + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    
+    Else
+    * Use color description
+    * #LW3QSEL := "SELECT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "' AND PRICE.P010CPRC > 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    * #134
+    * G#35 DISTINCT
+    #LW3QSEL := "SELECT DISTINCT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC FROM LFIP100 ATTR"
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    * G#35
+    * #LW3QSEL += " JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "' AND PRICE.P010CPRC > 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    #LW3QSEL += " JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    
+    Endif
+    
+    Else
+    * Is already using color code
+    * #LW3QSEL := "SELECT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00STYLE = '" + #FXSTYLCD + "' AND ATTR.L00COLOR = '" + #FXCOLRCD + "' AND ATTR.L00SIZE = '" + #FXSIZECD + "' AND ATTR.L00BACK = '" + #FXBACKCD + "' AND PRICE.P010CPRC > 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    * #134
+    * G#35 DISTINCT
+    #LW3QSEL := "SELECT DISTINCT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC FROM LFIP100 ATTR"
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    * G#35
+    * #LW3QSEL += " JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00STYLE = '" + #FXSTYLCD + "' AND ATTR.L00COLOR = '" + #FXCOLRCD + "' AND ATTR.L00SIZE = '" + #FXSIZECD + "' AND ATTR.L00BACK = '" + #FXBACKCD + "' AND PRICE.P010CPRC > 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    #LW3QSEL += " JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00STYLE = '" + #FXSTYLCD + "' AND ATTR.L00COLOR = '" + #FXCOLRCD + "' AND ATTR.L00SIZE = '" + #FXSIZECD + "' AND ATTR.L00BACK = '" + #FXBACKCD + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    Endif
+    
+    * Exclude swatches from selection
+    If Cond(#FXSWONLY <> 'Y')
+    #LW3QSEL += " AND ATTR.L00PTYP NOT IN ('W', 'S')"
+    Endif
+    
+    * * * * !NC! - Product Details B2B
+    * * * #COM_OWNER.umSQLDebugMessage Iheadermessage('Product Details - B2B') Iquerystring(#LW3QSEL)
+    
+    * 2021/08/05 - Gitlab#31 - Initialize indicator to True
+    #wCompletelyDroppedFlag := True
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN #P010RPRC #P010CPRC #P010UOM #P010SMPRC #P010SHPRC) Io_Error(*NEXT) Using(#LW3QSEL)
+    * If Cond(#LW3MSRPPF = 'Y')
+    * * If Custom Rug, uplift the price using the Custom Rug markup value
+    * If Cond(#FXOLNTYP = 'RG')
+    * #P010CPRC := ((#LW3MSRPCR / 100) * #P010CPRC) + #P010CPRC
+    * Else
+    * If Cond(#L00PTYP = 'R')
+    * #P010CPRC := ((#LW3MSRPPR / 100) * #P010CPRC) + #P010CPRC
+    * Else
+    * #P010CPRC := ((#LW3MSRPCP / 100) * #P010CPRC) + #P010CPRC
+    * Endif
+    * Endif
+    * Endif
+    
+    * #COM_OWNER.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcustomrug(#LW3MSRPCR) Imarkuptiles(#LW3MSRPTL) Iiscustomrug(#FXOLNTYP = 'RG') Iproducttype(#L00PTYP) Bcalculatedprice(#P010CPRC)
+    
+    * * !NC!
+    * Message Msgtxt('LW3STPR - before umGetPrice - ' + #FXCUSID + ' - ' + #L00STYLE + ' -  ' + #L00COLOR + ' - ' + #L00SIZE + ' - ' + #L00BACK + ' - ' + #FXCUSIND)
+    * Message Msgtxt('LW3STPR - before umGetPrice2 - ' + #P010CPRC.asSTring + ' - ' + #P010RPRC.asSTring + ' -  ' + #P010SMPRC.asString + ' - ' + #P010SHPRC.asString + ' - ' + #L00BACK + ' - ' + #OPPEDATE.asString + ' - ' + #OPPAPLY)
+    
+    * G#35 - Use the API to get the pricing field values
+    #Utility_API.umGetPrice( #FXCUSID #L00STYLE #L00COLOR #L00SIZE #L00BACK 'Y' #P010CPRC #P010RPRC #P010SMPRC #P010SHPRC #OPPEDATE #OPPAPLY #FXCUSIND )
+    
+    * Message Msgtxt('LW3STPR - after umGetPrice - ' + #P010CPRC.asSTring + ' - ' + #P010RPRC.asSTring + ' -  ' + #P010SMPRC.asString + ' - ' + #P010SHPRC.asString + ' - ' + ' - ' + #OPPEDATE.asString + ' - ' + #OPPAPLY + ' - ' + #Utility_API.umGetPrice( #FXCUSID #L00STYLE #L00COLOR #L00SIZE #L00BACK 'Y' #P010CPRC #P010RPRC #P010SMPRC #P010SHPRC #OPPEDATE #OPPAPLY #FXCUSIND ))
+    
+    If Cond(#FXOLNTYP = 'RG')
+    #FXVARTXT := 'CUSTOMRUG'
+    Else
+    #FXVARTXT := 'PRODUCTTYPE'
+    Endif
+    
+    #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype(#FXVARTXT) Iorderlinetype(#FXOLNTYP) Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcustomrug(#LW3MSRPCR) Imarkupcarpettile(#LW3MSRPTL) Imarkuphardsurface(#LW3MSRPHS) Iproducttype(#L00PTYP) Bcalculatedprice(#P010CPRC)
+    
+    * 2021/08/05 - Gitlab#31 - Previously, just load the very first product, but if a product has multiple records and the first one loaded is dropped, check for the next first not-dropped product, but support data if all products are dropped
+    If Cond(#L00DROP <> 'Y')
+    #wCompletelyDroppedFlag := False
+    Endif
+    
+    Add_Entry To_List(#WL_PRDLST)
+    
+    * 2021/08/05 - Gitlab#31 - This should only retrieve one entry, unless the first record is dropped, keep looking for the next undropped item. If all products are dropped, load all of them
+    If Cond(#L00DROP <> 'Y')
+    Leave
+    Endif
+    Endselect
+    
+    If Cond(#LISTCOUNT > 0)
+    * 2021/08/05 - Gitlab#31 - If every product is dropped, keep only the first record and delete the rest
+    If Cond(#wCompletelyDroppedFlag And (#LISTCOUNT > 1))
+    #wFirstRecord := True
+    
+    Selectlist Named(#WL_PRDLST)
+    If Cond(#wFirstRecord)
+    #wFirstRecord := False
+    Else
+    Dlt_Entry From_List(#WL_PRDLST)
+    Endif
+    Endselect
+    Else
+    * 2021/08/05 - Gitlab#31 - If not all records are dropped, delete the dropped records to load just one record, specifically the only undropped record
+    If Cond(*Not #wCompletelyDroppedFlag)
+    Selectlist Named(#WL_PRDLST) Where(#L00DROP = Y)
+    Dlt_Entry From_List(#WL_PRDLST)
+    Endselect
+    Endif
+    Endif
+    Endif
+    
+    Endif
+    
+    Else
+    
+    * No Pricing
+    
+    * If product detail keys supplied is style and color description (from friendly URL), use them to get product information
+    If Cond(#FXFNDURL = 'Y')
+    
+    If Cond(#FXSWONLY = 'Y')
+    * Use color code
+    * #134
+    #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR"
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    #LW3QSEL += " WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00COLOR = '" + #FXCOLRCD + "' " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    Else
+    * Use color description
+    * #134
+    #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR"
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    #LW3QSEL += " WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "' " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    Endif
+    
+    Else
+    * #134
+    #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR"
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    #LW3QSEL += " WHERE ATTR.L00STYLE = '" + #FXSTYLCD + "' AND ATTR.L00COLOR = '" + #FXCOLRCD + "' AND ATTR.L00SIZE = '" + #FXSIZECD + "' AND ATTR.L00BACK = '" + #FXBACKCD + "' " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    Endif
+    
+    * * Ensure that brand has a value
+    * If Cond(#FXBRAND = *BLANKS)
+    * Fetch Fields(#LW3BRNCD) From_File(LW3SFEXT) With_Key(#FXSFID) Io_Error(*NEXT) Val_Error(*NEXT)
+    * If_Status Is(*OKAY)
+    * #FXBRAND := #LW3BRNCD
+    * Endif
+    * Endif
+    
+    * 04/24/2019 - Jan - Consolidate all b2C sites
+    #FXBRAND := 'ALL'
+    
+    * If brand is still blank or 'ALL', do not add it to the query
+    If Cond((#FXBRAND = *BLANKS) Or (#FXBRAND <> 'ALL'))
+    #LW3QSEL += " AND ATTR.L00DVBR = '" + #FXBRAND + "' "
+    Endif
+    
+    * Exclude swatches from selection
+    If Cond(#FXSWONLY <> 'Y')
+    #LW3QSEL += " AND ATTR.L00PTYP NOT IN ('W', 'S')"
+    Endif
+    
+    * AppTracker Issue #12615 - Do not include dropped colors for Premade Rugs
+    #LW3QSEL += " AND ((ATTR.L00PTYP <> 'R') Or (ATTR.L00PTYP = 'R' AND L00DROP <> 'Y'))"
+    
+    * * NC!
+    * #COM_OWNER.umSQLDebugMessage Iquerystring(#LW3QSEL) Iheadermessage('Product Details - B2C')
+    
+    * 2021/08/05 - Gitlab#31 - Initialize the Completely Dropped flag to True
+    #wCompletelyDroppedFlag := True
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    * 2021/08/05 - Gitlab#31
+    * Add_Entry To_List(#WL_PRDLST)
+    *
+    * * This should only retrieve one entry
+    * Leave
+    * Endselect
+    
+    * 2021/08/05 - Gitlab#31 - Previously, just load the very first product, but if a product has multiple records and the first one loaded is dropped, check for the next first not-dropped product, but support data if all products are dropped
+    If Cond(#L00DROP <> 'Y')
+    #wCompletelyDroppedFlag := False
+    Endif
+    
+    * * !NC!
+    * Message Msgtxt('list - ' + #L00SDESC + ' - ' + #L00CDESC + ' - ' + #L00PTYP + ' - ' + #LW3ROWTYP)
+    * Message Msgtxt('list - ' + #L00WTHFT.asString + ' - ' + #L00WTHIN.asSTring + ' - ' + #L00PATERN)
+    
+    Add_Entry To_List(#WL_PRDLST)
+    
+    * 2021/08/05 - Gitlab#31 - This should only retrieve one entry, unless the first record is dropped, keep looking for the next undropped item. If all products are dropped, load all of them
+    If Cond(#L00DROP <> 'Y')
+    Leave
+    Endif
+    Endselect
+    
+    If Cond(#LISTCOUNT > 0)
+    * 2021/08/05 - Gitlab#31 - If every product is dropped, keep only the first record and delete the rest
+    If Cond(#wCompletelyDroppedFlag And (#LISTCOUNT > 1))
+    #wFirstRecord := True
+    
+    Selectlist Named(#WL_PRDLST)
+    If Cond(#wFirstRecord)
+    #wFirstRecord := False
+    Else
+    Dlt_Entry From_List(#WL_PRDLST)
+    Endif
+    Endselect
+    Else
+    * 2021/08/05 - Gitlab#31 - If not all records are dropped, delete the dropped records to load just one record, specifically the only undropped record
+    If Cond(*Not #wCompletelyDroppedFlag)
+    Selectlist Named(#WL_PRDLST) Where(#L00DROP = Y)
+    Dlt_Entry From_List(#WL_PRDLST)
+    Endselect
+    Endif
+    Endif
+    Endif
+    
+    
+    Endif
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('before list count') Iquerystring('b4 list count - ' + #LISTCOUNT.asString + ' - ' + #FXRETCD)
+    
+    * If Product Details were not found, do not proceed with the rest of the queries
+    If Cond(#LISTCOUNT = 0)
+    If Cond(#FXSHOWMSG = 'Y')
+    #MultilingualReader.umDisplayMultilingualMessage( 'MSG_PROD_DETAILS_NOT_RETRIEVED' *LANGUAGE )
+    Endif
+    #FXRETCD := 'ER'
+    Return
+    Endif
+    
+    #W_PRODUCTTYPE := #L00PTYP
+    
+    * Only retrieve coordinates/available colors if product details were found
+    If Cond((#FXDTARCD = 'ALL') And (#LISTCOUNT > 0))
+    #W_STYLECODE := #L00STYLE
+    #W_COLORCODE := #L00COLOR
+    #W_SIZECODE := #L00SIZE
+    #W_BACKINGCODE := #L00BACK
+    * Pass in the previously retrieved product key fields
+    
+    * Check_For In_File(LW3CODL4) With_Key('HSBRND' *LANGUAGE #L00DVBR) Io_Error(*NEXT)
+    * If_Status Is(*EQUALKEY)
+    If Cond((#L00DVBR = 'SHS') Or (#L00DVBR = 'SST'))
+    * 04/08/2020 - If getting product details for a Hard surface product, get coordinating broadlooms
+    #COM_OWNER.umGetCoordinatingBroadloom Igetpricedproducts((#FXCUSIND = 'B') And (#LW3NITMF <> 'Y')) Istylecode(#W_STYLECODE) Icolorcode(#W_COLORCODE)
+    Else
+    #COM_OWNER.umGetCoordinates Igetpricedproducts((#FXCUSIND = 'B') And (#LW3NITMF <> 'Y')) Istylecode(#W_STYLECODE) Icolorcode(#W_COLORCODE) Isizecode(#W_SIZECODE) Ibackingcode(#W_BACKINGCODE) Iproductcollection(#L00CNAME) Iproducttype(#L00PTYP)
+    Endif
+    
+    * #134
+    * Modified by Jan - 4th Nov 2022 - GitLab Issue #227
+    * If Cond((#W_PRODUCTTYPE = 'H') Or (#W_PRODUCTTYPE = 'I') Or (#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_Porcelain) Or (#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_Laminate))
+    * G#151
+    If Cond((#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_HardSurfacePlank) Or (#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_HardSurfaceTile) Or (#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_Porcelain) Or (#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_Laminate) Or (#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_FineHardwood))
+    #COM_OWNER.umGetCoordinatingTrims Istylecode(#W_STYLECODE) Icolorcode(#W_COLORCODE)
+    Endif
+    
+    * #134
+    * Modified by Jan - 4th Nov 2022 - GitLab Issue #254
+    * If Cond(#W_PRODUCTTYPE = 'M')
+    If Cond(#Global_Constants.umIsCoordinatingProduct( #W_PRODUCTTYPE ))
+    * For Molding Trim, get Available Styles instead of Available Colors
+    #COM_OWNER.umGetAvailableStyles Igetpricedproducts((#FXCUSIND = 'B') And (#LW3NITMF <> 'Y')) Istylecode(#W_STYLECODE) Icolorcode(#W_COLORCODE) Isizecode(#W_SIZECODE) Ibackingcode(#W_BACKINGCODE)
+    Else
+    #COM_OWNER.umGetAvailableColors Igetpricedproducts((#FXCUSIND = 'B') And (#LW3NITMF <> 'Y')) Istylecode(#W_STYLECODE) Icolorcode(#W_COLORCODE) Isizecode(#W_SIZECODE) Ibackingcode(#W_BACKINGCODE)
+    Endif
+    
+    Endif
+    
+    * If Premade Rugs, retrieve the available lengths - retrieve only if product details were found
+    If Cond((#W_PRODUCTTYPE = 'R') And (#LISTCOUNT > 0))
+    
+    #LW3ROWTYP := 'ALN'
+    
+    * Retrieve Available Lengths
+    If Cond(#FXCUSIND = 'B')
+    * G#35
+    * #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00PTYP, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00WDTIN, ATTR.L00LTHIN, ATTR.L00FLAG5, PRICE.P010RPRC, PRICE.P010CPRC FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "' AND PRICE.P010CPRC > 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " ORDER BY PRICE.P010CPRC"
+    #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00PTYP, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00WDTIN, ATTR.L00LTHIN, ATTR.L00FLAG5, PRICE.P010RPRC, PRICE.P010CPRC FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " ORDER BY PRICE.P010CPRC"
+    
+    * * !NC! - Premade Rug B2B
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Premade Rug B2B') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WDTIN #L00LTHIN #L00FLAG5 #P010RPRC #P010CPRC) Io_Error(*NEXT) Using(#LW3QSEL)
+    If Cond(#LW3MSRPPF = 'Y')
+    * G#35
+    #Utility_API.umGetPrice( #FXCUSID #L00STYLE #L00COLOR #L00SIZE #L00BACK 'Y' #P010CPRC #P010RPRC #P010SMPRC #P010SHPRC #OPPEDATE #OPPAPLY #FXCUSIND )
+    
+    #P010CPRC := ((#LW3MSRPPR / 100) * #P010CPRC) + #P010CPRC
+    Endif
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Else
+    * #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00PTYP, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00WDTIN, ATTR.L00LTHIN FROM LFIP100 AS ATTR WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "'" + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    
+    * AppTracker Issue #12615 - Do not include dropped colors for Premade Rugs
+    #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00PTYP, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00WDTIN, ATTR.L00LTHIN FROM LFIP100 AS ATTR WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "'" + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND ((ATTR.L00PTYP <> 'R') Or (ATTR.L00PTYP = 'R' AND L00DROP <> 'Y'))"
+    
+    * * !NC! - Premade Rug B2C
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('Premade Rug B2C') Iquerystring(#LW3QSEL)
+    
+    Select_Sql Fields(#L00DVBR #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    Add_Entry To_List(#WL_PRDLST)
+    Endselect
+    
+    Endif
+    
+    Endif
+    
+    * check value of field #LW3CRDVIS
+    If Cond(#LW3CRDVIS *EQ 'Y')
+    #F55UPRICE #F55UPRCCA #P010SHPRC #P010SMPRC #P010CPRC #P010RPRC := 0
+    Endif
+    
+    * * !NC!
+    * #COM_OWNER.umSQLDebugMessage Iheadermessage('before return') Iquerystring('b4 return - ' + #FXRETCD)
+    
+    
+    Endroutine

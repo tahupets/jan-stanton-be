@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00F2F
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "FACE-TO-FACE PRODUCT"
+      Label:              "FACE-TO-FACE"
+      Heading1:           "FACE-TO-FACE PRODUCT"
+      Heading2:           " "
+      Heading3:           " "

@@ -1,0 +1,191 @@
+﻿File:
+  Name:                           LFIP107
+  File Type:                      IBM i Other File
+  Library:                        CDVDTALIB
+  Record Format Name:             LFIR107
+  Module Library:                 Partition Module Library
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       Yes
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "B2B LVT Associated Broadloom or Rug"
+
+  Real Fields:
+  - L07STYLE:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - L07COLOR:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - L07CSTYLE:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - L07CCOLOR:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - L07CPCAT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - L07SKUSEQ:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - L07FINSH:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - L07IMGCOR:
+      Type:               Alphanumeric
+      Length:             250
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L07IMGCORD
+
+  - L07CORDRN:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+      IBM i Column Data:
+      - Rename:
+          External Name:      L07CORDRNK
+
+  - L07ROOMTY:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - L07FMLSDT:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - L07FMLSJL:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - L07FMUSER:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - L07FMTIME:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  Primary Keys:
+  - L07STYLE
+  - L07COLOR
+  - L07CSTYLE
+  - L07CCOLOR
+  - L07CORDRN
+
+  Logical Views:
+  - LFIL107:
+      Identifier:         LFIL107
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LFIR107
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "B2B LVT Associated Values by Finish"
+
+      Fields:
+      - L07STYLE
+      - L07COLOR
+      - L07CSTYLE
+      - L07CCOLOR
+      - L07CPCAT
+      - L07SKUSEQ
+      - L07FINSH
+      - L07IMGCOR
+      - L07CORDRN
+      - L07ROOMTY
+      - L07FMLSDT
+      - L07FMLSJL
+      - L07FMUSER
+      - L07FMTIME
+
+      Keys:
+      - L07FINSH:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LFIL1071:
+      Identifier:         LFIL1071
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LFIR107
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "B2B LVT Associated Values by LVT Style/C"
+
+      Fields:
+      - L07STYLE
+      - L07COLOR
+      - L07CSTYLE
+      - L07CCOLOR
+      - L07CPCAT
+      - L07SKUSEQ
+      - L07FINSH
+      - L07IMGCOR
+      - L07CORDRN
+      - L07ROOMTY
+      - L07FMLSDT
+      - L07FMLSJL
+      - L07FMUSER
+      - L07FMTIME
+
+      Keys:
+      - L07STYLE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L07COLOR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - L07CORDRN:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed

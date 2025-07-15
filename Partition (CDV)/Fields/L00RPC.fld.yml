@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00RPC
+  Type:               Alpha
+  Length:             15
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "RADIANT PANEL CLASS"
+      Label:              "RADIANT PANEL"
+      Heading1:           "RADIANT PANEL CLASS"
+      Heading2:           " "
+      Heading3:           " "

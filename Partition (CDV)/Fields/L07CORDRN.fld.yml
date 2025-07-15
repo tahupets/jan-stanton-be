@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L07CORDRN
+  Type:               Packed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "IMAGE - COORD RANK"
+      Label:              "IMAGE - COORD"
+      Heading1:           "IMAGE - COORD RANK"
+      Heading2:           " "
+      Heading3:           " "

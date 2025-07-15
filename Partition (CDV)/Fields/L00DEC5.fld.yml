@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00DEC5
+  Type:               Packed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DECIMAL 5"
+      Label:              "DECIMAL 5"
+      Heading1:           "DECIMAL 5"
+      Heading2:           " "
+      Heading3:           " "

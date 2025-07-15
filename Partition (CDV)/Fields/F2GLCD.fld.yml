@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2GLCD
+  Type:               Packed
+  Length:             6
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "G/L CODE"
+      Label:              "G/L CODE"
+      Heading1:           "G/L CODE"
+      Heading2:           " "
+      Heading3:           " "

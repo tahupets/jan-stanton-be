@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2RCJL
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "RECORD CREATION JULIAN"
+      Label:              "RECORD CREATION"
+      Heading1:           "RECORD CREATION"
+      Heading2:           "JULIAN"
+      Heading3:           " "

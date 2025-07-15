@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00PRDG
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PRODUCT GROUP"
+      Label:              "PRODUCT GROUP"
+      Heading1:           "PRODUCT GROUP"
+      Heading2:           " "
+      Heading3:           " "

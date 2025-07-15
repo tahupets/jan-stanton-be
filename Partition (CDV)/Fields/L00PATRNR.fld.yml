@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00PATRNR
+  Type:               Alpha
+  Length:             60
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PATTERN REPEAT"
+      Label:              "PATTERN REPEAT"
+      Heading1:           "PATTERN REPEAT"
+      Heading2:           " "
+      Heading3:           " "

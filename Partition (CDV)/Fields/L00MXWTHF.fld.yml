@@ -1,0 +1,17 @@
+﻿Field:
+  Name:               L00MXWTHF
+  Type:               Packed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          4
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "MAX WIDTH FEET"
+      Label:              "MAX WIDTH FEET"
+      Heading1:           "MAX WIDTH FEET"
+      Heading2:           " "
+      Heading3:           " "

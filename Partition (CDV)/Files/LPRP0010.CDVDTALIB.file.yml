@@ -1,0 +1,321 @@
+﻿File:
+  Name:                           LPRP0010
+  File Type:                      IBM i Other File
+  Library:                        CDVDTALIB
+  Record Format Name:             LPRR0010
+  Module Library:                 Partition Module Library
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Broadloom SY Price Inquiry by Acct/Brand"
+
+  Real Fields:
+  - P010SID#:
+      Type:               Decimal
+      Length:             15
+      Decimals:           0
+
+  - P010EFDT:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - P010CMPY:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - P010CST#:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - P010DVBR:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - P010BDSC:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - P010NUFLG:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - P010PCAT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - P010PTYP:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - P010ISTY:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - P010STYL:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - P010SDSC:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - P010SIZE:
+      Type:               Alphanumeric
+      Length:             6
+      Decimals:           0
+
+  - P010SZED:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - P010BACK:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - P010RPRC:
+      Type:               Decimal
+      Length:             6
+      Decimals:           2
+
+  - P010CPRC:
+      Type:               Decimal
+      Length:             6
+      Decimals:           2
+
+  - P010UOM:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - P010SMPRC:
+      Type:               Decimal
+      Length:             5
+      Decimals:           2
+
+  - P010SHPRC:
+      Type:               Decimal
+      Length:             5
+      Decimals:           2
+
+  - P010PAPLY:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - P010PTRPT:
+      Type:               Alphanumeric
+      Length:             60
+      Decimals:           0
+
+  Primary Keys:
+  - P010SID#
+  - P010CST#
+  - P010BDSC
+  - P010STYL
+  - P010SIZE
+  - P010BACK
+
+  Logical Views:
+  - LPRL0010:
+      Identifier:         LPRL0010
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LPRR0010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Broadloom SY Price Inquiry"
+
+      Fields:
+      - P010SID#
+      - P010EFDT
+      - P010CMPY
+      - P010CST#
+      - P010DVBR
+      - P010BDSC
+      - P010NUFLG
+      - P010PCAT
+      - P010PTYP
+      - P010ISTY
+      - P010STYL
+      - P010SDSC
+      - P010SIZE
+      - P010SZED
+      - P010BACK
+      - P010RPRC
+      - P010CPRC
+      - P010UOM
+      - P010SMPRC
+      - P010SHPRC
+      - P010PAPLY
+      - P010PTRPT
+
+      Keys:
+      - P010SID#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - P010CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - P010BDSC:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - P010STYL:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - P010SIZE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - P010BACK:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LPRL0010A:
+      Identifier:         LPRL0010A
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LPRR0010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Broadloom SY Price Inquiry by Acct/SKU"
+
+      Fields:
+      - P010SID#
+      - P010EFDT
+      - P010CMPY
+      - P010CST#
+      - P010DVBR
+      - P010BDSC
+      - P010NUFLG
+      - P010PCAT
+      - P010PTYP
+      - P010ISTY
+      - P010STYL
+      - P010SDSC
+      - P010SIZE
+      - P010SZED
+      - P010BACK
+      - P010RPRC
+      - P010CPRC
+      - P010UOM
+      - P010SMPRC
+      - P010SHPRC
+      - P010PAPLY
+      - P010PTRPT
+
+      Keys:
+      - P010CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - P010BACK:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - P010SIZE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - P010STYL:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - P010RPRC:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - LPRL0010B:
+      Identifier:         LPRL0010B
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LPRR0010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Broadloom SY Price Inquiry by Acct/SKU"
+
+      Fields:
+      - P010SID#
+      - P010EFDT
+      - P010CMPY
+      - P010CST#
+      - P010DVBR
+      - P010BDSC
+      - P010NUFLG
+      - P010PCAT
+      - P010PTYP
+      - P010ISTY
+      - P010STYL
+      - P010SDSC
+      - P010SIZE
+      - P010SZED
+      - P010BACK
+      - P010RPRC
+      - P010CPRC
+      - P010UOM
+      - P010SMPRC
+      - P010SHPRC
+      - P010PAPLY
+      - P010PTRPT
+
+      Keys:
+      - P010CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - P010STYL:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - P010SIZE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - P010BACK:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

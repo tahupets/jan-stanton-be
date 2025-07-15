@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00FIBRLB
+  Type:               Alpha
+  Length:             20
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "FIBER PROD LABEL"
+      Label:              "FIBER PROD"
+      Heading1:           "FIBER PROD LABEL"
+      Heading2:           " "
+      Heading3:           " "

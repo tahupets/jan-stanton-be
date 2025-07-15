@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2IPRD
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "INVENTORY PRODUCT FLAG"
+      Label:              "INVENTORY"
+      Heading1:           "INVENTORY"
+      Heading2:           "PRODUCT"
+      Heading3:           " "

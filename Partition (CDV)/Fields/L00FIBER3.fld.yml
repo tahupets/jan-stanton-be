@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00FIBER3
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "FIBER DETAIL"
+      Label:              "FIBER DETAIL"
+      Heading1:           "FIBER DETAIL"
+      Heading2:           " "
+      Heading3:           " "

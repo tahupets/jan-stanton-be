@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010BDSC
+  Type:               Alpha
+  Length:             40
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Brand"
+      Label:              "Brand"
+      Heading1:           "Brand"
+      Heading2:           " "
+      Heading3:           " "

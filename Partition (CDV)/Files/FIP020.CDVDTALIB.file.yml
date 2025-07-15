@@ -1,0 +1,305 @@
+﻿File:
+  Name:                           FIP020
+  File Type:                      IBM i Other File
+  Library:                        CDVDTALIB
+  Record Format Name:             FIR020
+  Module Library:                 Partition Module Library
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       Yes
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Product Master File"
+
+  Real Fields:
+  - F2CMPY:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - F2STYL:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - F2CLR:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - F2SIZE:
+      Type:               Alphanumeric
+      Length:             6
+      Decimals:           0
+
+  - F2BACK:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - F2SDSC:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - F2CDSC:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - F2BDSC:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - F2WDSC:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - F2SSDC:
+      Type:               Alphanumeric
+      Length:             8
+      Decimals:           0
+
+  - F2CSDC:
+      Type:               Alphanumeric
+      Length:             8
+      Decimals:           0
+
+  - F2BSDC:
+      Type:               Alphanumeric
+      Length:             8
+      Decimals:           0
+
+  - F2WSDC:
+      Type:               Alphanumeric
+      Length:             8
+      Decimals:           0
+
+  - F2ISTY:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - F2ICLR:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - F2ISZE:
+      Type:               Alphanumeric
+      Length:             6
+      Decimals:           0
+
+  - F2IBK:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - F2PCAT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - F2LSDT:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - F2LSJL:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - F2USER:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - F2TIME:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - F2IPRD:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - F2CUST:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - F2RCDT:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - F2RCJL:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - F2ART#:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - F2DROP:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - F2DRDT:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - F2DRJL:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - F2TPR:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - F2DVBR:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - F2GLCD:
+      Type:               Decimal
+      Length:             6
+      Decimals:           2
+
+  - F2GLDP:
+      Type:               Decimal
+      Length:             4
+      Decimals:           0
+
+  - F2FCDE:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - F2SELL:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - F2DRUS:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - F2REVR:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - F2FBRD:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  Primary Keys:
+  - F2CMPY
+  - F2STYL
+  - F2CLR
+  - F2BACK
+  - F2SIZE
+  - F2CUST
+
+  Logical Views:
+  - FIL020A1:
+      Identifier:         FIL020A1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      FIR020
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Style/Size/Color/Bk - no select/omits"
+
+      Fields:
+      - F2CMPY
+      - F2STYL
+      - F2CLR
+      - F2SIZE
+      - F2BACK
+      - F2SDSC
+      - F2CDSC
+      - F2BDSC
+      - F2WDSC
+      - F2SSDC
+      - F2CSDC
+      - F2BSDC
+      - F2WSDC
+      - F2ISTY
+      - F2ICLR
+      - F2ISZE
+      - F2IBK
+      - F2PCAT
+      - F2LSDT
+      - F2LSJL
+      - F2USER
+      - F2TIME
+      - F2IPRD
+      - F2CUST
+      - F2RCDT
+      - F2RCJL
+      - F2ART#
+      - F2DROP
+      - F2DRDT
+      - F2DRJL
+      - F2TPR
+      - F2DVBR
+      - F2GLCD
+      - F2GLDP
+      - F2FCDE
+      - F2SELL
+      - F2DRUS
+      - F2REVR
+      - F2FBRD
+
+      Keys:
+      - F2STYL:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - F2SIZE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - F2CLR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - F2BACK:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

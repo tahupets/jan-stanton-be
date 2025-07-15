@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3CUTPRC
+  Type:               Packed
+  Length:             15
+  Decimals:           4
+  Default Value:      "*ZERO"
+  Edit Mask:          J
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Cut Price"
+      Label:              "Cut Price"
+      Heading1:           "Cut"
+      Heading2:           "Price"
+      Heading3:           " "

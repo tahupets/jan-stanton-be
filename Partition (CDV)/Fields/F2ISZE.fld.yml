@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2ISZE
+  Type:               Alpha
+  Length:             6
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "IVN. SIZE CODE"
+      Label:              "IVN. SIZE CODE"
+      Heading1:           "INV. SIZE"
+      Heading2:           "CODE"
+      Heading3:           " "

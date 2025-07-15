@@ -1,0 +1,319 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * ========================================================
+    * Copyright       : LANSA 2023
+    * Type            : Function
+    * Name            : LW3BFDA
+    * Identifier      : LW3BFDA
+    * Process         : LW3EXAPI
+    * Written By      : Faridah Belandres
+    * Written On      : 14-Nov-2023
+    * Description     : Function for JSON Bind - Brandfolder Search
+    * =======================================================
+    * INPUT PARAMETERS:
+    * FXSTYLCD - Style Code
+    * FXCOLRCD - Color Code (Optional)
+    * -------------------------------------
+    * OUTPUT PARAMETERS:
+    * FXRETCD - Return Code (OK | ER)
+    * FXCNTSTR - Product Description
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * Date            | Modified by       | Description
+    * -------------------------------------------------------
+    *                 |                   |
+    * =======================================================
+    
+    Function Options(*DIRECT)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#LW3CNTGL) Name(#Global_Constants) Desc('Global Constants') Help('Global Constants') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Configuration Reader RP') Scope(*APPLICATION)
+    Define_Com Class(#CNRCODES) Name(#Utility_Codes) Desc('Code Utility RP') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Simple Field Definitions
+    * =======================================================
+    
+    * Define fields for JSON Bind Mapping:
+    * *** Note: Field Names match the mapping in LANSA Integrator Studio
+    
+    Define Field(#BFSEARCH_URL) Type(*STRING)
+    Define Field(#BEARER_TOKEN) Type(*STRING)
+    Define Field(#WBFHOST) Type(*STRING) Desc('Brandfolder host') Default(*BLANKS)
+    Define Field(#WBFURI) Type(*STRING) Desc('Brandfolder path') Default(*BLANKS)
+    Define Field(#WBFPATH) Type(*STRING) Desc('Brandfolder path') Default(*BLANKS)
+    Define Field(#WBFPARMS) Type(*STRING) Desc('Brandfolder path') Default(*BLANKS)
+    
+    Define Field(#PNAME) Type(*STRING)
+    Define Field(#PVAL) Type(*STRING)
+    Define Field(#WSTOKEN) Type(*STRING) Default(*BLANKS)
+    * The following fields are used by the binding map
+    * data
+    Define Field(#DATA_ID) Type(*STRING)
+    Define Field(#DATA_TYPE) Type(*STRING)
+    
+    * data > attributes
+    Define Field(#ATT_NAME) Type(*STRING)
+    Define Field(#ATT_DESCRIPTION) Type(*STRING) Length(65535)
+    Define Field(#ATT_THUMBNAIL_URL) Type(*STRING)
+    Define Field(#ATT_APPROVED) Type(*STRING)
+    
+    * meta
+    Define Field(#META_CURRENT_PAGE) Type(*STRING)
+    Define Field(#META_NEXT_PAGE) Type(*STRING)
+    Define Field(#META_PREV_PAGE) Type(*STRING)
+    Define Field(#META_TOTAL_COUNT) Type(*STRING)
+    Define Field(#META_TOTAL_PAGES) Type(*STRING)
+    
+    
+    * =======================================================
+    * Group Definitions
+    * =======================================================
+    
+    * The following fragments are used by the binding map
+    Group_By Name(#ATTRIBUTES) Fields(#ATT_DESCRIPTION #ATT_THUMBNAIL_URL #ATT_APPROVED #ATT_NAME)
+    Group_By Name(#DATA) Fields(#DATA_TYPE #DATA_ID)
+    Group_By Name(#META) Fields(#META_TOTAL_COUNT #META_TOTAL_PAGES #META_PREV_PAGE #META_NEXT_PAGE #META_CURRENT_PAGE)
+    
+    * =======================================================
+    * List Definitions
+    * =======================================================
+    
+    * Define list for JSON Bind Mapping:
+    Def_List Name(#PLST) Fields(#PNAME #PVAL) Type(*WORKING) Entrys(*MAX)
+    
+    * =======================================================
+    * Program Mainline
+    * =======================================================
+    
+    #FXRETCD := 'ER'
+    
+    #COM_OWNER.umMainProcess
+    Exchange Fields(#FXRETCD #FXCNTSTR)
+    Return
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umMainProcess
+    * Description....:
+    * =======================================================
+    Mthroutine Name(umMainProcess)
+    * Initialize
+    #COM_OWNER.umInitialize Istylecode(#FXSTYLCD) Icolorcode(#FXCOLRCD) Ohost(#WBFHOST) Ouri(#WBFURI)
+    #COM_OWNER.umJSMOpen
+    #COM_OWNER.callHTTPService Ihost(#WBFHOST) Iuri(#WBFURI) Oproductdescription(#FXCNTSTR)
+    #COM_OWNER.umJSMClose
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: callHTTPService
+    * Description....:
+    * =======================================================
+    Mthroutine Name(callHTTPService)
+    
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iHost)
+    Define_Map For(*INPUT) Class(#LW3CNTSTR) Name(#iUri)
+    
+    Define_Map For(*OUTPUT) Class(#FXCNTSTR) Name(#oProductDescription)
+    
+    * Load service (HTTP Service)
+    * #JSMXCMD := 'SERVICE_LOAD SERVICE(HTTPService) SERVICE_CONTENT(*HTTP) TRACE(*YES) TRACE_NAME(*FUNCTION)'
+    #JSMXCMD := 'SERVICE_LOAD SERVICE(HTTPService) SERVICE_CONTENT(*HTTP)'
+    Use Builtin(JSMX_COMMAND) With_Args(#JSMXHDLE1 #JSMXCMD) To_Get(#JSMXSTS #JSMXMSG)
+    Execute Subroutine(CHECK) With_Parms(#JSMXSTS #JSMXMSG)
+    
+    * set Properties
+    #JSMXCMD := 'SET PROPERTY(*LIST) SERVICE_LIST(PNAME,PVAL)'
+    Use Builtin(JSMX_COMMAND) With_Args(#JSMXHDLE1 #JSMXCMD) To_Get(#JSMXSTS #JSMXMSG #PLST)
+    Execute Subroutine(CHECK) With_Parms(#JSMXSTS #JSMXMSG)
+    
+    *
+    * GET request to search API
+    #JSMXCMD := 'SEND HOST(' + #iHost + ')  URI(' + #iUri + ') METHOD(*GET) SECURE(*YES) HANDLER(OutboundJSONBind)'
+    Use Builtin(JSMX_COMMAND) With_Args(#JSMXHDLE1 #JSMXCMD) To_Get(#JSMXSTS #JSMXMSG)
+    Execute Subroutine(CHECK) With_Parms(#JSMXSTS #JSMXMSG)
+    
+    * Bind service to read HTTP request content
+    #JSMXCMD := 'RECEIVE HANDLER(InboundJSONBind)'
+    Use Builtin(JSMX_COMMAND) With_Args(#JSMXHDLE1 #JSMXCMD) To_Get(#JSMXSTS #JSMXMSG)
+    Execute Subroutine(CHECK) With_Parms(#JSMXSTS #JSMXMSG)
+    
+    * Bind service to read HTTP request content
+    #JSMXCMD := 'BIND SERVICE(BFSEARCHRESPONSE) TYPE(*INBOUND) BINDTRACE(*YES) SERVICE_EXCHANGE(*FIELD)'
+    Use Builtin(JSMX_COMMAND) With_Args(#JSMXHDLE1 #JSMXCMD) To_Get(#JSMXSTS #JSMXMSG)
+    Execute Subroutine(CHECK) With_Parms(#JSMXSTS #JSMXMSG)
+    
+    Begin_Loop /* DATA */
+    
+    * Get fragment - DATA
+    #JSMXCMD := 'GET FRAGMENT(DATA) SERVICE_EXCHANGE(*FIELD)'
+    Use Builtin(JSMX_COMMAND) With_Args(#JSMXHDLE1 #JSMXCMD) To_Get(#JSMXSTS #JSMXMSG)
+    Leave If('#JSMXSTS *EQ NOFRAGMENT')
+    Execute Subroutine(CHECK) With_Parms(#JSMXSTS #JSMXMSG)
+    
+    * Get fragment - ATTRIBUTES
+    #JSMXCMD := 'GET FRAGMENT(ATTRIBUTES) SERVICE_EXCHANGE(*FIELD)'
+    Use Builtin(JSMX_COMMAND) With_Args(#JSMXHDLE1 #JSMXCMD) To_Get(#JSMXSTS #JSMXMSG)
+    Execute Subroutine(CHECK) With_Parms(#JSMXSTS #JSMXMSG)
+    
+    * There is data in the response so set the return status to "OK"
+    #FXRETCD := 'OK'
+    
+    * * !NC!
+    * #WAMNAM := #COM_OWNER.Name
+    * #LW3MSGTXT := 'Attribute Name - ' + #ATT_NAME + ' - ' + #L_StyleColorDesc + ' - ' + #ATT_NAME.UpperCase
+    * Insert Fields(#WAMNAM #LW3MSGTXT) To_File(LW3DEBUG) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * * Check if the name matches the Style and Color Description
+    * If Cond(#L_StyleColorDesc.Trim = #ATT_NAME.UpperCase.Trim)
+    *
+    * * * !NC!
+    * * #WAMNAM := #COM_OWNER.Name
+    * * #LW3MSGTXT := 'Attribute Desc - ' + #ATT_DESCRIPTION
+    * * Insert Fields(#WAMNAM #LW3MSGTXT) To_File(LW3DEBUG) Io_Error(*NEXT) Val_Error(*NEXT)
+    *
+    * #oProductDescription := #ATT_DESCRIPTION
+    * Leave
+    * Endif
+    
+    If Cond(#ATT_DESCRIPTION <> *BLANKS)
+    #oProductDescription := #ATT_DESCRIPTION
+    Leave
+    Endif
+    
+    End_Loop /* DATA */
+    
+    * Get fragment - META
+    #JSMXCMD := 'GET FRAGMENT(META) SERVICE_EXCHANGE(*FIELD)'
+    Use Builtin(JSMX_COMMAND) With_Args(#JSMXHDLE1 #JSMXCMD) To_Get(#JSMXSTS #JSMXMSG)
+    Execute Subroutine(CHECK) With_Parms(#JSMXSTS #JSMXMSG)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umInitialize
+    * Description....: Initialize fields
+    * =======================================================
+    Mthroutine Name(umInitialize) Desc('Initialize fields') Help('Initialize fields')
+    
+    Define_Map For(*INPUT) Class(#FXSTYLCD) Name(#iStyleCode)
+    Define_Map For(*INPUT) Class(#FXCOLRCD) Name(#iColorCode)
+    
+    Define_Map For(*OUTPUT) Class(#PRIM_ALPH) Name(#oHost)
+    Define_Map For(*OUTPUT) Class(#LW3CNTSTR) Name(#oUri)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_APIKey)
+    Define_Com Class(#LW3CNTSTR) Name(#L_Parameters)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_SearchField1)
+    Define_Com Class(#PRIM_ALPH) Name(#L_SearchField2)
+    
+    #WAMNAM := *FUNCTION
+    
+    * sample URL:
+    * https://brandfolder.com/api/v4/brandfolders/jqjrxr3k5kpzvrkgs6tz5ntv/assets?search=custom_fields.Style%20Code:ANABE
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('BF_API_HOST') Ilanguage('') Oalphavalue(#oHost)
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('BF_API_KEY') Ilanguage('') Oalphavalue(#L_APIKey)
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('BF_API_URI') Ilanguage('') Oalphavalue(#oUri)
+    
+    #oUri := #oUri.Substitute( #L_APIKey )
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('BF_API_SEARCH_PARM') Ilanguage('') Oalphavalue(#L_Parameters)
+    #L_Parameters := '?' + #L_Parameters + '='
+    
+    If Cond(#iColorCode <> *BLANKS)
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('BF_API_SRC_FIELD2') Ilanguage('') Oalphavalue(#L_SearchField2)
+    #L_Parameters += #L_SearchField2.Substitute( #iColorCode )
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('BF_API_SRC_FIELD1') Ilanguage('') Oalphavalue(#L_SearchField1)
+    #L_Parameters += '%20AND%20' + #L_SearchField1.Substitute( #iStyleCode )
+    Else
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('BF_API_SRC_FIELD1') Ilanguage('') Oalphavalue(#L_SearchField1)
+    #L_Parameters += #L_SearchField1.Substitute( #iStyleCode )
+    
+    Endif
+    
+    #oUri += #L_Parameters
+    
+    #ATTRIBUTES #DATA #META := *NULL
+    
+    * search=custom_fields.Color Code:"49405" AND custom_fields.Style Code:"ACCEL"
+    
+    Clr_List Named(#PLST)
+    
+    #PNAME := 'Authorization'
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('BF_API_HDR_AUTH_VAL') Ilanguage('') Oalphavalue(#PVAL)
+    Add_Entry To_List(#PLST)
+    
+    #PNAME := 'Accept'
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('BF_API_HDR_ACPT_VAL') Ilanguage('') Oalphavalue(#PVAL)
+    Add_Entry To_List(#PLST)
+    
+    #PNAME := 'Content-Type'
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('BF_API_HDR_CNTT_VAL') Ilanguage('') Oalphavalue(#PVAL)
+    Add_Entry To_List(#PLST)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umJSMOpen
+    * Description....:
+    * =======================================================
+    Mthroutine Name(umJSMOpen)
+    *  OPEN JSM AND VERIFY STATUS
+    Use Builtin(JSMX_OPEN) To_Get(#JSMXSTS #JSMXMSG #jsmxhdle1)
+    Execute Subroutine(CHECK) With_Parms(#JSMXSTS #JSMXMSG)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umJSMClose
+    * Description....:
+    * =======================================================
+    Mthroutine Name(umJSMClose)
+    *
+    * CLOSE JSM AND VERIFY STATUS
+    Use Builtin(JSMX_CLOSE) With_Args(#JSMXHDLE1) To_Get(#JSMXSTS #JSMXMSG)
+    Execute Subroutine(CHECK) With_Parms(#JSMXSTS #JSMXMSG)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umCheckJSMStatus
+    * Description....: Check JSM Status
+    * =======================================================
+    Mthroutine Name(umCheckJSMStatus) Desc('Check JSM Status')
+    
+    Define_Map For(*INPUT) Class(#JSMXSTS) Name(#iJSMStatus)
+    Define_Map For(*INPUT) Class(#JSMXMSG) Name(#iJSMMessage)
+    
+    If Cond(#iJSMStatus = 'OK')
+    * No logic yet
+    Else
+    Use Builtin(JSMX_CLOSE) With_Args(#JSMXHDLE1) To_Get(#JSMXSTS #JSMXMSG)
+    Endif
+    
+    Endroutine
+    
+    * ====================
+    * SUBROUTINES
+    * ====================
+    Subroutine Name(CHECK) Parms((#JSMXSTS *RECEIVED) (#JSMXMSG *RECEIVED))
+    If Cond('#JSMXSTS *NE OK')
+    Use Builtin(JSMX_CLOSE) With_Args(#JSMXHDLE1) To_Get(#JSMXSTS #JSMXMSG)
+    Exit
+    Endif
+    Endroutine
+    
+    * ************************** FBTSTFN2 *****************************

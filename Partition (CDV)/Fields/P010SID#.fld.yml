@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010SID#
+  Type:               Packed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Session ID#"
+      Label:              "Session ID#"
+      Heading1:           "Session ID#"
+      Heading2:           " "
+      Heading3:           " "

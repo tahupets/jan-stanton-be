@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010SHPRC
+  Type:               Packed
+  Length:             5
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SF Hnd Srged Price"
+      Label:              "SF Hnd Srged"
+      Heading1:           "SF Hnd Srged Price"
+      Heading2:           " "
+      Heading3:           " "

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00DROP
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DROPPED PRODUCT"
+      Label:              "DROPPED PRODUCT"
+      Heading1:           "DROPPED PRODUCT"
+      Heading2:           " "
+      Heading3:           " "

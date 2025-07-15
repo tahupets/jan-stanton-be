@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00WDTIN
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "WIDTH INCHES"
+      Label:              "WIDTH INCHES"
+      Heading1:           "WIDTH INCHES"
+      Heading2:           " "
+      Heading3:           " "

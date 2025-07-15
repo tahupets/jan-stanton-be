@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3MSRPPR
+  Type:               Packed
+  Length:             15
+  Decimals:           3
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "MSRP Premade Rug"
+      Label:              "MSRP Premade Ru"
+      Heading1:           "MSRP"
+      Heading2:           "Premade"
+      Heading3:           "Rug"

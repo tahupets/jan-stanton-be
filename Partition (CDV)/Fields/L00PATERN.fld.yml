@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00PATERN
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PATTERN 1"
+      Label:              "PATTERN 1"
+      Heading1:           "PATTERN 1"
+      Heading2:           " "
+      Heading3:           " "

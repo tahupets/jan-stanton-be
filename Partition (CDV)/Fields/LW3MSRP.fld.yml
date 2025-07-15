@@ -1,0 +1,22 @@
+﻿Field:
+  Name:               LW3MSRP
+  Type:               Packed
+  Length:             15
+  Decimals:           4
+  Default Value:      "*ZERO"
+  Reference Field:    LW3LPRICE
+  Edit Mask:          J
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "MSRP"
+      Label:              "MSRP"
+      Heading1:           "MSRP"
+      Heading2:           " "
+      Heading3:           " "

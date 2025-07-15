@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L0AUSG2
+  Type:               Alpha
+  Length:             25
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "USAGE 2"
+      Label:              "USAGE 2"
+      Heading1:           "USAGE 2"
+      Heading2:           " "
+      Heading3:           " "

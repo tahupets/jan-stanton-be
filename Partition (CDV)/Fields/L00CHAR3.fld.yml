@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00CHAR3
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CHARACTER 3"
+      Label:              "CHARACTER 3"
+      Heading1:           "CHARACTER 3"
+      Heading2:           " "
+      Heading3:           " "

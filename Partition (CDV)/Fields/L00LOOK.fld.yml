@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00LOOK
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "LOOK & FEEL"
+      Label:              "LOOK & FEEL"
+      Heading1:           "LOOK & FEEL"
+      Heading2:           " "
+      Heading3:           " "

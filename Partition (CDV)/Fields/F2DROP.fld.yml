@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2DROP
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DROPPED PRODUCT (DEFAULT IS NO)?"
+      Label:              "DROPPED PRODUCT"
+      Heading1:           "DROPPED"
+      Heading2:           "PRODUCT?"
+      Heading3:           " "

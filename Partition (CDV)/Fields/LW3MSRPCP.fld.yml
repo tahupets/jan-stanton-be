@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3MSRPCP
+  Type:               Packed
+  Length:             15
+  Decimals:           3
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "MSRP Carpet"
+      Label:              "MSRP Carpet"
+      Heading1:           "MSRP"
+      Heading2:           "Carpet"
+      Heading3:           " "

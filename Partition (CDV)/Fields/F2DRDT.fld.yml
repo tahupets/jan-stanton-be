@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2DRDT
+  Type:               Packed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DROPPED DATE"
+      Label:              "DROPPED DATE"
+      Heading1:           "DROPPED"
+      Heading2:           "DATE"
+      Heading3:           " "

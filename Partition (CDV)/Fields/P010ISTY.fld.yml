@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010ISTY
+  Type:               Alpha
+  Length:             5
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Inv Style"
+      Label:              "Inv Style"
+      Heading1:           "Inv Style"
+      Heading2:           " "
+      Heading3:           " "

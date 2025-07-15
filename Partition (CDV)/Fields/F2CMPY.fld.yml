@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2CMPY
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "COMPANY CODE"
+      Label:              "COMPANY CODE"
+      Heading1:           "COMPANY"
+      Heading2:           "CODE"
+      Heading3:           " "

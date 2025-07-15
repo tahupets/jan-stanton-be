@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               LW3SDESC
+  Type:               Alpha
+  Length:             20
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Style Description"
+      Label:              "Style Descripti"
+      Heading1:           "Style"
+      Heading2:           "Description"
+      Heading3:           " "

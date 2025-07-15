@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00PROPB2
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PROPRIETARY B2C OK"
+      Label:              "PROPRIETARY B2C"
+      Heading1:           "PROPRIETARY B2C OK"
+      Heading2:           " "
+      Heading3:           " "

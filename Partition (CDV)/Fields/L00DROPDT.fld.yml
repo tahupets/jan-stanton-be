@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00DROPDT
+  Type:               Packed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DROPPED DATE"
+      Label:              "DROPPED DATE"
+      Heading1:           "DROPPED DATE"
+      Heading2:           " "
+      Heading3:           " "

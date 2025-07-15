@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3MSRPPM
+  Type:               Packed
+  Length:             15
+  Decimals:           3
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "MSRP Promotions"
+      Label:              "MSRP Promotions"
+      Heading1:           "MSRP"
+      Heading2:           "Promotions"
+      Heading3:           " "

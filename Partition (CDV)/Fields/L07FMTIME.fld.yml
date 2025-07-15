@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L07FMTIME
+  Type:               Packed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "TIME OF LAST UPDATE"
+      Label:              "TIME OF LAST"
+      Heading1:           "TIME OF"
+      Heading2:           "LAST UPDATE"
+      Heading3:           " "

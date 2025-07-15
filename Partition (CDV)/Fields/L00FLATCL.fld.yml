@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00FLATCL
+  Type:               Alpha
+  Length:             5
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "IMAGE - FLAT COLOR"
+      Label:              "IMAGE - FLAT"
+      Heading1:           "IMAGE - FLAT COLOR"
+      Heading2:           " "
+      Heading3:           " "

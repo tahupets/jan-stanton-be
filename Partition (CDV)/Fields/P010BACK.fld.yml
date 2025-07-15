@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010BACK
+  Type:               Alpha
+  Length:             2
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Back"
+      Label:              "Back"
+      Heading1:           "Back"
+      Heading2:           " "
+      Heading3:           " "

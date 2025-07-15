@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00CLR1
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PRIMARY COLOR"
+      Label:              "PRIMARY COLOR"
+      Heading1:           "PRIMARY COLOR"
+      Heading2:           " "
+      Heading3:           " "

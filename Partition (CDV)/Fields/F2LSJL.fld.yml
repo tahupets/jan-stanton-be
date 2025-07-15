@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2LSJL
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "LAST CHANGE JULIAN"
+      Label:              "LAST CHANGE"
+      Heading1:           "LAST CHANGE"
+      Heading2:           "JULIAN"
+      Heading3:           " "

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2DRUS
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DROP USER ID"
+      Label:              "DROP USER ID"
+      Heading1:           "DROP"
+      Heading2:           "USER ID"
+      Heading3:           " "

@@ -85,8 +85,6 @@
     #oReturnField := #iCurrencySymbol + #OReturnField
     Endroutine
     
-    
-    
     * =======================================================
     * Mthroutine ....: umSplitString
     * Description....: Split string into an array
@@ -171,6 +169,135 @@
     * Replace ^ with ®
     If Cond(#rText.Contains( (94).asUnicodeString ))
     #rText := #rText.ReplaceAll( (94).asUnicodeString (174).AsUnicodeString )
+    Endif
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umInchesToFeetAndInches
+    * Description....: Convert Feet to Inches.
+    * =======================================================
+    Mthroutine Name(umInchesToFeetAndInches) Help('Convert Inches to Feet and Inches')
+    Define_Map For(*INPUT) Class(#L00WDTIN) Name(#iInches)
+    
+    Define_Map For(*OUTPUT) Class(#L00WTHFT) Name(#oTotalFeet)
+    Define_Map For(*OUTPUT) Class(#L00WTHIN) Name(#oTotalInches)
+    
+    #oTotalFeet := #iInches / 12
+    #oTotalInches := #iInches.Mod( 12 )
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umProperCase
+    * Description....: Convert text into propercase
+    * =======================================================
+    Mthroutine Name(umProperCase)
+    Define_Map For(*INPUT) Class(#STD_QSEL) Name(#iInputString) Desc('input')
+    Define_Map For(*RESULT) Class(#STD_QSEL) Name(#rResult) Desc('output string')
+    
+    Define Field(#wCounter) Reffld(#STD_COUNT) Desc('index')
+    Define Field(#wInputLength) Reffld(#STD_COUNT) Desc('input length')
+    Define Field(#wCurrentCharacter) Reffld(#STD_ALPHA) Desc('current char')
+    Define Field(#wFlag_FirstLetter) Type(*BOOLEAN) Desc('first letter flag (1/0)')
+    Define Field(#wFlag_Space) Type(*BOOLEAN) Desc('space flag (1/0)')
+    Define Field(#wInputString) Reffld(#STD_QSEL) Desc('Input string in upper case')
+    * No whitespace in the specs, but if ever, the logic is here, you just need to uncomment it
+    * Define Field(#wWhitespace) Reffld(#STD_QSEL) Desc('characters after this will be uppercase')
+    Define Field(#wValidChar) Reffld(#STD_QSEL) Desc('characters considered as valid')
+    
+    Define Field(#wCurrentWordStart) Reffld(#STD_COUNT)
+    Define Field(#wCurrentWordLen) Reffld(#STD_COUNT)
+    Define Field(#wCurrentWord) Reffld(#STD_TEXT)
+    
+    #rResult := ''
+    
+    * Initialize by changing input text into uppercase
+    #wInputString := #iInputString.UpperCase
+    
+    * Write Whitespace words in between spaces, words in upper case
+    * Characters after Whitespace Characters will automatically by capitalized
+    *     So far there are no whitespace characters
+    * #wWhitespace := *NULL
+    #wValidChar := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    
+    #wInputLength := #wInputString.CurChars
+    
+    #wFlag_FirstLetter := True
+    #wFlag_Space := False
+    #wCurrentWord := *NULL
+    
+    * Loop thru the input letter by letter
+    #wCounter := 1
+    Dowhile Cond(#wCounter <= #wInputLength)
+    * Get the value of the current character
+    #wCurrentCharacter := #wInputString.Substring( #wCounter 1 )
+    
+    * If current character is a letter, proceed with proper casing, if not then just use the same character
+    If Cond(#wValidChar.Contains( #wCurrentCharacter ))
+    If Cond(#wFlag_FirstLetter)
+    #rResult := #rResult + #COM_OWNER.umReturnSpaceIfTrue( #wFlag_Space ) + #wCurrentCharacter
+    
+    #wFlag_FirstLetter := False
+    Else
+    #rResult := #rResult + #COM_OWNER.umReturnSpaceIfTrue( #wFlag_Space ) + #wCurrentCharacter.LowerCase
+    Endif
+    Else
+    #rResult := #rResult + #COM_OWNER.umReturnSpaceIfTrue( #wFlag_Space ) + #wCurrentCharacter
+    Endif
+    
+    * Turn flag on if current character is blanks
+    #wFlag_Space := (#wCurrentCharacter = ' ')
+    
+    * * Characters after a whitespace character will always be in upper case
+    * If Cond(#wWhitespace.Contains( #wCurrentCharacter ))
+    * #wFlag_FirstLetter := True
+    * Else
+    #wFlag_FirstLetter := #wFlag_Space
+    * Endif
+    
+    * Check if current word is in the reserved word list
+    If Cond((#wFlag_FirstLetter) Or (#wCounter >= #wInputLength) Or (#wCounter = 1) Or (#wCurrentWord = ''))
+    * If current word is in the whitespace list found in the Code Table, capitalize that word
+    Check_For In_File(LW3CODES) With_Key('PCRWRD' #wCurrentWord *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    If Cond(#wCounter >= #wInputLength)
+    * adjust length if we are in the last character of the input
+    #rResult := #rResult.ReplaceSubstring( (#wCurrentWordStart) (#wCurrentWordLen + 1) (#wCurrentWord.UpperCase) )
+    Else
+    #rResult := #rResult.ReplaceSubstring( #wCurrentWordStart #wCurrentWordLen (#wCurrentWord.UpperCase) )
+    Endif
+    Endif
+    
+    * Reset values on the start, at the last run of the loop and if the First Letter flag is on
+    #wCurrentWordStart := #wCounter
+    #wCurrentWordLen := 1
+    Else
+    #wCurrentWordLen += 1
+    Endif
+    
+    #wCounter += 1
+    
+    * * build the current word
+    If Cond(#wCounter >= #wInputLength)
+    * adjust length if we are in the last character of the input
+    #wCurrentWord := #wInputString.Substring( #wCurrentWordStart (#wCurrentWordLen + 1) )
+    Else
+    #wCurrentWord := #wInputString.Substring( #wCurrentWordStart #wCurrentWordLen )
+    Endif
+    Endwhile
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umReturnSpaceIfTrue
+    * Description....: Used in umProperCase to return a space if the condition is true
+    * =======================================================
+    Mthroutine Name(umReturnSpaceIfTrue) Access(*PRIVATE)
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iSpaceFlag)
+    Define_Map For(*RESULT) Class(#STD_ALPHA) Name(#iText)
+    
+    If Cond(#iSpaceFlag)
+    #iText := ' '
+    Else
+    #iText := ''
     Endif
     Endroutine
     

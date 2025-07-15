@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L0ACOLOR
+  Type:               Alpha
+  Length:             5
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "COLOR CODE"
+      Label:              "COLOR CODE"
+      Heading1:           "COLOR CODE"
+      Heading2:           " "
+      Heading3:           " "

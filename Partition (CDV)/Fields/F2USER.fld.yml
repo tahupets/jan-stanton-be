@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2USER
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "USER PROFILE"
+      Label:              "USER PROFILE"
+      Heading1:           "USER"
+      Heading2:           "PROFILE"
+      Heading3:           " "

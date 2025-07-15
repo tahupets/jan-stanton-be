@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00SDESC
+  Type:               Alpha
+  Length:             20
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "STYLE DESCRIPTION"
+      Label:              "STYLE"
+      Heading1:           "STYLE DESCRIPTION"
+      Heading2:           " "
+      Heading3:           " "

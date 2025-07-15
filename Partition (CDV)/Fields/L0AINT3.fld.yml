@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L0AINT3
+  Type:               Packed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "INTEGER 3"
+      Label:              "INTEGER 3"
+      Heading1:           "INTEGER 3"
+      Heading2:           " "
+      Heading3:           " "

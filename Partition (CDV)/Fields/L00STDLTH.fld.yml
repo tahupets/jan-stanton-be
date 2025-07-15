@@ -1,0 +1,17 @@
+﻿Field:
+  Name:               L00STDLTH
+  Type:               Packed
+  Length:             4
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          4
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "STANDARD LENGTH IN FEET"
+      Label:              "STANDARD LENGTH"
+      Heading1:           "STD LENGTH"
+      Heading2:           "(FEET)"
+      Heading3:           " "

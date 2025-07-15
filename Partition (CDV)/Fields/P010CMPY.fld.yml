@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010CMPY
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Company"
+      Label:              "Company"
+      Heading1:           "Company"
+      Heading2:           " "
+      Heading3:           " "

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00CLR2
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SECONDRY COLOR"
+      Label:              "SECONDRY COLOR"
+      Heading1:           "SECONDRY COLOR"
+      Heading2:           " "
+      Heading3:           " "

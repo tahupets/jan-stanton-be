@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2SELL
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "OK TO SELL Y/N?"
+      Label:              "OK TO SELL Y/N?"
+      Heading1:           "ALLOW"
+      Heading2:           "SALES Y/N"
+      Heading3:           " "

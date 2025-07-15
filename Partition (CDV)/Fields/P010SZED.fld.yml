@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010SZED
+  Type:               Alpha
+  Length:             20
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Size Desc"
+      Label:              "Size Desc"
+      Heading1:           "Size Desc"
+      Heading2:           " "
+      Heading3:           " "

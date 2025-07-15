@@ -358,6 +358,11 @@
     Endif
     Endif
     
+    * Default to the current system language if it cannot be identified from the request
+    If Cond(#rLanguageCode = *BLANKS)
+    #rLanguageCode := *LANGUAGE
+    Endif
+    
     Endroutine
     
     * =======================================================

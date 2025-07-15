@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2FCDE
+  Type:               Alpha
+  Length:             30
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "FINANCIAL CODE"
+      Label:              "FINANCIAL CODE"
+      Heading1:           "FINANCIAL CODE"
+      Heading2:           " "
+      Heading3:           " "

@@ -36,6 +36,12 @@
     Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
     Define_Com Class(#LW3CNTGL) Name(#Global_Constants) Desc('Global Constants') Help('Global Constants') Scope(*APPLICATION)
     
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CNRCODES) Name(#Utility_Codes) Desc('Code Table Utility') Help('Code Table Utility') Scope(*APPLICATION)
     
     * =======================================================
     * Method Definitions
@@ -243,5 +249,386 @@
     Endif
     Endroutine
     
+    * ==========================================================================================
+    * Mthroutine  : umGetResources
+    * Description : Get resources
+    * ==========================================================================================
+    Mthroutine Name(umGetResources) Desc('Get Resources for the Product Detail Tab')
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#i_L00PTYP)
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#i_L00STYLE)
+    Define_Map For(*INPUT) Class(#L00FIBRLB) Name(#i_L00FIBRLB)
+    Define_Map For(*INPUT) Class(#L00DVBR) Name(#i_L00DVBR)
+    
+    Define_Map For(*INPUT) Class(#F54STYP) Name(#i_F54STYP) Mandatory('')
+    
+    Define_Map For(*OUTPUT) Class(#LW3CDES) Name(#o_FIBER)
+    Define_Map For(*OUTPUT) Class(#LW3CDES) Name(#o_CLEANINGANDCARE)
+    Define_Map For(*OUTPUT) Class(#LW3CDES) Name(#o_WARRANTY)
+    Define_Map For(*OUTPUT) Class(#LW3CDES) Name(#o_INSTALLATIONGUIDE)
+    * G#151
+    Define_Map For(*OUTPUT) Class(#LW3CDES) Name(#o_SPECSHEET)
+    Define_Map For(*OUTPUT) Class(#LW3CDES) Name(#o_TRIMINFO)
+    
+    * G#88 - add new input field
+    Define_Map For(*INPUT) Class(#L00SIZE) Name(#i_L00SIZE) Mandatory('')
+    
+    Define Field(#W_GETCNTBYCOL) Type(*CHAR) Length(1)
+    
+    * Retrieve Tab Contents from the B2B Storefront
+    * #W_SFID := 9
+    * G#151
+    * #o_FIBER #o_WARRANTY #o_CLEANINGANDCARE   := *NULL
+    #o_FIBER #o_WARRANTY #o_CLEANINGANDCARE #o_INSTALLATIONGUIDE #o_SPECSHEET #o_TRIMINFO := *NULL
+    
+    * Gitlab #41 - Show warranty tab for both B2B and B2C sites
+    * #134 - Do not show tabs for Molding Trim
+    * Modified by Jan - 4th Nov 2022 - GitLab Issue #254
+    If Cond(*Not (#Global_Constants.umIsCoordinatingProduct( #i_L00PTYP )))
+    * Warranty
+    #L02WRNTY #L02COLL #W_GETCNTBYCOL := *NULL
+    Fetch Fields(#L02WRNTY) From_File(LFIP102) With_Key(#L02COLL #i_L00STYLE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #LW3MNUESD := #L02WRNTY
+    If Cond((#LW3MNUESD <> *BLANKS) And (#LW3MNUESD <> '1RW'))
+    #o_WARRANTY := #Utility_Codes.umGetCodeDescriptionByCode( 'PDFWTY' #LW3MNUESD.UpperCase )
+    
+    If Cond(#o_WARRANTY.Trim = '-')
+    #o_WARRANTY := *NULL
+    Endif
+    
+    If Cond(#o_WARRANTY = *BLANK)
+    #W_GETCNTBYCOL := 'W'
+    Endif
+    Endif
+    Else
+    #W_GETCNTBYCOL := 'W'
+    Endif
+    
+    If Cond(#W_GETCNTBYCOL = 'W')
+    Fetch Fields(#L00COLCD) From_File(LFIL1001) With_Key(#i_L00STYLE) Io_Error(*NEXT) Val_Error(*NEXT)
+    Fetch Fields(#L02WRNTY) From_File(LFIP102) With_Key(#L00COLCD) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #LW3MNUESD := #L02WRNTY
+    If Cond((#LW3MNUESD <> *BLANKS) And (#LW3MNUESD <> '1RW'))
+    #o_WARRANTY := #Utility_Codes.umGetCodeDescriptionByCode( 'PDFWTY' #LW3MNUESD.UpperCase )
+    If Cond(#o_WARRANTY.Trim = '-')
+    #o_WARRANTY := *NULL
+    Endif
+    Endif
+    Endif
+    Endif
+    
+    * Cleaning and Care
+    * G#131 - If Subtype passed look for the combination of Product Type and Subtype first. If that is blanks, then look for just the product type
+    If Cond(#i_F54STYP = '')
+    #o_CLEANINGANDCARE := #Utility_Codes.umGetCodeDescriptionByCode( 'CACURL' #i_L00PTYP )
+    Else
+    #o_CLEANINGANDCARE := #Utility_Codes.umGetCodeDescriptionByCode( 'CACURL' (#i_L00PTYP + '+' + #i_F54STYP) )
+    Endif
+    
+    * Fiber
+    If Cond(#i_L00FIBRLB <> *BLANKS)
+    #o_FIBER := #Utility_Codes.umGetCodeDescriptionByCode( 'PDFFBR' #i_L00FIBRLB.UpperCase )
+    If Cond(#o_FIBER.Trim = '-')
+    #o_FIBER := *NULL
+    Endif
+    Endif
+    
+    * G#95  Search Installation guide via this heirarchy
+    * - Brand+Size e.g F2K+725X48 (the new flavour of code I've suggested), if no match then check,
+    * - Product Type e.g C, if no match then check,
+    * - Brand e.g F2K, , if no match then check,
+    * - Size e.g 4X48
+    #o_INSTALLATIONGUIDE := #Utility_Codes.umGetCodeDescriptionByCode( 'ISGURL' (#i_L00DVBR + '+' + #i_L00SIZE) )
+    * #COM_OWNER.umSQLDebugMessage( (' umGetResources ') (#i_L00PTYP + '-' + #i_L00STYLE + '-' + #i_L00FIBRLB + '-' + #i_L00DVBR + '-' + #i_L00SIZE + '-' + #L00COLCD) )
+    
+    If Cond(#o_INSTALLATIONGUIDE = '')
+    * Check if installation guide can be retrieved by product type, otherwise by size
+    #o_INSTALLATIONGUIDE := #Utility_Codes.umGetCodeDescriptionByCode( 'ISGURL' #i_L00PTYP )
+    Endif
+    
+    * G#220 - If no PDF for Product Type, look via the Brand Code. If there is still no value, look via the Size
+    * Modified by Jan - 5th Nov 2022 - GitLab Issue #227 - Do not show for F2K Tiles and Trims
+    If Cond((#o_INSTALLATIONGUIDE = '') And ((#i_L00PTYP <> 'M') And (#i_L00PTYP <> #Global_Constants.upPrdTyp_Laminate) And (#i_L00PTYP <> #Global_Constants.upPrdTyp_Porcelain) And (#i_L00PTYP <> #Global_Constants.upPrdTyp_GlassMosaic) And (#i_L00PTYP <> #Global_Constants.upPrdTyp_Bullnose)))
+    #o_INSTALLATIONGUIDE := #Utility_Codes.umGetCodeDescriptionByCode( 'ISGURL' #i_L00DVBR )
+    Endif
+    
+    * G#93 - Question About Values Displayed for Tile
+    * - Collection Code Check for NVL8 and NMV8
+    If Cond(#i_L00PTYP = 'L')
+    Fetch Fields(#L00COLCD) From_File(LFIL1001) With_Key(#i_L00STYLE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    If Cond((#o_INSTALLATIONGUIDE = '') And ((#L00COLCD = 'NVM8') Or (#L00COLCD = 'NVL8')))
+    #o_INSTALLATIONGUIDE := #Utility_Codes.umGetCodeDescriptionByCode( 'ISGURL' #L00COLCD )
+    Endif
+    Endif
+    Endif
+    
+    If Cond(#o_INSTALLATIONGUIDE = '')
+    * G#88 - replace key with #i_L00SIZE
+    #o_INSTALLATIONGUIDE := #Utility_Codes.umGetCodeDescriptionByCode( 'ISGURL' #i_L00SIZE )
+    Endif
+    
+    Endif
+    
+    * G#151
+    #o_SPECSHEET := #Utility_Codes.umGetCodeDescriptionByCode( 'SPSURL' #i_L00STYLE )
+    #o_TRIMINFO := #Utility_Codes.umGetCodeDescriptionByCode( 'TRMURL' #i_L00PTYP )
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetBrandDescription
+    * Description....: Get Brand Description
+    * =======================================================
+    Mthroutine Name(umGetBrandDescription) Desc('Get Brand Description')
+    
+    Define_Map For(*INPUT) Class(#L00DVBR) Name(#iBrand)
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType)
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyleCode)
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iColorCode)
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iSizeCode)
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iBackingCode)
+    Define_Map For(*RESULT) Class(#LW3BRNDS) Name(#rBrandDescription)
+    
+    * Github #122 - 06/21/2024 - New method for retrieving brand description
+    
+    * G#151
+    * If Cond((#iBrand = 'SHS') And (#iProductType = 'L'))
+    If Cond((#iBrand = 'SHS') And ((#iProductType = #Global_Constants.upPrdTyp_Laminate) Or (#iProductType = #Global_Constants.upPrdTyp_FineHardwood) Or (#iProductType = #Global_Constants.upPrdTyp_Trim) Or (#iProductType = #Global_Constants.upPrdTyp_GlassMosaic)))
+    * For Laminates, Trims, Finehardwood under the Stanton DWF, change the brand displayed to just "Stanton"
+    #rBrandDescription := #Utility_Codes.umGetCodeDescriptionByCode( 'BRAND' 'ST' )
+    Else
+    
+    If Cond((#iBrand = 'SHS') And (#Global_Constants.umIsCoordinatingProduct( #iProductType )))
+    
+    #LW3COUNT5 := 0
+    
+    #LW3QSEL := "Select Count(*) From FIP351 As COORD"
+    #LW3QSEL += " Join LFIP100 As ATTR On ATTR.L00STYLE = COORD.F351STYL And ATTR.L00COLOR = COORD.F351CLR"
+    * If the Trim's associated product is a Laminate under the Stanton DWF brand
+    #LW3QSEL += " Where COORD.F351MSTYL = '" + #iStyleCode + "' And COORD.F351MCLR = '" + #iColorCode + "' And COORD.F351MSIZE = '" + #iSizeCode + "' And COORD.F351MBACK = '" + #iBackingCode + "'"
+    #LW3QSEL += " And ATTR.L00PTYP = '" + #Global_Constants.upPrdTyp_Laminate + "' And ATTR.L00DVBR = 'SHS'"
+    
+    Select_Sql Fields(#LW3COUNT5) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    If Cond(#LW3COUNT5 > 0)
+    * For Laminates under the Stanton DWF, change the brand displayed to just "Stanton"
+    #rBrandDescription := #Utility_Codes.umGetCodeDescriptionByCode( 'BRAND' 'ST' )
+    Else
+    #rBrandDescription := #Utility_Codes.umGetCodeDescriptionByCode( 'BRAND' #iBrand )
+    
+    Endif
+    
+    Else
+    #rBrandDescription := #Utility_Codes.umGetCodeDescriptionByCode( 'BRAND' #iBrand )
+    
+    Endif
+    
+    Endif
+    
+    Endroutine
+    
+    * ==========================================================================================
+    * Mthroutine  : umGetProdTypeDescription
+    * Description : Get Product Type description
+    * ==========================================================================================
+    Mthroutine Name(umGetProdTypeDescription)
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType)
+    Define_Map For(*INPUT) Class(#L00PCAT) Name(#iCategory)
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyle)
+    Define_Map For(*INPUT) Class(#L00BACK) Name(#iBack)
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iColor)
+    Define_Map For(*INPUT) Class(#L00SIZE) Name(#iSize)
+    
+    Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rProdTypeDesc)
+    
+    #rProdTypeDesc := *NULL
+    
+    If Cond(#COM_OWNER.umGetSubType( #iCategory #iProductType #iStyle #iBack ) = '')
+    Case Of_Field(#iProductType)
+    When Value_Is(= #Global_Constants.upPrdTyp_Porcelain)
+    * Use the value found in the HS Masterfile if Product type is porcelain
+    #LW3QSEL := "SELECT HSMF.F340CCODE "
+    #LW3QSEL += "FROM FIP340 HSMF "
+    #LW3QSEL += "WHERE HSMF.F340STYL = '" + #iStyle + "' "
+    #LW3QSEL += "  and HSMF.F340CLR = '" + #iColor + "' "
+    #LW3QSEL += "  and HSMF.F340SIZE = '" + #iSize + "' "
+    #LW3QSEL += "  and HSMF.F340BACK = '" + #iBack + "'"
+    
+    Select_Sql Fields(#F340CCODE) Io_Error(*NEXT) Using(#LW3QSEL)
+    #rProdTypeDesc := #Utility_General.umProperCase( #F340CCODE )
+    Leave
+    Endselect
+    
+    When Value_Is(= #Global_Constants.upPrdTyp_GlassMosaic)
+    * If Detail Value = RG is found, use the Detail Value. If not then use the Product Type value
+    #LW3QSEL := "SELECT XDTL.L130DVAL "
+    #LW3QSEL += "FROM LFIP130 XDTL "
+    #LW3QSEL += "WHERE XDTL.L130STYL = '" + #iStyle + "' "
+    #LW3QSEL += "  and XDTL.L130CLR = '" + #iColor + "' "
+    #LW3QSEL += "  and XDTL.L130SIZE = '" + #iSize + "' "
+    #LW3QSEL += "  and XDTL.L130BACK = '" + #iBack + "'"
+    #LW3QSEL += "  and XDTL.L130DVAL = 'RECYCLED GLASS'"
+    
+    Select_Sql Fields(#STD_TEXT) Io_Error(*NEXT) Using(#LW3QSEL)
+    #rProdTypeDesc := #Utility_General.umProperCase( #STD_TEXT )
+    Leave
+    Endselect
+    
+    * Not Recycled Glass, use the Product Type
+    If Cond(#rProdTypeDesc = '')
+    #rProdTypeDesc := #Utility_Codes.umGetCodeDescriptionByCode( 'PRDTYP' #iProductType )
+    Endif
+    
+    Otherwise
+    #rProdTypeDesc := #Utility_Codes.umGetCodeDescriptionByCode( 'PRDTYP' #iProductType )
+    Endcase
+    Else
+    #rProdTypeDesc := #Utility_Codes.umGetCodeDescriptionByCode( 'PRDTYP' (#iProductType + '+' + #COM_OWNER.umGetSubType( #iCategory #iProductType #iStyle #iBack )) )
+    Endif
+    
+    Endroutine
+    
+    * ==========================================================================================
+    * Mthroutine  : umGetSizeDescription
+    * Description : Get Size description
+    * ==========================================================================================
+    Mthroutine Name(umGetSizeDescription)
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType)
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyle)
+    Define_Map For(*INPUT) Class(#L00SIZE) Name(#iSize)
+    Define_Map For(*INPUT) Class(#L00COLOR) Name(#iColor)
+    Define_Map For(*INPUT) Class(#L00BACK) Name(#iBack)
+    
+    Define_Map For(*RESULT) Class(#F2WDSC) Name(#rSizeDescription)
+    
+    Define_Com Class(#PRIM_NMBR) Name(#w_PositionOfX)
+    Define_Com Class(#PRIM_NMBR) Name(#w_PositionOfFirstInch)
+    Define_Com Class(#PRIM_NMBR) Name(#w_PositionOfLastInch)
+    
+    * Clear workfields
+    #F2WDSC #F2PWTI #F2PLTI #rSizeDescription := *NULL
+    
+    * Use FIP020T for Trims
+    If Cond(#iProductType = #Global_Constants.upPrdTyp_Trim)
+    Fetch Fields(#F2PWTI #F2PLTI) From_File(FIP020T) With_Key(#iStyle #iColor #iSize #iBack) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #rSizeDescription := ('&1"W X &2"L').TrimSubstitute( #F2PWTI.AsDisplayString( EditCode_N ) #F2PLTI.AsDisplayString( EditCode_N ) )
+    Endif
+    Else
+    * G#4 - Use the FIP020.F2WDSC for the dimension rather than building the value from LFIP100's length and width fields
+    If Cond(#Global_Constants.umIsCoordinatingProduct( #iProductType ) Or #Global_Constants.umIsHardSurface( #iProductType ))
+    Fetch Fields(#F2WDSC) From_File(FIL020A1) With_Key(#iStyle #iSize #iColor #iBack) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #rSizeDescription := #F2WDSC
+    
+    * G#144
+    * a) Look for a 'W' in the F2WDSC field value. If found, then take no further action, return the F2WDSC dimension data unchanged.
+    If Cond(*Not #rSizeDescription.UpperCase.Contains( 'W' ))
+    * b) If a 'W' is not found in the F2WDSC string, now look for an 'X'. If not found, just return the dimension as-is unchanged (this is an unexpected format which we will not process further).
+    * If Cond(*Not #F2WDSC.UpperCase.Contains( ' X ' ))
+    If Cond(#rSizeDescription.UpperCase.Contains( 'X' ))
+    * c) If an 'X' is found, check if the character before and after the 'X' is a space. If no space(s) found insert space(s) before and after the 'X'.
+    #w_PositionOfX := #rSizeDescription.UpperCase.PositionOf( 'X' )
+    
+    If Cond(#w_PositionOfX > 1)
+    If Cond(#rSizeDescription.UpperCase.Substring( (#w_PositionOfX - 1) 1 ) <> *BLANK)
+    #rSizeDescription := #rSizeDescription.ReplaceAll( 'X' ' X ' )
+    Endif
+    
+    * d) Next, look for the first inch symbol " then immediately after that include a "W".
+    * e) Finally, look for the next/last inch symbol " then immediately after include a "L".
+    #w_PositionOfFirstInch := #rSizeDescription.UpperCase.PositionOf( '"' )
+    
+    If Cond((#w_PositionOfFirstInch > 0) And (#w_PositionOfFirstInch < #rSizeDescription.CurChars))
+    * G#151
+    If Cond(#rSizeDescription.UpperCase.Substring( (#w_PositionOfFirstInch + 1) 1 ) <> "W")
+    * #rSizeDescription := #rSizeDescription.Substring( 1 #w_PositionOfFirstInch ) + 'W' + #rSizeDescription.Substring( (#w_PositionOfFirstInch + 1) ) + 'L'
+    
+    * f) Some Fine Hardwood have RL at the end. If that is the case, no need to add an L, but remove the space between the values
+    If Cond((#rSizeDescription.UpperCase.Contains( 'RL' )))
+    #rSizeDescription := #rSizeDescription.ReplaceAll( ' RL' 'RL' )
+    #rSizeDescription := #rSizeDescription.Substring( 1 #w_PositionOfFirstInch ) + 'W' + #rSizeDescription.Substring( (#w_PositionOfFirstInch + 1) )
+    Else
+    * g) According to Christine, @MarcusLancaster not necessary to show FXD can be L. thus we remove the FXD before padding the L
+    If Cond(#rSizeDescription.UpperCase.Contains( 'FXD' ))
+    #rSizeDescription := #rSizeDescription.RemoveAll( 'FXD' )
+    Endif
+    
+    #rSizeDescription := #rSizeDescription.Substring( 1 #w_PositionOfFirstInch ) + 'W' + #rSizeDescription.Substring( (#w_PositionOfFirstInch + 1) ) + 'L'
+    Endif
+    Endif
+    Endif
+    Endif
+    Endif
+    * Endif
+    Endif
+    Endif
+    Endif
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetSubType
+    * Description....: Get Subtype value if available
+    * =======================================================
+    Mthroutine Name(umGetSubType)
+    Define_Map For(*INPUT) Class(#L00PCAT) Name(#iCategory)
+    Define_Map For(*INPUT) Class(#L00PTYP) Name(#iProductType)
+    Define_Map For(*INPUT) Class(#L00STYLE) Name(#iStyle)
+    Define_Map For(*INPUT) Class(#L00BACK) Name(#iBacking)
+    Define_Map For(*RESULT) Class(#F54STYP) Name(#rSubtype)
+    
+    #rSubtype := *NULL
+    
+    #LW3QSEL := " SELECT F54STYP FROM FIP054 "
+    #LW3QSEL += " WHERE F54PCAT = '" + #iCategory + "' and F54PTYP = '" + #iProductType + "' "
+    #LW3QSEL += " and F54STYL = '" + #iStyle + "' and F54BACK = '" + #iBacking + "'"
+    
+    Select_Sql Fields(#F54STYP) Io_Error(*NEXT) Using(#LW3QSEL)
+    #rSubtype := #F54STYP
+    Leave
+    Endselect
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetExtendedSKUDetails
+    * Description....: Get Extended SKU Details
+    * =======================================================
+    Mthroutine Name(umGetExtendedSKUDetails) Desc('Get Extended SKU Details')
+    Define_Map For(*INPUT) Class(#LW3STYLE) Name(#iStyle) Desc('Style')
+    Define_Map For(*INPUT) Class(#LW3COLOR) Name(#iColor) Desc('Color')
+    Define_Map For(*INPUT) Class(#LW3SIZE) Name(#iSize) Desc('Size')
+    Define_Map For(*INPUT) Class(#LW3BACK) Name(#iBack) Desc('Back')
+    
+    * G#157
+    Define_Map For(*INPUT) Class(#LW3PTYP) Name(#iProductType) Desc('Product Type')
+    
+    Define_Map For(*OUTPUT) Class(#PRIM_LCOL<#LW3ESKUD>) Name(#o_ExtendedDetailList) Pass(*BY_REFERENCE)
+    
+    * Clear and populate collections
+    Set_Ref Com(#o_ExtendedDetailList) To(*CREATE_AS #PRIM_LCOL<#LW3ESKUD>)
+    
+    Clr_List Named(#o_ExtendedDetailList)
+    
+    #LW3QSEL := "Select L130DTYP, LISTAGG(TRIM(L130DVAL), ', ') Within Group (Order By L130SEQ#) As DetailValue"
+    #LW3QSEL += " From LFIP130"
+    #LW3QSEL += " Where L130STYL = '" + #iStyle + "' And L130CLR = '" + #iColor + "' And L130SIZE = '" + #iSize + "' And L130BACK = '" + #iBack + "'"
+    #LW3QSEL += " Group By L130DTYP"
+    
+    Select_Sql Fields(#L130DTYP #LW3DTLVL) Io_Error(*NEXT) Using(#LW3QSEL)
+    * G#157 - Skip Overall Thickness for Fine Hardwood. This can be done in the data as well
+    Continue If((#iProductType = #Global_Constants.upPrdTyp_FineHardwood) And (#L130DTYP.UpperCase = 'OVERALL THICKNESS'))
+    
+    #LW3DTLVL := #Utility_General.umProperCase( #LW3DTLVL )
+    
+    Add_Entry To_List(#o_ExtendedDetailList)
+    Endselect
+    
+    Endroutine
     
     End_Com

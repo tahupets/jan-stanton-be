@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00RMSCEN
+  Type:               Alpha
+  Length:             250
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "IMAGE - ROOM SCENE 1"
+      Label:              "IMAGE - ROOM"
+      Heading1:           "IMAGE - ROOM SCENE 1"
+      Heading2:           " "
+      Heading3:           " "

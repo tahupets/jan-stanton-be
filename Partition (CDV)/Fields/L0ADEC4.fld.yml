@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L0ADEC4
+  Type:               Packed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DECIMAL 4"
+      Label:              "DECIMAL 4"
+      Heading1:           "DECIMAL 4"
+      Heading2:           " "
+      Heading3:           " "

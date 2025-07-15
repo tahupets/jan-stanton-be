@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2GLDP
+  Type:               Packed
+  Length:             4
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "G/L DEPT"
+      Label:              "G/L DEPT"
+      Heading1:           "G/L DEPT"
+      Heading2:           " "
+      Heading3:           " "

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               F2BSDC
+  Type:               Alpha
+  Length:             8
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SHORT BACKING DESCRIPTION"
+      Label:              "SHORT BACKING"
+      Heading1:           "SHORT BACK"
+      Heading2:           "DESCRIPTION"
+      Heading3:           " "

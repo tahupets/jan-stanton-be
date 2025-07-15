@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00DVBR
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "BRAND"
+      Label:              "BRAND"
+      Heading1:           "BRAND"
+      Heading2:           " "
+      Heading3:           " "

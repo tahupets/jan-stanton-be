@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               P010NUFLG
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "New/Upd Prc"
+      Label:              "New/Upd Prc"
+      Heading1:           "New/Upd Prc"
+      Heading2:           " "
+      Heading3:           " "

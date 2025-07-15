@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00SKUSEQ
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SKU ORDER SEQ#"
+      Label:              "SKU ORDER SEQ#"
+      Heading1:           "SKU ORDER SEQ#"
+      Heading2:           " "
+      Heading3:           " "

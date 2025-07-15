@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00STYLE
+  Type:               Alpha
+  Length:             5
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "STYLE CODE"
+      Label:              "STYLE CODE"
+      Heading1:           "STYLE CODE"
+      Heading2:           " "
+      Heading3:           " "

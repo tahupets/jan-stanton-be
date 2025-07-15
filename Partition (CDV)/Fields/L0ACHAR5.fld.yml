@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L0ACHAR5
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CHARACTER 5"
+      Label:              "CHARACTER 5"
+      Heading1:           "CHARACTER 5"
+      Heading2:           " "
+      Heading3:           " "

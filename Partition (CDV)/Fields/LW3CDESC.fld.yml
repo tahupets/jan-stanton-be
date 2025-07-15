@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               LW3CDESC
+  Type:               Alpha
+  Length:             20
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Color Description"
+      Label:              "Color Descripti"
+      Heading1:           "Color"
+      Heading2:           "Description"
+      Heading3:           " "

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00FLATRN
+  Type:               Packed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "IMAGE - FLAT RANK"
+      Label:              "IMAGE - FLAT"
+      Heading1:           "IMAGE - FLAT RANK"
+      Heading2:           " "
+      Heading3:           " "

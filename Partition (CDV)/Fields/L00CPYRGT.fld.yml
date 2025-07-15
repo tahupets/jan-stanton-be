@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L00CPYRGT
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "COPYRIGHT"
+      Label:              "COPYRIGHT"
+      Heading1:           "COPYRIGHT"
+      Heading2:           " "
+      Heading3:           " "

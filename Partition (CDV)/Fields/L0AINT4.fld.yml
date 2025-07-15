@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               L0AINT4
+  Type:               Packed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "INTEGER 4"
+      Label:              "INTEGER 4"
+      Heading1:           "INTEGER 4"
+      Heading2:           " "
+      Heading3:           " "

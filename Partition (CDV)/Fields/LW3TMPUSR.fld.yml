@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3TMPUSR
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Temporary User Flag"
+      Label:              "Temporary User"
+      Heading1:           "Temporary"
+      Heading2:           "User"
+      Heading3:           "Flag"

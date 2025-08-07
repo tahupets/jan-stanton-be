@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               LW3ORDMOD
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "'N'"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Place/Modify Orders?"
+      Label:              "Web User Place/"
+      Heading1:           "Web"
+      Heading2:           "User"
+      Heading3:           "Place/Modify"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Marginleft(165) Usepicklist(False) Width(194) Componentversion(1)
+    
+    End_Com
+    
+    End_Com

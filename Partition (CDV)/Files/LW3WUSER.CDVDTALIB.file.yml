@@ -1,0 +1,471 @@
+﻿File:
+  Name:                           LW3WUSER
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3WUSER
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(10000     2000      3         ) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Web User E-Account"
+
+  Real Fields:
+  - LW3WEBUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CUSVAL:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - LW3CEMAIL:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3USRQTY:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
+  - LW3USRAMT:
+      Type:               Signed
+      Length:             15
+      Decimals:           2
+
+  - LW3EASTAT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3CUSIND:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3VISITD:
+      Type:               Alphanumeric
+      Length:             8
+      Decimals:           0
+
+  - LW3VISITT:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+
+  - LW3WEBSHP:
+      Type:               Signed
+      Length:             3
+      Decimals:           0
+
+  - LW3USRTYP:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3SUPUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3WEBC01:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3IS001:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3WEBB2C:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CHPASF:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3CRDVIS:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3ORDMOD:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3TRKSHP:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3TMPUSR:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3REFRL:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - LW3GSTEML:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3INHA:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3ADMUSR:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3ROLEA:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3ROLES:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3PWDDAT:
+      Type:               Decimal
+      Length:             26
+      Decimals:           0
+
+  - LW3PWDTIM:
+      Type:               Decimal
+      Length:             15
+      Decimals:           0
+
+  - LW3PWDTKN:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  - LW3ALLDLR:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3ARSVF:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  Primary Keys:
+  - LW3WEBUSR
+
+  Virtual Fields:
+  - LW3VISITV:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+      Virtual Field Type: Date Conversion
+      Derive On Input:    Yes
+      Derive On Output:   No
+      Source Field:       LW3VISITD
+      Source Date Format: YYYYMMDD
+      Target Date Format: SYSFMT
+
+  Logical Views:
+  - LW3USRL1:
+      Identifier:         LW3USRL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3USRL1
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "LW3WUSER by user (B2B only)"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      Select/Omit Criteria:
+      - Action:             Select
+        Type:               Compare
+        Field Name:         LW3CUSIND
+        Operator:           Equal
+        Value:              "'B'"
+
+  - LW3USRL2:
+      Identifier:         LW3USRL2
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3USRL2
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Amended by ADAPTOR"
+
+      Keys:
+      - LW3IS001:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3USRL3:
+      Identifier:         LW3USRL3
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3USRL3
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "LW3WUSER by Sub/Super user (B2B only)"
+
+      Keys:
+      - LW3SUPUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      Select/Omit Criteria:
+      - Action:             Select
+        Type:               Compare
+        Field Name:         LW3CUSIND
+        Operator:           Equal
+        Value:              "'B'"
+
+  - LW3USRL4:
+      Identifier:         LW3USRL4
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3USRL4
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "LW3WEBB2C (B2C only)"
+
+      Keys:
+      - LW3WEBB2C:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3USRL5:
+      Identifier:         LW3USRL5
+      Unique Key:         Yes
+      Access Path:        Immediate
+      Record Format:      LW3USRL5
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Store Front/Email"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CEMAIL:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3USRL6:
+      Identifier:         LW3USRL6
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3USRL6
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "LW3WUSER By Email"
+
+      Keys:
+      - LW3CEMAIL:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  File Level Triggers:
+  - LW3WEBUSR:
+    - Multilingual Trigger:
+        Function:           LW3MT26
+        Trigger Points:
+        - Before Insert
+        - Before Update
+
+  - LW3CEMAIL:
+    - Convert emails to lowercase:
+        Function:           WUSREML
+        Trigger Points:
+        - Before Read
+        - Before Insert
+        - Before Update
+        - After Read
+
+  Access Routes:
+  - LW3WUSER01:
+      Description:        LW3USRA1
+      File:               LW3USRA1
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3WEBUSR
+
+  - LW3WUSER02:
+      Description:        LW3WCUS1
+      File:               LW3WCUS1
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3CUSIND
+      - LW3WEBUSR
+
+  - LW3WUSER03:
+      Description:        LW3USRPRF
+      File:               LW3USRPRF
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3SFID
+      - LW3WEBUSR
+
+  - LW3WUSER04:
+      Description:        LW3WSHIP
+      File:               LW3WSHIP
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3WEBB2C
+
+  - LW3WUSER05:
+      Description:        LW3WUSERE
+      File:               LW3WUSERE
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3WEBUSR
+
+  - LW3WUSER06:
+      Description:        LW3SES01
+      File:               LW3SES01
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3WEBUSR
+
+  - LW3WUSER07:
+      Description:        LW3SECUR
+      File:               LW3SECUR
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3WEBUSR
+
+  - LW3WUSER08:
+      Description:        LW3SHOPH
+      File:               LW3SHOPH
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3WEBUSR

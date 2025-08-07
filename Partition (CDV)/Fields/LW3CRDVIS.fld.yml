@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3CRDVIS
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "'N'"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Credit Visible?"
+      Label:              "Web User Credit"
+      Heading1:           "Web"
+      Heading2:           "User"
+      Heading3:           "Credit"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(178) Componentversion(1)
+    
+    End_Com
+    
+    End_Com

@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3CHNAME
+  Type:               Alpha
+  Length:             40
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Customer Contact Name"
+      Label:              "Contact Name"
+      Heading1:           "Contact"
+      Heading2:           "Name"
+      Heading3:           " "

@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3SUPUSR
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Super User Id"
+      Label:              "Super User Id"
+      Heading1:           "Super"
+      Heading2:           "User"
+      Heading3:           "Id"

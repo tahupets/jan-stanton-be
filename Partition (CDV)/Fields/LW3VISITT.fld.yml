@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3VISITT
+  Type:               Signed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          "'0 :  :  '"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Last Visit Time time (numeric)"
+      Label:              "Visit Time"
+      Heading1:           "Time"
+      Heading2:           " "
+      Heading3:           " "

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3INHA
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Inherit Super User Cust Asc (Y or ' ')"
+      Label:              "Inherit Super U"
+      Heading1:           "Inherit"
+      Heading2:           "Super"
+      Heading3:           "User"

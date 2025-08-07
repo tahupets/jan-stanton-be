@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3CHPASF
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Change Password Flag"
+      Label:              "Change Password"
+      Heading1:           "Change"
+      Heading2:           "Password"
+      Heading3:           "Flag"

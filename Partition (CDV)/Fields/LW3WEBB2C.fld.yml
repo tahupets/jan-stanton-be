@@ -1,0 +1,27 @@
+﻿Field:
+  Name:               LW3WEBB2C
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Reference Field:    CUSID
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "B2C Customer Number"
+      Label:              "B2C Customer No"
+      Heading1:           "B2C"
+      Heading2:           "Customer"
+      Heading3:           "Number"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(187) Usepicklist(False) Width(290)
+    
+    End_Com
+    
+    End_Com

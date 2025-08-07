@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               LW3ADMUSR
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Admin User flag"
+      Label:              "Admin User flag"
+      Heading1:           "Adm"
+      Heading2:           "User"
+      Heading3:           "flag"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(178)
+    
+    End_Com
+    
+    End_Com

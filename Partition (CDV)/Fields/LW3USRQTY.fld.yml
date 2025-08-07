@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3USRQTY
+  Type:               Signed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          3
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Web User Cart Total Qty"
+      Label:              "Web User Cart"
+      Heading1:           "Web"
+      Heading2:           "User"
+      Heading3:           "Cart"

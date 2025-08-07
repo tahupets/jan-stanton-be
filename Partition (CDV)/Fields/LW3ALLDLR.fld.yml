@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3ALLDLR
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "All Dealers Flag"
+      Label:              "All Dealers Fla"
+      Heading1:           "All"
+      Heading2:           "Dealers"
+      Heading3:           "Flag"

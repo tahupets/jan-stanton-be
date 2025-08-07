@@ -1,0 +1,33 @@
+﻿Field:
+  Name:               LW3PWDDAT
+  Type:               Packed
+  Length:             26
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Password reset date"
+      Label:              "Password reset"
+      Heading1:           "Password"
+      Heading2:           "reset"
+      Heading3:           "date"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVDT) Name(#VisualDateTime) Defaultvisual(True) Height(19) Width(370)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'std_datetimepicker.std_datetimepicker') Name(#WebletTemplate) Defaultweblet(True)
+    
+    End_Com
+    
+    End_Com

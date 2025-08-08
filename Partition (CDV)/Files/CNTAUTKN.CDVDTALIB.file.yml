@@ -81,3 +81,28 @@
       - LW3CDSTMP:
           Key Order:          Ascending
           Numeric Ordering:   Unsigned
+
+  - CNTAUTKNL2:
+      Identifier:         CNTAUTKNL2
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CNTAUTKNL2
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "New Index"
+
+      Keys:
+      - LW3GUID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3USEDTK:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CDSTMP:
+          Key Order:          Descending
+          Numeric Ordering:   Unsigned

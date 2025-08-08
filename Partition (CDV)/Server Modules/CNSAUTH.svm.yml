@@ -1,0 +1,746 @@
+﻿ServerModule:
+  Name:               CNSAUTH
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Storefront Authorization"
+
+  Source: |
+    Begin_Com Role(*EXTENDS #PRIM_SRVM)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    Define_Com Class(#prim_srvm.HttpJsonWebToken) Name(#uJWTAccess)
+    Define_Com Class(#prim_srvm.HttpJsonWebToken) Name(#uJWTRefresh)
+    Define_Com Class(#prim_srvm.HttpJsonWebTokenSignatureHSnnn) Name(#HSnnn) Algorithm(HS384)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERMLUTL) Name(#Utility_Multilinguals) Desc('Multilingual Utility') Help('Multilinguals Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    Define_Com Class(#CNRAPILG) Name(#Processor_ApiLog) Desc('API Log Processor') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Srvroutine Definitions
+    * =======================================================
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSAUTH/refresh
+    * Operation: PostRefresh
+    *
+    * Request
+    *    Parameter: None
+    *    Schema   : requestJson
+    
+    * Response
+    *    Schema   : (OK) refreshResponseObject
+    *
+    * Action  : Validate the Refresh Token and provide a new Access Token
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usRefresh) Response(*HTTP #uContext) Desc('Refresh the Access Token') Help('Validate the expired Access Token and Refresh Token to create a new one')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetRefresh) Name(#Operation)
+    Define_Com Class(#COM_HOME.refreshResponseObject) Name(#Object_RefreshResponse)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetRefresh.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    Define_Com Class(#LW3SVVALP) Name(#L_JWT_SecretKey)
+    Define_Com Class(#LW3SVVNUM) Name(#L_JWT_TokenTimeSpan)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_SecureCookieName)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_RefreshTokenRenewalFlag)
+    Define_Com Class(#PRIM_NMBR) Name(#L_RefreshTokenRenewalTimer)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    #LW3RETCOD := 'OK'
+    
+    * Retrieve Refresh Token from Header Cookie
+    If Cond(#uContext.Request.Headers.Item<'Cookie'> *IsNot *NULL)
+    
+    #LW3RFSTKN := #Processor_Session.umGetRefreshTokenFromCookie( #uContext.Request.Headers.Item<'Cookie'>.Value )
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_REFRESH_KEY') Ilanguage('') Oalphavalue(#L_JWT_SecretKey)
+    
+    * Validate the Refresh Token
+    If Cond(#HSnnn.TryVerifyToken( #LW3RFSTKN #uJWTRefresh #L_JWT_SecretKey ))
+    
+    * Validate that the Refresh Token exists in CNTAUTKN
+    Fetch Fields(#LW3RFSTKN #LW3GUID #LW3CSRFTK #LW3USEDTK) From_File(CNTAUTKNL1) With_Key(#LW3RFSTKN) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    * Ensure that the refresh token has not been used before
+    If Cond(#LW3USEDTK = *BLANKS)
+    
+    * Set the flag to say that the refresh token has been used
+    #LW3USEDTK := 'Y'
+    Update Fields(#LW3USEDTK) In_File(CNTAUTKNL1) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Oreturncode(#LW3RETCOD)
+    
+    Else
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_REFRESH_RENEWAL') Ilanguage('') Oalphavalue(#L_RefreshTokenRenewalFlag) Onumericvalue(#L_RefreshTokenRenewalTimer)
+    
+    If Cond(#L_RefreshTokenRenewalFlag = 'Y')
+    
+    * If this token has been set to used only within the past 60 seconds, re-fetch the generated access / refresh token and return it
+    If Cond(#STD_DTIMX.Now.Time.AsDisplayString( ISO ).asTime.Difference( #LW3UDSTMP.Time ) < #L_RefreshTokenRenewalTimer)
+    
+    #LW3USEDTK := ''
+    Fetch Fields(#LW3GUID) From_File(CNTAUTKNL2) With_Key(#LW3GUID #LW3USEDTK) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #LW3USEDTK := 'Y'
+    Update Fields(#LW3USEDTK) In_File(CNTAUTKNL2) Io_Error(*NEXT) Val_Error(*NEXT)
+    #LW3RETCOD := 'OK'
+    Endif
+    
+    Endif
+    
+    Endif
+    
+    Endif
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    * Create a new Access, Refresh, and CSRF Token
+    #Processor_Session.umSetAuthTokenParms Ijwtaccess(#uJWTAccess) Ijwtrefresh(#uJWTRefresh) Iguid(#LW3GUID) Iusername(#Global_DataModel.upUserId) Iuseremail(#Global_DataModel.upUserEmail) Iuserfirstname(#Global_DataModel.upUserFirstName) Iuserlastname(#Global_DataModel.upUserLastName) Oaccesstoken(#LW3ACSTKN) Orefreshtoken(#LW3RFSTKN) Ocsrftoken(#LW3CSRFTK)
+    
+    If Cond(#LW3ACSTKN <> *BLANKS)
+    
+    * Set the Access and Refresh Tokens as a Secure Cookies
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_ACSTKN_CK_NAME') Ilanguage('') Oalphavalue(#L_SecureCookieName)
+    
+    #uContext.Response.AddCookie Name(#L_SecureCookieName) Value(#LW3ACSTKN) Secure(False) Httponly(True) Path('/')
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_RFSTKN_CK_NAME') Ilanguage('') Oalphavalue(#L_SecureCookieName)
+    
+    #uContext.Response.AddCookie Name(#L_SecureCookieName) Value(#LW3RFSTKN) Secure(False) Httponly(True) Path('/')
+    
+    * Transfer field values to mapped fields in the schema "refreshResponseObject"
+    Set Com(#Object_RefreshResponse) Com_Fields(*ALL)
+    
+    * Set the return JSON Response for "postRefresh"
+    #Operation.Response.SetContentJson Content(#Object_RefreshResponse)
+    
+    Else
+    #LW3RETCOD := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('New tokens could not be created')
+    
+    Endif
+    
+    Else
+    #LW3RETCOD := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session Id is not valid.')
+    
+    Endif
+    
+    Else
+    #LW3RETCOD := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Refresh Token is not in CNTAUTKN.')
+    
+    Endif
+    
+    Else
+    #LW3RETCOD := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed.')
+    
+    Endif
+    
+    Else
+    #LW3RETCOD := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Http header cookie value could not be read.')
+    
+    Endif
+    
+    Endif
+    
+    If Cond(#LW3RETCOD <> 'OK')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetRefresh.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    Srvroutine Name(usRefresh2) Response(*HTTP #uContext) Desc('Refresh the Access Token') Help('Validate the expired Access Token and Refresh Token to create a new one')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.PostRefresh) Name(#Operation)
+    Define_Com Class(#COM_HOME.refreshResponseObject) Name(#Object_RefreshResponse)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.PostRefresh.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    Define_Com Class(#LW3SVVALP) Name(#L_JWT_SecretKey)
+    Define_Com Class(#LW3SVVNUM) Name(#L_JWT_TokenTimeSpan)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_SecureCookieName)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    * #Operation.Request.
+    
+    * Default the HTTP Response Status to 403 (Forbidden)
+    #uContext.Response.HttpStatus := 403
+    
+    * * !NC!
+    * #Utility_General.umDebugLog Iwamname(#COM_OWNER.Name) Imessagetext('inside usRefresh')
+    
+    * * !NC!
+    * #Utility_General.umDebugLog Iwamname(#COM_OWNER.Name) Imessagetext('uContext - ' + #uContext.Request.Method)
+    
+    * * !NC!
+    * For Each(#Header) In(#uContext.Request.Headers)
+    * #Utility_General.umDebugLog Iwamname(#COM_OWNER.Name) Imessagetext(#Header.Name + ' - ' + #Header.Value)
+    * Endfor
+    
+    * * !NC!
+    * #Utility_General.umDebugLog Iwamname(#COM_OWNER.Name) Imessagetext('Operation - ' + #Operation.Name)
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    #LW3RETCOD := 'OK'
+    
+    * * !NC!
+    * #Utility_General.umDebugLog Iwamname(#COM_OWNER.Name) Imessagetext('TryBind Success')
+    
+    * Retrieve Refresh Token from Header Cookie
+    If Cond(#uContext.Request.Headers.Item<'Cookie'> *IsNot *NULL)
+    
+    #LW3RFSTKN := #Processor_Session.umGetRefreshTokenFromCookie( #uContext.Request.Headers.Item<'Cookie'>.Value )
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_REFRESH_KEY') Ilanguage('') Oalphavalue(#L_JWT_SecretKey)
+    
+    * Validate the Refresh Token
+    If Cond(#HSnnn.TryVerifyToken( #LW3RFSTKN #uJWTRefresh #L_JWT_SecretKey ))
+    
+    * Validate that the Refresh Token exists in CNTAUTKN
+    Fetch Fields(#LW3RFSTKN #LW3GUID #LW3CSRFTK #LW3USEDTK) From_File(CNTAUTKNL1) With_Key(#LW3RFSTKN) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    * Ensure that the refresh token has not been used before
+    If Cond(#LW3USEDTK = *BLANKS)
+    
+    * Set the flag to say that the refresh token has been used
+    #LW3USEDTK := 'Y'
+    Update Fields(#LW3USEDTK) In_File(CNTAUTKNL1) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    * Create a new Access, Refresh, and CSRF Token
+    #Processor_Session.umSetAuthTokenParms Ijwtaccess(#uJWTAccess) Ijwtrefresh(#uJWTRefresh) Iguid(#LW3GUID) Iusername(#Global_DataModel.upUserId) Iuseremail(#Global_DataModel.upUserEmail) Iuserfirstname(#Global_DataModel.upUserFirstName) Iuserlastname(#Global_DataModel.upUserLastName) Oaccesstoken(#LW3ACSTKN) Orefreshtoken(#LW3RFSTKN) Ocsrftoken(#LW3CSRFTK)
+    
+    If Cond(#LW3ACSTKN <> *BLANKS)
+    
+    * Set the Access and Refresh Tokens as a Secure Cookies
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_ACSTKN_CK_NAME') Ilanguage('') Oalphavalue(#L_SecureCookieName)
+    
+    #uContext.Response.AddCookie Name(#L_SecureCookieName) Value(#LW3ACSTKN) Secure(False) Httponly(True) Path('/')
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_RFSTKN_CK_NAME') Ilanguage('') Oalphavalue(#L_SecureCookieName)
+    
+    #uContext.Response.AddCookie Name(#L_SecureCookieName) Value(#LW3RFSTKN) Secure(False) Httponly(True) Path('/')
+    
+    * Transfer field values to mapped fields in the schema "refreshResponseObject"
+    Set Com(#Object_RefreshResponse) Com_Fields(*ALL)
+    
+    * Set the return JSON Response for "postRefresh"
+    #Operation.Response.SetContentJson Content(#Object_RefreshResponse)
+    
+    Else
+    #LW3RETCOD := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('New tokens could not be created')
+    
+    Endif
+    
+    Else
+    #LW3RETCOD := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session Id is not valid.')
+    
+    Endif
+    
+    Else
+    #LW3RETCOD := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Refresh Token already used.')
+    
+    Endif
+    
+    Else
+    * * !NC!
+    * #Utility_General.umDebugLog Iwamname(#COM_OWNER.Name) Imessagetext('Fetch in CNTAUTKNL1 failed')
+    #LW3RETCOD := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Refresh Token is not in CNTAUTKN.')
+    
+    Endif
+    
+    Else
+    * * !NC!
+    * #Utility_General.umDebugLog Iwamname(#COM_OWNER.Name) Imessagetext('TryVerifyToken failed')
+    #LW3RETCOD := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed.')
+    
+    Endif
+    
+    Else
+    * * !NC!
+    * #Utility_General.umDebugLog Iwamname(#COM_OWNER.Name) Imessagetext('Cookie is Null')
+    #LW3RETCOD := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Http header cookie value could not be read.')
+    
+    Endif
+    
+    Else
+    * * !NC!
+    * #Utility_General.umDebugLog Iwamname(#COM_OWNER.Name) Imessagetext('TryBind Context failed - ' + #uContext.Request.Method)
+    
+    Endif
+    
+    If Cond(#LW3RETCOD <> 'OK')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.PostRefresh.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSAUTH/encrypt
+    * Operation: PostEncrypt
+    *
+    * Request
+    *    Parameter: None
+    *    Schema   : requestJson
+    
+    * Response
+    *    Schema   : (OK) refreshResponseObject
+    *
+    * Action  : Encrypt String
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetEncrypt) Response(*HTTP #uContext) Desc('Refresh the Access Token') Help('Validate the expired Access Token and Refresh Token to create a new one')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetEncrypt) Name(#Operation)
+    Define_Com Class(#Com_Home.encryptResponseObject) Name(#Object_EncryptResponse)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_String)
+    
+    * Default the HTTP Response Status to 400
+    #uContext.Response.HttpStatus := 400
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Operation.Request.string <> *BLANKS)
+    
+    #L_String := #Operation.Request.string
+    
+    Use Builtin(ENCRYPT) With_Args(#L_String 256 'CE@NextApp!12345' 'YES') To_Get(#LW3QSEL)
+    
+    #Object_EncryptResponse.encrypt := #LW3QSEL
+    
+    #Operation.Response.SetContentJson Content(#Object_EncryptResponse)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSetHttpResponseMessages
+    * Description....: Set Http Response Messages
+    * =======================================================
+    Mthroutine Name(umSetHttpResponseMessages) Desc('Set Http Response Messages') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3VARNAM) Name(#iVariableName)
+    Define_Map For(*INPUT) Class(#LW3MSGTYP) Name(#iMessageType)
+    Define_Map For(*INPUT) Class(#LW3FLDNAM) Name(#iFieldName) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iMessageDetails) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iSubstitutionVariable1) Mandatory('')
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Add_Entry To_List(#iArray_HttpResponse)
+    #iArray_HttpResponse.CurrentItem.code := #iVariableName
+    #iArray_HttpResponse.CurrentItem.type := #iMessageType
+    #iArray_HttpResponse.CurrentItem.message := #Utility_Multilinguals.umGetMultilingualText( #iVariableName #Global_DataModel.upCurrentLanguage )
+    
+    If Cond(#iFieldName <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.field := #iFieldName
+    Endif
+    If Cond(#iMessageDetails <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.detail := #iMessageDetails
+    Endif
+    If Cond(#iSubstitutionVariable1 <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.substitutions.Add Value(#iSubstitutionVariable1)
+    Endif
+    
+    Endroutine
+    
+    End_Com
+
+  API Definition:
+    Language Handling:       NoAction
+    Partition Handling:      PathVariable
+    Publish as Swagger V2:   Yes
+    Publish as OpenAPI V3:   Yes
+    ServicePath:             /CNSAUTH
+
+    Paths:
+    - /refresh:
+        Description:        Refresh Access Token
+
+        Operations:
+        - GetRefresh:
+            Verb:               Get
+            Server Routine:     usRefresh
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Title:              Refresh Response Object
+                      Type:               Reference
+                      Reference Name:     refreshResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+        - PostRefresh:
+            Verb:               Post
+            Server Routine:     usRefresh2
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+              Media Types:
+              - application/x-www-form-urlencoded:
+                  Media Type Id:      blankString
+
+                  Schema Object:
+                    Description:        blankString
+                    Type:               Object
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                    Properties:
+                    - blank:
+                        Description:        blank string
+                        Type:               String
+                        Format:             Unspecified
+                        Required:           Yes
+                        Nullable:           No
+                        ReadOnly:           No
+                        WriteOnly:          No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     refreshResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    - /encrypt:
+
+        Operations:
+        - GetEncrypt:
+            Verb:               Get
+            Server Routine:     usGetEncrypt
+            Deprecated:         No
+
+            Parameters:
+            - string:
+                Location:           Query
+                Style:              Default
+                Required:           Yes
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        string
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - OK:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     encryptResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+    Components:
+      Schema:
+        Types:
+        - refreshResponseObject:
+            Description:        Refresh Response Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3ACSTKN:
+                Description:        Access Token
+                Type:               Field
+                Field Name:         LW3ACSTKN
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CSRFTK:
+                Description:        LW3CSRFTK
+                Type:               Field
+                Field Name:         LW3CSRFTK
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3RFSTKN:
+                Description:        LW3RFSTKN
+                Type:               Field
+                Field Name:         LW3RFSTKN
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - encryptResponseObject:
+            Description:        Encrypt Response Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - encrypt:
+                Description:        Encrypted String
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - httpResponseArray:
+            Description:        Http Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        Http Response Object
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - code:
+                  Description:        Multilingual Variable Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - message:
+                  Description:        Multilingual Variable Unicode Text
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - type:
+                  Description:        Message Type
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - field:
+                  Description:        Field Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - detail:
+                  Description:        Message Detail
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - substitutions:
+                  Description:        Substitution Variables
+                  Type:               Array
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+                  Items:
+                  - Description:        values
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No

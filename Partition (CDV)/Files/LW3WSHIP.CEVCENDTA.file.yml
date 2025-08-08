@@ -1,11 +1,11 @@
 ﻿File:
-  Name:                           LW3WCUST
+  Name:                           LW3WSHIP
   File Type:                      LANSA File
-  Library:                        CDVDTALIB
-  Record Format Name:             LW3WCUST
+  Library:                        CEVCENDTA
+  Record Format Name:             LW3WSHIP
   Module Library:                 Same Library As File
   File Uses SQL on IBM i:         No
-  Enabled For RDMLX:              Yes
+  Enabled For RDMLX:              No
   Enabled For Long Names:         No
   Share Data Path:                No
   Secure From File Overrides:     Yes
@@ -15,9 +15,9 @@
   Create I/O Module:              Yes
   Create Batch Control:           No
   IBM i High Speed Table:         No
-  Auto RRN Generation:            No
+  Auto RRN Generation:            Yes
   Create RRNO Column:             Yes
-  Auto RRNO Is Fixed:             No
+  Auto RRNO Is Fixed:             Yes
   Convert Special Characters:     Yes
   Enable Commitment Control:      No
   Auto Commit:                    No
@@ -27,102 +27,87 @@
 
   Multilingual Details:
   - ENG:
-      Description:        "Web Customer Master"
+      Description:        "Web Ship-To Address"
 
   Real Fields:
-  - LW3CUSIND:
-      Type:               Alphanumeric
-      Length:             1
-      Decimals:           0
-
   - LW3WEBB2C:
       Type:               Alphanumeric
       Length:             10
       Decimals:           0
 
-  - LW3WEBUSR:
-      Type:               Alphanumeric
-      Length:             10
+  - LW3WEBSHP:
+      Type:               Signed
+      Length:             3
       Decimals:           0
 
-  - LW3CHNAME:
+  - LW3CSNAME:
       Type:               Alphanumeric
       Length:             40
       Decimals:           0
 
-  - LW3CHLNME:
+  - LW3CSLNME:
       Type:               Alphanumeric
       Length:             25
       Decimals:           0
 
-  - LW3CHFNME:
+  - LW3CSFNME:
       Type:               Alphanumeric
       Length:             15
       Decimals:           0
 
-  - LW3CHTITL:
+  - LW3CSTITL:
       Type:               Alphanumeric
       Length:             6
       Decimals:           0
 
-  - LW3CHCPNY:
+  - LW3CSCPNY:
       Type:               Alphanumeric
       Length:             40
       Decimals:           0
 
-  - LW3HADDR1:
+  - LW3SADDR1:
       Type:               Alphanumeric
       Length:             40
       Decimals:           0
 
-  - LW3HADDR2:
+  - LW3SADDR2:
       Type:               Alphanumeric
       Length:             40
       Decimals:           0
 
-  - LW3CHCITY:
+  - LW3CSCITY:
       Type:               Alphanumeric
       Length:             30
       Decimals:           0
 
-  - LW3HSTATE:
+  - LW3SSTATE:
       Type:               Alphanumeric
       Length:             3
       Decimals:           0
 
-  - LW3HPSTAL:
+  - LW3SPSTAL:
       Type:               Alphanumeric
       Length:             10
       Decimals:           0
 
-  - LW3HCNTRY:
+  - LW3SCNTRY:
       Type:               Alphanumeric
       Length:             3
       Decimals:           0
 
-  - LW3CHPHNE:
+  - LW3CSPHNE:
       Type:               Alphanumeric
       Length:             40
       Decimals:           0
 
-  - LW3CHPEXT:
+  - LW3CSPEXT:
       Type:               Alphanumeric
-      Length:             4
+      Length:             5
       Decimals:           0
 
-  - LW3CWPHNE:
+  - LW3SHPTYP:
       Type:               Alphanumeric
-      Length:             40
-      Decimals:           0
-
-  - LW3ECCFAX:
-      Type:               Alphanumeric
-      Length:             40
-      Decimals:           0
-
-  - LW3WCSTAT:
-      Type:               Alphanumeric
-      Length:             1
+      Length:             2
       Decimals:           0
 
   - LW3WEBC01:
@@ -130,52 +115,19 @@
       Length:             10
       Decimals:           0
 
-  - LW3SFID:
-      Type:               Decimal
-      Length:             2
-      Decimals:           0
-
-  - LW3CDSTMP:
-      Type:               Date Time
-      Length:             26
-      Decimals:           0
-
-  - LW3UDSTMP:
-      Type:               Date Time
-      Length:             26
+  - LW3POBOX:
+      Type:               Alphanumeric
+      Length:             1
       Decimals:           0
 
   Primary Keys:
-  - LW3CUSIND
   - LW3WEBB2C
-  - LW3WEBUSR
-
-  Logical Views:
-  - LW3WCUS1:
-      Identifier:         LW3WCUS1
-      Unique Key:         No
-      Access Path:        Immediate
-      Record Format:      LW3WCUS1
-      Dynamic Select:     No
-      Parameters:         " "
-
-      Multilingual Details:
-      - ENG:
-          Description:        "User typ / User"
-
-      Keys:
-      - LW3CUSIND:
-          Key Order:          Ascending
-          Numeric Ordering:   Unsigned
-
-      - LW3WEBUSR:
-          Key Order:          Ascending
-          Numeric Ordering:   Unsigned
+  - LW3WEBSHP
 
   File Level Triggers:
-  - LW3CHLNME:
-    - Trigger for LW3WCUST:
-        Function:           LW3MT23
+  - LW3CSLNME:
+    - Trigger for LW3WSHIP:
+        Function:           LW3MT25
         Trigger Points:
         - Before Insert
         - Before Update

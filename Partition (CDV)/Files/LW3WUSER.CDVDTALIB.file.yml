@@ -5,7 +5,7 @@
   Record Format Name:             LW3WUSER
   Module Library:                 Same Library As File
   File Uses SQL on IBM i:         No
-  Enabled For RDMLX:              No
+  Enabled For RDMLX:              Yes
   Enabled For Long Names:         No
   Share Data Path:                No
   Secure From File Overrides:     Yes
@@ -37,12 +37,17 @@
 
   - LW3CUSVAL:
       Type:               Alphanumeric
-      Length:             30
+      Length:             50
       Decimals:           0
 
   - LW3CEMAIL:
       Type:               Alphanumeric
       Length:             50
+      Decimals:           0
+
+  - LW3PWDSLT:
+      Type:               Alphanumeric
+      Length:             32
       Decimals:           0
 
   - LW3USRQTY:
@@ -63,16 +68,6 @@
   - LW3CUSIND:
       Type:               Alphanumeric
       Length:             1
-      Decimals:           0
-
-  - LW3VISITD:
-      Type:               Alphanumeric
-      Length:             8
-      Decimals:           0
-
-  - LW3VISITT:
-      Type:               Signed
-      Length:             6
       Decimals:           0
 
   - LW3WEBSHP:
@@ -165,16 +160,6 @@
       Length:             3
       Decimals:           0
 
-  - LW3PWDDAT:
-      Type:               Decimal
-      Length:             26
-      Decimals:           0
-
-  - LW3PWDTIM:
-      Type:               Decimal
-      Length:             15
-      Decimals:           0
-
   - LW3PWDTKN:
       Type:               Alphanumeric
       Length:             256
@@ -190,20 +175,28 @@
       Length:             1
       Decimals:           0
 
+  - LW3RPSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - LW3LVSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - LW3CDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - LW3UDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
   Primary Keys:
   - LW3WEBUSR
-
-  Virtual Fields:
-  - LW3VISITV:
-      Type:               Signed
-      Length:             6
-      Decimals:           0
-      Virtual Field Type: Date Conversion
-      Derive On Input:    Yes
-      Derive On Output:   No
-      Source Field:       LW3VISITD
-      Source Date Format: YYYYMMDD
-      Target Date Format: SYSFMT
 
   Logical Views:
   - LW3USRL1:
@@ -413,51 +406,6 @@
   - LW3WUSER05:
       Description:        LW3WUSERE
       File:               LW3WUSERE
-      Library:            "*FIRST"
-      Association Type:   Derive
-      Association Rule:   Derive
-      Documentation Only: No
-      Maximum Records:    9999
-      Default Action:     Ignore
-      Keep Last:          0
-      Derivation:         After Virtual Fields
-
-      Keys:
-      - LW3WEBUSR
-
-  - LW3WUSER06:
-      Description:        LW3SES01
-      File:               LW3SES01
-      Library:            "*FIRST"
-      Association Type:   Derive
-      Association Rule:   Derive
-      Documentation Only: No
-      Maximum Records:    9999
-      Default Action:     Ignore
-      Keep Last:          0
-      Derivation:         After Virtual Fields
-
-      Keys:
-      - LW3WEBUSR
-
-  - LW3WUSER07:
-      Description:        LW3SECUR
-      File:               LW3SECUR
-      Library:            "*FIRST"
-      Association Type:   Derive
-      Association Rule:   Derive
-      Documentation Only: No
-      Maximum Records:    9999
-      Default Action:     Ignore
-      Keep Last:          0
-      Derivation:         After Virtual Fields
-
-      Keys:
-      - LW3WEBUSR
-
-  - LW3WUSER08:
-      Description:        LW3SHOPH
-      File:               LW3SHOPH
       Library:            "*FIRST"
       Association Type:   Derive
       Association Rule:   Derive

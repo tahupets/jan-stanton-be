@@ -1,0 +1,134 @@
+﻿File:
+  Name:                           LW3WUSERE
+  File Type:                      LANSA File
+  Library:                        CEVCENDTA
+  Record Format Name:             LW3WUSERE
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Web User Extension"
+
+  Real Fields:
+  - LW3WEBUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CCSEQ:
+      Type:               Decimal
+      Length:             3
+      Decimals:           0
+
+  - LW3PAYPON:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3PAYCCD:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3PAYCCS:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3PAYANY:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3CCN4:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3CCTYP:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3TOKEN:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - LW3PAYID:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - LW3CCNAME:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3CCEXP:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CCSTS:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  Primary Keys:
+  - LW3WEBUSR
+  - LW3CCSEQ
+
+  Logical Views:
+  - LW3WUSRL1:
+      Identifier:         LW3WUSRL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3WUSRL1
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "by name/type/number4/exp"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CCNAME:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CCTYP:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CCN4:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CCEXP:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

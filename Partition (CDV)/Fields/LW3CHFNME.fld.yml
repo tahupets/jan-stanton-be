@@ -23,7 +23,7 @@
     *
     Begin_Com Role(*EXTENDS #PRIM_OBJT)
     
-    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Usepicklist(False) Componentversion(1) Height(21) Width(394)
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Usepicklist(False) Componentversion(1) Height(21) Width(412)
     
     End_Com
     

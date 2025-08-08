@@ -1,0 +1,36 @@
+﻿Process:
+  Name:                      LW3MLTP01
+  Menu Style:                SAA/CUA
+  Anticipated Usage:         Light
+  Optimize For Remote Comms: No
+  Enable For Web:            No
+  Generate XML:              No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE Multilingual Trigger Process 01"
+
+  Functions:
+  - LW3MT23:
+      Name:               LW3MT23
+      Display on Menu:    No
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Trigger for LW3WCUST"
+
+      Allowed Next Functions:
+      - "*ANY"
+
+  - LW3MT26:
+      Name:               LW3MT26
+      Display on Menu:    No
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Trigger for LW3WUSER"
+
+      Allowed Next Functions:
+      - "*ANY"

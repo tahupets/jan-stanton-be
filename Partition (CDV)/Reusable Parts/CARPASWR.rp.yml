@@ -1,0 +1,138 @@
+﻿Reusable Part:
+  Name:               CARPASWRD
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Password Object"
+
+  Source: |
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    * Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    
+    Define_Com Class(#XPRIM_Crypto_Hash) Name(#HashObject)
+    Define_Com Class(#XPRIM_Binary) Name(#PasswordBytes)
+    Define_Com Class(#XPRIM_Binary) Name(#SaltBytes)
+    Define_Com Class(#XPRIM_Binary) Name(#HashBytes)
+    Define Field(#randomNumber) Type(*INT)
+    Define Field(#randomNumberDecimal) Type(*DEC) Length(3) Decimals(2)
+    
+    Def_List Name(#characters) Fields(#STD_CHAR) Counter(#LISTCOUNT) Type(*WORKING) Entrys(*MAX)
+    
+    Mthroutine Name(HashPassword)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#password)
+    Define_Map For(*OUTPUT) Class(#PRIM_ALPH) Name(#hash)
+    Define_Map For(*OUTPUT) Class(#PRIM_ALPH) Name(#salt)
+    Define_Map For(*OUTPUT) Class(#PRIM_BOLN) Name(#status)
+    
+    #COM_OWNER.GenerateSalt Salt(#salt) Status(#status)
+    If Cond(#status)
+    #PasswordBytes.FromStringUsingUTF8 String(#password)
+    #SaltBytes.FromStringUsingUTF8 String(#salt)
+    
+    #HashObject.UseSCrypt Salt(#SaltBytes)
+    #HashObject.Compute Input(#PasswordBytes) Result(#HashBytes)
+    
+    #hash := #HashBytes.AsBase64String
+    Endif
+    Endroutine
+    
+    Mthroutine Name(ValidatePassword)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#password)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#hash)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#salt)
+    Define_Map For(*RESULT) Class(#PRIM_BOLN) Name(#valid)
+    
+    #PasswordBytes.FromStringUsingUTF8 String(#password)
+    #SaltBytes.FromStringUsingUTF8 String(#salt)
+    
+    #HashObject.UseSCrypt Salt(#SaltBytes)
+    #HashObject.Compute Input(#PasswordBytes) Result(#HashBytes)
+    
+    #valid := (#hash = #HashBytes.AsBase64String)
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: GenerateSalt
+    * Description....: Generate Salt based on either the character.csv file or the PASSWORD_SALT System Setting
+    * =======================================================
+    Mthroutine Name(GenerateSalt)
+    Define_Map For(*OUTPUT) Class(#PRIM_ALPH) Name(#salt)
+    Define_Map For(*OUTPUT) Class(#PRIM_BOLN) Name(#status)
+    
+    Define_Com Class(#PRIM_NMBR) Name(#w_LoopCounter) Desc('Loop Counter')
+    
+    * Initialize by clearing characters work list
+    Clr_List Named(#characters)
+    
+    * If "USE_PASS_SALT_FLAG" is Y, populate the characters worklist using the value from system setting "PASSWORD_SALT"
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable("USE_PASS_SALT_FLAG") Ilanguage(*BLANK) Oalphavalue(#LW3SVVALP)
+    #status := (#LW3SVVALP <> *BLANK)
+    
+    If Cond(#status)
+    If Cond(#LW3SVVALP = 'Y')
+    
+    * "PASSWORD_SALT" = abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable("PASSWORD_SALT") Ilanguage(*BLANK) Oalphavalue(#LW3SVVALP)
+    #status := (#LW3SVVALP <> *BLANK)
+    
+    If Cond(#status)
+    
+    * Loop thru the contents of "PASSWORD_SALT" and add each one to the list if its not yet available
+    #w_LoopCounter := 1
+    Begin_Loop Using(#w_LoopCounter) To(62)
+    #COM_OWNER.InsertIntoCharacters( #LW3SVVALP.Substring( #w_LoopCounter 1 ) )
+    End_Loop
+    Endif
+    Endif
+    Endif
+    
+    * If at this point, characters is not yet populated, use the old process which uses the csv file.
+    If Cond(#LISTCOUNT = 0)
+    Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key("WEBRESOURCEPATH") Io_Error(*NEXT) Val_Error(*NEXT)
+    #status := (#IO$STS = "OK")
+    If Cond(#status)
+    #LW3SVVALP := #LW3SVVALP.ReplaceAll( "/" *PATHDELIM ).ReplaceAll( "\" *PATHDELIM )
+    #LW3SVVALP += *PATHDELIM + "Etc" + *PATHDELIM + "characters.csv"
+    Use Builtin(TRANSFORM_FILE) With_Args(#characters #LW3SVVALP 'O') To_Get(#IO$STS)
+    #status := (#IO$STS = "EF")
+    Endif
+    Endif
+    
+    If Cond(#status)
+    #salt := ""
+    #STD_NUM := 1
+    Begin_Loop Using(#STD_NUM) To(32)
+    
+    Dountil Cond((#randomNumber > 0) And (#randomNumber <= #LISTCOUNT))
+    Use Builtin(RANDOM_NUM_GENERATOR) To_Get(#randomNumberDecimal)
+    #randomNumber := (#randomNumberDecimal * 100)
+    Enduntil
+    
+    Get_Entry Number(#randomNumber) From_List(#characters)
+    #salt += #STD_CHAR
+    End_Loop
+    Endif
+    Endroutine
+     
+    * =======================================================
+    * Mthroutine ....: InsertIntoCharacters
+    * Description....: Insert character into character worklist if not yet there
+    * =======================================================
+    Mthroutine Name(InsertIntoCharacters) Desc('Insert character into character worklist if not yet there') Access(*PRIVATE)
+    Define_Map For(*INPUT) Class(#STD_CHAR) Name(#i_Char)
+    
+    Loc_Entry In_List(#characters) Where(#i_Char = #STD_CHAR)
+    If_Status Is_Not(*OKAY)
+    #STD_CHAR := #i_Char
+    Add_Entry To_List(#characters)
+    Endif
+    Endroutine
+    End_Com

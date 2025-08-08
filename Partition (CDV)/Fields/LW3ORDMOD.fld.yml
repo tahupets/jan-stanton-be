@@ -3,7 +3,7 @@
   Type:               Alpha
   Length:             1
   Decimals:           0
-  Default Value:      "'N'"
+  Default Value:      "'Y'"
   Enabled For RDMLX:  No
   System Field:       No
 
@@ -19,7 +19,7 @@
     *
     Begin_Com Role(*EXTENDS #PRIM_OBJT)
     
-    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Marginleft(165) Usepicklist(False) Width(194) Componentversion(1)
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Marginleft(165) Usepicklist(False) Width(194)
     
     End_Com
     

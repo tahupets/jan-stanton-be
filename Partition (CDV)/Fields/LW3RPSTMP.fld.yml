@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3RPSTMP
+  Type:               DateTime
+  Length:             26
+  Decimals:           0
+  Default Value:      "*SQLNULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - ASQN
+  - ISO
+  - SUTC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Password Reset (DateTime)"
+      Label:              "Password Reset"
+      Heading1:           "Password"
+      Heading2:           "Reset"
+      Heading3:           "(DateTime)"

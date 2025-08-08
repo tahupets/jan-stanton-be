@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3LVSTMP
+  Type:               DateTime
+  Length:             26
+  Decimals:           0
+  Default Value:      "*SQLNULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - ASQN
+  - ISO
+  - SUTC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Last Visit (DateTime)"
+      Label:              "Last Visit (Dat"
+      Heading1:           "Last"
+      Heading2:           "Visit"
+      Heading3:           "(DateTime)"

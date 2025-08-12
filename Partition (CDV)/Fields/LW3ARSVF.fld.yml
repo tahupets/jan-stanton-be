@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3ARSVF
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Allow Reservation Flag"
+      Label:              "Allow Reservati"
+      Heading1:           "Allow"
+      Heading2:           "Reservation"
+      Heading3:           "Flag"

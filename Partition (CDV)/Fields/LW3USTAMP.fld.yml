@@ -1,0 +1,23 @@
+﻿Field:
+  Name:               LW3USTAMP
+  Type:               Signed
+  Length:             12
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Output Attributes:
+  - TDSU
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Update time and date stamp"
+      Label:              "Update time and"
+      Heading1:           "Update"
+      Heading2:           "T/D"
+      Heading3:           "Stamp"

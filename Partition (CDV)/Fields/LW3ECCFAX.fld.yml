@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3ECCFAX
+  Type:               Alpha
+  Length:             40
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Customer Fax"
+      Label:              "Fax"
+      Heading1:           "Fax"
+      Heading2:           " "
+      Heading3:           " "

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3CSCITY
+  Type:               Alpha
+  Length:             30
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Shipping City"
+      Label:              "City"
+      Heading1:           "Shipping"
+      Heading2:           "City"
+      Heading3:           " "

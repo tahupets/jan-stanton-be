@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3CWPHNE
+  Type:               Alpha
+  Length:             40
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Customer Work Phone"
+      Label:              "Work Phone"
+      Heading1:           "Customer"
+      Heading2:           "Work"
+      Heading3:           "Phone"

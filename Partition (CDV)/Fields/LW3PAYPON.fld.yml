@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3PAYPON
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Payment Type PO Number"
+      Label:              "Payment Type PO"
+      Heading1:           "Payment"
+      Heading2:           "Type"
+      Heading3:           "PO"

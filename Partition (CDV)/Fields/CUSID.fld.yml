@@ -1,0 +1,38 @@
+﻿Field:
+  Name:               CUSID
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Customer Account"
+      Label:              "Customer"
+      Heading1:           "Customer"
+      Heading2:           " "
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(257)
+    
+    End_Com
+    
+    * 12/06/2011 - Changed Prompter form from OECUSID to CRVPCM
+    * Begin_Com Role(*Prompter #OECUSID) Name(#Prompter) Defaultprompter(True)
+    * Begin_Com Role(*Prompter #CRVPCM) Name(#Prompter) Defaultprompter(True)
+    * End_Com
+    
+    End_Com
+
+  Repository Help:
+  - ENG: |
+      $$USER
+      %$$title CUSTOMER ACCOUNT ID
+      
+      This is the assigned customer account identifier, up to 10 characters.

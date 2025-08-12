@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3PWDTKN
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Password reset token/nonce"
+      Label:              "Password reset"
+      Heading1:           "Password"
+      Heading2:           "reset"
+      Heading3:           "token/nonce"

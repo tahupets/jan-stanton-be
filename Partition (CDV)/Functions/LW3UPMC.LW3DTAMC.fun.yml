@@ -1,0 +1,36 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * ======================================================
+    * Copyright ......: © Lansa Commerce Edition 2024
+    * Process ........: LW3DTAMC
+    * Function .......: LW3UPMC
+    * Created on .....: 08/08/2025
+    * Description ....: Reset all LW3WUSER password to lansa
+    
+    
+    Function Options(*DIRECT)
+    
+    Define_Com Class(#CARPASWRD) Name(#Processor_Password) Desc('Password Processor') Help('Password Processor')
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    
+    
+    * Retrieve all records in LW3WUSER file
+    Select Fields(#LW3WEBUSR #LW3CUSVAL #LW3PWDSLT) From_File(LW3WUSER) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Continue If(#LW3PWDSLT <> *BLANKS)
+    
+    #Processor_Password.HashPassword Password('lansa') Hash(#LW3CUSVAL) Salt(#LW3PWDSLT) Status(#LW3RETCOD)
+    
+    Update Fields(#LW3CUSVAL #LW3PWDSLT) In_File(LW3WUSER) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If_Status Is_Not(*OKAY)
+    #LW3RETCOD := 'ER'
+    Leave
+    Endif
+    Endselect
+    
+    
+    Exchange Fields(#LW3RETCOD)
+    Return

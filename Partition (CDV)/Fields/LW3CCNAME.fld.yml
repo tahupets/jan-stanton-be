@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3CCNAME
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       Yes
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Cardholder Name"
+      Label:              "Name on Card"
+      Heading1:           "Cardholder"
+      Heading2:           "Name"
+      Heading3:           " "

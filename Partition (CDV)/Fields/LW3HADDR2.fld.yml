@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3HADDR2
+  Type:               Alpha
+  Length:             40
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Customer Address Line 2"
+      Label:              "Address 2"
+      Heading1:           "Customer"
+      Heading2:           "Address"
+      Heading3:           "Line 2"

@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3PWDTIM
+  Type:               Packed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Password reset time"
+      Label:              "Password reset"
+      Heading1:           "Password"
+      Heading2:           "reset"
+      Heading3:           "time"

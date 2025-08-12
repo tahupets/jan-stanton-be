@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3USRTYP
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "B2B User Type"
+      Label:              "User Type"
+      Heading1:           "B2B"
+      Heading2:           "User"
+      Heading3:           "Type"

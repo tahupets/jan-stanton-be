@@ -1,0 +1,24 @@
+﻿Process:
+  Name:                      LW3TRG
+  Menu Style:                SAA/CUA
+  Anticipated Usage:         Heavy
+  Optimize For Remote Comms: No
+  Enable For Web:            Yes
+  Generate XML:              No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE General, Trigger & Validation Funcs."
+
+  Functions:
+  - WUSREML:
+      Name:               WUSREML
+      Display on Menu:    No
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Force lowercase email addresses"
+
+      Allowed Next Functions:
+      - "*ANY"

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3VISITD
+  Type:               Alpha
+  Length:             8
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Web User Last Visit Date"
+      Label:              "User Last Visit"
+      Heading1:           "Web"
+      Heading2:           "User"
+      Heading3:           "Last"

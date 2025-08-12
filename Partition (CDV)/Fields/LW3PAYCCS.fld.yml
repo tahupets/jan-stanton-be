@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3PAYCCS
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Payment Credit Card Saved"
+      Label:              "Payment Credit"
+      Heading1:           "Payment"
+      Heading2:           "Credit"
+      Heading3:           "Card"

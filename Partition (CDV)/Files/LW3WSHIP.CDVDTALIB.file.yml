@@ -1,0 +1,133 @@
+﻿File:
+  Name:                           LW3WSHIP
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3WSHIP
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(10000     2000      3         ) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Web Ship-To Address"
+
+  Real Fields:
+  - LW3WEBB2C:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3WEBSHP:
+      Type:               Signed
+      Length:             3
+      Decimals:           0
+
+  - LW3CSNAME:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3CSLNME:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - LW3CSFNME:
+      Type:               Alphanumeric
+      Length:             15
+      Decimals:           0
+
+  - LW3CSTITL:
+      Type:               Alphanumeric
+      Length:             6
+      Decimals:           0
+
+  - LW3CSCPNY:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3SADDR1:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3SADDR2:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3CSCITY:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - LW3SSTATE:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3SPSTAL:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3SCNTRY:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3CSPHNE:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3CSPEXT:
+      Type:               Alphanumeric
+      Length:             5
+      Decimals:           0
+
+  - LW3SHPTYP:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - LW3WEBC01:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3POBOX:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  Primary Keys:
+  - LW3WEBB2C
+  - LW3WEBSHP
+
+  File Level Triggers:
+  - LW3CSLNME:
+    - Trigger for LW3WSHIP:
+        Function:           LW3MT25
+        Trigger Points:
+        - Before Insert
+        - Before Update

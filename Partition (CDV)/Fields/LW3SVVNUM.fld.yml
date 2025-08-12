@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3SVVNUM
+  Type:               Signed
+  Length:             30
+  Decimals:           9
+  Default Value:      "*ZERO"
+  Edit Mask:          J
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Variable numeric value"
+      Label:              "Numeric value"
+      Heading1:           "Variable"
+      Heading2:           "Numeric"
+      Heading3:           "Value"

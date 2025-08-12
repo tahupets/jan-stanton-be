@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               LW3TRKSHP
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "'Y'"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Track Shipments?"
+      Label:              "Web User Track"
+      Heading1:           "Web"
+      Heading2:           "User"
+      Heading3:           "Track"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(178)
+    
+    End_Com
+    
+    End_Com

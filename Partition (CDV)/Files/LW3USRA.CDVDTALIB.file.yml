@@ -1,0 +1,155 @@
+﻿File:
+  Name:                           LW3USRA
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3USRA
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(10000     2000      3         ) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "B-to-B User/Account Association"
+
+  Real Fields:
+  - LW3WEBUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3ASCSTS:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3CRTUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CSTAMP:
+      Type:               Signed
+      Length:             12
+      Decimals:           0
+
+  - LW3UPDUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3USTAMP:
+      Type:               Signed
+      Length:             12
+      Decimals:           0
+
+  - LW3ASSC01:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CUSTYP:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3SUID:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  Logical Views:
+  - LW3USRA1:
+      Identifier:         LW3USRA1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3USRA1
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By User/Customer"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3ASSC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3USRA2:
+      Identifier:         LW3USRA2
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3USRA2
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Customer/User"
+
+      Keys:
+      - LW3ASSC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3USRA3:
+      Identifier:         LW3USRA3
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3USRA3
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By User/Supplier"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3SUID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  File Level Validation Rules:
+  - LW3WEBUSR:
+    - Lookup Check:
+        Description:        "must exist on LW3WUSER file"
+        File:               LW3WUSER
+        Keys:
+        - LW3WEBUSR
+        When Inserting:     Always
+        When Updating:      Always
+        When Deleting:      Never
+        Positive Action:    Next
+        Negative Action:    Error
+        Message File:       DC@M01
+        Message Number:     LW39085

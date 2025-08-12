@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3CCTYP
+  Type:               Alpha
+  Length:             4
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Credit Card Type"
+      Label:              "Credit Card Typ"
+      Heading1:           "Credit"
+      Heading2:           "Card"
+      Heading3:           "Type"

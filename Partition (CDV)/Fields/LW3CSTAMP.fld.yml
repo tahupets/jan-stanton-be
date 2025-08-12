@@ -1,0 +1,23 @@
+﻿Field:
+  Name:               LW3CSTAMP
+  Type:               Signed
+  Length:             12
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Output Attributes:
+  - TDSC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Create time and date stamp"
+      Label:              "Create time and"
+      Heading1:           "Create"
+      Heading2:           "T/D"
+      Heading3:           "Stamp"

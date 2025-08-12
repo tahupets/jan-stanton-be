@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3USRAMT
+  Type:               Signed
+  Length:             15
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Edit Mask:          J
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Web User Cart Total Amt"
+      Label:              "Total Qty"
+      Heading1:           "Web"
+      Heading2:           "User"
+      Heading3:           "Cart"

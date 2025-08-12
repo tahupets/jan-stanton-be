@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               LW3IS001
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Customer ID"
+      Label:              "Customer ID"
+      Heading1:           "Customer"
+      Heading2:           "    ID"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(208) Usepicklist(False) Width(312)
+    
+    End_Com
+    
+    End_Com

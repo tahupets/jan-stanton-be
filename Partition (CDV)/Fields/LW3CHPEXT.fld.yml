@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3CHPEXT
+  Type:               Alpha
+  Length:             4
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Customer Phone Extension"
+      Label:              "Customer Phone"
+      Heading1:           "Customer"
+      Heading2:           "Phone"
+      Heading3:           "Extension"

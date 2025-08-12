@@ -1,0 +1,181 @@
+﻿File:
+  Name:                           LW3WCUST
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3WCUST
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(10000     2000      3         ) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Web Customer Master"
+
+  Real Fields:
+  - LW3CUSIND:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3WEBB2C:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3WEBUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CHNAME:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3CHLNME:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - LW3CHFNME:
+      Type:               Alphanumeric
+      Length:             15
+      Decimals:           0
+
+  - LW3CHTITL:
+      Type:               Alphanumeric
+      Length:             6
+      Decimals:           0
+
+  - LW3CHCPNY:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3HADDR1:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3HADDR2:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3CHCITY:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - LW3HSTATE:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3HPSTAL:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3HCNTRY:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3CHPHNE:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3CHPEXT:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3CWPHNE:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3ECCFAX:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3WCSTAT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3WEBC01:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3CDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - LW3UDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  Primary Keys:
+  - LW3CUSIND
+  - LW3WEBB2C
+  - LW3WEBUSR
+
+  Logical Views:
+  - LW3WCUS1:
+      Identifier:         LW3WCUS1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3WCUS1
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "User typ / User"
+
+      Keys:
+      - LW3CUSIND:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  File Level Triggers:
+  - LW3CHLNME:
+    - Trigger for LW3WCUST:
+        Function:           LW3MT23
+        Trigger Points:
+        - Before Insert
+        - Before Update

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3ASCSTS
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "User/Account Association Status"
+      Label:              "Assoc. Status"
+      Heading1:           "User/Acct."
+      Heading2:           "Assoc."
+      Heading3:           "Status"

@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3CCSEQ
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Credit Card Sequence Number"
+      Label:              "Credit Card Seq"
+      Heading1:           "Credit"
+      Heading2:           "Card"
+      Heading3:           "Sequence"

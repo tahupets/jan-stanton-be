@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3SVLANG
+  Type:               Alpha
+  Length:             4
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Keyboard Shift:     SbcsAndDbcs
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Variable language"
+      Label:              "Language"
+      Heading1:           "Lang"
+      Heading2:           " "
+      Heading3:           " "

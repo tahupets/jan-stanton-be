@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3CSPEXT
+  Type:               Alpha
+  Length:             5
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Shipping Address Phone Extension"
+      Label:              "Shipping Addres"
+      Heading1:           "Shipping"
+      Heading2:           "Address"
+      Heading3:           "Phone"

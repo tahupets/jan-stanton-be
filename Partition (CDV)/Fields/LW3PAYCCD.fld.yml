@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               LW3PAYCCD
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Payment Type Credit Card Direct"
+      Label:              "Payment Type Cr"
+      Heading1:           "Payment"
+      Heading2:           "Type"
+      Heading3:           "Credit"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(206) Usepicklist(False) Width(328)
+    
+    End_Com
+    
+    End_Com

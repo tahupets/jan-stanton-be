@@ -1,0 +1,24 @@
+﻿Process:
+  Name:                      LW3DTAMC
+  Menu Style:                SAA/CUA
+  Anticipated Usage:         Light
+  Optimize For Remote Comms: No
+  Enable For Web:            No
+  Generate XML:              No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Data Migration and Conversion"
+
+  Functions:
+  - LW3UPMC:
+      Name:               LW3UPMC
+      Display on Menu:    Yes
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "User Password Migration and Conversion"
+
+      Allowed Next Functions:
+      - "*ANY"

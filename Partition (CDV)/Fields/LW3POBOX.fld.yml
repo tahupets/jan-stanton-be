@@ -1,0 +1,32 @@
+﻿Field:
+  Name:               LW3POBOX
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "'N'"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PO Box"
+      Label:              "PO Box"
+      Heading1:           "PO"
+      Heading2:           "Box"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(178)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'std_checkbox.std_checkbox') Name(#Weblet) Defaultweblet(True)
+    
+    End_Com
+    End_Com

@@ -3,7 +3,7 @@
   File Type:                      LANSA File
   Library:                        CDVDTALIB
   Record Format Name:             LW3WUSER
-  Module Library:                 Same Library As File
+  Module Library:                 Partition Module Library
   File Uses SQL on IBM i:         No
   Enabled For RDMLX:              Yes
   Enabled For Long Names:         No

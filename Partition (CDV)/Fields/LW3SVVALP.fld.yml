@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3SVVALP
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Keyboard Shift:     SbcsAndDbcs
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Variable alpha value"
+      Label:              "Alpha value"
+      Heading1:           "Variable"
+      Heading2:           "Alpha"
+      Heading3:           "Value"

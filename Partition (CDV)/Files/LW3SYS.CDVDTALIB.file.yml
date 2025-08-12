@@ -1,0 +1,63 @@
+﻿File:
+  Name:                           LW3SYS
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3SYS
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(10000     2000      3         ) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Commerce Edition System Settings"
+
+  Real Fields:
+  - LW3SVNAME:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - LW3SVLANG:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3SVVALP:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  - LW3SVVNUM:
+      Type:               Signed
+      Length:             30
+      Decimals:           9
+
+  Primary Keys:
+  - LW3SVNAME
+  - LW3SVLANG
+
+  File Level Triggers:
+  - LW3SVNAME:
+    - Trigger for LW3SYS:
+        Function:           LW3MT20
+        Trigger Points:
+        - Before Insert
+        - Before Update

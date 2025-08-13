@@ -1,0 +1,215 @@
+﻿File:
+  Name:                           LW3SESSN
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3SESSN
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(10000     2000      3         ) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Job Session ID"
+
+  Real Fields:
+  - LW3WEBUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3SESSID:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
+  - LW3SITCNT:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
+  - LW3SITTOT:
+      Type:               Decimal
+      Length:             15
+      Decimals:           2
+
+  - LW3CARDES:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3SESDAT:
+      Type:               Alphanumeric
+      Length:             8
+      Decimals:           0
+
+  - LW3SESTIM:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+
+  - LW3SESTAT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3SESORD:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - LW3PRDREF:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3VNDNME:
+      Type:               Alphanumeric
+      Length:             40
+      Decimals:           0
+
+  - LW3REGCUS:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3ASSC01:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3ORDCLN:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3SUID:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - LW3MSRPPF:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  Virtual Fields:
+  - LW3SESDTV:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+      Virtual Field Type: Date Conversion
+      Derive On Input:    Yes
+      Derive On Output:   No
+      Source Field:       LW3SESDAT
+      Source Date Format: YYYYMMDD
+      Target Date Format: SYSFMT
+
+  Logical Views:
+  - LW3SES01:
+      Identifier:         LW3SES01
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3SES01
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Webuser/Session ID"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3SESSID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - LW3SES02:
+      Identifier:         LW3SES02
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3SES02
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Session ID"
+
+      Keys:
+      - LW3SESSID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - LW3SES03:
+      Identifier:         LW3SES03
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3SES03
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Amended by ADAPTOR"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3ASSC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  Access Routes:
+  - LW3SESSN:
+      Description:        LW3HDRL1
+      File:               LW3HDRL1
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3WEBUSR
+      - LW3SESSID
+
+  - LW3SESSN01:
+      Description:        LW3SHPTO
+      File:               LW3SHPTO
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3SESSID

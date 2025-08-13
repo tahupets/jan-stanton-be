@@ -1,0 +1,77 @@
+﻿File:
+  Name:                           LW3USRLEA
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3USRLEA
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         Yes
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(*NOMAX) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "User Login Error Audit"
+
+  Real Fields:
+  - LW3SESSID:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
+  - LW3WEBUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3DTEAS:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - LW3TIMAS:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  Logical Views:
+  - LW3ULEAL1:
+      Identifier:         LW3ULEAL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3ULEAL1
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Web User/Date/Time"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3DTEAS:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - LW3TIMAS:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed

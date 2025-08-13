@@ -1,0 +1,24 @@
+﻿Process:
+  Name:                      LW3API
+  Menu Style:                SAA/CUA
+  Anticipated Usage:         Light
+  Optimize For Remote Comms: No
+  Enable For Web:            No
+  Generate XML:              No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Back Office file API functions"
+
+  Functions:
+  - LW3ACUS:
+      Name:               LW3ACUS
+      Display on Menu:    No
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer master API caller"
+
+      Allowed Next Functions:
+      - "*ANY"

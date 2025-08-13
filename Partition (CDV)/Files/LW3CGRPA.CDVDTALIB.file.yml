@@ -1,0 +1,45 @@
+﻿File:
+  Name:                           LW3CGRPA
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3CGRPA
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       Yes
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             No
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 100000    20000     3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Customer Group Accounts"
+
+  Real Fields:
+  - LW3GRPNM:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3WEBC01:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  Primary Keys:
+  - LW3GRPNM
+  - LW3WEBC01

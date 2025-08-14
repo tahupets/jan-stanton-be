@@ -14,9 +14,14 @@
     * Utilities
     * =======================================================
     
+<<<<<<< Updated upstream
     * Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
     Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
     Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+=======
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+>>>>>>> Stashed changes
     
     Define_Com Class(#XPRIM_Crypto_Hash) Name(#HashObject)
     Define_Com Class(#XPRIM_Binary) Name(#PasswordBytes)
@@ -34,7 +39,10 @@
     Define_Map For(*OUTPUT) Class(#PRIM_BOLN) Name(#status)
     
     #COM_OWNER.GenerateSalt Salt(#salt) Status(#status)
+<<<<<<< Updated upstream
     
+=======
+>>>>>>> Stashed changes
     If Cond(#status)
     #PasswordBytes.FromStringUsingUTF8 String(#password)
     #SaltBytes.FromStringUsingUTF8 String(#salt)

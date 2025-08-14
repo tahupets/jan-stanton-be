@@ -1,0 +1,22 @@
+﻿Field:
+  Name:               EXPTIM
+  Type:               DateTime
+  Length:             26
+  Decimals:           0
+  Default Value:      "*SQLNULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - ASQN
+  - FE
+  - ISO
+  - SUTC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Expiry Time"
+      Label:              "Expiry Time"
+      Heading1:           "Expiry"
+      Heading2:           "Time"
+      Heading3:           " "

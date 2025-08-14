@@ -1,0 +1,1645 @@
+﻿ServerModule:
+  Name:               CNSORDER
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Storefront Orders"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Server Module
+    * Platform        : REST APIs
+    * Name            : CNSORDER
+    * Identifier      : CNSORDER
+    * Ancestor        : PRIM_SRVM
+    * Written By      : Jan Metica
+    * Written On      : 30th September 2024
+    * Description     : Storefront Orders
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Begin_Com Role(*EXTENDS #PRIM_SRVM)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERMLUTL) Name(#Utility_Multilinguals) Desc('Multilingual Utility') Help('Multilinguals Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    Define_Com Class(#CERBSINF) Name(#Processor_BillToShipTo) Desc('Bill To Ship To Processor') Help('Use this to retrieve Bill To and Ship to Information')
+    Define_Com Class(#CERIAUTL) Name(#Processor_ProductAttributes) Desc('Product Attributes Processor')
+    Define_Com Class(#CNRAPILG) Name(#Processor_ApiLog) Desc('API Log Processor') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Overrides
+    * =======================================================
+    
+    Override Field(#LW3OIOD) Edit_Word('''  /  /    ''')
+    Override Field(#LW3OISD) Edit_Word('''  /  /    ''')
+    
+    * =======================================================
+    * List Definition
+    * =======================================================
+    
+    * Used by API LW3LORD
+    Def_List Name(#LW3ORDL) Fields(#LW3OION #LW3OIOT #LW3OIPO #LW3OSDTE #LW3OPDTE #LW3OITK #LW3OIURL) Type(*WORKING) Entrys(*MAX)
+    
+    * Used by API LW3LODD
+    Def_List Name(#LW3ORDDL) Fields(#LW3COLNUM #LW3ITEMCD #LW3IDESC #LW3LPRICE #LW3UM #LW3QTYRQS #LW3PRCEXT #LW3OLPDTE) Counter(#LW3COUNT) Type(*WORKING) Entrys(*MAX)
+    
+    * =======================================================
+    * Srvroutine Definitions
+    * =======================================================
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSORDER/init
+    * Operation: GetOrdersInit
+    *
+    * Request
+    *    Parameter: None
+    *    Schema   : None
+    
+    * Response
+    *    Schema   : (OK) daysArray
+    *
+    * Action  : Build User Dropdowns when the page initializes
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetOrdersInit) Response(*HTTP #uContext) Desc('Order Inquiry Initialization')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetOrdersInit) Name(#Operation)
+    Define_Com Class(#Com_Home.initArray) Name(#Init_Array)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetOrdersInit.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    * #COM_OWNER.umBuildUserDropdowns Oresponsejsonstring(#LW3JSDTA)
+    #COM_OWNER.umBuildUserDropdowns Iarray_Init(#Init_Array)
+    
+    #Operation.Response.SetContentJson Content(#Init_Array)
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session Id is not valid.')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetOrdersInit.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed.')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetOrdersInit.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSORDER/orders
+    * Operation: GetOrders
+    *
+    * Request
+    *    Parameter: order - Order Number
+    *               ponum - Purchase Order Number
+    *               days - Filter By Days
+    *    Schema   : None
+    
+    * Response
+    *    Schema   : (OK) ordersArray
+    *
+    * Action  : Build Order List based on the passed in filter parameters
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetOrders) Response(*HTTP #uContext) Desc('Get Orders')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetOrders) Name(#Operation)
+    Define_Com Class(#Com_Home.ordersArray) Name(#Array_Orders)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetOrders.Response.NoContent.Object) Name(#Object_NoContent) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetOrders.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    * API Log
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    Fetch Fields(#LW3TMPUSR) From_File(LW3WUSER) With_Key(#Global_DataModel.upUserId) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#LW3TMPUSR = 'Y')
+    * !NC! - Add error message for temporary user
+    
+    Else
+    
+    #COM_OWNER.umBuildOrderList Ifilterbydays(#Operation.Request.days) Iordernumber(#Operation.Request.order) Ipurchaseordernumber(#Operation.Request.ponum) Iordersarray(#Array_Orders) Oreturncode(#LW3RETCOD)
+    
+    * Returns true or false after formatting appropriate HTTP Response
+    If Cond(#LW3RETCOD = 'OK')
+    #Operation.Response.SetContentJson Content(#Array_Orders)
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgNoResultsFromFilter') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Search did not yield result.')
+    Set_Ref Com(#Object_NoContent) To(*CREATE_AS #Com_Home.GetOrders.Response.NoContent.Object)
+    Set Com(#Object_NoContent) Messages(#Array_HttpResponse)
+    #Operation.Response.SetNoContent Content(#Object_NoContent)
+    
+    Endif
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session Id is not valid.')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetOrders.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed.')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetOrders.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSORDER/order/{order}
+    * Operation: GetOrderDetails
+    *
+    * Request
+    *    Parameter: order - Order Number
+    *    Schema   : None
+    
+    * Response
+    *    Schema   : (OK) orderDetailsObject
+    *
+    * Action  : Build Order Details based on the passed in Order Number
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetOrderDetails) Response(*HTTP #uContext) Desc('Get Order Details')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetOrderDetails) Name(#Operation)
+    Define_Com Class(#Com_Home.orderDetailsObject) Name(#Object_OrderDetails)
+    Define_Com Class(#Com_Home.orderItemsArray) Name(#Array_OrderItems)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetOrderDetails.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetOrderDetails.Response.Resp400.Object) Name(#Object_Resp400) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umGetOrderHeaderInformation Iordernumber(#Operation.Request.order) Iorderdetails(#Object_OrderDetails.order)
+    #COM_OWNER.umGetOrderDetailInformation Iordernumber(#Operation.Request.order) Iarray_Orderitems(#Array_OrderItems)
+       
+    If Cond(#Array_OrderItems.Count *EQ 0)
+    
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgNoResultsFromFilter') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Search did not yield result.')
+    Set_Ref Com(#Object_Resp400) To(*CREATE_AS #Com_Home.GetOrderDetails.Response.Resp400.Object)
+    Set Com(#Object_Resp400) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp400 Content(#Object_Resp400)
+    
+    Else
+    * Set Order Totals
+    #Utility_General.umFormatDisplayPrice Inumericvalue(#LW3OIOT) Icurrencysymbol(#Global_DataModel.upStorefrontCurrencySymbol) Idecimalsymbol(#Global_DataModel.upStorefrontDecimalPointSymbol) Ithousandsymbol(#Global_DataModel.upStorefrontThousandSeparatorSymbol) Oreturnfield(#D_OIOT)
+    
+    #Object_OrderDetails.product <= #Array_OrderItems
+    Set Com(#Object_OrderDetails.shipTo) Com_Fields(*ALL)
+    Set Com(#Object_OrderDetails.billTo) Com_Fields(*ALL)
+    Set Com(#Object_OrderDetails.totals) Com_Fields(*ALL)
+    
+    #Operation.Response.SetContentJson Content(#Object_OrderDetails)
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session Id is not valid.')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetOrderDetails.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed.')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetOrderDetails.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umBuildOrderList
+    * Description....: Build the Order List using the received search parameters by calling the API LW3LORD
+    * =======================================================
+    Mthroutine Name(umBuildOrderList) Desc('Build order List') Help('Build the Order List using the received search parameters by calling the API LW3LORD') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3NUMDAY) Name(#iFilterByDays) Desc('Filter By Days Search Input')
+    Define_Map For(*INPUT) Class(#FXWRKORD) Name(#iOrderNumber) Desc('Order Number Search Input')
+    Define_Map For(*INPUT) Class(#FXWRKREF) Name(#iPurchaseOrderNumber) Desc('PO Number Search Input')
+    Define_Map For(*INPUT) Class(#COM_HOME.ordersArray) Name(#iOrdersArray) Pass(*BY_REFERENCE)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    Define_Com Class(#PRIM_NMBR) Name(#L_ListCount)
+    * Define_Com Class(#PRIM_LIBI.IFieldDateIntrinsics) Name(#L_TempDateTime)
+    
+    #oReturnCode := 'ER'
+    
+    Clr_List Named(#LW3ORDL)
+    Clr_List Named(#iOrdersArray)
+    
+    #COM_OWNER.umSetDateRanges Ifilterbydays(#iFilterByDays) Ofromdate(#W_FRMDATN) Otodate(#W_TODATN)
+    
+    #STDWEBUSR := #Global_DataModel.upUserId
+    #FXCUSID := #Global_DataModel.upCustomerId
+    #FXWRKORD := #iOrderNumber
+    #FXWRKREF := #iPurchaseOrderNumber
+    #FXSTRDT := #W_FRMDATN
+    #FXENDDT := #W_TODATN
+    
+    * Call the API to build the list of orders based on the provided search parameters
+    Exchange Fields(#FXCUSID #FXWRKORD #FXWRKREF #FXSTRDT #FXENDDT #STDWEBUSR)
+    Call Process(*DIRECT) Function(LW3LORD) If_Error(*NEXT) Pass_Lst(#LW3ORDL)
+    
+    Selectlist Named(#LW3ORDL)
+    #L_ListCount += 1
+    #Utility_General.umFormatDisplayPrice Inumericvalue(#LW3OIOT) Icurrencysymbol(#Global_DataModel.upStorefrontCurrencySymbol) Idecimalsymbol(#Global_DataModel.upStorefrontDecimalPointSymbol) Ithousandsymbol(#Global_DataModel.upStorefrontThousandSeparatorSymbol) Oreturnfield(#D_OIOT)
+    
+    * Re-format dates
+    * If Cond(#LW3OIOD.isDate( CCYYMMDD ))
+    * #LW3OIOD := #LW3OIOD.asDate( CCYYMMDD ).asNumber( MMDDCCYY )
+    * Endif
+    * If Cond(#LW3OISD.isDate( CCYYMMDD ))
+    * #LW3OISD := #LW3OISD.asDate( CCYYMMDD ).asNumber( MMDDCCYY )
+    * Endif
+    
+    Add_Entry To_List(#iOrdersArray)
+    
+    #iOrdersArray.CurrentItem.displayedOrderDate := #LW3OPDTE.Date.AsDisplayString( MMsDDsCCYY )
+    #iOrdersArray.CurrentItem.displayedShippingDate := #LW3OSDTE.Date.AsDisplayString( MMsDDsCCYY )
+    
+    Endselect
+    
+    If Cond(#L_ListCount > 0)
+    #oReturnCode := 'OK'
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSetDateRanges
+    * Description....: Calculate Date Range for filtering
+    * =======================================================
+    Mthroutine Name(umSetDateRanges) Desc('Set Date Ranges') Help('Calculate Date Range for filtering') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3NUMDAY) Name(#iFilterByDays) Desc('Filter By Days Search Input')
+    Define_Map For(*OUTPUT) Class(#W_FRMDATN) Name(#oFromDate)
+    Define_Map For(*OUTPUT) Class(#W_TODATN) Name(#oToDate) Desc('To Date')
+    
+    Define_Com Class(#W_FRMDATN) Name(#L_DaysToAdjust)
+    Define_Com Class(#PRIM_NMBR) Name(#L_NumberOfDays) Value(30)
+    
+    * Sample scenario: 31 - 60 Days
+    * Get L_DaysToAdjust = 30 * 1 = 30
+    * Add 1 to L_DaysToAdjust to get 31
+    * Multiply be a negative value to get -31
+    * Use FINDDATE to get the From Date based on the day today adjusted by -31 days
+    
+    #L_DaysToAdjust := #L_NumberOfDays * #iFilterByDays
+    #L_DaysToAdjust += 1
+    #L_DaysToAdjust *= -1
+    
+    * If filtering by 0-30 days, set From Date to today's date
+    If Cond(#iFilterByDays = 0)
+    #oFromDate := #LW3OPDTE.Now.Date.AsNumber( CCYYMMDD )
+    Else
+    Use Builtin(FINDDATE) With_Args(#LW3OPDTE.Now.Date.AsNumber( CCYYMMDD ) #L_DaysToAdjust J J) To_Get(#oFromDate)
+    Endif
+    
+    Case Of_Field(#iFilterByDays)
+    
+    * Show 91 Days and above
+    When Value_Is(>= 3)
+    #L_DaysToAdjust := -1095
+    
+    * Show 0-30 or 31-60 or 61-90 Days
+    Otherwise
+    * Sample scenario: 31 - 60 Days
+    * Get L_DaysToAdjust = (1 * 30) + 30 = 60
+    * Multiply be a negative value to get -60
+    * Use FINDDATE to get the From Date based on the day today adjusted by -60 days
+    #L_DaysToAdjust := ((#iFilterByDays * #L_NumberOfDays) + #L_NumberOfDays)
+    #L_DaysToAdjust *= -1
+    
+    Endcase
+    
+    Use Builtin(FINDDATE) With_Args(#LW3OPDTE.Now.Date.AsNumber( CCYYMMDD ) #L_DaysToAdjust J J) To_Get(#oToDate)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildUserDropdowns
+    * Description....: Build User Dropdowns
+    * =======================================================
+    Mthroutine Name(umBuildUserDropdowns) Desc('Build User Dropdowns') Help('Build dropdown for "Days"') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#Com_Home.initArray) Name(#iArray_Init) Pass(*BY_REFERENCE)
+    
+    Select Fields(#LW3CODE #LW3CDES) From_File(LW3CODL4) With_Key('ORDERT' #Global_DataModel.upCurrentLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Add_Entry To_List(#iArray_Init)
+    #iArray_Init.CurrentItem.value := #LW3CODE
+    #iArray_Init.CurrentItem.description := #LW3CDES
+    
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetOrderHeaderInformation
+    * Description....: Call the appropriate APIs and Utilities to retrieve the Order Header, Bill To and Ship To information
+    * =======================================================
+    Mthroutine Name(umGetOrderHeaderInformation) Desc('Get Order Header Information') Help('Call the appropriate APIs and Utilities to retrieve the Order Header, Bill To and Ship To information')
+    
+    Define_Map For(*INPUT) Class(#LW3OION) Name(#iOrderNumber)
+    Define_Map For(*INPUT) Class(#COM_HOME.orderDetailsObject.order.Object) Name(#iOrderDetails) Pass(*BY_REFERENCE)
+    
+    #FXCOID := #iOrderNumber
+    #FXCUSID := #Global_DataModel.upCustomerId
+    #STDWEBUSR := #Global_DataModel.upUserId
+    #LW3CUSIND := #Global_DataModel.upUserIndicator
+    
+    * Call API to get Order Header Information
+    Exchange Fields(#FXCUSID #FXCOID #STDWEBUSR #LW3CUSIND)
+    Call Process(*DIRECT) Function(LW3AOHT) If_Error(*NEXT)
+    
+    * If LW3SHIPID is blank, set the Ship To to be the same as the Bill to value
+    If Cond(#LW3SHIPID *EQ '0')
+    * Retrieve Ship To/Bill To Information
+    #Processor_BillToShipTo.umGetBillToShipToInfo Iwebuser(#Global_DataModel.upUserId) Icustomerindicator(#Global_DataModel.upUserIndicator) Icustomernumber(#Global_DataModel.upCustomerId) Igetbilltoinfo(True) Igetshiptoinfo(True) Obilltoname(#LW3CHNAME) Obilltoaddress1(#LW3HADDR1) Obilltoaddress2(#LW3HADDR2) Obilltocity(#LW3CHCITY) Obilltostate(#LW3HSTATE) Obilltozip(#LW3HPSTAL) Obilltocitystatezip(#LW3BTCSZ) Obilltocountry(#LW3HCNTRY) Ishiptoid(#LW3SHIPID) Oshiptoname(#LW3CSNAME) Oshiptoaddress1(#LW3SADDR1) Oshiptoaddress2(#LW3SADDR2) Oshiptocity(#LW3CSCITY) Oshiptostate(#LW3SSTATE) Oshiptozip(#LW3SPSTAL) Oshiptocitystatezip(#LW3STCSZ) Oshiptocountry(#LW3SCNTRY)
+    Else
+    * Retrieve Bill To Information
+    #Processor_BillToShipTo.umGetBillToShipToInfo Iwebuser(#Global_DataModel.upUserId) Icustomerindicator(#Global_DataModel.upUserIndicator) Icustomernumber(#Global_DataModel.upCustomerId) Igetbilltoinfo(True) Igetshiptoinfo(False) Obilltoname(#LW3CHNAME) Obilltoaddress1(#LW3HADDR1) Obilltoaddress2(#LW3HADDR2) Obilltocity(#LW3CHCITY) Obilltostate(#LW3HSTATE) Obilltozip(#LW3HPSTAL) Obilltocitystatezip(#LW3BTCSZ) Obilltocountry(#LW3HCNTRY)
+    
+    * Ship To Information comes from the API LW3AOHT
+    #LW3CSNAME := #OESTNM
+    #LW3CSCPNY := *BLANKS
+    #LW3SADDR1 := #OESTA1
+    #LW3SADDR2 := #OESTA2
+    #LW3CSCITY := #OECITY
+    #LW3SSTATE := #STATE
+    #LW3SPSTAL := #OESPST
+    #LW3SCNTRY := #CNTRY
+    Endif
+    
+    #LW3STCSZ := #LW3CSCITY + ' ' + #LW3SSTATE + ' ' + #LW3SPSTAL
+    
+    * Format prices returned by the Order Header API
+    #Utility_General.umFormatDisplayPrice Inumericvalue(#FXCCCHGA) Icurrencysymbol(#Global_DataModel.upStorefrontCurrencySymbol) Idecimalsymbol(#Global_DataModel.upStorefrontDecimalPointSymbol) Ithousandsymbol(#Global_DataModel.upStorefrontThousandSeparatorSymbol) Oreturnfield(#D_CHGTOT)
+    #Utility_General.umFormatDisplayPrice Inumericvalue(#FXAMOUNT) Icurrencysymbol(#Global_DataModel.upStorefrontCurrencySymbol) Idecimalsymbol(#Global_DataModel.upStorefrontDecimalPointSymbol) Ithousandsymbol(#Global_DataModel.upStorefrontThousandSeparatorSymbol) Oreturnfield(#D_AMOUNT)
+    #Utility_General.umFormatDisplayPrice Inumericvalue(#OHTOTA) Icurrencysymbol(#Global_DataModel.upStorefrontCurrencySymbol) Idecimalsymbol(#Global_DataModel.upStorefrontDecimalPointSymbol) Ithousandsymbol(#Global_DataModel.upStorefrontThousandSeparatorSymbol) Oreturnfield(#D_TOTAL)
+    
+    * Set response data
+    #iOrderDetails.orderNumber := #iOrderNumber
+    #iOrderDetails.customerId := #Global_DataModel.upCustomerId
+    
+    
+    #iOrderDetails.displayedOrderDate := #LW3OISD.asDate( CCYYMMDD ).AsDisplayString( MMsDDsCCYY )
+    #iOrderDetails.poNumber := #LW3HPONUM
+    #iOrderDetails.trackingNumber := #LW3OITK
+    
+    #COM_OWNER.umGetTrackingURL Itracknumber(#LW3OITK) Otrackurl(#iOrderDetails.trackingURL) Ishiptype(#LW3OSHPTY)
+    Endroutine
+    * ===================================================
+    * Subroutine  : GET_URL
+    * Description : Get the shipment tracking URL.
+    * ===================================================
+    Mthroutine Name(umGetTrackingURL) Desc('Get Tracking URL by Tracking Number') Help('Get Tracking URL by Tracking Number')
+    Define_Map For(*INPUT) Class(#LW3OITK) Name(#iTrackNumber)
+    Define_Map For(*INPUT) Class(#LW3OSHPTY) Name(#iShipType)
+    Define_Map For(*OUTPUT) Class(#LW3OIURL) Name(#oTrackURL)
+    
+    If Cond((#iTrackNumber *NE *blank) And (#iShipType *NE *BLANK))
+    Fetch Fields(#LW3SSHPDS #LW3SHPURL #LW3SHPSUB #LW3JSHPTY) From_File(LW3SSHPR) With_Key(#iShipType) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If_Status Is(*OKAY)
+    #oTrackURL := #LW3SHPURL
+    * Change Field(#LW3LNKURL) To(#LW3SHPURL)
+    * If Cond('#LW3SHPSUB *EQ Y')
+    * Execute Subroutine(SUBSTITUTE) With_Parms('%%TRACKINGNUM%%' 15 #LW3SHPTRK #LW3LNKURL)
+    * Endif
+    Else
+    #oTrackURL := *BLANK
+    Endif
+    
+    Else
+    #oTrackURL := *BLANK
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetOrderDetailInformation
+    * Description....: Call the appropriate APIs and Utilities to retrieve the Order Detail Information
+    * =======================================================
+    Mthroutine Name(umGetOrderDetailInformation) Desc('Get Order Detail Information') Help('Call the appropriate APIs and Utilities to retrieve the Order Detail Information')
+    
+    Define_Map For(*INPUT) Class(#LW3OION) Name(#iOrderNumber)
+    
+    Define_Map For(*INPUT) Class(#COM_HOME.orderItemsArray) Name(#iArray_OrderItems) Pass(*BY_REFERENCE)
+    
+    Define_Com Class(#LW3LPRICE) Name(#L_LW3LPRICE)
+    
+    #FXCUSID := #Global_DataModel.upCustomerId
+    #FXCOID := #iOrderNumber
+    
+    * Call API to get Order Detail Information
+    Exchange Fields(#FXCOID #FXCUSID)
+    Call Process(*DIRECT) Function(LW3LODD) If_Error(*NEXT) Pass_Lst(#LW3ORDDL)
+    
+    Selectlist Named(#LW3ORDDL)
+    #L_LW3LPRICE := #LW3LPRICE
+    #Utility_General.umFormatDisplayPrice Inumericvalue(#LW3LPRICE) Icurrencysymbol(#Global_DataModel.upStorefrontCurrencySymbol) Idecimalsymbol(#Global_DataModel.upStorefrontDecimalPointSymbol) Ithousandsymbol(#Global_DataModel.upStorefrontThousandSeparatorSymbol) Oreturnfield(#D_LPRICE)
+    
+    #Utility_General.umFormatDisplayPrice Inumericvalue(#LW3PRCEXT) Icurrencysymbol(#Global_DataModel.upStorefrontCurrencySymbol) Idecimalsymbol(#Global_DataModel.upStorefrontDecimalPointSymbol) Ithousandsymbol(#Global_DataModel.upStorefrontThousandSeparatorSymbol) Oreturnfield(#D_PRCEXT)
+    
+    #Processor_ProductAttributes.umGetAttribuesForItemInCart Istorefrontid(#Global_DataModel.upStorefrontId) Istorefrontshortname(#Global_DataModel.upStorefrontShortName) Ilanguage(#Global_DataModel.upCurrentLanguage) Iordernumber(#iOrderNumber) Ilinenumber(#LW3COLNUM) Iitemcode(#LW3ITEMCD) Osize(#LW3ISIZE) Ocolor(#LW3ICOLR) Oprice(#LW3LPRICE) Oimage(#LW3IMAGE)
+    
+    If Cond(#LW3LPRICE *EQ 0)
+    #LW3LPRICE := #L_LW3LPRICE
+    Endif
+    Add_Entry To_List(#iArray_OrderItems)
+    
+    * If Cond(#LW3OISD.isDate( CCYYMMDD ))
+    * #iArray_OrderItems.CurrentItem.displayedShippingDate := #LW3OISD.asDate( CCYYMMDD ).AsDisplayString( MMsDDsCCYY )
+    * Endif
+    
+    #iArray_OrderItems.CurrentItem.displayedShippingDate := #LW3OLPDTE.Date.AsDisplayString( MMsDDsCCYY )
+    
+    
+    Endselect
+    
+    * Format prices returned by the Order Detail API
+    #Utility_General.umFormatDisplayPrice Inumericvalue(#LW3ORDTOT) Icurrencysymbol(#Global_DataModel.upStorefrontCurrencySymbol) Idecimalsymbol(#Global_DataModel.upStorefrontDecimalPointSymbol) Ithousandsymbol(#Global_DataModel.upStorefrontThousandSeparatorSymbol) Oreturnfield(#D_ORDTOT)
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSetHttpResponseMessages
+    * Description....: Set Http Response Messages
+    * =======================================================
+    Mthroutine Name(umSetHttpResponseMessages) Desc('Set Http Response Messages') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3VARNAM) Name(#iVariableName)
+    Define_Map For(*INPUT) Class(#LW3MSGTYP) Name(#iMessageType)
+    Define_Map For(*INPUT) Class(#LW3FLDNAM) Name(#iFieldName) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iMessageDetails) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iSubstitutionVariable1) Mandatory('')
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Add_Entry To_List(#iArray_HttpResponse)
+    #iArray_HttpResponse.CurrentItem.code := #iVariableName
+    #iArray_HttpResponse.CurrentItem.type := #iMessageType
+    #iArray_HttpResponse.CurrentItem.message := #Utility_Multilinguals.umGetMultilingualText( #iVariableName #Global_DataModel.upCurrentLanguage )
+    
+    If Cond(#iFieldName <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.field := #iFieldName
+    Endif
+    If Cond(#iMessageDetails <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.detail := #iMessageDetails
+    Endif
+    If Cond(#iSubstitutionVariable1 <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.substitutions.Add Value(#iSubstitutionVariable1)
+    Endif
+    
+    Endroutine
+    
+    End_Com
+
+  API Definition:
+    Language Handling:       NoAction
+    Partition Handling:      PathVariable
+    Publish as Swagger V2:   Yes
+    Publish as OpenAPI V3:   Yes
+    ServicePath:             /CNSORDER
+
+    Security Requirements:
+    - Security:
+
+        Security Schemes:
+        - HttpBearer:
+
+    Paths:
+    - /orders:
+
+        Operations:
+        - GetOrders:
+            Verb:               Get
+            Server Routine:     usGetOrders
+            Deprecated:         No
+
+            Parameters:
+            - orderNumber:
+                Location:           Query
+                Style:              Default
+                Required:           No
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Order Number
+                  Type:               Field
+                  Field Name:         LW3ORDNUM
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            - poNumber:
+                Location:           Query
+                Style:              Default
+                Required:           No
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Purchase Order Number
+                  Type:               Field
+                  Field Name:         LW3PONUM
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            - type:
+                Location:           Query
+                Style:              Default
+                Required:           No
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Type
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     ordersArray
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Success (No Content):
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      NoContent
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    - /orders/init:
+
+        Operations:
+        - GetOrdersInit:
+            Verb:               Get
+            Server Routine:     usGetOrdersInit
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     initArray
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Success (No Content):
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      NoContent
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    - /order/{order}:
+
+        Operations:
+        - GetOrderDetails:
+            Verb:               Get
+            Server Routine:     usGetOrderDetails
+            Deprecated:         No
+
+            Parameters:
+            - order:
+                Location:           Path
+                Style:              Default
+                Required:           Yes
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Order Number
+                  Type:               Field
+                  Field Name:         LW3OION
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     orderDetailsObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Bad Request:
+                Status Code:        400
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp400
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    Components:
+      Schema:
+        Types:
+        - ordersArray:
+            Description:        Orders Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     ordersObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - ordersObject:
+            Title:              order
+            Description:        Orders Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - orderNumber:
+                Description:        Order Number
+                Type:               Field
+                Field Name:         LW3OION
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - orderTotal:
+                Description:        Order Total Amount
+                Type:               Field
+                Field Name:         LW3OIOT
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - purchaseOrderNumber:
+                Description:        Purchase Order Number
+                Type:               Field
+                Field Name:         LW3OIPO
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - orderDate:
+                Description:        Order Placement Date /Time
+                Type:               Field
+                Field Name:         LW3OPDTE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - orderShippingDate:
+                Description:        Order Shipping Date
+                Type:               Field
+                Field Name:         LW3OSDTE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - trackingNumber:
+                Description:        Order Tracking Number
+                Type:               Field
+                Field Name:         LW3OITK
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - trackingURL:
+                Description:        Order Tracking URL
+                Type:               Field
+                Field Name:         LW3OIURL
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - displayedOrderTotal:
+                Description:        Display Order Total Amount
+                Type:               Field
+                Field Name:         D_OIOT
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - displayedOrderDate:
+                Description:        Order Date
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - displayedShippingDate:
+                Description:        Shipping Date
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - orderDetailsObject:
+            Description:        orderDetailsObject
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - product:
+                Type:               Reference
+                Reference Name:     orderItemsArray
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - shipTo:
+                Description:        Ship To
+                Type:               Object
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+                Properties:
+                - name:
+                    Description:        Ship To Name
+                    Type:               Field
+                    Field Name:         LW3CSNAME
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - company:
+                    Description:        Ship To Company
+                    Type:               Field
+                    Field Name:         LW3CSCPNY
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - address1:
+                    Description:        Ship To Address 1
+                    Type:               Field
+                    Field Name:         LW3SADDR1
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - address2:
+                    Description:        Ship To Address 2
+                    Type:               Field
+                    Field Name:         LW3SADDR2
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - city:
+                    Description:        Ship To City
+                    Type:               Field
+                    Field Name:         LW3CSCITY
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - state:
+                    Description:        Ship To State
+                    Type:               Field
+                    Field Name:         LW3SSTATE
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - postalCode:
+                    Description:        Ship To Postal Code
+                    Type:               Field
+                    Field Name:         LW3SPSTAL
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - country:
+                    Description:        Ship To Country
+                    Type:               Field
+                    Field Name:         LW3SCNTRY
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+            - billTo:
+                Description:        Bill To
+                Type:               Object
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+                Properties:
+                - name:
+                    Description:        Bill To Name
+                    Type:               Field
+                    Field Name:         LW3CHNAME
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - company:
+                    Description:        Bill To Company
+                    Type:               Field
+                    Field Name:         LW3CHCPNY
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - address1:
+                    Description:        Bill To Address 1
+                    Type:               Field
+                    Field Name:         LW3HADDR1
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - address2:
+                    Description:        Bill To Address 2
+                    Type:               Field
+                    Field Name:         LW3HADDR2
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - city:
+                    Description:        Bill To City
+                    Type:               Field
+                    Field Name:         LW3CHCITY
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - state:
+                    Description:        Bill To State
+                    Type:               Field
+                    Field Name:         LW3HSTATE
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - postalCode:
+                    Description:        Bill To Postal Code
+                    Type:               Field
+                    Field Name:         LW3HPSTAL
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - country:
+                    Description:        Bill To Country
+                    Type:               Field
+                    Field Name:         LW3HCNTRY
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+            - totals:
+                Description:        Order Totals
+                Type:               Object
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+                Properties:
+                - displayedOrderTotal:
+                    Description:        Displayed Order Total
+                    Type:               Field
+                    Field Name:         D_ORDTOT
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - displayedTotalCharge:
+                    Description:        Displayed Total Charges
+                    Type:               Field
+                    Field Name:         D_CHGTOT
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - displayedAmount:
+                    Description:        Displayed Amount
+                    Type:               Field
+                    Field Name:         D_AMOUNT
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - displayedTotal:
+                    Description:        Displayed Total
+                    Type:               Field
+                    Field Name:         D_TOTAL
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+            - order:
+                Description:        Order Details
+                Type:               Object
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+                Properties:
+                - customerId:
+                    Description:        Customer Number
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - orderNumber:
+                    Description:        Order Number
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - poNumber:
+                    Description:        Purchase Order
+                    Type:               Field
+                    Field Name:         LW3HPONUM
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - displayedOrderDate:
+                    Description:        Order Date
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - trackingNumber:
+                    Description:        Shipment Tracking Number
+                    Type:               Field
+                    Field Name:         LW3OITK
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - trackingURL:
+                    Description:        Order Inquiry Tracking URL
+                    Type:               Field
+                    Field Name:         LW3OIURL
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+        - orderItemsArray:
+            Description:        Order Details Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     orderItemsObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - orderItemsObject:
+            Description:        Order Details Items Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - productCode:
+                Description:        Item Code
+                Type:               Field
+                Field Name:         LW3ITEMCD
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - productDescription:
+                Description:        Item Description
+                Type:               Field
+                Field Name:         LW3IDESC
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - productColor:
+                Description:        Product Color
+                Type:               Field
+                Field Name:         LW3ICOLR
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - productSize:
+                Description:        Product Size
+                Type:               Field
+                Field Name:         LW3ISIZE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - productPrice:
+                Description:        List Price
+                Type:               Field
+                Field Name:         LW3LPRICE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - unitOfMeasure:
+                Description:        Unit of Measure
+                Type:               Field
+                Field Name:         LW3UM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - lineQuantity:
+                Description:        Quantity
+                Type:               Field
+                Field Name:         LW3QTYRQS
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - shippingDate:
+                Description:        Shipping Date
+                Type:               Field
+                Field Name:         LW3OLPDTE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - displayedUnitPrice:
+                Description:        Displayed List Price
+                Type:               Field
+                Field Name:         D_LPRICE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - displayedLineTotal:
+                Description:        Displayed Extended Price
+                Type:               Field
+                Field Name:         D_PRCEXT
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - displayedShippingDate:
+                Description:        Shipping Date
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - initArray:
+            Description:        Init Dropdown Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        init Object
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - value:
+                  Description:        value
+                  Type:               Field
+                  Field Name:         LW3CODE
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - description:
+                  Description:        Description
+                  Type:               Field
+                  Field Name:         LW3CDES
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+        - httpResponseArray:
+            Description:        Http Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        Http Response Object
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - code:
+                  Description:        Multilingual Variable Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - message:
+                  Description:        Multilingual Variable Unicode Text
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - type:
+                  Description:        Message Type
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - field:
+                  Description:        Field Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - detail:
+                  Description:        Message Detail
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - substitutions:
+                  Description:        Substitution Variable
+                  Type:               Array
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+                  Items:
+                  - Description:        value
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+      Security Schemes:
+      - HttpBearer:
+          Type:                   HTTP
+          In:                     Unspecified
+          HTTP Scheme:            Bearer
+          HTTP Bearer Format:     JWT

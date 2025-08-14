@@ -1,0 +1,681 @@
+﻿ServerModule:
+  Name:               CNSLOGIN
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Storefront Login"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Server Module
+    * Platform        : REST APIs
+    * Name            : CNSLOGIN
+    * Identifier      : CNSLOGIN
+    * Ancestor        : PRIM_SRVM
+    * Written By      : Jan Metica
+    * Written On      : 28st August 2024
+    * Description     : Storefront Login
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Begin_Com Role(*EXTENDS #PRIM_SRVM)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    Define_Com Class(#prim_srvm.HttpJsonWebToken) Name(#uJWTAccess)
+    Define_Com Class(#prim_srvm.HttpJsonWebToken) Name(#uJWTRefresh)
+    Define_Com Class(#prim_srvm.HttpJsonWebTokenSignatureHSnnn) Name(#HSnnn) Algorithm(HS384)
+    Define_Com Class(#prim_srvm.HttpJsonWebTokenSignatureRSnnn) Name(#RSnnn) Algorithm(RS256)
+    Define_Com Class(#prim_srvm.HttpJsonWebTokenSignatureESnnn) Name(#ESnnn) Algorithm(ES512)
+    Define_Com Class(#prim_srvm.HttpJsonWebTokenSignaturePSnnn) Name(#PSnnn) Algorithm(PS384)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERMLUTL) Name(#Utility_Multilinguals) Desc('Multilingual Utility') Help('Multilinguals Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    Define_Com Class(#CNRAPILG) Name(#Processor_ApiLog) Desc('API Log Processor') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Srvroutine Definitions
+    * =======================================================
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSLOGIN/login
+    * Operation: PostLogin
+    *
+    * Request
+    *    Parameter: None
+    *    Schema   : requestJson
+    
+    * Response
+    *    Schema   : (OK) loginResponseObject
+    *             : (ER) errorResponseArray
+    *
+    * Action  : Validate Storefront, then User Credentials, and then create JWT Claims and generate a GUID for Session Management
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usPostLogin) Response(*HTTP #uContext) Desc('Storefront Login') Help('Storefront Login used for both B2B and B2C')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.PostLogin) Name(#Operation)
+    Define_Com Class(#Com_Home.loginResponseObject) Name(#Object_LoginResponse)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.PostLogin.Response.Resp400.Object) Name(#Object_Operation) Reference(*DYNAMIC)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_SecureCookieName)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    * Validate that the site domain from the request, matches with a valid Storefront
+    #Global_DataModel.umGetStorefrontDetails Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    * Validate the user's login attempt
+    #COM_OWNER.umValidateUserLogin Iusername(#Operation.Request.RequestJson.Username) Iemail(#Operation.Request.RequestJson.Email.LowerCase) Ivalidatebyuser(False) Ipassword(#Operation.Request.RequestJson.Password) Ousername(#LW3WEBUSR) Oemail(#LW3CEMAIL) Ocustomerindicator(#LW3CUSIND) Ochangepasswordflag(#LW3CHPASF) Iarray_Httpresponse(#Array_HttpResponse) Oalldealers(#LW3ALLDLR) Oallowreservations(#LW3ARSVF) Oalloworders(#LW3ORDMOD) Oretailonly(#LW3CRDVIS) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    #COM_OWNER.umGetWebUserName Iusername(#LW3WEBUSR) Icustomerindicator(#LW3CUSIND) Ouserfirstname(#LW3CHFNME) Ouserlastname(#LW3CHLNME)
+    
+    #Global_DataModel.upUserId := #LW3WEBUSR
+    #Global_DataModel.upUserEmail := #LW3CEMAIL
+    #Global_DataModel.upUserIndicator := #LW3CUSIND
+    #Global_DataModel.upUserFirstName := #LW3CHFNME
+    #Global_DataModel.upUserLastName := #LW3CHLNME
+    
+    * Create a new session record that will produce a unique GUID for the user
+    #Processor_Session.umProcessSession Iwebuser(#LW3WEBUSR) Bguid(#LW3GUID) Ijsondata(#Global_DataModel.umBuildSessionPayload( #uContext.Request.Headers )) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #Processor_Session.umSetAuthTokenParms Ijwtaccess(#uJWTAccess) Ijwtrefresh(#uJWTRefresh) Iguid(#LW3GUID) Iusername(#LW3WEBUSR) Iuseremail(#LW3CEMAIL) Iuserfirstname(#LW3CHFNME) Iuserlastname(#LW3CHLNME) Ialldealers(#LW3ALLDLR) Iallowreservations(#LW3ARSVF) Ialloworders(#LW3ORDMOD) Iretailonly(#LW3CRDVIS) Oaccesstoken(#LW3ACSTKN) Orefreshtoken(#LW3RFSTKN) Ocsrftoken(#LW3CSRFTK)
+    
+    * Set the Access and Refresh Tokens as a Secure Cookies
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_ACSTKN_CK_NAME') Ilanguage('') Oalphavalue(#L_SecureCookieName)
+    
+    #uContext.Response.AddCookie Name(#L_SecureCookieName) Value(#LW3ACSTKN) Secure(False) Httponly(True) Path('/')
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_RFSTKN_CK_NAME') Ilanguage('') Oalphavalue(#L_SecureCookieName)
+    
+    #uContext.Response.AddCookie Name(#L_SecureCookieName) Value(#LW3RFSTKN) Secure(False) Httponly(True) Path('/')
+    
+    * Check if the claim for username has been successfully created or not
+    If (#uJWTAccess.Claims<'ceUserName'> *IsNot *Null)
+    
+    * Transfer field values to mapped fields in the schema "loginResponseObject"
+    Set Com(#Object_LoginResponse) Com_Fields(*ALL)
+    
+    * If LW3ALLDLR = 'Y', the user can search for all customer accounts in Account Selection
+    #Object_LoginResponse.permissions.allDealers := (#LW3ALLDLR = 'Y')
+    * If LW3ORDMOD = 'Y', then it is set to prevent ordering
+    #Object_LoginResponse.permissions.allowOrders := (#LW3ORDMOD <> 'Y')
+    * If LW3RSVF = 'Y', then reservations are allowed
+    #Object_LoginResponse.permissions.allowReservations := (#LW3ARSVF = 'Y')
+    * If LW3CRDVIS = 'Y', then the user is only shown retail prices
+    #Object_LoginResponse.permissions.retailOnly := (#LW3CRDVIS = 'Y')
+    
+    * Set the return JSON Response for "postLogin"
+    #Operation.Response.SetContentJson( #Object_LoginResponse )
+    
+    Endif
+    
+    Else
+    #LW3RETCOD := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgLoginFailed') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session record could not be created.')
+    
+    Endif
+    
+    Endif
+    
+    Endif
+    
+    Endif
+    
+    If Cond(#LW3RETCOD = 'ER')
+    Set_Ref Com(#Object_Operation) To(*CREATE_AS #Com_Home.PostLogin.Response.Resp400.Object)
+    Set Com(#Object_Operation) Messages(#Array_HttpResponse)
+    
+    #Operation.Response.SetResp400 Content(#Object_Operation)
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine : umValidateUserLogin
+    * Description: Validate User Login
+    * =======================================================
+    Mthroutine Name(umValidateUserLogin) Desc('Validate User Login') Help('Use this to validate user login. Set the parameter iValidateByUser to validate either by user or email') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iValidateByUser) Mandatory(False)
+    
+    * Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpContext) Name(#iContext) Pass(*BY_REFERENCE)
+    Define_Map For(*INPUT) Class(#COM_HOME.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Define_Map For(*INPUT) Class(#LW3WEBUSR) Name(#iUsername) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3CEMAIL) Name(#iEmail) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3USRPAS) Name(#iPassword)
+    Define_Map For(*OUTPUT) Class(#LW3WEBUSR) Name(#oUsername)
+    Define_Map For(*OUTPUT) Class(#LW3CEMAIL) Name(#oEmail)
+    * Define_Map For(*OUTPUT) Class(#LW3WEBC01) Name(#oDefaultCust)
+    Define_Map For(*OUTPUT) Class(#LW3CUSIND) Name(#oCustomerIndicator)
+    Define_Map For(*OUTPUT) Class(#LW3CHPASF) Name(#oChangePasswordFlag)
+    Define_Map For(*OUTPUT) Class(#LW3ALLDLR) Name(#oAllDealers)
+    Define_Map For(*OUTPUT) Class(#LW3ARSVF) Name(#oAllowReservations)
+    Define_Map For(*OUTPUT) Class(#LW3ORDMOD) Name(#oAllowOrders)
+    Define_Map For(*OUTPUT) Class(#LW3CRDVIS) Name(#oRetailOnly)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    Define_Com Class(#CARPASWRD) Name(#Processor_Password)
+    
+    If Cond(#iValidateByUser)
+    * *** User Name is not unique per storefront
+    Fetch Fields(#LW3WEBUSR #LW3CEMAIL #LW3EASTAT #LW3CUSVAL #LW3TMPUSR #LW3CUSIND #LW3WEBC01 #LW3PWDSLT #LW3CHPASF #LW3ALLDLR #LW3ARSVF #LW3ORDMOD #LW3CRDVIS) From_File(LW3WUSER) With_Key(#iUsername) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Else
+    Fetch Fields(#LW3WEBUSR #LW3CEMAIL #LW3EASTAT #LW3CUSVAL #LW3TMPUSR #LW3CUSIND #LW3WEBC01 #LW3PWDSLT #LW3CHPASF #LW3ALLDLR #LW3ARSVF #LW3ORDMOD) From_File(LW3USRL5) With_Key(#Global_DataModel.upStorefrontId #iEmail) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Endif
+    
+    If_Status Is(*OKAY)
+    
+    * Storefront Type and User Type should match. B2B Storefront should only cater for B2B Users and B2C likewise
+    If (*Not ((#LW3CUSIND *EQ #Global_DataModel.upStorefrontIndicator) *Or ((#LW3CUSIND *EQ *BLANK) *And (#Global_DataModel.upStorefrontIndicator *EQ 'B'))))
+    * !NC! - Log somewhere that this happened for this user/email for which storefront
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgLoginFailed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Storefront Type and User Type did not match.')
+    #oReturnCode := 'ER'
+    Return
+    Endif
+    
+    * Validate User status
+    If (#LW3EASTAT <> 'A')
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgLoginFailed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('User is inactive.')
+    #oReturnCode := 'ER'
+    Return
+    Endif
+    
+    * Validate Password
+    #LW3USRPAS := #iPassword
+    If Cond(*Not #Processor_Password.ValidatePassword( #LW3USRPAS #LW3CUSVAL #LW3PWDSLT ))
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgLoginFailed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Password is invalid.')
+    #oReturnCode := 'ER'
+    Return
+    Else
+    
+    * Check if there is a record on Password Link Timeout for the user
+    Check_For In_File(CNTPSLTO) With_Key(#LW3CEMAIL) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    * Delete the record for the User on the Password Link Timeout
+    Delete From_File(CNTPSLTO) With_Key(#LW3CEMAIL) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    * Reset the User Fields related to Forgot Password since user was able to login successfully using old password.
+    #LW3CHPASF #LW3PWDTKN := *BLANKS
+    Update Fields(#LW3CHPASF #LW3PWDTKN) In_File(LW3WUSER) With_Key(#LW3WEBUSR) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    * Error in Update
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('IO Error LW3WUSER')
+    #oReturnCode := ER
+    Return
+    Endif
+    Endif
+    Endif
+    
+    
+    
+    Endif
+    
+    * Validate Temporary User
+    * TEMPORARY USER FILTER:
+    * .....non-temporary users, log in normally
+    * .....temporary users, 1st time, log in normally
+    * .....temporary users, after the 1st time, can't log in
+    If Cond(#LW3TMPUSR = 'Y')
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgLoginFailed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Temporary user is now allowed to login.')
+    #LW3RETCOD := 'ER'
+    Return
+    
+    Else
+    * Set status to 'OK' in this final check
+    #oReturnCode := 'OK'
+    
+    If Cond(#LW3TMPUSR *EQ '1')
+    #LW3TMPUSR := 'Y'
+    Update Fields(#LW3TMPUSR) In_File(LW3WUSER) With_Key(#LW3WEBUSR) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgTest') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Could not retrieve data in LW3WUSER')
+    #oReturnCode := 'ER'
+    
+    Endif
+    
+    If Cond(#oReturnCode = 'OK')
+    #oUsername := #LW3WEBUSR
+    #oEmail := #LW3CEMAIL
+    #oCustomerIndicator := #LW3CUSIND
+    #oChangePasswordFlag := #LW3CHPASF
+    
+    #oAllDealers := #LW3ALLDLR
+    #oAllowOrders := #LW3ORDMOD
+    #oAllowReservations := #LW3ARSVF
+    #oRetailOnly := #LW3CRDVIS
+    
+    Endif
+    
+    Endroutine
+    
+    * ======================================================
+    * Mthroutine : umGetWebUserName
+    * Description: Get Web User Name
+    * ======================================================
+    Mthroutine Name(umGetWebUserName) Desc('Get Web User First Name') Access(*PRIVATE)
+    Define_Map For(*INPUT) Class(#LW3WEBUSR) Name(#iUsername)
+    Define_Map For(*INPUT) Class(#LW3CUSIND) Name(#iCustomerIndicator)
+    Define_Map For(*OUTPUT) Class(#LW3CHFNME) Name(#oUserFirstName)
+    Define_Map For(*OUTPUT) Class(#LW3CHFNME) Name(#oUserLastName)
+    
+    #LW3WEBB2C := *DEFAULT
+    
+    If Cond(#iCustomerIndicator = 'B')
+    Fetch Fields(#LW3CHFNME #LW3CHLNME) From_File(LW3WCUST) With_Key(#iCustomerIndicator #LW3WEBB2C #iUsername) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #oUserFirstName := #LW3CHFNME
+    #oUserLastName := #LW3CHLNME
+    Endif
+    Else
+    * !NC! - Need the B2C logic for retrieving first name and last name
+    Endif
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSetHttpResponseMessages
+    * Description....: Set Http Response Messages
+    * =======================================================
+    Mthroutine Name(umSetHttpResponseMessages) Desc('Set Http Response Messages') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3VARNAM) Name(#iVariableName)
+    Define_Map For(*INPUT) Class(#LW3MSGTYP) Name(#iMessageType)
+    Define_Map For(*INPUT) Class(#LW3FLDNAM) Name(#iFieldName) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iMessageDetails) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iSubstitutionVariable1) Mandatory('')
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Add_Entry To_List(#iArray_HttpResponse)
+    #iArray_HttpResponse.CurrentItem.code := #iVariableName
+    #iArray_HttpResponse.CurrentItem.type := #iMessageType
+    #iArray_HttpResponse.CurrentItem.message := #Utility_Multilinguals.umGetMultilingualText( #iVariableName #Global_DataModel.upCurrentLanguage )
+    
+    If Cond(#iFieldName <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.field := #iFieldName
+    Endif
+    If Cond(#iMessageDetails <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.detail := #iMessageDetails
+    Endif
+    If Cond(#iSubstitutionVariable1 <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.substitutions.Add Value(#iSubstitutionVariable1)
+    Endif
+    
+    Endroutine
+    
+    End_Com
+
+  API Definition:
+    Language Handling:       NoAction
+    Partition Handling:      PathVariable
+    Publish as Swagger V2:   Yes
+    Publish as OpenAPI V3:   Yes
+    ServicePath:             /CNSLOGIN
+
+    Security Requirements:
+    - Security:
+
+        Security Schemes:
+        - HTTPBasic:
+
+    Paths:
+    - /login:
+        Description:        Storefront Login
+        Summary:            Storefront Login
+
+        Operations:
+        - PostLogin:
+            Verb:               Post
+            Server Routine:     usPostLogin
+            Summary:            Storefront Login
+            Help Text:          Storefront Login
+            Ignore Security:    Yes
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+              Media Types:
+              - application/json:
+                  Media Type Id:      RequestJson
+
+                  Schema Object:
+                    Title:              Login Request Object
+                    Type:               Reference
+                    Reference Name:     loginRequestObject
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Title:              Login Response Object
+                      Type:               Reference
+                      Reference Name:     loginResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Bad Request:
+                Status Code:        400
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp400
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    Components:
+      Schema:
+        Types:
+        - loginResponseObject:
+            Title:              Login Response Object
+            Description:        Login Response Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - returnCode:
+                Description:        Return Code
+                Type:               Field
+                Field Name:         LW3RETCOD
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - passwordChangeFlag:
+                Description:        Change Password Flag
+                Type:               Field
+                Field Name:         LW3CHPASF
+                Format:             Unspecified
+                Required:           No
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - accessToken:
+                Description:        LW3ACSTKN
+                Type:               Field
+                Field Name:         LW3ACSTKN
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - csrfToken:
+                Description:        LW3CSRFTK
+                Type:               Field
+                Field Name:         LW3CSRFTK
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - refreshToken:
+                Description:        Refresh Token
+                Type:               Field
+                Field Name:         LW3RFSTKN
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - permissions:
+                Description:        Permissions
+                Type:               Object
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+                Properties:
+                - allDealers:
+                    Description:        All Dealers
+                    Type:               Boolean
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - allowReservations:
+                    Description:        Allow Reservations
+                    Type:               Boolean
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - allowOrders:
+                    Description:        Allow Orders
+                    Type:               Boolean
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                - retailOnly:
+                    Description:        Retail Pricing Only
+                    Type:               Boolean
+                    Format:             Unspecified
+                    Required:           Yes
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+        - loginRequestObject:
+            Title:              Login Request Object
+            Description:        Login Request Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - Username:
+                Description:        Username
+                Type:               String
+                Format:             Unspecified
+                Required:           No
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - Email:
+                Description:        Email Address
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - Password:
+                Description:        Password
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - httpResponseArray:
+            Title:              message
+            Description:        Http Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        Http Response Array
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - code:
+                  Description:        Multilingual Variable Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - message:
+                  Description:        Multilingual Variable Unicode Text
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - type:
+                  Description:        Message Type
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - field:
+                  Description:        Field Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - detail:
+                  Description:        Message Detail
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - substitutions:
+                  Description:        Substitution Variables
+                  Type:               Array
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+                  Items:
+                  - Description:        values
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+      Security Schemes:
+      - HttpBasic:
+          Type:                   HTTP
+          In:                     Unspecified
+          HTTP Scheme:            Bearer
+          HTTP Bearer Format:     JWT

@@ -1,0 +1,588 @@
+﻿File:
+  Name:                           LW3CARTH
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3CARTH
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(10000     2000      3         ) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Shopping Cart Header"
+
+  Real Fields:
+  - LW3SESSID:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
+  - LW3ORDNUM:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - LW3CODATE:
+      Type:               Alphanumeric
+      Length:             8
+      Decimals:           0
+
+  - LW3HDRSTS:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3OSTSDT:
+      Type:               Alphanumeric
+      Length:             8
+      Decimals:           0
+
+  - LW3OSHPTY:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3OWEGHT:
+      Type:               Decimal
+      Length:             13
+      Decimals:           5
+
+  - LW3ITMTOT:
+      Type:               Decimal
+      Length:             15
+      Decimals:           2
+
+  - LW3CODISC:
+      Type:               Decimal
+      Length:             15
+      Decimals:           2
+
+  - LW3COSHIP:
+      Type:               Decimal
+      Length:             15
+      Decimals:           2
+
+  - LW3ITMCNT:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
+  - LW3ORDTOT:
+      Type:               Decimal
+      Length:             15
+      Decimals:           2
+
+  - LW3ODISC:
+      Type:               Decimal
+      Length:             15
+      Decimals:           2
+
+  - LW3WEBUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3WEBSHP:
+      Type:               Signed
+      Length:             3
+      Decimals:           0
+
+  - LW3CUSIND:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3ASSIND:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3REGCUS:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3HPYTYP:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - LW3HCCTYP:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - LW3HCCNAM:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3HCCNUM:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3HCCMTH:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - LW3HCCYER:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3HPONUM:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - LW3TAXTOT:
+      Type:               Decimal
+      Length:             15
+      Decimals:           2
+
+  - LW3ASSC01:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3WEBC01:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3IS001:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3PROMID:
+      Type:               Signed
+      Length:             8
+      Decimals:           0
+
+  - LW3STDSHP:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3NDASHP:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3RSPCDE:
+      Type:               Alphanumeric
+      Length:             6
+      Decimals:           0
+
+  - LW3CCMESG:
+      Type:               Alphanumeric
+      Length:             70
+      Decimals:           0
+
+  - LW3REFRID:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - LW3APPCDE:
+      Type:               Alphanumeric
+      Length:             6
+      Decimals:           0
+
+  - LW3SHPDTE:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CANDTE:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CARACT:
+      Type:               Alphanumeric
+      Length:             15
+      Decimals:           0
+
+  - LW3TAXCOD:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3SHIPID:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3UITMCT:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
+  - LW3SHPTRK:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - LW3RQSDTH:
+      Type:               Signed
+      Length:             8
+      Decimals:           0
+
+  Primary Keys:
+  - LW3SESSID
+  - LW3ORDNUM
+
+  Virtual Fields:
+  - LW3ODATEV:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+      Virtual Field Type: Date Conversion
+      Derive On Input:    Yes
+      Derive On Output:   No
+      Source Field:       LW3CODATE
+      Source Date Format: YYYYMMDD
+      Target Date Format: SYSFMT
+
+  - LW3STSDTV:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+      Virtual Field Type: Date Conversion
+      Derive On Input:    Yes
+      Derive On Output:   No
+      Source Field:       LW3OSTSDT
+      Source Date Format: YYYYMMDD
+      Target Date Format: SYSFMT
+
+  Logical Views:
+  - LW3HDRL1:
+      Identifier:         LW3HDRL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3HDRL1
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Webuser/Session ID"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3SESSID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - LW3HDRL10:
+      Identifier:         LW3HDRL10
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3HDRL10
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Customer and Date"
+
+      Keys:
+      - LW3WEBC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CODATE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3HDRL11:
+      Identifier:         LW3HDRL11
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3HDRL11
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Web User/Customer/Type/Order Date"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3WEBC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3HDRSTS:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CODATE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3HDRL12:
+      Identifier:         LW3HDRL12
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3HDRL12
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By PO num/Web user"
+
+      Keys:
+      - LW3HPONUM:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3HDRL2:
+      Identifier:         LW3HDRL2
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3HDRL2
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Session ID"
+
+      Keys:
+      - LW3SESSID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - LW3HDRL3:
+      Identifier:         LW3HDRL3
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3HDRL3
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Session ID / Order Number"
+
+      Keys:
+      - LW3SESSID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - LW3ORDNUM:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3HDRL4:
+      Identifier:         LW3HDRL4
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3HDRL4
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Webuser Id/Order Date/Order Number"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CODATE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3ORDNUM:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3HDRL5:
+      Identifier:         LW3HDRL5
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3HDRL5
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Webuser Id/Order Status/Order Number"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3HDRSTS:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3ORDNUM:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3HDRL6:
+      Identifier:         LW3HDRL6
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3HDRL6
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Webuser/Order Number"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3ORDNUM:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3HDRL7:
+      Identifier:         LW3HDRL7
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3HDRL7
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Amended by ADAPTOR"
+
+      Keys:
+      - LW3WEBC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3WEBSHP:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - LW3HDRL8:
+      Identifier:         LW3HDRL8
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3HDRL8
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Order Number"
+
+      Keys:
+      - LW3ORDNUM:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3HDRL9:
+      Identifier:         LW3HDRL9
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3HDRL9
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Orde date"
+
+      Keys:
+      - LW3CODATE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  Access Routes:
+  - LW3CARTH01:
+      Description:        LW3CARTD
+      File:               LW3CARTD
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3SESSID
+      - LW3ORDNUM
+
+  - LW3CARTH02:
+      Description:        LW3CARTS
+      File:               LW3CARTS
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3SESSID
+
+  - STATDES:
+      Description:        Header Status Description
+      File:               LW3CODES
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    1
+      Default Action:     Ignore
+      Keep Last:          2
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - "'HDRSTS'"
+      - LW3HDRSTS
+
+      PJFs:
+      - LW3HDRSTD:
+          PJF Type:           Lookup
+          Source Field:       LW3CDES

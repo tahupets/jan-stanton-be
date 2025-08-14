@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3UITMCT
+  Type:               Signed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          1
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Unique item count"
+      Label:              "Unique item cou"
+      Heading1:           "Unique"
+      Heading2:           "item"
+      Heading3:           "count"

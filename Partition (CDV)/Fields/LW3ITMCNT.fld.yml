@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3ITMCNT
+  Type:               Signed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          1
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Item Total Count"
+      Label:              "Total Items"
+      Heading1:           "Total"
+      Heading2:           "Items"
+      Heading3:           " "

@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               LW3CURCD
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Currency Code"
+      Label:              "Currency Code"
+      Heading1:           "Cur"
+      Heading2:           "Cde"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(187) Usepicklist(False) Width(241)
+    
+    End_Com
+    
+    End_Com

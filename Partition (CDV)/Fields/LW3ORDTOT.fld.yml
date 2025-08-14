@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3ORDTOT
+  Type:               Packed
+  Length:             15
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Edit Mask:          J
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Order Total"
+      Label:              "Order Total"
+      Heading1:           "Order"
+      Heading2:           "Total"
+      Heading3:           " "

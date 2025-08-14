@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3TSSYM
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Thousands separator symbol"
+      Label:              "Thousands separ"
+      Heading1:           "Thousands"
+      Heading2:           "separator"
+      Heading3:           "symbol"

@@ -1,0 +1,36 @@
+﻿Process:
+  Name:                      LW3GEN
+  Menu Style:                SAA/CUA
+  Anticipated Usage:         Light
+  Optimize For Remote Comms: No
+  Enable For Web:            Yes
+  Generate XML:              No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Commerce Edition General Functions"
+
+  Functions:
+  - LW3GN01:
+      Name:               LW3GN01
+      Display on Menu:    Yes
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Maintain Session ID"
+
+      Allowed Next Functions:
+      - "*ANY"
+
+  - LW3GN08:
+      Name:               LW3GN08
+      Display on Menu:    Yes
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Password Encryption"
+
+      Allowed Next Functions:
+      - "*ANY"

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3RETCOD
+  Type:               Alpha
+  Length:             2
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Return code for dropdown list"
+      Label:              "Return code for"
+      Heading1:           "Return"
+      Heading2:           "Code"
+      Heading3:           "For"

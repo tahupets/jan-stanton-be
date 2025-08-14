@@ -1,0 +1,24 @@
+﻿Process:
+  Name:                      LW3MLAPI
+  Menu Style:                SAA/CUA
+  Anticipated Usage:         Light
+  Optimize For Remote Comms: No
+  Enable For Web:            No
+  Generate XML:              No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Multilingual API"
+
+  Functions:
+  - LW3MSG:
+      Name:               LW3MSG
+      Display on Menu:    Yes
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Multilingual Message API"
+
+      Allowed Next Functions:
+      - "*ANY"

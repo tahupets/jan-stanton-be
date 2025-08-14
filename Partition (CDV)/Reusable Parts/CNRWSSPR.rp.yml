@@ -267,7 +267,7 @@
     * #uCryptoKey.FromRandomBytes Bytecount(16)
     * #LW3PWDSLT := #uCryptoKey.AsHexString
     
-    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('CSRF_TOKEN_SECRET_KEY') Ilanguage('') Oalphavalue(#L_JWT_SecretKey)
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('CSRF_TKN_SECRET_KEY') Ilanguage('') Oalphavalue(#L_JWT_SecretKey)
     #uPasswordBytes.FromStringUsingUTF8 String(#L_JWT_SecretKey + (*YYYYMMDDC + *TIMEC))
     * #uSaltBytes.FromStringUsingUTF8 String(#LW3PWDSLT)
     

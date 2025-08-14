@@ -117,7 +117,8 @@
     If_Status Is(*OKAY)
     #LW3USEDTK := 'Y'
     Update Fields(#LW3USEDTK) In_File(CNTAUTKNL2) Io_Error(*NEXT) Val_Error(*NEXT)
-    #LW3RETCOD := 'OK'
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Oreturncode(#LW3RETCOD)
     Endif
     
     Endif
@@ -129,7 +130,7 @@
     If Cond(#LW3RETCOD = 'OK')
     
     * Create a new Access, Refresh, and CSRF Token
-    #Processor_Session.umSetAuthTokenParms Ijwtaccess(#uJWTAccess) Ijwtrefresh(#uJWTRefresh) Iguid(#LW3GUID) Iusername(#Global_DataModel.upUserId) Iuseremail(#Global_DataModel.upUserEmail) Iuserfirstname(#Global_DataModel.upUserFirstName) Iuserlastname(#Global_DataModel.upUserLastName) Oaccesstoken(#LW3ACSTKN) Orefreshtoken(#LW3RFSTKN) Ocsrftoken(#LW3CSRFTK)
+    #Processor_Session.umSetAuthTokenParms Ijwtaccess(#uJWTAccess) Ijwtrefresh(#uJWTRefresh) Iguid(#LW3GUID) Iusername(#Global_DataModel.upUserId) Iuseremail(#Global_DataModel.upUserEmail) Iuserfirstname(#Global_DataModel.upUserFirstName) Iuserlastname(#Global_DataModel.upUserLastName) Ialldealers(#Global_DataModel.upAllDealers) Ialloworders(#Global_DataModel.upAllowOrders) Iallowreservations(#Global_DataModel.upAllowReservations) Iretailonly(#Global_DataModel.upRetailOnly) Oaccesstoken(#LW3ACSTKN) Orefreshtoken(#LW3RFSTKN) Ocsrftoken(#LW3CSRFTK)
     
     If Cond(#LW3ACSTKN <> *BLANKS)
     
@@ -257,7 +258,7 @@
     If Cond(#LW3RETCOD = 'OK')
     
     * Create a new Access, Refresh, and CSRF Token
-    #Processor_Session.umSetAuthTokenParms Ijwtaccess(#uJWTAccess) Ijwtrefresh(#uJWTRefresh) Iguid(#LW3GUID) Iusername(#Global_DataModel.upUserId) Iuseremail(#Global_DataModel.upUserEmail) Iuserfirstname(#Global_DataModel.upUserFirstName) Iuserlastname(#Global_DataModel.upUserLastName) Oaccesstoken(#LW3ACSTKN) Orefreshtoken(#LW3RFSTKN) Ocsrftoken(#LW3CSRFTK)
+    #Processor_Session.umSetAuthTokenParms Ijwtaccess(#uJWTAccess) Ijwtrefresh(#uJWTRefresh) Iguid(#LW3GUID) Iusername(#Global_DataModel.upUserId) Iuseremail(#Global_DataModel.upUserEmail) Iuserfirstname(#Global_DataModel.upUserFirstName) Iuserlastname(#Global_DataModel.upUserLastName) Ialldealers(#Global_DataModel.upAllDealers) Ialloworders(#Global_DataModel.upAllowOrders) Iallowreservations(#Global_DataModel.upAllowReservations) Iretailonly(#Global_DataModel.upRetailOnly) Oaccesstoken(#LW3ACSTKN) Orefreshtoken(#LW3RFSTKN) Ocsrftoken(#LW3CSRFTK)
     
     If Cond(#LW3ACSTKN <> *BLANKS)
     
@@ -614,7 +615,7 @@
             WriteOnly:          No
 
             Properties:
-            - LW3ACSTKN:
+            - accessToken:
                 Description:        Access Token
                 Type:               Field
                 Field Name:         LW3ACSTKN
@@ -624,7 +625,7 @@
                 ReadOnly:           No
                 WriteOnly:          No
 
-            - LW3CSRFTK:
+            - csrfToken:
                 Description:        LW3CSRFTK
                 Type:               Field
                 Field Name:         LW3CSRFTK
@@ -634,7 +635,7 @@
                 ReadOnly:           No
                 WriteOnly:          No
 
-            - LW3RFSTKN:
+            - refreshToken:
                 Description:        LW3RFSTKN
                 Type:               Field
                 Field Name:         LW3RFSTKN

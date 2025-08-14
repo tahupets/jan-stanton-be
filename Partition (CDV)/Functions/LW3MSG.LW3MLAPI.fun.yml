@@ -1,0 +1,78 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * =======================================================
+    * Process .......: LW3MLAPI
+    * Function ......: LW3MSG
+    * Description ...: Multilingual Messaging API
+    * =======================================================
+    * INPUT Parms:
+    * =======================================================
+    * #LW3VARNAM - Message ML variable name
+    * #LW3LNGID - Language code
+    * #LW3MSGSUB - Substitution variable data
+    * =======================================================
+    * OUTPUT Parms:
+    * =======================================================
+    *
+    * =======================================================
+    *
+    Function Options(*DIRECT *HEAVYUSAGE)
+    
+    * Working fields, lists and groups
+    * =======================================================
+    Define Field(#w_index) Type(*DEC) Length(3) Decimals(0)
+    Define Field(#w_msgtxt) Type(*CHAR) Length(400) Input_Atr(LC)
+    *
+    * =======================================================
+    * Program Mainline
+    * =======================================================
+    
+    Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key(#LW3VARNAM #LW3LNGID) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If Cond(#io$sts ^= OK)
+    
+    Message Msgtxt('Message: ' + #LW3VARNAM + ' not found.')
+    
+    Else
+    
+    If Cond(#LW3MSGSUB *NE *BLANK)
+    
+    #w_msgtxt := #LW3VARTXT.Replace( '&1' #LW3MSGSUB )
+    
+    Else
+    
+    #w_msgtxt := #LW3VARTXT
+    
+    Endif
+    
+    
+    Dowhile Cond(#w_msgtxt.CurChars > 80)
+    
+    #w_index := #w_msgtxt.Substring( 1 80 ).LastPositionOf( ' ' )
+    
+    If Cond(#w_index = 0)
+    
+    Message Msgtxt(#w_msgtxt.Substring( 1 80 ))
+    
+    #w_msgtxt := #w_msgtxt.Substring( 81 )
+    
+    Else
+    
+    Message Msgtxt(#w_msgtxt.Substring( 1 #w_index ))
+    
+    #w_msgtxt := #w_msgtxt.Substring( (#w_index + 1) )
+    
+    Endif
+    
+    Endwhile
+    
+    If Cond(#w_msgtxt *NE *blank)
+    Message Msgtxt(#w_msgtxt)
+    Endif
+    Endif
+    
+    
+    Return
+    

@@ -1,0 +1,24 @@
+﻿Process:
+  Name:                      LW3API2
+  Menu Style:                SAA/CUA
+  Anticipated Usage:         Light
+  Optimize For Remote Comms: No
+  Enable For Web:            No
+  Generate XML:              No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Supplier Portal API functions"
+
+  Functions:
+  - LW3ASUP:
+      Name:               LW3ASUP
+      Display on Menu:    Yes
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Supplier Master API caller"
+
+      Allowed Next Functions:
+      - "*ANY"

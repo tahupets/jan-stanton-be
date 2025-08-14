@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               LW3B2BIND
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "B2B Indicator"
+      Label:              "B2B Indicator"
+      Heading1:           "B2B"
+      Heading2:           "Indicator"
+      Heading3:           " "

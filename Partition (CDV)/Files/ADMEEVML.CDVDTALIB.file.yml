@@ -1,0 +1,50 @@
+﻿File:
+  Name:                           ADMEEVML
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             ADMEEVML
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 100000 10000 10) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Email Events ML Description"
+
+  Real Fields:
+  - EEVID:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - LW3LNGCOD:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - EEVDSC:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  Primary Keys:
+  - EEVID
+  - LW3LNGCOD

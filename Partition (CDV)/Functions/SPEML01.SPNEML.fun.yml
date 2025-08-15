@@ -1,0 +1,774 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * ====================================================
+    * Process ........:  SPNEML
+    * Function .......:  SPEML01
+    * Description ....:  Generic Email function
+    * =======================================================
+    * Modification History
+    * =======================================================
+    * REF         PROGRAMMER  DATE
+    * AAAAAAAAAA  UUUUUUUUUU  YY/MM/DD
+    * XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    * =======================================================
+    * Utilities
+    * =======================================================
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERMLUTL) Name(#Utility_Multilinguals) Desc('Multilingual Utility') Help('Multilinguals Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Working fields, lists and groups
+    * =======================================================
+    Define Field(#W_ERROR) Type(*BOOLEAN)
+    Define Field(#W_EMLHDLE) Reffld(#S_REFJHD)
+    Define Field(#W_FILHDLE) Reffld(#S_REFJHD)
+    Define Field(#W_EMLOPEN) Type(*BOOLEAN)
+    Define Field(#W_EMLLOAD) Type(*BOOLEAN)
+    Define Field(#W_ATTCHMT) Reffld(#S_REFFIL)
+    Define Field(#W_ATTTYP) Reffld(#S_REFATP)
+    Define Field(#W_FILE) Reffld(#S_REFFIL)
+    Define Field(#W_ADDRESS) Reffld(#EEDREM)
+    Define Field(#W_DSPNAME) Reffld(#EEDRNM)
+    Define Field(#W_RETCDE) Type(*CHAR) Length(2)
+    Define Field(#W_JSMTRCE) Type(*CHAR) Length(6)
+    
+    Define Field(#W_PATH) Type(*CHAR) Length(40)
+    Define Field(#w_handle) Type(*DEC) Length(3) Decimals(0)
+    
+    * event file
+    Group_By Name(#ADMEEV) Fields(#EEVID #EEVENM #EEVDSC #EEVUDS #EEVADT #EEVATM #EEVAFN #EEVAUR #EEVCDT #EEVCTM #EEVCFN #EEVCUR #LW3SFID)
+    * event email file
+    Group_By Name(#ADMEEC) Fields(#EECEID #EECCSQ #EECCID #EECSBJ #EECSEM #EECSNM #EECADT #EECATM #EECAFN #EECAUR #EECCDT #EECCTM #EECCFN #EECCUR)
+    * event email recipient file
+    Group_By Name(#ADMEED) Fields(#EEDEID #EEDCSQ #EEDDSQ #EEDRTY #EEDREM #EEDRNM #EEDRDL #EEDADT #EEDATM #EEDAFN #EEDAUR #EEDCDT #EEDCTM #EEDCFN #EEDCUR)
+    * content file
+    Group_By Name(#ADMCNT) Fields(#CNTLNG #APPLID #CONTID #CNTVER #CNTFMT #CTYPID #CNTDSC #CNTDTA #EECATC #EECATP)
+    
+    * ATTACHMENT FILE LIST
+    Def_List Name(#FILELIST) Fields(#W_FILE) Type(*WORKING)
+    * Event email list
+    Def_List Name(#EMLLIST) Fields(#EECCSQ) Type(*WORKING)
+    * TO LIST
+    Def_List Name(#TOLIST) Fields(#W_ADDRESS #W_DSPNAME) Type(*WORKING)
+    * TO LIST
+    Def_List Name(#CCLIST) Fields(#W_ADDRESS #W_DSPNAME) Type(*WORKING)
+    * TO LIST
+    Def_List Name(#BCCLIST) Fields(#W_ADDRESS #W_DSPNAME) Type(*WORKING)
+    * DYNAMIC RECIPIENT LIST
+    Def_List Name(#DYMRCPLST) Fields(#EEDREM #EEDRNM #EEDRTY) Type(*WORKING)
+    * BODY LIST NO FILE
+    Def_List Name(#BODYLST) Fields(#S_CNTDTA) Type(*WORKING) Entrys(*MAX)
+    * BODY LIST FROM A FILE
+    Def_List Name(#bodylst2) Fields(#S_CNTTXT) Type(*WORKING) Entrys(*MAX)
+    
+    * sender name and email overrides
+    Define Field(#W_EECSEM) Reffld(#EECSEM)
+    Define Field(#W_EECSNM) Reffld(#EECSNM)
+    
+    Define Field(#W_SPNESJ) Reffld(#SPNESJ)
+    
+    Def_List Name(#ERRORLST) Fields(#S_STSMSG) Type(*WORKING)
+    
+    Define Field(#W_MAIL_SERVER) Type(*STRING) Length(6)
+    
+    
+    * =======================================================
+    * Input Parameters - BY EXCHANGE
+    * =======================================================
+    * Event ID:            #EEVID   (The given Event to send emails for)
+    * Language ID:         #S_LANG (The language of the email content)
+    * Recipient List:      #DYMRCPLST  (A list of recipients to send emails to.  Recepients in this list will be appended to the recipeint list determined by the Event ID
+    * Attachment:          #S_EMLATC (Additional attachment(s) to be included in addition to those specified by the Event ID)
+    * Attachment Type:     #S_EMLATP (Indicates whether attachement is a file or directory; VALUES: F(ile),D(irectory),N(one))
+    * Content Override:    #S_CNTOVR (Content of Body- overrides body content from ADMCNT)
+    * Cnt Override Type:   #S_CNTTYP (Content override type- indicates whether S_CNTOVR is a file location (F) or the actual data (C))
+    * Transactoin ID:      #S_PRMTID (A unique ID used for substitution variables)
+    * =======================================================
+    * Output Parameters - BY EXCHANGE
+    * =======================================================
+    * Email Status:        #S_STATUS (Indicates whether email was sent successfully)
+    * Email Message:       #S_STSMSG (Status message)
+    * =======================================================
+    * Program Mainline : SPEML01
+    * =======================================================
+    Function Options(*DIRECT) Rcv_List(#DYMRCPLST)
+    
+    Clr_List Named(#ERRORLST)
+    
+    Execute Subroutine(CHECKPARMS)
+    Execute Subroutine(INITIALIZE)
+    
+    * fetch event information
+    Fetch Fields(#ADMEEV) From_File(ADMEEV) With_Key(#EEVID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    * LOG ERROR
+    Change Field(#W_ERROR) To(TRUE)
+    #W_ERROR := TRUE
+    #S_STSMSG := 'Error retrieving event information'
+    Add_Entry To_List(#ERRORLST)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    Else
+    * get list of event email sequences to process
+    Exchange Fields(#EEVID)
+    Call Process(*DIRECT) Function(SPEML02) If_Error(*NEXT) Pass_Lst(#EMLLIST)
+    
+    * connect to JSM
+    Execute Subroutine(CONNECT)
+    Selectlist Named(#EMLLIST)
+    * for each event email
+    If (#W_ERROR.IsFalse)
+    Execute Subroutine(BUILDEMAIL)
+    Endif
+    If (#W_ERROR.IsFalse)
+    * get content
+    Execute Subroutine(GETCNT)
+    If (#W_ERROR.IsFalse)
+    * send email
+    Execute Subroutine(SENDEMAIL)
+    Else
+    #S_STSMSG := 'Error retrieving content'
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    Endif
+    Else
+    #S_STSMSG := 'Error building email'
+    Add_Entry To_List(#ERRORLST)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    Endif
+    Endselect
+    * disconnect from JSM
+    Execute Subroutine(JSMEMLEND)
+    
+    Endif
+    
+    Execute Subroutine(FINALIZE)
+    Exchange Fields(#S_CNTDTA)
+    Return
+    
+    * =======================================================
+    * Subroutine ....: INITIALIZE
+    * Description....: Initialize function
+    * =======================================================
+    Subroutine Name(INITIALIZE)
+    #W_EMLOPEN := FALSE
+    #W_EMLLOAD := FALSE
+    * retrieve configuration details
+    * JSM trace
+    Fetch Fields(#CFGVAL) From_File(ADMECF) With_Key(JSM_TRACE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If (#CFGVAL *EQ *BLANKS)
+    #W_JSMTRCE := '*YES'
+    Else
+    #W_JSMTRCE := #CFGVAL.Trim
+    Endif
+    #S_STATUS := OK
+    Endroutine
+    
+    * =======================================================
+    * Subroutine ....: FINALIZE
+    * Description....: Finalize function
+    * =======================================================
+    Subroutine Name(FINALIZE)
+    If (#W_ERROR)
+    #S_STATUS := ER
+    Else
+    #s_status := OK
+    #S_STSMSG := 'Email(s) Sent.'
+    Endif
+    
+    Exchange Fields(#S_STATUS #S_STSMSG)
+    Endroutine
+    
+    * =======================================================
+    * Subroutine ....: CHECKPARMS
+    * Description....: Check input parameters
+    * =======================================================
+    Subroutine Name(CHECKPARMS)
+    If (#EEVID *EQ *ZEROS)
+    #W_ERROR := TRUE
+    #S_STSMSG := 'Event ID not specified.'
+    Add_Entry To_List(#ERRORLST)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    Endif
+    Endroutine
+    
+    * =======================================================
+    * Subroutine ....: Keywrd
+    * Description....: Helps build the JSM command string
+    * =======================================================
+    Subroutine Name(KEYWRD) Parms((#W_KEYWORD *RECEIVED) (#W_KEYVAL1 *RECEIVED))
+    Define Field(#W_KEYWORD) Reffld(#STD_TEXT)
+    Define Field(#W_KEYVAL1) Type(*CHAR) Length(200)
+    Use Builtin(BCONCAT) With_Args(#JSMCMD #W_KEYWORD) To_Get(#JSMCMD)
+    Use Builtin(TCONCAT) With_Args(#JSMCMD '(' #W_KEYVAL1 ')') To_Get(#JSMCMD)
+    Endroutine
+    
+    * --------------------------------------------------
+    * Subroutine ....: CHECK_STS
+    * Description ..: Check JSM command status
+    * --------------------------------------------------
+    Subroutine Name(CHECK_STS)
+    If Cond('#JSMSTS *NE OK')
+    * returned status set to errror
+    Change Field(#W_ERROR) To(TRUE)
+    * If this is an unrecoverable error, abort
+    #S_STSMSG := #JSMMSG
+    Add_Entry To_List(#ERRORLST)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    Endif
+    Endroutine
+    
+    * --------------------------------------------------
+    * Subroutine ....: CONNECT
+    * Description ..: Connect to JSM and load SMTP Service
+    * --------------------------------------------------
+    Subroutine Name(CONNECT)
+    * CHANGE FIELD(#W_ERROR) TO(FALSE)
+    * Open the JSM service.
+    Change Field(#JSMCMD) To('''JSMX_OPEN''')
+    Use Builtin(JSMX_OPEN) To_Get(#JSMSTS #JSMMSG #W_EMLHDLE)
+    * USE BUILTIN(JSMX_OPEN) WITH_ARGS('10.1.0.110:4590') TO_GET(#JSMSTS #JSMMSG #W_EMLHDLE)
+    Execute Subroutine(CHECK_STS)
+    If (#JSMSTS *EQ OK)
+    #W_EMLOPEN := TRUE
+    * load SMTP Service
+    #JSMCMD := 'SERVICE_LOAD'
+    Execute Subroutine(KEYWRD) With_Parms('SERVICE' 'SMTPMAILSERVICE')
+    Execute Subroutine(KEYWRD) With_Parms('TRACE' #W_JSMTRCE)
+    Execute Subroutine(KEYWRD) With_Parms('TRACE_NAME' *FUNCTION)
+    Use Builtin(JSMX_COMMAND) With_Args(#W_EMLHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG)
+    Execute Subroutine(CHECK_STS)
+    If (#JSMSTS *EQ OK)
+    #W_EMLLOAD := TRUE
+    Endif
+    Endif
+    Endroutine
+    
+    * --------------------------------------------------
+    * Subroutine ....: GETALIST
+    * Description ..: Get Attachment list
+    * -------------------------------------------------
+    Subroutine Name(GETALIST) Parms((#W_ATTCHMT *RECEIVED) (#W_ATTTYP *RECEIVED))
+    Case Of_Field(#W_ATTTYP)
+    When Value_Is(= 'D')
+    * Multiple attachements from a directory
+    Execute Subroutine(BLD_LISTO)
+    When Value_Is(= 'F')
+    * Attachement is a file
+    Change Field(#W_FILE) To(#W_ATTCHMT)
+    Add_Entry To_List(#FILELIST)
+    When Value_Is(= 'N')
+    * No attachement
+    Otherwise
+    Endcase
+    Endroutine
+    
+    * --------------------------------------------------
+    * Subroutine ....: BLD_LIST0
+    * Description ..: Build attachment list
+    * -------------------------------------------------
+    Subroutine Name(BLD_LISTO)
+    #JSMCMD := JSMX_OPEN
+    * USE BUILTIN(JSMX_OPEN) WITH_ARGS('localhost:4560') TO_GET(#JSMSTS #JSMMSG #W_FILHDLE)
+    * USE BUILTIN(JSMX_OPEN) TO_GET(#JSMSTS #JSMMSG #W_FILHDLE)
+    Execute Subroutine(CHECK_STS)
+    If (#JSMSTS *NE OK)
+    * #W_ERROR := true
+    * Add_Entry To_List(#ERRORLST)
+    Else
+    #JSMCMD := 'SERVICE_LOAD'
+    Execute Subroutine(KEYWRD) With_Parms('SERVICE' 'XMLFILESERVICE')
+    Execute Subroutine(KEYWRD) With_Parms('TRACE' #W_JSMTRCE)
+    Execute Subroutine(KEYWRD) With_Parms('TRACE_NAME' *FUNCTION)
+    Use Builtin(JSMX_COMMAND) With_Args(#W_FILHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG)
+    Execute Subroutine(CHECK_STS)
+    If (#JSMSTS *NE OK)
+    * #W_ERROR := true
+    * Add_Entry To_List(#ERRORLST)
+    Else
+    Clr_List Named(#FILELIST)
+    #JSMCMD := 'LIST'
+    Execute Subroutine(KEYWRD) With_Parms('DIR' #W_ATTCHMT)
+    Execute Subroutine(KEYWRD) With_Parms('SERVICE_LIST' W_FILE)
+    Use Builtin(JSMX_COMMAND) With_Args(#W_FILHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG #FILELIST)
+    Execute Subroutine(CHECK_STS)
+    Endif
+    #JSMCMD := SERVICE_UNLOAD
+    Use Builtin(JSMX_COMMAND) With_Args(#W_FILHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG)
+    * EXECUTE SUBROUTINE(LOGJSMSBR)
+    #JSMCMD := JSMX_CLOSE
+    Use Builtin(JSMX_CLOSE) With_Args(#W_FILHDLE) To_Get(#JSMSTS #JSMMSG)
+    * ADD LOGGING
+    Endif
+    Endroutine
+    * --------------------------------------------------
+    * Subroutine ....: GETRCPLSTS
+    * Description ..: Get recipient listS
+    * -------------------------------------------------
+    Subroutine Name(GETRCPLSTS)
+    Clr_List Named(#TOLIST)
+    Clr_List Named(#CCLIST)
+    Clr_List Named(#BCCLIST)
+    * build base recipient
+    Select Fields(#ADMEED) From_File(ADMEED) With_Key(#EEVID #EECCSQ) Io_Error(*NEXT) Val_Error(*NEXT)
+    #W_ADDRESS := #EEDREM
+    #W_DSPNAME := #EEDRNM
+    If (#EEDRTY *EQ TO)
+    Add_Entry To_List(#TOLIST)
+    Endif
+    If (#EEDRTY *EQ CC)
+    Add_Entry To_List(#CCLIST)
+    Endif
+    If (#EEDRTY *EQ BCC)
+    Add_Entry To_List(#BCCLIST)
+    Endif
+    Endselect
+    
+    * append dynamic recepients
+    Selectlist Named(#DYMRCPLST)
+    #W_ADDRESS := #EEDREM
+    #W_DSPNAME := #EEDRNM
+    If (#EEDRTY *EQ TO)
+    Add_Entry To_List(#TOLIST)
+    Endif
+    If (#EEDRTY *EQ CC)
+    Add_Entry To_List(#CCLIST)
+    Endif
+    If (#EEDRTY *EQ BCC)
+    Add_Entry To_List(#BCCLIST)
+    Endif
+    
+    Endselect
+    
+    Endroutine
+    
+    * --------------------------------------------------
+    * Subroutine ....: BUILDEMAIL
+    * Description ..: Build email
+    * -------------------------------------------------
+    Subroutine Name(BUILDEMAIL)
+    * FETCH EVENT EMAIL DETAILS
+    Fetch Fields(#ADMEEC) From_File(ADMEEC) With_Key(#EEVID #EECCSQ *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If_Status Is_Not(*OKAY)
+    * LOG ERROR
+    #W_ERROR := TRUE
+    #S_STSMSG := 'Error retrieving event email information (admeec) using keys: ' + #eevid.AsString + ', ' + #EECCSQ.AsString
+    Add_Entry To_List(#ERRORLST)
+    #STD_TEXT := ' 1 / ' + #eevid.AsString
+    #LW3VARNAM := MSG_LW32324
+    #LW3LNGID := *LANGUAGE
+    #LW3MSGSUB := #STD_TEXT
+    Execute Subroutine(SEND_MSG)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    Else
+    * Retrieve content via black box call
+    #LW3APLID := #lw3sfid
+    #LW3UTYP := E
+    #LW3EMLID := #EEVID
+    
+    Exchange Fields(#LW3APLID #LW3UTYP #LW3EMLID)
+    
+    Call Process(*DIRECT) Function(CM_BBOX) If_Error(*NEXT)
+    
+    #CNTDTA := #LW3CNTSTR
+    
+    If Cond(#LW3RETCOD *NE OK)
+    * LOG ERROR
+    #W_ERROR := TRUE
+    #STD_TEXT := ' 2 / ' + #eevid.AsString
+    #LW3VARNAM := MSG_LW32324
+    #LW3LNGID := *LANGUAGE
+    #LW3MSGSUB := #STD_TEXT
+    Execute Subroutine(SEND_MSG)
+    #S_STSMSG := #LW3RETMSG
+    Add_Entry To_List(#ERRORLST)
+    
+    Else
+    * build recipient lists
+    Execute Subroutine(GETRCPLSTS)
+    
+    * Get the System Setting Value for SMTP Mail Server
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('MAIL_SERVER') Ilanguage('ENG') Oalphavalue(#W_MAIL_SERVER)
+    * Check if the Mail Server is pointed to the Solutions SMTP Server
+    If (#W_MAIL_SERVER = 'SPEML1')
+    
+    * Only need to setup the Solutions SMTP Server, no need to setup Port and User Credentials
+    * set recipient list
+    * #JSMCMD := 'SET'
+    * get server from code file
+    Fetch Fields(#LW3CDES) From_File(LW3CODES) With_Key(#W_MAIL_SERVER SRV *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    #W_ERROR := true
+    #S_STSMSG := ('Add a record to file-LW3CODES, with key &1 SRV').Substitute( #W_MAIL_SERVER )
+    Add_Entry To_List(#ERRORLST)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    
+    Else
+    #S_STSMSG := #LW3CDES
+    Add_Entry To_List(#ERRORLST)
+    * Execute Subroutine(KEYWRD) With_Parms('SERVER' #LW3CDES)
+    
+    #JSMCMD := ('SET SERVER(&1) SECURE(*NO)').Substitute( #LW3CDES )
+    Use Builtin(JSMX_COMMAND) With_Args(#W_EMLHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG #TOLIST)
+    Execute Subroutine(CHECK_STS)
+    If (#JSMSTS *NE OK)
+    #STD_TEXT := ' 3 / ' + #eevid.AsString
+    #LW3VARNAM := MSG_LW32324
+    #LW3LNGID := *LANGUAGE
+    #LW3MSGSUB := #STD_TEXT
+    Execute Subroutine(SEND_MSG)
+    #W_ERROR := true
+    Endif
+    
+    #JSMCMD := 'SET'
+    Execute Subroutine(KEYWRD) With_Parms('TO' '*LIST')
+    Execute Subroutine(KEYWRD) With_Parms('SERVICE_LIST' 'W_ADDRESS,W_DSPNAME')
+    Use Builtin(JSMX_COMMAND) With_Args(#W_EMLHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG #TOLIST)
+    Execute Subroutine(CHECK_STS)
+    If (#JSMSTS *NE OK)
+    #STD_TEXT := ' 3 / ' + #eevid.AsString
+    #LW3VARNAM := MSG_LW32324
+    #LW3LNGID := *LANGUAGE
+    #LW3MSGSUB := #STD_TEXT
+    Execute Subroutine(SEND_MSG)
+    #W_ERROR := true
+    Endif
+    
+    Endif
+    
+    
+    
+    Else
+    
+    * Not set up to Solutions SMTP Server
+    * Connect to the MailTrap Server instead
+    * set recipient list
+    #JSMCMD := 'SET'
+    * get server from code file
+    Fetch Fields(#LW3CDES) From_File(LW3CODES) With_Key(#W_MAIL_SERVER SRV *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    #W_ERROR := true
+    #S_STSMSG := ('Add a record to file-LW3CODES, with key &1 SRV').Substitute( #W_MAIL_SERVER )
+    Add_Entry To_List(#ERRORLST)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    
+    Else
+    #S_STSMSG := #LW3CDES
+    Add_Entry To_List(#ERRORLST)
+    Execute Subroutine(KEYWRD) With_Parms('SERVER' #LW3CDES)
+    Endif
+    
+    * get PORT from code file
+    Fetch Fields(#LW3CDES) From_File(LW3CODES) With_Key(#W_MAIL_SERVER PRT *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    #W_ERROR := true
+    #S_STSMSG := ('Add a record to file-LW3CODES, with key &1 PRT').Substitute( #W_MAIL_SERVER )
+    Add_Entry To_List(#ERRORLST)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    
+    Else
+    
+    #S_STSMSG := #LW3CDES
+    Add_Entry To_List(#ERRORLST)
+    
+    Execute Subroutine(KEYWRD) With_Parms('PORT' #LW3CDES)
+    Endif
+    
+    * get user from code file
+    Fetch Fields(#LW3CDES) From_File(LW3CODES) With_Key(#W_MAIL_SERVER USER *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    #W_ERROR := true
+    #S_STSMSG := ('Add a record to file-LW3CODES, with key &1 USER').Substitute( #W_MAIL_SERVER )
+    Add_Entry To_List(#ERRORLST)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    
+    Else
+    
+    #S_STSMSG := #LW3CDES
+    Add_Entry To_List(#ERRORLST)
+    
+    Execute Subroutine(KEYWRD) With_Parms('USER' #LW3CDES)
+    Endif
+    
+    
+    
+    * get PASSWORD from code file
+    Fetch Fields(#LW3CDES) From_File(LW3CODES) With_Key(#W_MAIL_SERVER PASSW *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    #W_ERROR := true
+    #S_STSMSG := ('Add a record to file-LW3CODES, with key &1 PASSW').Substitute( #W_MAIL_SERVER )
+    Add_Entry To_List(#ERRORLST)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    
+    Else
+    
+    #S_STSMSG := #LW3CDES
+    Add_Entry To_List(#ERRORLST)
+    
+    Execute Subroutine(KEYWRD) With_Parms('PASSWORD' #LW3CDES)
+    Endif
+    
+    
+    * EXECUTE SUBROUTINE(KEYWRD) WITH_PARMS('SERVER' 'demo.lansa.com')
+    * EXECUTE SUBROUTINE(KEYWRD) WITH_PARMS('PORT' '25')
+    * EXECUTE SUBROUTINE(KEYWRD) WITH_PARMS('USER' 'test@lansa.com')
+    * EXECUTE SUBROUTINE(KEYWRD) WITH_PARMS('PASSWORD' 'lansa2008|')
+    
+    Execute Subroutine(KEYWRD) With_Parms('TO' '*LIST')
+    Execute Subroutine(KEYWRD) With_Parms('SERVICE_LIST' 'W_ADDRESS,W_DSPNAME')
+    Use Builtin(JSMX_COMMAND) With_Args(#W_EMLHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG #TOLIST)
+    Execute Subroutine(CHECK_STS)
+    If (#JSMSTS *NE OK)
+    #STD_TEXT := ' 3 / ' + #eevid.AsString
+    #LW3VARNAM := MSG_LW32324
+    #LW3LNGID := *LANGUAGE
+    #LW3MSGSUB := #STD_TEXT
+    Execute Subroutine(SEND_MSG)
+    #W_ERROR := true
+    Endif
+    
+    Endif
+    
+    
+    
+    #JSMCMD := 'SET'
+    Execute Subroutine(KEYWRD) With_Parms('CC' '*LIST')
+    Execute Subroutine(KEYWRD) With_Parms('SERVICE_LIST' 'W_ADDRESS,W_DSPNAME')
+    Use Builtin(JSMX_COMMAND) With_Args(#W_EMLHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG #CCLIST)
+    Execute Subroutine(CHECK_STS)
+    If (#JSMSTS *NE OK)
+    #STD_TEXT := ' 4 / ' + #eevid.AsString
+    #LW3VARNAM := MSG_LW32324
+    #LW3LNGID := *LANGUAGE
+    #LW3MSGSUB := #STD_TEXT
+    Execute Subroutine(SEND_MSG)
+    #W_ERROR := true
+    Endif
+    #JSMCMD := 'SET'
+    Execute Subroutine(KEYWRD) With_Parms('BCC' '*LIST')
+    Execute Subroutine(KEYWRD) With_Parms('SERVICE_LIST' 'W_ADDRESS,W_DSPNAME')
+    Use Builtin(JSMX_COMMAND) With_Args(#W_EMLHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG #BCCLIST)
+    Execute Subroutine(CHECK_STS)
+    If (#JSMSTS *NE OK)
+    #W_ERROR := true
+    #STD_TEXT := ' 5 / ' + #eevid.AsString
+    #LW3VARNAM := MSG_LW32324
+    #LW3LNGID := *LANGUAGE
+    #LW3MSGSUB := #STD_TEXT
+    Execute Subroutine(SEND_MSG)
+    Endif
+    
+    * BUILD ATTACHMENT LIST
+    Clr_List Named(#FILELIST)
+    * BUILD BASE ATTACHMENTS
+    Execute Subroutine(GETALIST) With_Parms(#EECATC #EECATP)
+    * BUILD DYNAMIC ATTACHMENTS
+    Execute Subroutine(GETALIST) With_Parms(#S_EMLATC #S_EMLATP)
+    * add attachments
+    #JSMCMD := 'ADD'
+    Execute Subroutine(KEYWRD) With_Parms('ATTACHMENT' '*LIST')
+    Execute Subroutine(KEYWRD) With_Parms('SERVICE_LIST' 'W_FILE')
+    Use Builtin(JSMX_COMMAND) With_Args(#W_EMLHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG #FILELIST)
+    Execute Subroutine(CHECK_STS)
+    If (#JSMSTS *NE OK)
+    #STD_TEXT := ' 6 / ' + #eevid.AsString
+    #LW3VARNAM := MSG_LW32324
+    #LW3LNGID := *LANGUAGE
+    #LW3MSGSUB := #STD_TEXT
+    Execute Subroutine(SEND_MSG)
+    #W_ERROR := true
+    Endif
+    
+    * Append to subject
+    If Cond(#W_SPNESJ ¬= '')
+    #EECSBJ := #W_SPNESJ
+    Else
+    #EECSBJ := #EECSBJ + ' ' + #SPNESJ
+    Endif
+    
+    * Order # gets appended to subject if order # exists
+    If_Null Field(#LW3ORDNUM)
+    Else
+    #EECSBJ += ' - ' + #Utility_Multilinguals.umGetMultilingualText( 'OrderNumber' #S_LANG ).AsNativeString + ' ' + #lw3ordnum.trim
+    Endif
+    
+    If Cond((#EECSNM = *BLANKS) *And (#W_EECSNM ¬= *BLANKS))
+    #EECSNM := #W_EECSNM
+    Endif
+    If Cond((#EECSEM = *BLANKS) *And (#W_EECSEM ¬= *BLANKS))
+    #EECSEM := #W_EECSEM
+    Endif
+    
+    * set other email parms
+    #JSMCMD := 'SET'
+    Execute Subroutine(KEYWRD) With_Parms('FROM' #EECSEM)
+    Execute Subroutine(KEYWRD) With_Parms('FROM_NAME' #EECSNM)
+    Execute Subroutine(KEYWRD) With_Parms('SUBJECT' #EECSBJ)
+    Use Builtin(JSMX_COMMAND) With_Args(#W_EMLHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG)
+    Execute Subroutine(CHECK_STS)
+    If (#JSMSTS *NE OK)
+    #STD_TEXT := ' 7 / ' + #eevid.AsString
+    #LW3VARNAM := MSG_LW32324
+    #LW3LNGID := *LANGUAGE
+    #LW3MSGSUB := #STD_TEXT
+    Execute Subroutine(SEND_MSG)
+    #W_ERROR := true
+    Endif
+    
+    Endif
+    Endif
+    
+    Endroutine
+    
+    * --------------------------------------------------
+    * Subroutine ....: GETCNT
+    * Description ..: Get Content
+    * -------------------------------------------------
+    Subroutine Name(GETCNT)
+    Clr_List Named(#BODYLST)
+    Clr_List Named(#bodylst2)
+    If (#S_CNTOVR *NE *BLANKS)
+    * content override is content data
+    If (#S_CNTTYP *EQ C)
+    #S_CNTDTA := #S_CNTOVR
+    Exchange Fields(#S_CNTDTA #S_PRMTID)
+    Call Process(*DIRECT) Function(SPEML03) If_Error(*NEXT)
+    * S_CNTDTA is returned with after subsitution
+    If Cond(#S_STATUS *NE OK)
+    Change Field(#W_ERROR) To(TRUE)
+    Change Field(#S_STSMSG) To('Problem with get content')
+    Add_Entry To_List(#ERRORLST)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    
+    Endif
+    * Add any web eml content
+    #S_CNTDTA := #S_CNTDTA
+    Add_Entry To_List(#BODYLST)
+    Else
+    * content override is a file
+    Use Builtin(TRANSFORM_FILE) With_Args(#bodylst2 #S_CNTOVR.Substring( 1 256 ) T) To_Get(#W_RETCDE)
+    If Cond('#W_RETCDE *EQ ER')
+    Change Field(#W_ERROR) To(TRUE)
+    Change Field(#S_STSMSG) To('content override file error')
+    Add_Entry To_List(#ERRORLST)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    
+    Endif
+    Endif
+    Else
+    * no content override, so content is from black box call
+    #S_CNTDTA := #CNTDTA
+    
+    * peform substitution
+    Exchange Fields(#S_CNTDTA #S_PRMTID)
+    Call Process(*DIRECT) Function(SPEML03) If_Error(*NEXT)
+    * S_CNTDTA is returned with after subsitution
+    If Cond(#S_STATUS *NE OK)
+    Change Field(#W_ERROR) To(TRUE)
+    Change Field(#S_STSMSG) To('content after substitution error')
+    Add_Entry To_List(#ERRORLST)
+    
+    #S_STATUS := ER
+    Exchange Fields(#S_STSMSG #S_STATUS)
+    Return
+    Endif
+    * Add any web eml content
+    #S_CNTDTA := #S_CNTDTA
+    Add_Entry To_List(#BODYLST)
+    * indicate that content is stored in bodylst
+    #S_CNTTYP := C
+    Endif
+    
+    Endroutine
+    
+    * --------------------------------------------------
+    * Subroutine ....: SENDEMAIL
+    * Description ..: Send email
+    * -------------------------------------------------
+    Subroutine Name(SENDEMAIL)
+    * send email
+    
+    #JSMCMD := 'SEND'
+    * Default to HTM format for now, since content is always saved in this way
+    #CNTFMT := 'HTM'
+    If (#CNTFMT.UpperCase *EQ HTM)
+    * SEND CONTENT AS html
+    Execute Subroutine(KEYWRD) With_Parms('CONTENT' '*HTML')
+    Else
+    Execute Subroutine(KEYWRD) With_Parms('CONTENT' '*PLAIN')
+    Endif
+    
+    If (#S_CNTTYP *EQ C)
+    Execute Subroutine(KEYWRD) With_Parms('SERVICE_LIST' 'S_CNTDTA')
+    Use Builtin(JSMX_COMMAND) With_Args(#W_EMLHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG #BODYLST)
+    Else
+    Execute Subroutine(KEYWRD) With_Parms('SERVICE_LIST' 'S_CNTTXT')
+    Use Builtin(JSMX_COMMAND) With_Args(#W_EMLHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG #bodylst2)
+    Endif
+    Execute Subroutine(CHECK_STS)
+    If (#JSMSTS *NE OK)
+    #W_ERROR := true
+    Endif
+    
+    Endroutine
+    
+    Subroutine Name(JSMEMLEND)
+    * close down JSM  & write ended log msg
+    If (#W_EMLLOAD)
+    #JSMCMD := SERVICE_UNLOAD
+    Use Builtin(JSMX_COMMAND) With_Args(#W_EMLHDLE #JSMCMD) To_Get(#JSMSTS #JSMMSG)
+    #W_EMLLOAD := FALSE
+    Endif
+    If (#W_EMLOPEN = TRUE)
+    #JSMCMD := JSMX_CLOSE
+    Use Builtin(JSMX_CLOSE) With_Args(#W_EMLHDLE) To_Get(#JSMSTS #JSMMSG)
+    #W_EMLOPEN := FALSE
+    Endif
+    Endroutine
+    
+    * Send a message
+    Subroutine Name(SEND_MSG)
+    Exchange Fields(#LW3VARNAM #LW3LNGID #LW3MSGSUB)
+    Call Process(*DIRECT) Function(LW3MSG) If_Error(*NEXT)
+    Endroutine

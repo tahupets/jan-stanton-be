@@ -1,0 +1,72 @@
+﻿Function:
+  Enabled For RDMLX:  No
+
+  Source: |
+    * =======================================================
+    * Copyright ......: (C) LANSA Australia 2000
+    * Process .......: LW3GEN
+    * Function ......: LW3GN10
+    * Type ..........: System Variable Evaluator
+    * Created on ....: 22/05/00 at 14:18:18
+    * Description ...: Sys Var evaluator for *LW3_NEXT_xxxx_N
+    * UM
+    * =======================================================
+    
+    Function Options(*DIRECT *NOMESSAGES *HEAVYUSAGE *MLOPTIMISE *NUM_SYSTEM_VARIABLE)
+    * =======================================================
+    
+    * Working fields, lists and groups
+    
+    * Split up the system variable name
+    Define Field(#SV_PREFIX) Type(*CHAR) Length(10) To_Overlay(#SYSVAR$NM)
+    Define Field(#SV_TRANID) Reffld(#LW3TRANID) To_Overlay(#SYSVAR$NM 11)
+    Define Field(#SV_SUFFIX) Type(*CHAR) Length(6) To_Overlay(#SYSVAR$NM 15)
+    
+    * Fields from the Sequence master
+    Group_By Name(#LW3SEQGRP) Fields(#LW3NXTNUM #LW3LOWEST #LW3MAXNUM)
+    
+    * =======================================================
+    * Function Mainline : LW3GN10
+    * =======================================================
+    
+    * Invalid already from prefix and suffix
+    If Cond('(#SV_PREFIX *NE ''*LW3_NEXT_'') *OR (#SV_SUFFIX *NE ''_NUM  '')')
+    Execute Subroutine(INVALIDSV)
+    Return
+    Endif
+    
+    Fetch Fields(#LW3SEQGRP) From_File(LW3SEQMS) With_Key(#SV_TRANID) Io_Error(*NEXT) Val_Error(*NEXT) Lock(*YES)
+    * Invalid if tran id portion not found on Sequence master
+    If_Status Is_Not(*OKAY)
+    Execute Subroutine(INVALIDSV)
+    Return
+    Endif
+    
+    * Valid now
+    If Cond('#LW3NXTNUM *LT #LW3LOWEST')
+    Change Field(#LW3NXTNUM) To(#LW3LOWEST)
+    Endif
+    
+    Change Field(#SYSVAR$NV) To(#LW3NXTNUM)
+    * Increment LW3NXTNUM field
+    Change Field(#LW3NXTNUM) To('#LW3NXTNUM + 1')
+    
+    If Cond('#LW3NXTNUM *GT #LW3MAXNUM')
+    Change Field(#LW3NXTNUM) To(#LW3LOWEST)
+    Endif
+    
+    Update Fields(#LW3NXTNUM) In_File(LW3SEQMS) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    Message Msgtxt('Update of Next ID or Number failed in Sys Var evaluator for *LW3_NEXT_xxxx_NUM')
+    Execute Subroutine(INVALIDSV)
+    Endif
+    
+    Return
+    
+    * =======================================================
+    * Subroutine ....: INVALIDSV
+    * Description....: An invalid system variable requested
+    * =======================================================
+    Subroutine Name(INVALIDSV)
+    Message Msgtxt('*LW3_NEXT_XXXX_NUM system variable evaluator invalidly invoked.')
+    Endroutine

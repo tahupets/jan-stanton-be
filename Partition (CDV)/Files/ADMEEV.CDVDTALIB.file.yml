@@ -1,0 +1,130 @@
+﻿File:
+  Name:                           ADMEEV
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             ADMEEV
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 100000 10000 10) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Email Events"
+
+  Real Fields:
+  - EEVID:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - EEVENM:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - EEVDSC:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  - EEVUDS:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - EEVADT:
+      Type:               Signed
+      Length:             8
+      Decimals:           0
+
+  - EEVATM:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+
+  - EEVAFN:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - EEVAUR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - EEVCDT:
+      Type:               Signed
+      Length:             8
+      Decimals:           0
+
+  - EEVCTM:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+
+  - EEVCFN:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - EEVCUR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  Primary Keys:
+  - EEVID
+
+  Logical Views:
+  - ADMEEVL2:
+      Identifier:         ADMEEVL2
+      Unique Key:         Yes
+      Access Path:        Immediate
+      Record Format:      ADMEEVL2
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By SF ID/Name"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - EEVENM:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  File Level Triggers:
+  - EEVID:
+    - Trigger for ADMEEV:
+        Function:           LW3MT02
+        Trigger Points:
+        - Before Insert
+        - Before Update
+        - Before Delete

@@ -1,0 +1,24 @@
+﻿Field:
+  Name:               EECCID
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Content ID"
+      Label:              "Content ID"
+      Heading1:           "Content ID"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(209)
+    
+    End_Com
+    
+    End_Com

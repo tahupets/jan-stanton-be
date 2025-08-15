@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3QSEL
+  Type:               String
+  Length:             9999
+  Decimals:           0
+  Default Value:      "*NULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SQL Query"
+      Label:              "SQL Query"
+      Heading1:           "SQL"
+      Heading2:           "Query"
+      Heading3:           " "

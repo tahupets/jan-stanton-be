@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LENGTH
+  Type:               Signed
+  Length:             7
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - RB
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Length (from the \"START Position\")"
+      Label:              "Length"
+      Heading1:           "Length"
+      Heading2:           " "
+      Heading3:           " "

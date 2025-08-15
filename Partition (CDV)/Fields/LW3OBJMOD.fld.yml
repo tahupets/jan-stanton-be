@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               LW3OBJMOD
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Object Mode"
+      Label:              "Object Mode"
+      Heading1:           "Object"
+      Heading2:           "Mode"

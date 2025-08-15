@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               FXLNGCOD
+  Type:               Alpha
+  Length:             4
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Language Code"
+      Label:              "Language Code"
+      Heading1:           "Language"
+      Heading2:           "Code"
+      Heading3:           " "

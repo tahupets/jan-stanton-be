@@ -1,0 +1,64 @@
+﻿Process:
+  Name:                      SPNEML
+  Menu Style:                SAA/CUA
+  Anticipated Usage:         Light
+  Optimize For Remote Comms: No
+  Enable For Web:            No
+  Generate XML:              No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Sponsorship Email Process"
+
+  Functions:
+  - SPEML01:
+      Name:               SPEML01
+      Menu Sequence:      1
+      Display on Menu:    No
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Main Email Function"
+
+      Allowed Next Functions:
+      - "*ANY"
+
+  - SPEML02:
+      Name:               SPEML02
+      Menu Sequence:      2
+      Display on Menu:    No
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Get event(s) to email"
+
+      Allowed Next Functions:
+      - "*ANY"
+
+  - SPEML03:
+      Name:               SPEML03
+      Menu Sequence:      3
+      Display on Menu:    Yes
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Substitute Email Parameters"
+
+      Allowed Next Functions:
+      - "*ANY"
+
+  - SPEML04:
+      Name:               SPEML04
+      Menu Sequence:      4
+      Display on Menu:    Yes
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Test Email Function"
+
+      Allowed Next Functions:
+      - "*ANY"

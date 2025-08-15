@@ -1,0 +1,1612 @@
+﻿ServerModule:
+  Name:               CNSREGSTR
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "REST API - Registration"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Server Module
+    * Platform        : REST APIs
+    * Name            : CNSREGSTR
+    * Identifier      : CNSREGSTR
+    * Ancestor        : PRIM_SRVM
+    * Written By      : Rigor Gumera
+    * Written On      : 6th November 2024
+    * Description     : Locations
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Begin_Com Role(*EXTENDS #PRIM_SRVM)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERMLUTL) Name(#Utility_Multilinguals) Desc('Multilingual Utility') Help('Multilinguals Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    Define_Com Class(#CNRAPILG) Name(#Processor_ApiLog) Desc('API Log Processor') Scope(*APPLICATION)
+    Define_Com Class(#CARPASWRD) Name(#Processor_Password) Desc('Password Processor') Help('Password Processor')
+    Define_Com Class(#CNRTKNPR) Name(#Processor_Tokens) Desc('Site Token Processor') Help('Site Token Processor')
+    
+    * =======================================================
+    * Simple Field Definitions
+    * =======================================================
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    
+    Define Field(#W_MSGCNT) Reffld(#STD_INT)
+    Define Field(#W_USERNAME) Reffld(#LW3WEBUSR)
+    Define Field(#W_NUMERIC_USERID) Type(*DEC) Length(15) Decimals(0)
+    
+    * sender name and override fields
+    Define Field(#W_EECSEM) Reffld(#EECSEM)
+    Define Field(#W_EECSNM) Reffld(#EECSNM)
+    
+    * =======================================================
+    * List Definitions
+    * =======================================================
+    
+    Def_List Name(#LS_REFFR) Fields(#LW3CODE #LW3CDES) Counter(#LISTCOUNT) Type(*WORKING) Entrys(*MAX)
+    
+    Def_List Name(#LS_DYMRCP) Fields(#EEDREM #EEDRNM #EEDRTY) Type(*WORKING)
+    Def_List Name(#LS_RETMSG) Fields(#LW3VARUTX #LW3VARNAM) Type(*WORKING) Entrys(*MAX)
+    
+    * =======================================================
+    * Group Definitions
+    * =======================================================
+    
+    * Fields from Request Json Body
+    Group_By Name(#GRP_REGISTER) Fields(#LW3CHCPNY #W_USERNAME #LW3CEMAIL #LW3USRPAS #LW3USRPS2 #LW3CHFNME #LW3CHLNME #LW3CODE #LW3HADDR1 #LW3HADDR2 #LW3CHCITY #LW3STATE #LW3HPSTAL #LW3CTRY #LW3CWPHNE #LW3ECCFAX #LW3LNGCOD)
+    
+    * LW3WCUST fields to insert
+    Group_By Name(#XG_CUSTOMER) Fields(#LW3CUSIND #LW3WEBB2C #LW3WEBUSR #LW3CHNAME #LW3CHLNME #LW3CHFNME #LW3CHTITL #LW3CHCPNY #LW3HADDR1 #LW3HADDR2 #LW3CHCITY #LW3HSTATE #LW3HPSTAL #LW3HCNTRY #LW3CHPHNE #LW3CHPEXT #LW3CWPHNE #LW3ECCFAX #LW3WCSTAT #LW3WEBC01 #LW3SFID)
+    
+    * LW3USRA fields to insert
+    Group_By Name(#XG_WUSERA) Fields(#LW3WEBUSR #LW3ASCSTS #LW3CRTUSR #LW3CSTAMP #LW3UPDUSR #LW3USTAMP #LW3ASSC01 #LW3CUSTYP #LW3SUID)
+    
+    * LW3WUSER fields to insert
+    Group_By Name(#XG_WUSER) Fields(#LW3WEBUSR #LW3CUSVAL #LW3CEMAIL #LW3CUSIND #LW3USRTYP #LW3WEBC01 #LW3SFID #LW3TMPUSR #LW3EASTAT #LW3REFRL #LW3PWDSLT #LW3ROLES #LW3CDSTMP)
+    
+    * LW3SECUR fields to insert
+    Group_By Name(#GRP_SECUR) Fields(#LW3WEBUSR #LW3CRTUSR #LW3VARFLD #LW3CSTAMP)
+    
+    * =======================================================
+    * Srvroutine Definitions
+    * =======================================================
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSREGSTR/init
+    * Operation: GetInit
+    *
+    * Request
+    *    Parameter: none
+    *    Schema   : none
+    *
+    * Response
+    *    Schema   : (OK) referralsResponseObject
+    *             : (ER) httpResponseObject
+    *
+    * Action  : Build the list of Refferals
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetInit) Response(*HTTP #uContext) Desc('Get Refferal List') Help('Build the list of Refferals')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetInit) Name(#Operation)
+    Define_Com Class(#Com_Home.referralsArray) Name(#Array_Referrals)
+    Define_Com Class(#Com_Home.referralsResponseObject) Name(#Object_Response)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.httpResponseObject) Name(#Object_HttpResponse)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    * Default the HTTP Response Status to 500 (Error)
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    #Global_DataModel.umGetStorefrontDetails Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    * Get Refferal List
+    #COM_OWNER.umGetReferralsList Oretcode(#LW3RETCOD)
+    
+    * Check if the return code is OK
+    If (#LW3RETCOD = OK)
+    * Add the Refferal to the Refferal Array
+    Selectlist Named(#LS_REFFR)
+    Add_Entry To_List(#Array_Referrals)
+    Endselect
+    
+    * Put the Countries Array to the API Response.
+    #Object_Response.Referrals <= #Array_Referrals
+    
+    * Set the JSON Content
+    #Operation.Response.SetContentJson Content(#Object_Response)
+    
+    Else
+    * Error in getting Referral List
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgReferralListError') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Error getting Referral List.')
+    #Object_HttpResponse.messages <= #Array_HttpResponse
+    #Operation.Response.SetResp400 Content(#Object_HttpResponse)
+    
+    Endif
+    
+    Else
+    
+    * Error in getting Storefront Details
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgForbiddenAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Get Storefront Details Error')
+    #Object_HttpResponse.messages <= #Array_HttpResponse
+    #Operation.Response.SetResp403 Content(#Object_HttpResponse)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSREGSTR/register
+    * Operation: PostRegistration
+    *
+    * Request
+    *    Parameter: none
+    *    Schema   : registrationRequestObject
+    *
+    * Response
+    *    Schema   : (OK) httpResponseObject
+    *             : (ER) httpResponseObject
+    *
+    * Action  : Build the list of States based on Country
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usPostRegistration) Response(*HTTP #uContext) Desc('Post Registration') Help('Post Registration')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.PostRegistration) Name(#Operation)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.httpResponseObject) Name(#Object_HttpResponse)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    * Default the HTTP Response Status to 500 (Error)
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    #Global_DataModel.umGetStorefrontDetails Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    * Use next assigned customer number for web user name
+    #W_NUMERIC_USERID := *LW3_NEXT_CUST_NUM
+    Substring Field(#W_NUMERIC_USERID 6) Into_Field(#LW3WEBUSR)
+    
+    * Get the necessary fields from the JSON Request Body
+    #LW3ASSC01 := #Operation.Request.ContentJSONRequest.accountNumber.asString.RightAdjust( 6 '0' )
+    #W_USERNAME := #LW3WEBUSR
+    #LW3CEMAIL := #Operation.Request.ContentJSONRequest.Email
+    #LW3USRPAS := #Operation.Request.ContentJSONRequest.Password
+    #LW3USRPS2 := #Operation.Request.ContentJSONRequest.VerifyPassword
+    #LW3HADDR1 := #Operation.Request.ContentJSONRequest.Address1
+    #LW3HADDR2 := #Operation.Request.ContentJSONRequest.Address2
+    #LW3CHCITY := #Operation.Request.ContentJSONRequest.City
+    #LW3STATE := #Operation.Request.ContentJSONRequest.State
+    #LW3CTRY := #Operation.Request.ContentJSONRequest.Country
+    #LW3HPSTAL := #Operation.Request.ContentJSONRequest.PostalCode
+    #LW3CHCPNY := #Operation.Request.ContentJSONRequest.Company
+    #LW3CHFNME := #Operation.Request.ContentJSONRequest.FirstName
+    #LW3CHLNME := #Operation.Request.ContentJSONRequest.LastName
+    #LW3CODE := #Operation.Request.ContentJSONRequest.referral
+    #LW3CWPHNE := #Operation.Request.ContentJSONRequest.WorkPhone
+    #LW3ECCFAX := #Operation.Request.ContentJSONRequest.Fax
+    
+    * Check Requirement Fields
+    #COM_OWNER.umChkReqdFlds Iaccountnumber(#LW3ASSC01) Iaddress(#LW3HADDR1) Icity(#LW3CHCITY) Icompany(#LW3CHCPNY) Icountry(#LW3CTRY) Ifirstname(#LW3CHFNME) Ilastname(#LW3CHLNME) Ipassword(#LW3USRPAS) Ipassword2(#LW3USRPS2) Iphone(#LW3CWPHNE) Istate(#LW3STATE) Izip(#LW3HPSTAL) Oreturncode(#LW3RETCOD) Iemail(#LW3CEMAIL) Iarray_Httpresponse(#Array_HttpResponse)
+    * Check if the all the Requirement Fields are OK
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umInsertRec Oretcode(#LW3RETCOD) Iarray_Httpresponse(#Array_HttpResponse) Ihttpheaders(#uContext.Request.Headers)
+    
+    * Check the reutrn code
+    Case Of_Field(#LW3RETCOD)
+    * Web User Account created and Email was sent successfully
+    When Value_Is(= OK)
+    
+    * Display Success Request Message
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgRegistrationSuccessful') Imessagetype('success') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Registration successful.')
+    #Object_HttpResponse.messages <= #Array_HttpResponse
+    #Operation.Response.SetContentJson Content(#Object_HttpResponse)
+    
+    * Web User Account created and Email was sent successfully
+    When Value_Is(= NE)
+    
+    * Display Email Error Message
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgRegistrationEmailNotSent') Imessagetype('Error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Registration successful but Email was not sent.')
+    #Object_HttpResponse.messages <= #Array_HttpResponse
+    #Operation.Response.SetContentJson Content(#Object_HttpResponse)
+    
+    Otherwise
+    * Error IO Insert
+    #Object_HttpResponse.messages <= #Array_HttpResponse
+    #Operation.Response.SetResp400 Content(#Object_HttpResponse)
+    Endcase
+    
+    Else
+    * Error in Requirement Fields
+    #Object_HttpResponse.messages <= #Array_HttpResponse
+    #Operation.Response.SetResp400 Content(#Object_HttpResponse)
+    
+    Endif
+    Else
+    
+    * Error in getting Storefront Details
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgForbiddenAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Get Storefront Details Error')
+    #Object_HttpResponse.messages <= #Array_HttpResponse
+    #Operation.Response.SetResp403 Content(#Object_HttpResponse)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSREGSTR/verify/user
+    * Operation: PostVerifyLink
+    *
+    * Request
+    *    Parameter: none
+    *    Schema   :
+    *
+    * Response
+    *    Schema   : (OK) httpResponseObject
+    *             : (ER) httpResponseObject
+    *
+    * Action  :     Check that the registration verification URL is valid
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usPostVerifyLink) Response(*HTTP #uContext) Desc('Verify User Registration Link') Help('Check that the registration verification URL is valid')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.PostVerifyLink) Name(#Operation)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.httpResponseObject) Name(#Object_HttpResponse)
+    
+    Define_Com Class(#Com_Home.PostVerifyLink.Response.ContentJson.Object) Name(#Object_ContentJson) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.PostVerifyLink.Response.Resp400.Object) Name(#Object_Resp400) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.PostVerifyLink.Response.Resp403.Object) Name(#Object_Resp403) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    * Default the HTTP Response Status to 500 (Error)
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    #Global_DataModel.umGetStorefrontDetails Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umRegistrationLinkVerify Iuseremail(#Operation.Request.ContentJson.email) Iverificationtoken(#Operation.Request.ContentJson.token) Iarray_Httpresponse(#Array_HttpResponse) Oreturncode(#LW3RETCOD)
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umUserVerified Iuseremail(#Operation.Request.ContentJson.email) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUserVerifySuccessful') Imessagetype('success') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('User verification is successful.')
+    
+    Set_Ref Com(#Object_ContentJson) To(*CREATE_AS #Com_Home.PostVerifyLink.Response.ContentJson.Object)
+    #Object_ContentJson.messages <= #Array_HttpResponse
+    #Operation.Response.SetContentJson Content(#Object_ContentJson)
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUserVerifyFailedUpdate') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Failed to update user file for verification.')
+    
+    Set_Ref Com(#Object_Resp400) To(*CREATE_AS #Com_Home.PostVerifyLink.Response.Resp400.Object)
+    #Object_Resp400.messages <= #Array_HttpResponse
+    #Operation.Response.SetResp400 Content(#Object_Resp400)
+    
+    Endif
+    
+    Else
+    * Set the  Error Response - message in umRegistrationLink Verify
+    Set_Ref Com(#Object_Resp400) To(*CREATE_AS #Com_Home.PostVerifyLink.Response.Resp400.Object)
+    Set Com(#Object_Resp400) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp400 Content(#Object_Resp400)
+    Endif
+    
+    Else
+    * Error in getting Storefront Details
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgForbiddenAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Get Storefront Details Error')
+    Set_Ref Com(#Object_Resp403) To(*CREATE_AS #Com_Home.PostVerifyLink.Response.Resp403.Object)
+    Set Com(#Object_Resp403) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp403 Content(#Object_Resp403)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgDefaultError') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Operation and Context failed to bind')
+    Set_Ref Com(#Object_Resp400) To(*CREATE_AS #Com_Home.PostVerifyLink.Response.Resp400.Object)
+    Set Com(#Object_Resp400) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp400 Content(#Object_Resp400)
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umGetReferralsList
+    * Description....: Get Referrals
+    * =======================================================
+    Mthroutine Name(umGetReferralsList) Desc('Get Referrals List') Help('Get Referrals List') Access(*PRIVATE)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oRetCode)
+    
+    * Assume Everything is OK
+    #oRetCode := OK
+    * Clear List
+    Clr_List Named(#LS_REFFR)
+    * Get the referral list from Code File
+    Select Fields(#LW3CODE #LW3CDES) From_File(LW3CODL4) With_Key('REFFR' #Global_DataModel.upCurrentLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    Case Of_Field(#LW3CODE.Trim)
+    * Please select as a placeholder will be handled by David in the frontend.
+    * And any code with "#" should be skipped whenever reading the Code Table
+    When Value_Is(= 'P1' = '#')
+    Continue
+    Otherwise
+    Add_Entry To_List(#LS_REFFR)
+    Endcase
+    Endselect
+    * No entries in list, return error
+    If (#LISTCOUNT = 0)
+    #oRetCode := ER
+    Endif
+    
+    Endroutine
+    
+    * =====================================================
+    * MTHROUTINE : umSendMail
+    * DESCRIPTION: Send Mail
+    * =====================================================
+    Mthroutine Name(umSendMail) Desc('Send Mail')
+    Define_Map For(*INPUT) Class(#LW3CEMAIL) Name(#iEmail)
+    Define_Map For(*INPUT) Class(#LW3CHNAME) Name(#iCustName)
+    Define_Map For(*INPUT) Class(#LW3CHNAME) Name(#iReplaceName)
+    Define_Map For(*INPUT) Class(#LW3CWPHNE) Name(#iWPhone)
+    Define_Map For(*INPUT) Class(#LW3SFID) Name(#iSFId)
+    Define_Map For(*INPUT) Class(#LW3CHFNME) Name(#iFirstName)
+    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpRequestHeaders) Name(#iHttpHeaders) Desc('Http Headers') Help('Http Headers') Pass(*BY_REFERENCE)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oRetCode)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_VerifyFlag)
+    Define_Com Class(#PRIM_ALPH) Name(#L_SiteDefaultScheme)
+    Define_Com Class(#PRIM_ALPH) Name(#L_String)
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('REGISTER_VERIFY_FLAG') Ilanguage('') Oalphavalue(#L_VerifyFlag)
+    
+    If Cond(#L_VerifyFlag = 'Y')
+    #EEVENM := 'B2BVRG'
+    Else
+    #EEVENM := 'B2BREG'
+    Endif
+    
+    Fetch Fields(#EEVID) From_File(admeevl2) With_Key(#Global_DataModel.upStorefrontId #EEVENM) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If_Status Is_Not(*OKAY)
+    #oRetCode := 'ER'
+    #LW3ERRMSG := 'File I/O failed.  Could not get email event details.'
+    Return
+    * Add_Entry To_List(#LS_HTTPMSG)
+    Endif
+    
+    Fetch Fields(#EECSBJ #EECSEM #EECSNM) From_File(ADMEEC02) With_Key(#EEVID #Global_DataModel.upCurrentLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    #APPLID := #iSFId.AsString
+    
+    * set recipient list
+    #EEDREM := #iEmail
+    #EEDRNM := #iCustName
+    #EEDRTY := "TO"
+    Add_Entry To_List(#LS_DYMRCP)
+    
+    #S_LANG := 'ENG'
+    
+    * set transaction id- this should be a unique number
+    #L_String := ('&1&2').Substitute( #STD_DATEX.Now.AsNumber( MMDDCCYY ).AsString #STD_TIMX.Now.AsNumber( HHMMSS ).AsString )
+    #PRMTID #S_PRMTID := #L_String.AsNumber
+    
+    * DELETE FROM PARAMETER FILE
+    Delete From_File(ADMEPR) With_Key(#S_PRMTID) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If Cond(#EECSNM = *BLANKS)
+    #W_EECSNM := 'No-Reply'
+    Else
+    #W_EECSNM := #EECSNM
+    Endif
+    If Cond(#EECSEM = *BLANKS)
+    #W_EECSEM := 'no-reply@company.com'
+    Else
+    #W_EECSEM := #EECSEM
+    Endif
+    
+    * Set substitution parameters for the email content asset
+    If Cond(#L_VerifyFlag = 'Y')
+    Fetch Fields(#LW3WEBUSR) From_File(LW3USRL5) With_Key(#Global_DataModel.upStorefrontId #iEmail) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    #COM_OWNER.umBuildVerificationLink Iuserid(#LW3WEBUSR) Iuseremail(#iEmail) Ihttpheaders(#iHttpHeaders) Overificationlink(#LW3URL) Oreturncode(#oRetCode)
+    #COM_OWNER.umExchParams Itransid(#S_PRMTID) Iparamid('FIRST_NAME') Paramval(#iFirstName)
+    #COM_OWNER.umExchParams Itransid(#S_PRMTID) Iparamid('VERIFY_LINK') Paramval(#LW3URL)
+    #COM_OWNER.umExchParams Itransid(#S_PRMTID) Iparamid('SF_NAME') Paramval(#Global_DataModel.upStorefrontName)
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('SITE_DEFAULT_SCHEME') Ilanguage('') Oalphavalue(#L_SiteDefaultScheme)
+    
+    * #COM_OWNER.umExchParams Itransid(#S_PRMTID) Iparamid('SITE_URL') Paramval(#L_SiteDefaultScheme + '://' + #iHttpHeaders<'Host'>.Value)
+    #COM_OWNER.umExchParams Itransid(#S_PRMTID) Iparamid('SITE_URL') Paramval(#L_SiteDefaultScheme + '://' + #Global_DataModel.upStorefrontDomain.LowerCase)
+    Else
+    #COM_OWNER.umExchParams Itransid(#S_PRMTID) Iparamid('TONAME') Paramval(#iReplaceName)
+    #oRetCode := 'OK'
+    Endif
+    
+    If Cond(#oRetCode = 'OK')
+    * Call Email Function
+    Exchange Fields(#EEVID #S_EMLATC #S_EMLATP #S_CNTOVR #S_CNTTYP #S_LANG #S_PRMTID #APPLID #W_EECSEM #W_EECSNM)
+    Call Process(*DIRECT) Function(SPEML01) Pass_Lst(#LS_DYMRCP)
+    * Check Status
+    If Cond(#S_STATUS *NE 'OK')
+    #oRetCode := 'ER'
+    Else
+    #oRetCode := 'OK'
+    Endif
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * MTHROUTINE : umExchParams
+    * DESCRIPTION: Exchange parameters to substitution function
+    * =======================================================
+    Mthroutine Name(umExchParams) Desc('Exchange parameters to substitution function')
+    Define_Map For(*INPUT) Class(#PRMTID) Name(#iTransId)
+    Define_Map For(*INPUT) Class(#PRMID) Name(#iParamId)
+    Define_Map For(*INPUT) Class(#PRMVAL) Name(#ParamVal)
+    
+    #PRMTID := #iTransId
+    #PRMID := #iParamId.Trim
+    #PRMVAL := #ParamVal.Trim
+    
+    Insert Fields(#PRMTID #PRMID #PRMVAL) To_File(ADMEPR) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*ERROR)
+    * ERROR inserting exchange parms
+    Else
+    * inserted exchange parm
+    Endif
+    
+    Endroutine
+    
+    * =====================================================
+    * MTHROUTINE : umChkReqdFlds
+    * DESCRIPTION: Check required fields
+    * =====================================================
+    Mthroutine Name(umChkReqdFlds) Desc('Check required fields')
+    Define_Map For(*INPUT) Class(#LW3ASSC01) Name(#iAccountNumber)
+    Define_Map For(*INPUT) Class(#LW3CHCPNY) Name(#iCompany)
+    Define_Map For(*INPUT) Class(#LW3USRPAS) Name(#iPassword)
+    Define_Map For(*INPUT) Class(#LW3USRPS2) Name(#iPassword2)
+    Define_Map For(*INPUT) Class(#LW3CHFNME) Name(#iFirstname)
+    Define_Map For(*INPUT) Class(#LW3CHLNME) Name(#iLastname)
+    Define_Map For(*INPUT) Class(#LW3HADDR1) Name(#iAddress)
+    Define_Map For(*INPUT) Class(#LW3CHCITY) Name(#iCity)
+    Define_Map For(*INPUT) Class(#LW3STATE) Name(#iState)
+    Define_Map For(*INPUT) Class(#LW3HPSTAL) Name(#iZip)
+    Define_Map For(*INPUT) Class(#LW3CTRY) Name(#iCountry)
+    Define_Map For(*INPUT) Class(#LW3CWPHNE) Name(#iPhone)
+    Define_Map For(*INPUT) Class(#LW3CEMAIL) Name(#iEmail)
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    Define_Com Class(#PRIM_NMBR) Name(#L_ErrorCount)
+    
+    If Cond((#iCompany = *BLANK) *Or (#iAccountNumber = *BLANK) *Or (#iPassword = *BLANK) *Or (#iPassword2 = *BLANK) *Or (#iFirstname = *BLANK) *Or (#iLastname = *BLANK) *Or (#iAddress = *BLANK) *Or (#iCity = *BLANK) *Or (#iState = *BLANK) *Or (#iZip = *BLANK) *Or (#iCountry = *BLANK) *Or (#iPhone = *BLANK) *Or (#iEmail = *BLANK))
+    #L_ErrorCount += 1
+    
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgCheckRequiredFields') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse)
+    
+    * Account Number
+    If Cond((#iAccountNumber = *BLANK) Or (#iAccountNumber = '000000'))
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgAccountNumberIsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3ASSC01')
+    Endif
+    * Email
+    If Cond(#iEmail = *BLANK)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgEmailIsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3CEMAIL')
+    Endif
+    * Password
+    If Cond(#iPassword = *BLANK)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgPasswordIsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3USRPAS')
+    Endif
+    * Verify Password
+    If Cond(#iPassword2 = *BLANK)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgPasswordIsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3USRPS2')
+    Endif
+    * Customer Company
+    If Cond(#iCompany = *BLANK)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUserIdIsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3CHCPNY')
+    Endif
+    * Customer First Name
+    If Cond(#iFirstname = *BLANK)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgFirstNameIsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3CHFNME')
+    Endif
+    * Customer Last Name
+    If Cond(#iLastname = *BLANK)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgLastNameIsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3CHLNME')
+    Endif
+    * Address Line 1
+    If Cond(#iAddress = *BLANK)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgAddress1IsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3HADDR1')
+    Endif
+    * City
+    If Cond(#iCity = *BLANK)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgCityIsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3CHCITY')
+    Endif
+    * State
+    If Cond(#iState = *BLANK)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgEmailIsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3STATE')
+    Endif
+    * Postal Code
+    If Cond(#iZip = *BLANK)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgZipPostalCodeIsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3HPSTAL')
+    Endif
+    * Country
+    If Cond(#iCountry = *BLANK)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgCountryIsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3CTRY')
+    Endif
+    * Work Phone
+    If Cond(#iPhone = *BLANK)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgWorkPhoneIsRequired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3CWPHNE')
+    Endif
+    
+    Endif
+    
+    If Cond(#L_ErrorCount = 0)
+    #oReturnCode := 'OK'
+    Else
+    #oReturnCode := 'ER'
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSetHttpResponseMessages
+    * Description....: Set Http Response Messages
+    * =======================================================
+    Mthroutine Name(umSetHttpResponseMessages) Desc('Set Http Response Messages') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3VARNAM) Name(#iVariableName)
+    Define_Map For(*INPUT) Class(#LW3MSGTYP) Name(#iMessageType)
+    Define_Map For(*INPUT) Class(#LW3FLDNAM) Name(#iFieldName) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iMessageDetails) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iSubstitutionVariable1) Mandatory('')
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Add_Entry To_List(#iArray_HttpResponse)
+    #iArray_HttpResponse.CurrentItem.code := #iVariableName
+    #iArray_HttpResponse.CurrentItem.type := #iMessageType
+    #iArray_HttpResponse.CurrentItem.message := #Utility_Multilinguals.umGetMultilingualText( #iVariableName #Global_DataModel.upCurrentLanguage )
+    
+    If Cond(#iFieldName <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.field := #iFieldName
+    Endif
+    If Cond(#iMessageDetails <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.detail := #iMessageDetails
+    Endif
+    If Cond(#iSubstitutionVariable1 <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.substitutions.Add Value(#iSubstitutionVariable1)
+    Endif
+    
+    Endroutine
+    
+    * =====================================================
+    * MTHROUTINE : umInsertRec
+    * DESCRIPTION: Insert New Record
+    * INPUT PARAM: GRP_REGISTER
+    * =====================================================
+    Mthroutine Name(umInsertRec) Desc('Insert New Record')
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpRequestHeaders) Name(#iHttpHeaders) Desc('Http Headers') Help('Http Headers') Pass(*BY_REFERENCE)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oRetCode)
+    
+    * RD added #LW3UPDUSR #LW3CRTUSR fields for Supplier Portal saving
+    #LW3WEBUSR #LW3UPDUSR #LW3CRTUSR := #W_USERNAME
+    
+    * Parse Referral Field
+    If Cond(#LW3CODE.Trim *NE 'P1')
+    Fetch Fields(#LW3CDES) From_File(LW3CODL4) With_Key('REFFR' #Global_DataModel.upCurrentLanguage #LW3CODE) Io_Error(*NEXT) Val_Error(*NEXT)
+    #LW3REFRL := #LW3CDES
+    Endif
+    
+    * Validate Input
+    #COM_OWNER.umValidate Iuserid(#W_USERNAME) Iemail(#LW3CEMAIL) Ipassword(#LW3USRPAS) Iverifypw(#LW3USRPS2) Oerrcnt(#LW3MSGCNT) Iarray_Httpresponse(#iArray_HttpResponse)
+    
+    If Cond(#LW3MSGCNT = *ZERO)
+    * Customer Indicator
+    #LW3CUSIND := B
+    * Storefront ID
+    #LW3SFID := #Global_DataModel.upStorefrontId
+    
+    * Combine first & last names to get full name
+    #LW3CHNAME := #LW3CHFNME + ' ' + #LW3CHLNME
+    
+    * Account status is inactive
+    #LW3EASTAT := 'I'
+    
+    * if supplier portal, set to Active
+    If (#LW3CUSIND = 'S')
+    * RD added #LW3ASCSTS fields for Supplier Portal saving
+    #LW3EASTAT #LW3ASCSTS := 'A'
+    Endif
+    
+    * Normal user
+    #LW3USRTYP := 'N'
+    
+    * No super-user
+    #LW3SUPUSR := *BLANKS
+    
+    * Time/date flag for last visited
+    #LW3VISITD := #YYYYMMDDC
+    #LW3VISITT := #TIME
+    
+    * Time/date for Created Timestamp
+    #LW3CDSTMP := *DATETIME
+    
+    * set customer country - ron
+    #LW3HCNTRY := #LW3CTRY
+    * set customer state - ron
+    #LW3HSTATE := #LW3STATE
+    * Set web user status - ron
+    #LW3WCSTAT := "A"
+    
+    * Set the role after the user gets verified
+    * #LW3ROLES := *BLANKS
+    * #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('DFLT_USER_ROLE') Ilanguage(*BLANKS) Oalphavalue(#LW3ROLES)
+    
+    * Create web customer master record
+    Insert Fields(#XG_CUSTOMER) To_File(LW3WCUST) Io_Status(#LW3RETCOD) Io_Error(*NEXT) Val_Error(*NEXT) Issue_Msg(*YES) Check_Only(*YES)
+    
+    If_Status Is(*OKAY)
+    
+    * Create user profile for this customer ...
+    Insert Fields(#XG_WUSER) To_File(LW3WUSER) Io_Status(#LW3RETCOD) Io_Error(*NEXT) Val_Error(*NEXT) Issue_Msg(*YES) Check_Only(*YES)
+    
+    If_Status Is(*OKAY)
+    
+    * Create auto notification
+    * ! value of  STDWEBUSR ? *
+    #LW3CRTUSR := #STDWEBUSR
+    
+    * send mail
+    #COM_OWNER.umSendMail Isfid(#Global_DataModel.upStorefrontId) Icustname(#LW3CHNAME) Iemail(#LW3CEMAIL) Iwphone(#LW3CWPHNE) Ireplacename(#LW3CHLNME + ', ' + #LW3CHFNME) Ihttpheaders(#iHttpHeaders) Ifirstname(#LW3CHFNME) Oretcode(#LW3RETCOD)
+    
+    * Check email was created and sent
+    If (#LW3RETCOD <> OK)
+    * No Email Sent
+    #LW3RETCOD := 'NE'
+    Endif
+    
+    Else
+    * Failed to insert record in LW3WUser
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSomethingWentWrong') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Insert to LW3WUSER File Error')
+    Endif
+    Else
+    
+    * Failed to insert record in LW3WCUST
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSomethingWentWrong') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Insert to LW3WCUST File Error')
+    Endif
+    
+    #oRetCode := #LW3RETCOD
+    
+    Else
+    
+    #oRetCode := 'ER'
+    Endif
+    
+    Endroutine
+    
+    * =====================================================
+    * MTHROUTINE : umValidate
+    * DESCRIPTION: Validate User Registration
+    * =====================================================
+    Mthroutine Name(umValidate) Desc('Validate User Registration')
+    Define_Map For(*INPUT) Class(#LW3WEBUSR) Name(#iUserId)
+    Define_Map For(*INPUT) Class(#LW3CEMAIL) Name(#iEmail)
+    Define_Map For(*INPUT) Class(#LW3USRPAS) Name(#iPassword)
+    Define_Map For(*INPUT) Class(#LW3USRPS2) Name(#iVerifyPw)
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    Define_Map For(*OUTPUT) Class(#LW3MSGCNT) Name(#oErrCnt)
+    
+    * Initialize Error Count
+    #LW3MSGCNT := 0
+    
+    If Cond((#iUserId = *BLANKS) Or (#iUserId = '0'))
+    * Invalid Username
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSomethingWentWrong') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3WEBUSR') Imessagedetails('User Id is blank or zero')
+    #LW3MSGCNT += 1
+    
+    Else
+    
+    * Check if username is unique
+    #LW3QSEL := "SELECT LW3WEBUSR FROM " + #Global_DataModel.upDataLibrary + "LW3WUSER WHERE LOWER(LW3WEBUSR) = '" + #iUserId.LowerCase + "' AND LW3SFID = " + #Global_DataModel.upStorefrontId.AsString + ""
+    Select_Sql Fields(#LW3CEMAIL) Io_Error(*NEXT) Using(#LW3QSEL)
+    
+    * Invalid Username
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUsernameShouldBeUnique') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3WEBUSR') Imessagedetails('Username should be unique')
+    #LW3MSGCNT += 1
+    Endselect
+    
+    Endif
+    
+    * validate e-mail address if entered
+    If Cond(#iEmail *NE *BLANKS)
+    #LW3CEMAIL := #iEmail
+    Exchange Fields(#LW3CEMAIL)
+    Call Process(*DIRECT) Function(LW3V001) Menu_Used(*NEXT) If_Error(*NEXT)
+    
+    If Cond(#LW3VALERR *EQ 'Y')
+    * Invalid Email
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgInvalidEmail') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3CEMAIL')
+    #LW3MSGCNT += 1
+    
+    Else
+    * Check if email is unique
+    Check_For In_File(LW3USRL5) With_Key(#Global_DataModel.upStorefrontId #LW3CEMAIL.LowerCase) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    * Invalid Email Should be unique
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgEmailShouldBeUnique') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Email should be unique')
+    
+    #LW3MSGCNT += 1
+    Endif
+    
+    Endif
+    Endif
+    
+    * Check that verify password is the same as password
+    If (#iVerifyPw *NE #iPassword)
+    * Password does not match the verify password
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgPasswordNotTheSame') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3USRPS2')
+    #LW3MSGCNT += 1
+    
+    Endif
+    
+    * ! validate user name or email? *
+    * Check:verify user name not start with & (& is reserved for temporary users)
+    #STD_FLAG := #iEmail.Substring( 1, 1 )
+    If (#STD_FLAG *EQ '&')
+    * Invalid Email
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgInvalidEmail') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3CEMAIL')
+    #LW3MSGCNT += 1
+    Endif
+    
+    * Validate with Password Criterias
+    #RMNEWPASS := #iPassword
+    #RMUSER := #iEmail
+    #FXLNGCOD := #Global_DataModel.upCurrentLanguage
+    Exchange Fields(#RMOLDPASS #RMNEWPASS #RMUSER #FXLNGCOD)
+    Call Process(*DIRECT) Function(LW3PAS2) Pass_Lst(#LS_RETMSG)
+    
+    If Cond(#W_MSGCNT > 0)
+    Selectlist Named(#LS_RETMSG)
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename(#LW3VARUTX.AsNativeString) Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('')
+    Endselect
+    * Password Criterias Error
+    #LW3MSGCNT += 1
+    Endif
+    
+    * Encrypt the password
+    #LW3OBJMOD := 'ENC'
+    #LW3USRPAS := #iPassword
+    #Processor_Password.HashPassword Password(#LW3USRPAS) Hash(#LW3CUSVAL) Salt(#LW3PWDSLT) Status(#LW3BOLSTS)
+    * returns True #LW3BOLSTS if password encryption is okay
+    If Cond(*Not #LW3BOLSTS)
+    * Failed to encrypt password
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgPasswordEncryptionFailed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Ifieldname('LW3USRPAS')
+    #LW3MSGCNT += 1
+    Endif
+    
+    If Cond((#LW3MSGCNT <> 0))
+    * If there are any errors on the field level, let us have a header-level message
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUserRegistrationFailed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('General error message for registration failure. See other messages for specific error details.')
+    Endif
+    
+    * Error Count
+    #oErrCnt := #LW3MSGCNT
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umBuildVerificationLink
+    * Description....: Build Registration Verification Link with Token
+    * =======================================================
+    Mthroutine Name(umBuildVerificationLink) Desc('Build Registration Verification Link') Help('Build Registration Verification Link with Token')
+    
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iUserId)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iUserEmail)
+    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpRequestHeaders) Name(#iHttpHeaders) Desc('Http Headers') Help('Http Headers') Pass(*BY_REFERENCE)
+    
+    Define_Map For(*OUTPUT) Class(#LW3URL) Name(#oVerificationLink)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_SecretKey)
+    Define_Com Class(#PRIM_BOLN) Name(#L_Boolean)
+    
+    #oReturnCode := 'ER'
+    
+    If_Ref Com(#iHttpHeaders) Is_Not(*NULL)
+    
+    If_Ref Com(#iHttpHeaders.Item<'Host'>) Is_Not(*NULL)
+    
+    If_Ref Com(#iHttpHeaders.Item<'Accept-Language'>) Is_Not(*NULL)
+    
+    * Get the secret key for the Token from System Settings
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('REG_VER_SECRET_KEY') Ilanguage('') Oalphavalue(#L_SecretKey)
+    
+    * Use the hashing algorithm for passwords to generate a secure hashed token
+    #Processor_Password.HashPassword Password((#iUserEmail.LowerCase + #L_SecretKey)) Hash(#LW3SECTKN) Salt(#LW3SALT) Status(#L_Boolean)
+    
+    If Cond(#L_Boolean)
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('REGISTER_VERIFY_URL') Ilanguage('') Oalphavalue(#oVerificationLink)
+    
+    * #LW3SURL := #oVerificationLink.Substitute( #iHttpHeaders<'Host'>.Value #iHttpHeaders<'Accept-Language'>.Value #LW3SECTKN #iUserEmail )
+    #LW3SURL := #oVerificationLink.Substitute( #Global_DataModel.upStorefrontDomain.LowerCase #iHttpHeaders<'Accept-Language'>.Value #LW3SECTKN #iUserEmail )
+    
+    * Log the verification link in a file to keep track of its expiration
+    Check_For In_File(CNTTKNEX) With_Key(#LW3SECTKN #iUserId #iUserEmail) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*EQUALKEY)
+    #LW3WEBUSR := #iUserId
+    #LW3CEMAIL := #iUserEmail
+    
+    #Processor_Tokens.umGetTokenExpiryDate Otokenexpirydatetime(#LW3UEXPDT) Otokensentdatetime(#LW3USNPDT)
+    
+    Insert Fields(#LW3SECTKN #LW3WEBUSR #LW3CEMAIL #LW3SURL #LW3SALT #LW3USNPDT #LW3UEXPDT #LW3CUSTMP #LW3CDSTMP) To_File(CNTTKNEX) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    #oVerificationLink := #LW3SURL
+    #oReturnCode := 'OK'
+    Endif
+    
+    Endif
+    Endif
+    
+    Endif
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umRegistrationLinkVerify
+    * Description....: Verification for Registration Link
+    * =======================================================
+    Mthroutine Name(umRegistrationLinkVerify) Desc('Verification for Registration Link') Help('Verification for Registration Link') Access(*PRIVATE)
+    Define_Map For(*INPUT) Class(#LW3CEMAIL) Name(#iUserEmail)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iVerificationToken)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_SecretKey)
+    Define_Com Class(#PRIM_BOLN) Name(#L_Boolean)
+    
+    #oReturnCode := 'ER'
+    
+    * Check if there is Email, User Name and Change Password Token
+    If Cond((#iUserEmail = *BLANKS) Or (#iVerificationToken = *BLANKS))
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgDefaultError') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Missing required field(s).')
+    Return
+    Endif
+    
+    * Get the necessary User Fields
+    Fetch Fields(#LW3WEBUSR #LW3CEMAIL #LW3CUSIND #LW3WEBB2C) From_File(LW3USRL5) With_Key(#Global_DataModel.upStorefrontId #iUserEmail) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    * Get the Pass Link Secret Key
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('REG_VER_SECRET_KEY') Ilanguage('') Oalphavalue(#L_SecretKey)
+    
+    Fetch Fields(#LW3USNPDT #LW3UEXPDT #LW3SALT #LW3USETKN) From_File(CNTTKNEX) With_Key(#iVerificationToken #LW3WEBUSR #LW3CEMAIL) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    If Cond(#LW3USETKN = 'Y')
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgDefaultError') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Token has already been used.')
+    
+    Else
+    
+    * Check that the token is not expired
+    If Cond(#LW3UEXPDT.Date > #STD_DTIMX.Now)
+    
+    If Cond(#Processor_Password.ValidatePassword( (#LW3CEMAIL + #L_SecretKey) #iVerificationToken #LW3SALT ))
+    #oReturnCode := 'OK'
+    #LW3USETKN := 'Y'
+    Update Fields(#LW3USETKN) In_File(CNTTKNEX) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUserVerifyTokenError') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Token verification has failed.')
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUserVerifyLinkExpired') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('The Url is already expired.')
+    
+    Endif
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUserVerifyTokenError') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Failed to retrieve token expiry information.')
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUserVerifyTokenError') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Failed to retrieve user information.')
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umUserVerified
+    * Description....: User Verified
+    * =======================================================
+    Mthroutine Name(umUserVerified) Desc('User Verified') Help('Update the user as necessary now that it has been verified') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3CEMAIL) Name(#iUserEmail)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    #oReturnCode := 'ER'
+    
+    Fetch Fields(#LW3WEBUSR) From_File(LW3USRL5) With_Key(#Global_DataModel.upStorefrontId #iUserEmail) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('DFLT_USER_ROLE') Ilanguage('') Oalphavalue(#LW3ROLES)
+    
+    #LW3EASTAT := 'A'
+    
+    Update Fields(#LW3ROLES #LW3EASTAT) In_File(LW3USRL5) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #oReturnCode := 'OK'
+    Endif
+    
+    Endif
+    
+    Endroutine
+    
+    End_Com
+
+  API Definition:
+    Language Handling:       NoAction
+    Partition Handling:      PathVariable
+    Publish as Swagger V2:   Yes
+    Publish as OpenAPI V3:   Yes
+    ServicePath:             /CNSREGSTR
+
+    Paths:
+    - /init:
+
+        Operations:
+        - GetInit:
+            Verb:               Get
+            Server Routine:     usGetInit
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     referralsResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Error:
+                Status Code:        400
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp400
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     httpResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Forbidden:
+                Status Code:        403
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp403
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     httpResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+    - /register:
+
+        Operations:
+        - PostRegistration:
+            Verb:               Post
+            Server Routine:     usPostRegistration
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+              Media Types:
+              - application/json:
+                  Media Type Id:      ContentJSONRequest
+
+                  Schema Object:
+                    Type:               Reference
+                    Reference Name:     registrationRequestObject
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     httpResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - ValidationError:
+                Status Code:        400
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp400
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     httpResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Forbidden:
+                Status Code:        403
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp403
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     httpResponseObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+    - /verify/user:
+
+        Operations:
+        - PostVerifyLink:
+            Verb:               Post
+            Server Routine:     usPostVerifyLink
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+              Media Types:
+              - application/json:
+                  Media Type Id:      ContentJson
+
+                  Schema Object:
+                    Description:        Request Object
+                    Type:               Object
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                    Properties:
+                    - email:
+                        Description:        Email
+                        Type:               String
+                        Format:             Unspecified
+                        Required:           Yes
+                        Nullable:           No
+                        ReadOnly:           No
+                        WriteOnly:          No
+
+                    - token:
+                        Description:        Token
+                        Type:               String
+                        Format:             Unspecified
+                        Required:           Yes
+                        Nullable:           No
+                        ReadOnly:           No
+                        WriteOnly:          No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Bad Request:
+                Status Code:        400
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp400
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Forbidden:
+                Status Code:        403
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp403
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    Components:
+      Schema:
+        Types:
+        - referralsObject:
+            Description:        Referrals Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - LW3CODE:
+                Description:        Referral Code
+                Type:               Field
+                Field Name:         LW3CODE
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - LW3CDES:
+                Description:        Referral Description
+                Type:               Field
+                Field Name:         LW3CDES
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - referralsArray:
+            Description:        Referrals Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     referralsObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - referralsResponseObject:
+            Description:        Referrals Response Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - Referrals:
+                Type:               Reference
+                Reference Name:     referralsArray
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - httpResponseArray:
+            Description:        Http Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        Http Error Response Object
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - code:
+                  Description:        Multilingual Variable Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - message:
+                  Description:        Multilingual Variable Unicode Text
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - type:
+                  Description:        Message Type
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - field:
+                  Description:        Field Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - detail:
+                  Description:        Message Detail
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - substitutions:
+                  Description:        Substitution Variables
+                  Type:               Array
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+                  Items:
+                  - Description:        values
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+        - httpResponseObject:
+            Description:        Http Response Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - messages:
+                Type:               Reference
+                Reference Name:     httpResponseArray
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - registrationRequestObject:
+            Description:        Registration Request Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - accountNumber:
+                Description:        Account Number
+                Type:               Number
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - company:
+                Description:        Customer Company
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - email:
+                Description:        Email Address
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - password:
+                Description:        User Password
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - verifyPassword:
+                Description:        Verify Password
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - firstName:
+                Description:        Customer First Name
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - lastName:
+                Description:        Customer Last Name
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - referral:
+                Description:        Code
+                Type:               String
+                Format:             Unspecified
+                Required:           No
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - address1:
+                Description:        Customer Address Line 1
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - address2:
+                Description:        Customer Address Line 2
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - city:
+                Description:        Customer City
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - state:
+                Description:        State/Province Code
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - postalCode:
+                Description:        Customer Postal Code
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - country:
+                Description:        Country Code
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - workPhone:
+                Description:        Customer Work Phone
+                Type:               String
+                Format:             Unspecified
+                Required:           No
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - fax:
+                Description:        Customer Fax
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No

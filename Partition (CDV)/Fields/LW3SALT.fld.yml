@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3SALT
+  Type:               Alpha
+  Length:             32
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Salt"
+      Label:              "Salt"
+      Heading1:           "Salt"
+      Heading2:           " "
+      Heading3:           " "

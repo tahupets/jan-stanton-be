@@ -1,0 +1,35 @@
+﻿Field:
+  Name:               RMOLDPASS
+  Type:               String
+  Length:             20
+  Decimals:           0
+  Default Value:      "*NULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - ND
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Old Password"
+      Label:              "Old Password"
+      Heading1:           "Old"
+      Heading2:           "Password"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(324)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'std_varchar.std_varchar') Name(#WebletTemplate) Defaultweblet(True)
+    
+    End_Com
+    
+    End_Com

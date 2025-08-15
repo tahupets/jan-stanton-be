@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               IO$MDE
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       Yes
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Current mode"
+      Label:              "Current mode"
+      Heading1:           "Current"
+      Heading2:           "Mode"

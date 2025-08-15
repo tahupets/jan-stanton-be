@@ -1,0 +1,36 @@
+﻿Process:
+  Name:                      LW3PASPROC
+  Menu Style:                SAA/CUA
+  Anticipated Usage:         Light
+  Optimize For Remote Comms: No
+  Enable For Web:            No
+  Generate XML:              No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Process for LW3PASCRT"
+
+  Functions:
+  - LW3PAS1:
+      Name:               LW3PAS1
+      Display on Menu:    No
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Display Password Rules"
+
+      Allowed Next Functions:
+      - "*ANY"
+
+  - LW3PAS2:
+      Name:               LW3PAS2
+      Display on Menu:    No
+      Next Function:      MENU
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Password Logic"
+
+      Allowed Next Functions:
+      - "*ANY"

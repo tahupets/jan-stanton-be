@@ -1,0 +1,33 @@
+﻿Field:
+  Name:               EEVUDS
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "'Y'"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Use Email Dist file (Y/N)"
+      Label:              "Use Email Dist"
+      Heading1:           "Use"
+      Heading2:           "Email"
+      Heading3:           "Dist"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(178)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'std_char.std_char') Name(#Weblet) Defaultweblet(True)
+    
+    End_Com
+    
+    End_Com

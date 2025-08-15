@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               CRITDSBL
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Disable Criteria"
+      Label:              "Disable Criteri"
+      Heading1:           "Disable"
+      Heading2:           "Criteria"
+      Heading3:           " "

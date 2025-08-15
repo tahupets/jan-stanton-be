@@ -52,6 +52,7 @@
     Define_Com Class(#LW3CURSM) Name(#L_StorefrontCurrencySymbol)
     Define_Com Class(#LW3DPSYM) Name(#L_StorefrontDecimalPointSymbol)
     Define_Com Class(#LW3TSSYM) Name(#L_StorefrontThousandSeparatorSymbol)
+    Define_Com Class(#LW3DOMAIN) Name(#L_StorefrontDomain)
     Define_Com Class(#FXANALYZE) Name(#L_StorefrontAnalyticsFlag)
     Define_Com Class(#FXANACCT) Name(#L_StorefrontAnalyticsAccountId)
     
@@ -94,6 +95,7 @@
     Define_Pty Name(upStorefrontCurrencySymbol) Get(*AUTO #L_StorefrontCurrencySymbol) Set(*AUTO #L_StorefrontCurrencySymbol)
     Define_Pty Name(upStorefrontDecimalPointSymbol) Get(*AUTO #L_StorefrontDecimalPointSymbol) Set(*AUTO #L_StorefrontDecimalPointSymbol)
     Define_Pty Name(upStorefrontThousandSeparatorSymbol) Get(*AUTO #L_StorefrontThousandSeparatorSymbol) Set(*AUTO #L_StorefrontThousandSeparatorSymbol)
+    Define_Pty Name(upStorefrontDomain) Get(*AUTO #L_StorefrontDomain) Set(*AUTO #L_StorefrontDomain)
     Define_Pty Name(upStorefrontAnalyticsFlag) Get(*AUTO #L_StorefrontAnalyticsFlag) Set(*AUTO #L_StorefrontAnalyticsFlag)
     Define_Pty Name(upStorefrontAnalyticsAccountId) Get(*AUTO #L_StorefrontAnalyticsAccountId) Set(*AUTO #L_StorefrontAnalyticsAccountId)
     
@@ -192,6 +194,7 @@
     #L_StorefrontCurrencySymbol := #LW3CURSM
     #L_StorefrontDecimalPointSymbol := #LW3DPSYM
     #L_StorefrontThousandSeparatorSymbol := #LW3TSSYM
+    #L_StorefrontDomain := #LW3DOMAIN
     #L_StorefrontAnalyticsFlag := #FXANALYZE
     #L_StorefrontAnalyticsAccountId := #FXANACCT
     

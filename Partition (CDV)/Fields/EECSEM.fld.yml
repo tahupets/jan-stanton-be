@@ -1,0 +1,31 @@
+﻿Field:
+  Name:               EECSEM
+  Type:               Alpha
+  Length:             128
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Sender eMail"
+      Label:              "Sender eMail"
+      Heading1:           "Sender eMail"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(555)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'std_char.std_char') Name(#Weblet) Defaultweblet(True)
+    
+    End_Com
+    
+    End_Com

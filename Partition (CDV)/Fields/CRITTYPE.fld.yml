@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               CRITTYPE
+  Type:               Alpha
+  Length:             15
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Criteria Measurement Type"
+      Label:              "Criteria Measur"
+      Heading1:           "Criteria"
+      Heading2:           "Measurement"
+      Heading3:           "Type"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(286)
+    
+    End_Com
+    
+    End_Com

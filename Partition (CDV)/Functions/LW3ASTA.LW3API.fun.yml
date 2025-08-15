@@ -1,0 +1,74 @@
+﻿Function:
+  Enabled For RDMLX:  No
+
+  Source: |
+    * =======================================================
+    * Process Name - LW3API
+    * Process Description - CE API functions
+    * Function Name - LW3ASTA
+    * Function Description - State API
+    
+    * EXCHANGE FIELDS(In)
+    
+    * #FXACTION  - Action code - G = Get specific state master
+    * .                          L = Get list of states
+    * #LW3CTRY  - Country code
+    * #LW3STATE - State code
+    
+    
+    * EXCHANGE FIELDS(Out)
+    
+    * #FXRETCD  - Return code - OK or NR
+    * Returns list #STATELIST
+    
+    * =======================================================
+    * Summary of Changes
+    * =======================================================
+    * CR #  !  Date   ! Description
+    * -------------------------------------------------------
+    *       |         |
+    * =======================================================
+    Function Options(*DIRECT) Rcv_List(#STATELIST)
+    * =======================================================
+    
+    Group_By Name(#STATEGRP) Fields(#LW3CTRY #LW3STATE #LW3STATED #LW3UFLG)
+    
+    Def_List Name(#STATELIST) Fields(#LW3CTRY #LW3STATE #LW3STATED) Type(*WORKING) Entrys(500)
+    
+    * =======================================================
+    * Program main line
+    * =======================================================
+    
+    Change Field(#LW3CTRYD) To(*NULL)
+    Change Field(#FXRETCD) To(NR)
+    Exchange Fields(#FXRETCD) Option(*ALWAYS)
+    Clr_List Named(#STATELIST)
+    
+    Case Of_Field(#FXACTION)
+    
+    When Value_Is('*EQ ''L''')
+    
+    Select Fields(#STATEGRP) From_File(LW3STATF) With_Key(*LANGUAGE #LW3CTRY) Nbr_Keys(*COMPUTE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    If Cond('#LW3UFLG *NE ''N''')
+    Add_Entry To_List(#STATELIST)
+    Change Field(#FXRETCD) To(OK)
+    Endif
+    Endif
+    Endselect
+    
+    Otherwise
+    
+    Fetch Fields(#STATEGRP) From_File(LW3STATF) With_Key(*LANGUAGE #LW3CTRY #LW3STATE) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If_Status Is(*OKAY)
+    If Cond('#LW3UFLG *NE ''N''')
+    Change Field(#FXRETCD) To(OK)
+    Add_Entry To_List(#STATELIST)
+    Endif
+    Endif
+    
+    Endcase
+    
+    Return
+    

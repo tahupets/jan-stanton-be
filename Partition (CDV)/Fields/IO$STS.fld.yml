@@ -1,0 +1,59 @@
+﻿Field:
+  Name:               IO$STS
+  Type:               Alpha
+  Length:             2
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       Yes
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Data base I/O operation status code"
+      Label:              "I/O status ...."
+      Heading1:           "I/O"
+      Heading2:           "Status"
+
+  Repository Help:
+  - ENG: |
+      $$USER
+      %{Description\:  Field IO$STS is a standard LANSA field. It is set by
+          any input or output command such as FETCH or INSERT. The value
+          returned in IO$STS indicates the success or failure of the I/O
+          operation. IO$STS may contain any of the following values after
+          an I/O command has been executed :
+      
+                   %Value in\
+                   %{IO$STS\  %{Description\
+      
+                       OK       Command completed normally. No errors found.
+      
+                       NR       No record found matching key or condition specified
+      
+                       EF       End of file reached when reading file.
+      
+                       BF       Begining of file found when reading file backwards.
+      
+                       VE       Validation error detected in data supplied
+                                for update, insert or delete operation.
+      
+                       ER       Fatal I/O error detected, function cannot
+                                continue at all.
+      
+      %{Comments\:  IO$STS can be used in IF commands just like any other
+          field. For example the following code is commonly used to issue an
+          error message :
+      
+                FETCH   FIELDS(#LIST) FROM_FILE(INVOICES) WITH_KEY(#INVNUM)
+                IF      COND('#IO$STS = NR')
+                MESSAGE TEXT('Invoice not found, check number and re-enter')
+                ENDIF
+      
+          Note that field IO$STS is updated during the FETCH command and
+          thus cannot be sensibly tested until after it has been completed.
+      
+      %{Warning\:  IO$STS is a standard LANSA field. The type and length of IO$STS
+          field should@NEVER\be modified in any way.

@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3USNPDT
+  Type:               DateTime
+  Length:             26
+  Decimals:           0
+  Default Value:      "*SQLNULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - ASQN
+  - ISO
+  - SUTC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Url Sent Date Time"
+      Label:              "Url Sent Date T"
+      Heading1:           "Url"
+      Heading2:           "Sent"
+      Heading3:           "Date"

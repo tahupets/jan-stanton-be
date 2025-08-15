@@ -1,0 +1,96 @@
+﻿File:
+  Name:                           CNTTKNEX
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             CNTTKNEX
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000 2000 3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Token Expirations"
+
+  Real Fields:
+  - LW3SECTKN:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3WEBUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CEMAIL:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3SURL:
+      Type:               String
+      Length:             512
+      Decimals:           0
+
+  - LW3SALT:
+      Type:               Alphanumeric
+      Length:             32
+      Decimals:           0
+
+  - LW3USETKN:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3USNPDT:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - LW3UEXPDT:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - LW3CUSTMP:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - LW3UUSTMP:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3UDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  Primary Keys:
+  - LW3SECTKN
+  - LW3WEBUSR
+  - LW3CEMAIL

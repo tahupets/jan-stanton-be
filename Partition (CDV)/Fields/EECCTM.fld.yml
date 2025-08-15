@@ -1,0 +1,28 @@
+﻿Field:
+  Name:               EECCTM
+  Type:               Signed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Reference Field:    EEVCTM
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Output Attributes:
+  - TIMU
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Change Time"
+      Label:              "Change Time"
+      Heading1:           "Change Time"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(216)
+    
+    End_Com
+    
+    End_Com

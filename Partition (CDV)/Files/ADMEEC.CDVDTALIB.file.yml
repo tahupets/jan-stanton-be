@@ -1,0 +1,158 @@
+﻿File:
+  Name:                           ADMEEC
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             ADMEEC
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 100000 10000 10) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Email Event Content"
+
+  Real Fields:
+  - EECEID:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - EECCSQ:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - LW3LNGCOD:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - EECCID:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - EECSBJ:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  - EECSEM:
+      Type:               Alphanumeric
+      Length:             128
+      Decimals:           0
+
+  - EECSNM:
+      Type:               Alphanumeric
+      Length:             128
+      Decimals:           0
+
+  - EECADT:
+      Type:               Signed
+      Length:             8
+      Decimals:           0
+
+  - EECATM:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+
+  - EECAFN:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - EECAUR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - EECCDT:
+      Type:               Signed
+      Length:             8
+      Decimals:           0
+
+  - EECCTM:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+
+  - EECCFN:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - EECCUR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  Primary Keys:
+  - EECEID
+  - EECCSQ
+  - LW3LNGCOD
+
+  Logical Views:
+  - ADMEEC01:
+      Identifier:         ADMEEC01
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      ADMEEC01
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Content Sequence"
+
+      Keys:
+      - EECCSQ:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3LNGCOD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - ADMEEC02:
+      Identifier:         ADMEEC02
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      ADMEEC02
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "by evt id, lang, cnt seq"
+
+      Keys:
+      - EECEID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3LNGCOD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - EECCSQ:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

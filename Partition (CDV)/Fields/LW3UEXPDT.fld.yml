@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3UEXPDT
+  Type:               DateTime
+  Length:             26
+  Decimals:           0
+  Default Value:      "*SQLNULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - ASQN
+  - ISO
+  - SUTC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Url Expiry Date Time"
+      Label:              "Url Expiry Date"
+      Heading1:           "Url"
+      Heading2:           "Expiry"
+      Heading3:           "Date"

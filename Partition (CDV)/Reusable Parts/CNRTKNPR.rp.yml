@@ -1,0 +1,79 @@
+﻿Reusable Part:
+  Name:               CNRTKNPR
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Tokens Processor"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Reusable Part
+    * Platform        : VL Web
+    * Name            : CNRTKNPR
+    * Identifier      : CNRTKNPR
+    * Ancestor        : PRIM_OBJT
+    * Written By      : Jan Metica
+    * Written On      : 11th July 2025
+    * Description     : Tokens Processor
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umGetTokenExpiryDate
+    * Description....: Verification for Registration Link
+    * =======================================================
+    Mthroutine Name(umGetTokenExpiryDate) Desc('Get Token Expiry Date') Help('Use this to get the expiry date for a token based on a system setting that has the control value in seconds')
+    
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iSystemSettingName) Mandatory('DEFAULT_SITE_TOKEN_EXPIRY')
+    
+    Define_Map For(*OUTPUT) Class(#STD_DTIMX) Name(#oTokenSentDateTime)
+    Define_Map For(*OUTPUT) Class(#STD_DTIMX) Name(#oTokenExpiryDateTime)
+    
+    Define_Com Class(#LW3SVVNUM) Name(#L_ExpirationSeconds)
+    Define_Com Class(#PRIM_ALPH) Name(#L_String)
+    
+    * Get the Pass Link Expiration in Seconds
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable(#iSystemSettingName) Ilanguage('') Onumericvalue(#L_ExpirationSeconds)
+    
+    If Cond(#L_ExpirationSeconds = 0)
+    * Default this to 1 day
+    #L_ExpirationSeconds := 86400
+    Endif
+    
+    #oTokenSentDateTime := #STD_DTIMX.Now
+    
+    If Cond(*OSAPI = 'IBMI')
+    #LW3QSEL := 'SELECT (CURRENT_TIMESTAMP - CURRENT_TIMEZONE) + ' + #L_ExpirationSeconds.asString + ' SECOND AS "UTC time" FROM SYSIBM.SYSDUMMY1'
+    Else
+    #LW3QSEL := 'SELECT DATEADD(SECOND, ' + #L_ExpirationSeconds.asString + ', GETUTCDATE());'
+    Endif
+    
+    Select_Sql Fields(#STD_DTIMX) Io_Error(*NEXT) Using(#LW3QSEL)
+    Leave
+    Endselect
+    
+    #oTokenExpiryDateTime := #STD_DTIMX
+    
+    Endroutine
+    
+    End_Com

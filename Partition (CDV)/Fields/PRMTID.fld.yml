@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               PRMTID
+  Type:               Signed
+  Length:             25
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Transaction ID"
+      Label:              "Transaction ID"
+      Heading1:           "Transaction"
+      Heading2:           "ID"
+      Heading3:           " "

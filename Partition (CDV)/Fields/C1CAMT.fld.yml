@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1CAMT
+  Type:               Packed
+  Length:             11
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Edit Mask:          L
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CURRENT AMOUNT DUE"
+      Label:              "CURRENT AMOUNT"
+      Heading1:           "CURRENT"
+      Heading2:           "AMOUNT DUE"

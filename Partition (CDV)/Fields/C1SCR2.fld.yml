@@ -1,0 +1,15 @@
+﻿Field:
+  Name:               C1SCR2
+  Type:               Packed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "APPR CREDIT STATUS   CODE"
+      Label:              "APPR CREDIT STA"
+      Heading1:           "APPR CREDIT"
+      Heading2:           "STATUS"

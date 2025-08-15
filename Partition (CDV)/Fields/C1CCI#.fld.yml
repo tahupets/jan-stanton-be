@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1CCI#
+  Type:               Alpha
+  Length:             9
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CCI NUMBER"
+      Label:              "CCI NUMBER"
+      Heading1:           "CCI"
+      Heading2:           "NO."

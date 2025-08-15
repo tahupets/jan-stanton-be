@@ -1,0 +1,2151 @@
+﻿File:
+  Name:                           CIP010
+  File Type:                      IBM i Other File
+  Library:                        SAND
+  Record Format Name:             CIR010
+  Module Library:                 Partition Module Library
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000 2000 3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "cut00mer Name & Address Master File"
+
+  Real Fields:
+  - C1CST#:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - C1CSFX:
+      Type:               Decimal
+      Length:             4
+      Decimals:           0
+
+  - C1CGRP:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - C1NAME:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - C1ADR1:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - C1ADR2:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - C1ADR3:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - C1CITY:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - C1ZIP:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - C1IAC:
+      Type:               Decimal
+      Length:             3
+      Decimals:           0
+
+  - C1ACDE:
+      Type:               Decimal
+      Length:             3
+      Decimals:           0
+
+  - C1PHN#:
+      Type:               Decimal
+      Length:             7
+      Decimals:           0
+
+  - C1CNT1:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - C1CNT2:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - C1STCD:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - C1CTCD:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - C1CYCD:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - C1ASRT:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - C1SXCD:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - C1EXPT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1TXID:
+      Type:               Alphanumeric
+      Length:             15
+      Decimals:           0
+
+  - C1STXC:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - C1CYXC:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - C1CTXC:
+      Type:               Alphanumeric
+      Length:             6
+      Decimals:           0
+
+  - C1STNO:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - C1DBRT:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - C1SCR1:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - C1SCR2:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - C1OPFG:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1AOVL:
+      Type:               Decimal
+      Length:             9
+      Decimals:           2
+
+  - C1UOVL:
+      Type:               Decimal
+      Length:             9
+      Decimals:           2
+
+  - C1LSDT:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - C1LSJL:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - C1USER:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - C1TIME:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - C1RCDT:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - C1RCJL:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - C1LPDT:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - C1LPJL:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - C1INHS:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1PFG1:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1PFG2:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1PFG3:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1PFG4:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1PFG5:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1PFG6:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1PFG7:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1PFG8:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1PFG9:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1PFG0:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1GRDT:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - C1GRJL:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - C1CLMT:
+      Type:               Decimal
+      Length:             11
+      Decimals:           2
+
+  - C1HCR:
+      Type:               Decimal
+      Length:             11
+      Decimals:           2
+
+  - C1D30:
+      Type:               Decimal
+      Length:             11
+      Decimals:           2
+
+  - C1D60:
+      Type:               Decimal
+      Length:             11
+      Decimals:           2
+
+  - C1D90:
+      Type:               Decimal
+      Length:             11
+      Decimals:           2
+
+  - C1D120:
+      Type:               Decimal
+      Length:             11
+      Decimals:           2
+
+  - C1CAMT:
+      Type:               Decimal
+      Length:             11
+      Decimals:           2
+
+  - C1PAMT:
+      Type:               Decimal
+      Length:             11
+      Decimals:           2
+
+  - C1CRAM:
+      Type:               Decimal
+      Length:             11
+      Decimals:           2
+
+  - C1AINT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1ADTP:
+      Type:               Decimal
+      Length:             4
+      Decimals:           1
+
+  - C1PSTM:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1CKOK:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1PRTL:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1LBDT:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - C1LBJL:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - C1GSA:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1SPEC:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1ACT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1REF:
+      Type:               Alphanumeric
+      Length:             15
+      Decimals:           0
+
+  - C1LIDT:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - C1LIDJ:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - C1APAC:
+      Type:               Decimal
+      Length:             3
+      Decimals:           0
+
+  - C1APPH:
+      Type:               Decimal
+      Length:             7
+      Decimals:           0
+
+  - C1APFX:
+      Type:               Decimal
+      Length:             10
+      Decimals:           0
+
+  - C1POWN:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - C1PACD:
+      Type:               Decimal
+      Length:             3
+      Decimals:           0
+
+  - C1PPHN:
+      Type:               Decimal
+      Length:             7
+      Decimals:           0
+
+  - C1PFAX:
+      Type:               Decimal
+      Length:             10
+      Decimals:           0
+
+  - C1PDTD:
+      Type:               Decimal
+      Length:             4
+      Decimals:           1
+
+  - C1LFSD:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - C1LFSA:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - C1LRVD:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - C1LRVA:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - C1NRVD:
+      Type:               Decimal
+      Length:             6
+      Decimals:           0
+
+  - C1NRVA:
+      Type:               Decimal
+      Length:             5
+      Decimals:           0
+
+  - C1SELL:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1CRCM:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - C1ICRY:
+      Type:               Decimal
+      Length:             3
+      Decimals:           0
+
+  - C1ICTY:
+      Type:               Decimal
+      Length:             4
+      Decimals:           0
+
+  - C1ILCL:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - C1CTRY:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - C1CINM:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - C1CDCV:
+      Type:               Decimal
+      Length:             9
+      Decimals:           0
+
+  - C1FBKR:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - C1DSPT:
+      Type:               Decimal
+      Length:             9
+      Decimals:           2
+
+  - C1OINV:
+      Type:               Decimal
+      Length:             9
+      Decimals:           2
+
+  - C1DUN#:
+      Type:               Alphanumeric
+      Length:             9
+      Decimals:           0
+
+  - C1CCI#:
+      Type:               Alphanumeric
+      Length:             9
+      Decimals:           0
+
+  - C1TXIS:
+      Type:               Alphanumeric
+      Length:             15
+      Decimals:           0
+
+  - C1GEO:
+      Type:               Decimal
+      Length:             9
+      Decimals:           0
+
+  - C1ICLM:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - C1MAIL:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  Primary Keys:
+  - C1CST#
+  - C1CSFX
+
+  Logical Views:
+  - CIL010:
+      Identifier:         CIL010
+      Unique Key:         Yes
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Information Master File -- Logi"
+
+      Fields:
+      - C1CST#
+      - C1CSFX
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1ADR3
+      - C1CITY
+      - C1ZIP
+      - C1IAC
+      - C1ACDE
+      - C1PHN#
+      - C1CNT1
+      - C1CNT2
+      - C1STCD
+      - C1CTCD
+      - C1CYCD
+      - C1ASRT
+      - C1SXCD
+      - C1EXPT
+      - C1TXID
+      - C1STXC
+      - C1CYXC
+      - C1CTXC
+      - C1STNO
+      - C1DBRT
+      - C1SCR1
+      - C1SCR2
+      - C1OPFG
+      - C1AOVL
+      - C1UOVL
+      - C1LSDT
+      - C1LSJL
+      - C1USER
+      - C1TIME
+      - C1RCDT
+      - C1RCJL
+      - C1LPDT
+      - C1LPJL
+      - C1INHS
+      - C1PFG1
+      - C1PFG2
+      - C1PFG3
+      - C1PFG4
+      - C1PFG5
+      - C1PFG6
+      - C1PFG7
+      - C1PFG8
+      - C1PFG9
+      - C1PFG0
+      - C1GRDT
+      - C1GRJL
+      - C1CLMT
+      - C1HCR
+      - C1D30
+      - C1D60
+      - C1D90
+      - C1D120
+      - C1CAMT
+      - C1PAMT
+      - C1CRAM
+      - C1AINT
+      - C1ADTP
+      - C1PSTM
+      - C1CKOK
+      - C1PRTL
+      - C1LBDT
+      - C1LBJL
+      - C1GSA
+      - C1SPEC
+      - C1ACT
+      - C1REF
+      - C1LIDT
+      - C1LIDJ
+      - C1APAC
+      - C1APPH
+      - C1APFX
+      - C1POWN
+      - C1PACD
+      - C1PPHN
+      - C1PFAX
+      - C1PDTD
+      - C1LFSD
+      - C1LFSA
+      - C1LRVD
+      - C1LRVA
+      - C1NRVD
+      - C1NRVA
+      - C1SELL
+      - C1CRCM
+      - C1ICRY
+      - C1ICTY
+      - C1ILCL
+      - C1CTRY
+      - C1CINM
+      - C1CDCV
+      - C1FBKR
+      - C1DSPT
+      - C1OINV
+      - C1DUN#
+      - C1CCI#
+      - C1TXIS
+      - C1GEO
+      - C1ICLM
+      - C1MAIL
+
+      Keys:
+      - C1CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1CSFX:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - CIL01005:
+      Identifier:         CIL01005
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Mast By Custr Group # (no omits"
+
+      Fields:
+      - C1CST#
+      - C1CSFX
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1ADR3
+      - C1CITY
+      - C1ZIP
+      - C1IAC
+      - C1ACDE
+      - C1PHN#
+      - C1CNT1
+      - C1CNT2
+      - C1STCD
+      - C1CTCD
+      - C1CYCD
+      - C1ASRT
+      - C1SXCD
+      - C1EXPT
+      - C1TXID
+      - C1STXC
+      - C1CYXC
+      - C1CTXC
+      - C1STNO
+      - C1DBRT
+      - C1SCR1
+      - C1SCR2
+      - C1OPFG
+      - C1AOVL
+      - C1UOVL
+      - C1LSDT
+      - C1LSJL
+      - C1USER
+      - C1TIME
+      - C1RCDT
+      - C1RCJL
+      - C1LPDT
+      - C1LPJL
+      - C1INHS
+      - C1PFG1
+      - C1PFG2
+      - C1PFG3
+      - C1PFG4
+      - C1PFG5
+      - C1PFG6
+      - C1PFG7
+      - C1PFG8
+      - C1PFG9
+      - C1PFG0
+      - C1GRDT
+      - C1GRJL
+      - C1CLMT
+      - C1HCR
+      - C1D30
+      - C1D60
+      - C1D90
+      - C1D120
+      - C1CAMT
+      - C1PAMT
+      - C1CRAM
+      - C1AINT
+      - C1ADTP
+      - C1PSTM
+      - C1CKOK
+      - C1PRTL
+      - C1LBDT
+      - C1LBJL
+      - C1GSA
+      - C1SPEC
+      - C1ACT
+      - C1REF
+      - C1LIDT
+      - C1LIDJ
+      - C1APAC
+      - C1APPH
+      - C1APFX
+      - C1POWN
+      - C1PACD
+      - C1PPHN
+      - C1PFAX
+      - C1PDTD
+      - C1LFSD
+      - C1LFSA
+      - C1LRVD
+      - C1LRVA
+      - C1NRVD
+      - C1NRVA
+      - C1SELL
+      - C1CRCM
+      - C1ICRY
+      - C1ICTY
+      - C1ILCL
+      - C1CTRY
+      - C1CINM
+      - C1CDCV
+      - C1FBKR
+      - C1DSPT
+      - C1OINV
+      - C1DUN#
+      - C1CCI#
+      - C1TXIS
+      - C1GEO
+      - C1ICLM
+      - C1MAIL
+
+      Keys:
+      - C1CGRP:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1CSFX:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - CIL01006:
+      Identifier:         CIL01006
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Master - By State - All Cust."
+
+      Fields:
+      - C1CST#
+      - C1CSFX
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1ADR3
+      - C1CITY
+      - C1ZIP
+      - C1IAC
+      - C1ACDE
+      - C1PHN#
+      - C1CNT1
+      - C1CNT2
+      - C1STCD
+      - C1CTCD
+      - C1CYCD
+      - C1ASRT
+      - C1SXCD
+      - C1EXPT
+      - C1TXID
+      - C1STXC
+      - C1CYXC
+      - C1CTXC
+      - C1STNO
+      - C1DBRT
+      - C1SCR1
+      - C1SCR2
+      - C1OPFG
+      - C1AOVL
+      - C1UOVL
+      - C1LSDT
+      - C1LSJL
+      - C1USER
+      - C1TIME
+      - C1RCDT
+      - C1RCJL
+      - C1LPDT
+      - C1LPJL
+      - C1INHS
+      - C1PFG1
+      - C1PFG2
+      - C1PFG3
+      - C1PFG4
+      - C1PFG5
+      - C1PFG6
+      - C1PFG7
+      - C1PFG8
+      - C1PFG9
+      - C1PFG0
+      - C1GRDT
+      - C1GRJL
+      - C1CLMT
+      - C1HCR
+      - C1D30
+      - C1D60
+      - C1D90
+      - C1D120
+      - C1CAMT
+      - C1PAMT
+      - C1CRAM
+      - C1AINT
+      - C1ADTP
+      - C1PSTM
+      - C1CKOK
+      - C1PRTL
+      - C1LBDT
+      - C1LBJL
+      - C1GSA
+      - C1SPEC
+      - C1ACT
+      - C1REF
+      - C1LIDT
+      - C1LIDJ
+      - C1APAC
+      - C1APPH
+      - C1APFX
+      - C1POWN
+      - C1PACD
+      - C1PPHN
+      - C1PFAX
+      - C1PDTD
+      - C1LFSD
+      - C1LFSA
+      - C1LRVD
+      - C1LRVA
+      - C1NRVD
+      - C1NRVA
+      - C1SELL
+      - C1CRCM
+      - C1ICRY
+      - C1ICTY
+      - C1ILCL
+      - C1CTRY
+      - C1CINM
+      - C1CDCV
+      - C1FBKR
+      - C1DSPT
+      - C1OINV
+      - C1DUN#
+      - C1CCI#
+      - C1TXIS
+      - C1GEO
+      - C1ICLM
+      - C1MAIL
+
+      Keys:
+      - C1STCD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - C1CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1CSFX:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - CIL010A:
+      Identifier:         CIL010A
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Master Alphabetic"
+
+      Fields:
+      - C1CST#
+      - C1CSFX
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1ADR3
+      - C1CITY
+      - C1ZIP
+      - C1IAC
+      - C1ACDE
+      - C1PHN#
+      - C1CNT1
+      - C1CNT2
+      - C1STCD
+      - C1CTCD
+      - C1CYCD
+      - C1ASRT
+      - C1SXCD
+      - C1EXPT
+      - C1TXID
+      - C1STXC
+      - C1CYXC
+      - C1CTXC
+      - C1STNO
+      - C1DBRT
+      - C1SCR1
+      - C1SCR2
+      - C1OPFG
+      - C1AOVL
+      - C1UOVL
+      - C1LSDT
+      - C1LSJL
+      - C1USER
+      - C1TIME
+      - C1RCDT
+      - C1RCJL
+      - C1LPDT
+      - C1LPJL
+      - C1INHS
+      - C1PFG1
+      - C1PFG2
+      - C1PFG3
+      - C1PFG4
+      - C1PFG5
+      - C1PFG6
+      - C1PFG7
+      - C1PFG8
+      - C1PFG9
+      - C1PFG0
+      - C1GRDT
+      - C1GRJL
+      - C1CLMT
+      - C1HCR
+      - C1D30
+      - C1D60
+      - C1D90
+      - C1D120
+      - C1CAMT
+      - C1PAMT
+      - C1CRAM
+      - C1AINT
+      - C1ADTP
+      - C1PSTM
+      - C1CKOK
+      - C1PRTL
+      - C1LBDT
+      - C1LBJL
+      - C1GSA
+      - C1SPEC
+      - C1ACT
+      - C1REF
+      - C1LIDT
+      - C1LIDJ
+      - C1APAC
+      - C1APPH
+      - C1APFX
+      - C1POWN
+      - C1PACD
+      - C1PPHN
+      - C1PFAX
+      - C1PDTD
+      - C1LFSD
+      - C1LFSA
+      - C1LRVD
+      - C1LRVA
+      - C1NRVD
+      - C1NRVA
+      - C1SELL
+      - C1CRCM
+      - C1ICRY
+      - C1ICTY
+      - C1ILCL
+      - C1CTRY
+      - C1CINM
+      - C1CDCV
+      - C1FBKR
+      - C1DSPT
+      - C1OINV
+      - C1DUN#
+      - C1CCI#
+      - C1TXIS
+      - C1GEO
+      - C1ICLM
+      - C1MAIL
+
+      Keys:
+      - C1ASRT:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - C1CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1CSFX:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - CIL010B:
+      Identifier:         CIL010B
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Master by Telephone Number"
+
+      Fields:
+      - C1CST#
+      - C1CSFX
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1ADR3
+      - C1CITY
+      - C1ZIP
+      - C1IAC
+      - C1ACDE
+      - C1PHN#
+      - C1CNT1
+      - C1CNT2
+      - C1STCD
+      - C1CTCD
+      - C1CYCD
+      - C1ASRT
+      - C1SXCD
+      - C1EXPT
+      - C1TXID
+      - C1STXC
+      - C1CYXC
+      - C1CTXC
+      - C1STNO
+      - C1DBRT
+      - C1SCR1
+      - C1SCR2
+      - C1OPFG
+      - C1AOVL
+      - C1UOVL
+      - C1LSDT
+      - C1LSJL
+      - C1USER
+      - C1TIME
+      - C1RCDT
+      - C1RCJL
+      - C1LPDT
+      - C1LPJL
+      - C1INHS
+      - C1PFG1
+      - C1PFG2
+      - C1PFG3
+      - C1PFG4
+      - C1PFG5
+      - C1PFG6
+      - C1PFG7
+      - C1PFG8
+      - C1PFG9
+      - C1PFG0
+      - C1GRDT
+      - C1GRJL
+      - C1CLMT
+      - C1HCR
+      - C1D30
+      - C1D60
+      - C1D90
+      - C1D120
+      - C1CAMT
+      - C1PAMT
+      - C1CRAM
+      - C1AINT
+      - C1ADTP
+      - C1PSTM
+      - C1CKOK
+      - C1PRTL
+      - C1LBDT
+      - C1LBJL
+      - C1GSA
+      - C1SPEC
+      - C1ACT
+      - C1REF
+      - C1LIDT
+      - C1LIDJ
+      - C1APAC
+      - C1APPH
+      - C1APFX
+      - C1POWN
+      - C1PACD
+      - C1PPHN
+      - C1PFAX
+      - C1PDTD
+      - C1LFSD
+      - C1LFSA
+      - C1LRVD
+      - C1LRVA
+      - C1NRVD
+      - C1NRVA
+      - C1SELL
+      - C1CRCM
+      - C1ICRY
+      - C1ICTY
+      - C1ILCL
+      - C1CTRY
+      - C1CINM
+      - C1CDCV
+      - C1FBKR
+      - C1DSPT
+      - C1OINV
+      - C1DUN#
+      - C1CCI#
+      - C1TXIS
+      - C1GEO
+      - C1ICLM
+      - C1MAIL
+
+      Keys:
+      - C1ACDE:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1PHN#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1CSFX:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - CIL010CSI:
+      Identifier:         CIL010CSI
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Master: Header fields for CSI c"
+
+      Fields:
+      - C1CST#
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1CITY
+      - C1STCD
+      - C1ZIP
+      - C1ACDE
+      - C1PHN#
+      - C1CTRY
+      - C1PFG0
+      - C1ACT
+      - C1SELL
+      - C1CSFX
+
+      Keys:
+      - C1CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - CIL010D:
+      Identifier:         CIL010D
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Master City"
+
+      Fields:
+      - C1CST#
+      - C1CSFX
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1ADR3
+      - C1CITY
+      - C1ZIP
+      - C1IAC
+      - C1ACDE
+      - C1PHN#
+      - C1CNT1
+      - C1CNT2
+      - C1STCD
+      - C1CTCD
+      - C1CYCD
+      - C1ASRT
+      - C1SXCD
+      - C1EXPT
+      - C1TXID
+      - C1STXC
+      - C1CYXC
+      - C1CTXC
+      - C1STNO
+      - C1DBRT
+      - C1SCR1
+      - C1SCR2
+      - C1OPFG
+      - C1AOVL
+      - C1UOVL
+      - C1LSDT
+      - C1LSJL
+      - C1USER
+      - C1TIME
+      - C1RCDT
+      - C1RCJL
+      - C1LPDT
+      - C1LPJL
+      - C1INHS
+      - C1PFG1
+      - C1PFG2
+      - C1PFG3
+      - C1PFG4
+      - C1PFG5
+      - C1PFG6
+      - C1PFG7
+      - C1PFG8
+      - C1PFG9
+      - C1PFG0
+      - C1GRDT
+      - C1GRJL
+      - C1CLMT
+      - C1HCR
+      - C1D30
+      - C1D60
+      - C1D90
+      - C1D120
+      - C1CAMT
+      - C1PAMT
+      - C1CRAM
+      - C1AINT
+      - C1ADTP
+      - C1PSTM
+      - C1CKOK
+      - C1PRTL
+      - C1LBDT
+      - C1LBJL
+      - C1GSA
+      - C1SPEC
+      - C1ACT
+      - C1REF
+      - C1LIDT
+      - C1LIDJ
+      - C1APAC
+      - C1APPH
+      - C1APFX
+      - C1POWN
+      - C1PACD
+      - C1PPHN
+      - C1PFAX
+      - C1PDTD
+      - C1LFSD
+      - C1LFSA
+      - C1LRVD
+      - C1LRVA
+      - C1NRVD
+      - C1NRVA
+      - C1SELL
+      - C1CRCM
+      - C1ICRY
+      - C1ICTY
+      - C1ILCL
+      - C1CTRY
+      - C1CINM
+      - C1CDCV
+      - C1FBKR
+      - C1DSPT
+      - C1OINV
+      - C1DUN#
+      - C1CCI#
+      - C1TXIS
+      - C1GEO
+      - C1ICLM
+      - C1MAIL
+
+      Keys:
+      - C1CITY:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - C1CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1CSFX:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - CIL010F:
+      Identifier:         CIL010F
+      Unique Key:         Yes
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Information Master File -- Logi"
+
+      Fields:
+      - C1CST#
+      - C1CSFX
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1ADR3
+      - C1CITY
+      - C1ZIP
+      - C1IAC
+      - C1ACDE
+      - C1PHN#
+      - C1CNT1
+      - C1CNT2
+      - C1STCD
+      - C1CTCD
+      - C1CYCD
+      - C1ASRT
+      - C1SXCD
+      - C1EXPT
+      - C1TXID
+      - C1STXC
+      - C1CYXC
+      - C1CTXC
+      - C1STNO
+      - C1DBRT
+      - C1SCR1
+      - C1SCR2
+      - C1OPFG
+      - C1AOVL
+      - C1UOVL
+      - C1LSDT
+      - C1LSJL
+      - C1USER
+      - C1TIME
+      - C1RCDT
+      - C1RCJL
+      - C1LPDT
+      - C1LPJL
+      - C1INHS
+      - C1PFG1
+      - C1PFG2
+      - C1PFG3
+      - C1PFG4
+      - C1PFG5
+      - C1PFG6
+      - C1PFG7
+      - C1PFG8
+      - C1PFG9
+      - C1PFG0
+      - C1GRDT
+      - C1GRJL
+      - C1CLMT
+      - C1HCR
+      - C1D30
+      - C1D60
+      - C1D90
+      - C1D120
+      - C1CAMT
+      - C1PAMT
+      - C1CRAM
+      - C1AINT
+      - C1ADTP
+      - C1PSTM
+      - C1CKOK
+      - C1PRTL
+      - C1LBDT
+      - C1LBJL
+      - C1GSA
+      - C1SPEC
+      - C1ACT
+      - C1REF
+      - C1LIDT
+      - C1LIDJ
+      - C1APAC
+      - C1APPH
+      - C1APFX
+      - C1POWN
+      - C1PACD
+      - C1PPHN
+      - C1PFAX
+      - C1PDTD
+      - C1LFSD
+      - C1LFSA
+      - C1LRVD
+      - C1LRVA
+      - C1NRVD
+      - C1NRVA
+      - C1SELL
+      - C1CRCM
+      - C1ICRY
+      - C1ICTY
+      - C1ILCL
+      - C1CTRY
+      - C1CINM
+      - C1CDCV
+      - C1FBKR
+      - C1DSPT
+      - C1OINV
+      - C1DUN#
+      - C1CCI#
+      - C1TXIS
+      - C1GEO
+      - C1ICLM
+      - C1MAIL
+
+      Keys:
+      - C1CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1CSFX:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - CIL010H:
+      Identifier:         CIL010H
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Master -- Sold-to's Only"
+
+      Fields:
+      - C1CST#
+      - C1CSFX
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1ADR3
+      - C1CITY
+      - C1ZIP
+      - C1IAC
+      - C1ACDE
+      - C1PHN#
+      - C1CNT1
+      - C1CNT2
+      - C1STCD
+      - C1CTCD
+      - C1CYCD
+      - C1ASRT
+      - C1SXCD
+      - C1EXPT
+      - C1TXID
+      - C1STXC
+      - C1CYXC
+      - C1CTXC
+      - C1STNO
+      - C1DBRT
+      - C1SCR1
+      - C1SCR2
+      - C1OPFG
+      - C1AOVL
+      - C1UOVL
+      - C1LSDT
+      - C1LSJL
+      - C1USER
+      - C1TIME
+      - C1RCDT
+      - C1RCJL
+      - C1LPDT
+      - C1LPJL
+      - C1INHS
+      - C1PFG1
+      - C1PFG2
+      - C1PFG3
+      - C1PFG4
+      - C1PFG5
+      - C1PFG6
+      - C1PFG7
+      - C1PFG8
+      - C1PFG9
+      - C1PFG0
+      - C1GRDT
+      - C1GRJL
+      - C1CLMT
+      - C1HCR
+      - C1D30
+      - C1D60
+      - C1D90
+      - C1D120
+      - C1CAMT
+      - C1PAMT
+      - C1CRAM
+      - C1AINT
+      - C1ADTP
+      - C1PSTM
+      - C1CKOK
+      - C1PRTL
+      - C1LBDT
+      - C1LBJL
+      - C1GSA
+      - C1SPEC
+      - C1ACT
+      - C1REF
+      - C1LIDT
+      - C1LIDJ
+      - C1APAC
+      - C1APPH
+      - C1APFX
+      - C1POWN
+      - C1PACD
+      - C1PPHN
+      - C1PFAX
+      - C1PDTD
+      - C1LFSD
+      - C1LFSA
+      - C1LRVD
+      - C1LRVA
+      - C1NRVD
+      - C1NRVA
+      - C1SELL
+      - C1CRCM
+      - C1ICRY
+      - C1ICTY
+      - C1ILCL
+      - C1CTRY
+      - C1CINM
+      - C1CDCV
+      - C1FBKR
+      - C1DSPT
+      - C1OINV
+      - C1DUN#
+      - C1CCI#
+      - C1TXIS
+      - C1GEO
+      - C1ICLM
+      - C1MAIL
+
+      Keys:
+      - C1CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - CIL010L:
+      Identifier:         CIL010L
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Master by Reference Number"
+
+      Fields:
+      - C1CST#
+      - C1CSFX
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1ADR3
+      - C1CITY
+      - C1ZIP
+      - C1IAC
+      - C1ACDE
+      - C1PHN#
+      - C1CNT1
+      - C1CNT2
+      - C1STCD
+      - C1CTCD
+      - C1CYCD
+      - C1ASRT
+      - C1SXCD
+      - C1EXPT
+      - C1TXID
+      - C1STXC
+      - C1CYXC
+      - C1CTXC
+      - C1STNO
+      - C1DBRT
+      - C1SCR1
+      - C1SCR2
+      - C1OPFG
+      - C1AOVL
+      - C1UOVL
+      - C1LSDT
+      - C1LSJL
+      - C1USER
+      - C1TIME
+      - C1RCDT
+      - C1RCJL
+      - C1LPDT
+      - C1LPJL
+      - C1INHS
+      - C1PFG1
+      - C1PFG2
+      - C1PFG3
+      - C1PFG4
+      - C1PFG5
+      - C1PFG6
+      - C1PFG7
+      - C1PFG8
+      - C1PFG9
+      - C1PFG0
+      - C1GRDT
+      - C1GRJL
+      - C1CLMT
+      - C1HCR
+      - C1D30
+      - C1D60
+      - C1D90
+      - C1D120
+      - C1CAMT
+      - C1PAMT
+      - C1CRAM
+      - C1AINT
+      - C1ADTP
+      - C1PSTM
+      - C1CKOK
+      - C1PRTL
+      - C1LBDT
+      - C1LBJL
+      - C1GSA
+      - C1SPEC
+      - C1ACT
+      - C1REF
+      - C1LIDT
+      - C1LIDJ
+      - C1APAC
+      - C1APPH
+      - C1APFX
+      - C1POWN
+      - C1PACD
+      - C1PPHN
+      - C1PFAX
+      - C1PDTD
+      - C1LFSD
+      - C1LFSA
+      - C1LRVD
+      - C1LRVA
+      - C1NRVD
+      - C1NRVA
+      - C1SELL
+      - C1CRCM
+      - C1ICRY
+      - C1ICTY
+      - C1ILCL
+      - C1CTRY
+      - C1CINM
+      - C1CDCV
+      - C1FBKR
+      - C1DSPT
+      - C1OINV
+      - C1DUN#
+      - C1CCI#
+      - C1TXIS
+      - C1GEO
+      - C1ICLM
+      - C1MAIL
+
+      Keys:
+      - C1REF:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - CIL010S:
+      Identifier:         CIL010S
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Master by Chain Store"
+
+      Fields:
+      - C1CST#
+      - C1CSFX
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1ADR3
+      - C1CITY
+      - C1ZIP
+      - C1IAC
+      - C1ACDE
+      - C1PHN#
+      - C1CNT1
+      - C1CNT2
+      - C1STCD
+      - C1CTCD
+      - C1CYCD
+      - C1ASRT
+      - C1SXCD
+      - C1EXPT
+      - C1TXID
+      - C1STXC
+      - C1CYXC
+      - C1CTXC
+      - C1STNO
+      - C1DBRT
+      - C1SCR1
+      - C1SCR2
+      - C1OPFG
+      - C1AOVL
+      - C1UOVL
+      - C1LSDT
+      - C1LSJL
+      - C1USER
+      - C1TIME
+      - C1RCDT
+      - C1RCJL
+      - C1LPDT
+      - C1LPJL
+      - C1INHS
+      - C1PFG1
+      - C1PFG2
+      - C1PFG3
+      - C1PFG4
+      - C1PFG5
+      - C1PFG6
+      - C1PFG7
+      - C1PFG8
+      - C1PFG9
+      - C1PFG0
+      - C1GRDT
+      - C1GRJL
+      - C1CLMT
+      - C1HCR
+      - C1D30
+      - C1D60
+      - C1D90
+      - C1D120
+      - C1CAMT
+      - C1PAMT
+      - C1CRAM
+      - C1AINT
+      - C1ADTP
+      - C1PSTM
+      - C1CKOK
+      - C1PRTL
+      - C1LBDT
+      - C1LBJL
+      - C1GSA
+      - C1SPEC
+      - C1ACT
+      - C1REF
+      - C1LIDT
+      - C1LIDJ
+      - C1APAC
+      - C1APPH
+      - C1APFX
+      - C1POWN
+      - C1PACD
+      - C1PPHN
+      - C1PFAX
+      - C1PDTD
+      - C1LFSD
+      - C1LFSA
+      - C1LRVD
+      - C1LRVA
+      - C1NRVD
+      - C1NRVA
+      - C1SELL
+      - C1CRCM
+      - C1ICRY
+      - C1ICTY
+      - C1ILCL
+      - C1CTRY
+      - C1CINM
+      - C1CDCV
+      - C1FBKR
+      - C1DSPT
+      - C1OINV
+      - C1DUN#
+      - C1CCI#
+      - C1TXIS
+      - C1GEO
+      - C1ICLM
+      - C1MAIL
+
+      Keys:
+      - C1STNO:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1CSFX:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - CIL010S3:
+      Identifier:         CIL010S3
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Master by Chain Store"
+
+      Fields:
+      - C1CST#
+      - C1CSFX
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1ADR3
+      - C1CITY
+      - C1ZIP
+      - C1IAC
+      - C1ACDE
+      - C1PHN#
+      - C1CNT1
+      - C1CNT2
+      - C1STCD
+      - C1CTCD
+      - C1CYCD
+      - C1ASRT
+      - C1SXCD
+      - C1EXPT
+      - C1TXID
+      - C1STXC
+      - C1CYXC
+      - C1CTXC
+      - C1STNO
+      - C1DBRT
+      - C1SCR1
+      - C1SCR2
+      - C1OPFG
+      - C1AOVL
+      - C1UOVL
+      - C1LSDT
+      - C1LSJL
+      - C1USER
+      - C1TIME
+      - C1RCDT
+      - C1RCJL
+      - C1LPDT
+      - C1LPJL
+      - C1INHS
+      - C1PFG1
+      - C1PFG2
+      - C1PFG3
+      - C1PFG4
+      - C1PFG5
+      - C1PFG6
+      - C1PFG7
+      - C1PFG8
+      - C1PFG9
+      - C1PFG0
+      - C1GRDT
+      - C1GRJL
+      - C1CLMT
+      - C1HCR
+      - C1D30
+      - C1D60
+      - C1D90
+      - C1D120
+      - C1CAMT
+      - C1PAMT
+      - C1CRAM
+      - C1AINT
+      - C1ADTP
+      - C1PSTM
+      - C1CKOK
+      - C1PRTL
+      - C1LBDT
+      - C1LBJL
+      - C1GSA
+      - C1SPEC
+      - C1ACT
+      - C1REF
+      - C1LIDT
+      - C1LIDJ
+      - C1APAC
+      - C1APPH
+      - C1APFX
+      - C1POWN
+      - C1PACD
+      - C1PPHN
+      - C1PFAX
+      - C1PDTD
+      - C1LFSD
+      - C1LFSA
+      - C1LRVD
+      - C1LRVA
+      - C1NRVD
+      - C1NRVA
+      - C1SELL
+      - C1CRCM
+      - C1ICRY
+      - C1ICTY
+      - C1ILCL
+      - C1CTRY
+      - C1CINM
+      - C1CDCV
+      - C1FBKR
+      - C1DSPT
+      - C1OINV
+      - C1DUN#
+      - C1CCI#
+      - C1TXIS
+      - C1GEO
+      - C1ICLM
+      - C1MAIL
+
+      Keys:
+      - C1CST#:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - C1STNO:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - CIL010Z3:
+      Identifier:         CIL010Z3
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CIR010
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Customer Master by zip code"
+
+      Fields:
+      - C1CST#
+      - C1CSFX
+      - C1CGRP
+      - C1NAME
+      - C1ADR1
+      - C1ADR2
+      - C1ADR3
+      - C1CITY
+      - C1ZIP
+      - C1IAC
+      - C1ACDE
+      - C1PHN#
+      - C1CNT1
+      - C1CNT2
+      - C1STCD
+      - C1CTCD
+      - C1CYCD
+      - C1ASRT
+      - C1SXCD
+      - C1EXPT
+      - C1TXID
+      - C1STXC
+      - C1CYXC
+      - C1CTXC
+      - C1STNO
+      - C1DBRT
+      - C1SCR1
+      - C1SCR2
+      - C1OPFG
+      - C1AOVL
+      - C1UOVL
+      - C1LSDT
+      - C1LSJL
+      - C1USER
+      - C1TIME
+      - C1RCDT
+      - C1RCJL
+      - C1LPDT
+      - C1LPJL
+      - C1INHS
+      - C1PFG1
+      - C1PFG2
+      - C1PFG3
+      - C1PFG4
+      - C1PFG5
+      - C1PFG6
+      - C1PFG7
+      - C1PFG8
+      - C1PFG9
+      - C1PFG0
+      - C1GRDT
+      - C1GRJL
+      - C1CLMT
+      - C1HCR
+      - C1D30
+      - C1D60
+      - C1D90
+      - C1D120
+      - C1CAMT
+      - C1PAMT
+      - C1CRAM
+      - C1AINT
+      - C1ADTP
+      - C1PSTM
+      - C1CKOK
+      - C1PRTL
+      - C1LBDT
+      - C1LBJL
+      - C1GSA
+      - C1SPEC
+      - C1ACT
+      - C1REF
+      - C1LIDT
+      - C1LIDJ
+      - C1APAC
+      - C1APPH
+      - C1APFX
+      - C1POWN
+      - C1PACD
+      - C1PPHN
+      - C1PFAX
+      - C1PDTD
+      - C1LFSD
+      - C1LFSA
+      - C1LRVD
+      - C1LRVA
+      - C1NRVD
+      - C1NRVA
+      - C1SELL
+      - C1CRCM
+      - C1ICRY
+      - C1ICTY
+      - C1ILCL
+      - C1CTRY
+      - C1CINM
+      - C1CDCV
+      - C1FBKR
+      - C1DSPT
+      - C1OINV
+      - C1DUN#
+      - C1CCI#
+      - C1TXIS
+      - C1GEO
+      - C1ICLM
+      - C1MAIL
+
+      Keys:
+      - C1ZIP:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - C1ASRT:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

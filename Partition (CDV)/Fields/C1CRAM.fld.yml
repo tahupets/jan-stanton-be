@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1CRAM
+  Type:               Packed
+  Length:             11
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Edit Mask:          L
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CREDITS/UN-APP CASH"
+      Label:              "CREDITS/UN-APP"
+      Heading1:           "CREDITS"
+      Heading2:           "/UN-APP CASH"

@@ -14,8 +14,8 @@
     * Name            : CNSACTSEL
     * Identifier      : CNSACTSEL
     * Ancestor        : PRIM_SRVM
-    * Written By      : Jan Metica
-    * Written On      : 2nd September 2024
+    * Written By      : Jerson Dela Cruz
+    * Written On      : 15th August 2025
     * Description     : Storefront Account Selection
     * =======================================================
     * Modification Log
@@ -101,11 +101,7 @@
     
     If Cond(#LW3RETCOD = 'OK')
     
-    * !NC! - Need to condition account search to only work for users with privilege. Search ability commented until this is planned out
-    
-    * #COM_OWNER.umSearchAssociatedAccounts Iwebuser(#Global_DataModel.upUserId) Iqueryparameters(#uContext.Request.QueryParameters) Iarray_Accounts(#Array_AccountsResponse)
-    
-    #COM_OWNER.umGetAssociatedAccountsList Iwebuser(#Global_DataModel.upUserId) Iarray_Accounts(#Array_AccountsResponse)
+    #COM_OWNER.umGetAssociatedAccountsList Iwebuser(#Global_DataModel.upUserId) Iarray_Accounts(#Array_AccountsResponse) Isearch(#Operation.Request.search)
     
     If Cond(#Array_AccountsResponse.Count > 0)
     #Operation.Response.SetContentJson Content(#Array_AccountsResponse)
@@ -217,6 +213,82 @@
     Endroutine
     
     
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSACTSEL/accounts/{account}
+    * Operation: GetAccounts
+    *
+    * Request
+    *    Parameter: account (LW3JDEC01)
+    *    Schema   : none
+    *
+    * Response
+    *    Schema   : (OK) accountObject
+    *             : (ER)
+    *
+    * Action  : Set the passed account as the selected one for this session
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetUserInit) Response(*HTTP #uContext) Desc('Storefront Get Account Information') Help('Retrieve details for the selected customer account')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetUserInit) Name(#Operation)
+    Define_Com Class(#Com_Home.userInitObject) Name(#Object_UserInit)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetUserInit.Response.Resp400.Object) Name(#Object_Resp400) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetUserInit.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umGetUserInit Iobject_Userinit(#Object_UserInit) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    #Utility_General.umDebugLog( 'CNSACTSEL' #Object_UserInit.canadianDPPFlag )
+    
+    #Utility_General.umDebugLog( 'CNSACTSEL' 'LW3RETCOD OK' )
+    #Operation.Response.SetContentJson Content(#Object_UserInit)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session id is not valid')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetUserInit.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetUserInit.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    
     * =======================================================
     * Method Definitions
     * =======================================================
@@ -226,7 +298,7 @@
     * =======================================================
     Mthroutine Name(umGetAssociatedAccountsList) Desc('Get Associated Accounts List') Access(*PRIVATE)
     Define_Map For(*INPUT) Class(#LW3WEBUSR) Name(#iWebUser)
-    
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iSearch)
     Define_Map For(*INPUT) Class(#COM_HOME.accountsArray) Name(#iArray_Accounts) Pass(*BY_REFERENCE)
     
     Define_Com Class(#LW3WEBUSR) Name(#L_WebUser)
@@ -238,7 +310,9 @@
     * if account is all dealer
     If Cond(#LW3ALLDLR = 'Y')
     
-    Select_Sql Fields(#C1CST# #C1NAME) Using("SELECT C1CST#, C1NAME FROM CIP010 WHERE C1CSFX = 0 ORDER BY C1CST#, C1NAME LIMIT 9999")
+    If Cond(#iSearch <> *BLANKS)
+    
+    Select_Sql Fields(#C1CST# #C1NAME) Using("SELECT C1CST#, C1NAME FROM CIP010 WHERE (UPPER(C1NAME) LIKE '%" + #iSearch + "%' OR C1CST# LIKE '%" + #iSearch + "%') AND C1CSFX = 0 ORDER BY C1CST#, C1NAME LIMIT 9999")
     
     #LW3ASSC01 := #C1CST#.asString.RightAdjust( 6 '0' )
     
@@ -258,6 +332,9 @@
     Endcase
     
     Endselect
+    
+    Endif
+    
     
     Else
     * If user is sub user, test Inheritance Flag
@@ -290,53 +367,6 @@
     Endroutine
     
     * =======================================================
-    * Mthroutine : umSearchAssociatedAccountsList
-    * Description: Search for Associated Accounts
-    * =======================================================
-    Mthroutine Name(umSearchAssociatedAccounts) Desc('Search for Associated Accounts') Access(*PRIVATE)
-    Define_Map For(*INPUT) Class(#LW3WEBUSR) Name(#iWebUser)
-    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpQueryParameters) Name(#iQueryParameters) Pass(*BY_REFERENCE)
-    Define_Map For(*INPUT) Class(#COM_HOME.accountsArray) Name(#iArray_Accounts) Pass(*BY_REFERENCE)
-    
-    For Each(#Parm) In(#iQueryParameters)
-    If Cond(#Parm.Name.UpperCase = 'SEARCH')
-    #LW3SEARCH := #Parm.Value
-    Leave
-    Endif
-    Endfor
-    
-    If Cond(#LW3SEARCH <> *BLANKS)
-    
-    #LW3QSEL := "Select A.LW3CUSTYP, A.LW3ASSC01, A.LW3SUID From " + #Global_DataModel.upDataLibrary + "LW3USRA A"
-    * * * #LW3QSEL += " Join " + #Global_DataModel.upDataLibrary + "LW3CUSM B On B.LW3WEBC01 = A.LW3ASSC01"
-    * * * #LW3QSEL += " Left Join LW3CGRPA C On C.LW3WEBC01 = A.LW3ASSC01"
-    #LW3QSEL += " Where A.LW3WEBUSR = '" + #iWebUser + "' And A.LW3ASCSTS = 'A'"
-    #LW3QSEL += " And UPPER(A.LW3ASSC01) Like '" + #LW3SEARCH.Trim + "%'"
-    * * * #LW3QSEL += " Or UPPER(B.LW3CUSNAM) Like '%" + #LW3SEARCH.Trim + "%'"
-    #LW3QSEL += " Order By A.LW3ASSC01"
-    
-    Select_Sql Fields(#LW3CUSTYP #LW3ASSC01 #LW3SUID) Io_Error(*NEXT) Using(#LW3QSEL)
-    
-    * Get customer Name
-    Case Of_Field(#LW3CUSTYP)
-    
-    When Value_Is('= CUS' '= *BLANK')
-    #COM_OWNER.umGetCustomerAccountDetails Icustomerid(#LW3ASSC01) Iarray_Accounts(#iArray_Accounts)
-    
-    * When Value_Is('= SUP')
-    * #COM_OWNER.umSuppAccount( #LW3SUID )
-    
-    When Value_Is(= GRP)
-    #COM_OWNER.umGetCustomerGroupDetails Icustomerid(#LW3ASSC01) Iarray_Accounts(#iArray_Accounts)
-    Endcase
-    
-    Endselect
-    
-    Endif
-    
-    Endroutine
-    
-    * =======================================================
     * Mthroutine : umGetCustomerAccountDetails
     * Description: Get Customer Account Details
     * =======================================================
@@ -352,10 +382,15 @@
     * Returns name and address fields
     Call Process(*DIRECT) Function(LW3ACUS) Exit_Used(*NEXT) Menu_Used(*NEXT) If_Error(*NEXT)
     
+    If Cond(#FXRETCD = OK)
+    
     Loc_Entry In_List(#iArray_Accounts) Where(#LW3JDEC01 = #iCustomerId)
     If_Status Is_Not(*OKAY)
     #LW3JDEC01 := #LW3ASSC01
+    
+    
     Add_Entry To_List(#iArray_Accounts)
+    Endif
     Endif
     Endroutine
     
@@ -515,6 +550,33 @@
     #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgRequestNotProcessed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('User is not associated with this account.')
     
     Endif
+    
+    Endroutine
+    
+    
+    * =======================================================
+    * Mthroutine : umGetUserInit
+    * Description: Get User Init
+    * =======================================================
+    Mthroutine Name(umGetUserInit) Desc('Get User Init') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#COM_HOME.userInitObject) Name(#iObject_UserInit) Pass(*BY_REFERENCE)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    * Check for Canadian DDP account
+    #C1PFG0 := *NULL
+    
+    Fetch Fields(#C1PFG0) From_File(CIP010) With_Key(#Global_DataModel.upCustomerId.AsNumber) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #oReturnCode := 'OK'
+    #iObject_UserInit.canadianDPPFlag := #C1PFG0
+    
+    Else
+    #oReturnCode := 'ER'
+    
+    Endif
+    
+    
     
     Endroutine
     
@@ -846,6 +908,86 @@
                           ReadOnly:           No
                           WriteOnly:          No
 
+    - /user/init:
+
+        Operations:
+        - GetUserInit:
+            Verb:               Get
+            Server Routine:     usGetUserInit
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - OK:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     userInitObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Bad Request:
+                Status Code:        400
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp400
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
     Components:
       Schema:
         Types:
@@ -1049,6 +1191,34 @@
                     Nullable:           No
                     ReadOnly:           No
                     WriteOnly:          No
+
+        - userInitObject:
+            Description:        User Init Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - dealerOrRetailPricingFlag:
+                Description:        Dealer or Retail Pricing Flag
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - canadianDPPFlag:
+                Description:        Canadian DPP Flag
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
 
       Security Schemes:
       - HTTPBearer:

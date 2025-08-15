@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1CSFX
+  Type:               Packed
+  Length:             4
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          4
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SOLD-TO CUSTOMER SUFFIX"
+      Label:              "SOLD-TO CUSTOME"
+      Heading1:           "SOLD-TO"
+      Heading2:           "SUFFIX"

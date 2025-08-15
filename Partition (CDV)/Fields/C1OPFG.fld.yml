@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               C1OPFG
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "N=RCD BY OE PGM. MUST UPDATERCD TO \" \" B"
+      Label:              "N=RCD BY OE PGM"
+      Heading1:           "ORDER"
+      Heading2:           "PROCESSING"
+      Heading3:           "FLAG"

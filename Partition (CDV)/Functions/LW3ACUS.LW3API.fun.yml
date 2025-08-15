@@ -1,5 +1,5 @@
 ﻿Function:
-  Enabled For RDMLX:  No
+  Enabled For RDMLX:  Yes
 
   Source: |
     * =======================================================
@@ -33,6 +33,9 @@
     * =======================================================
     Function Options(*DIRECT)
     * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    
     
     Define Field(#W_BO) Type(*CHAR) Length(10)
     

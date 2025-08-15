@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1LFSA
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DATE LAST FIN STMNT"
+      Label:              "DATE LAST FIN S"
+      Heading1:           "DATE"
+      Heading2:           "LAST FIN"
+      Heading3:           "STMNT"

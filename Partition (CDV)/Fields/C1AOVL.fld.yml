@@ -1,0 +1,15 @@
+﻿Field:
+  Name:               C1AOVL
+  Type:               Packed
+  Length:             9
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "APPROVED ORDER VALUATION"
+      Label:              "APPROVED ORDER"
+      Heading1:           "APPR ORDER"
+      Heading2:           "VALUE"

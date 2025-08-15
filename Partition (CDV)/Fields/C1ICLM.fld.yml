@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1ICLM
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "INSIDE CITY LIMITS?"
+      Label:              "INSIDE CITY LIM"
+      Heading1:           "INSIDE CITY"
+      Heading2:           "LIMITS?"

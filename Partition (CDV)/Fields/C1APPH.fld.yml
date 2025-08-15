@@ -1,0 +1,14 @@
+﻿Field:
+  Name:               C1APPH
+  Type:               Packed
+  Length:             7
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "AP CONTACT PHONE"
+      Label:              "AP CONTACT PHON"
+      Heading1:           "AP CONTACT PHONE"

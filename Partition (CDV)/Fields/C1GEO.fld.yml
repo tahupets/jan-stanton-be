@@ -1,0 +1,14 @@
+﻿Field:
+  Name:               C1GEO
+  Type:               Packed
+  Length:             9
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "TAX GEO CODE"
+      Label:              "TAX GEO CODE"
+      Heading1:           "TAX GEO CODE"

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1PHN#
+  Type:               Packed
+  Length:             7
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          4
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "TELEPHONE NUMBER"
+      Label:              "TELEPHONE NUMBE"
+      Heading1:           "TELEPHONE"
+      Heading2:           "NUMBER"

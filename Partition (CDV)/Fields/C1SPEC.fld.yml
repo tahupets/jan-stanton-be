@@ -1,0 +1,17 @@
+﻿Field:
+  Name:               C1SPEC
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SPECIAL CUSTOMER?"
+      Label:              "SPECIAL CUSTOME"
+      Heading1:           "SPECIAL CUSTOMER?"

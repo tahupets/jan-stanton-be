@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1DUN#
+  Type:               Alpha
+  Length:             9
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DUNN AND BRADSTREET NUMBER"
+      Label:              "DUNN AND BRADST"
+      Heading1:           "D & B"
+      Heading2:           "NUMBER"

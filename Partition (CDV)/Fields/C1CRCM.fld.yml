@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               C1CRCM
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CREDIT RATING COMMENTS"
+      Label:              "CREDIT RATING C"
+      Heading1:           "CREDIT"
+      Heading2:           "RATING"
+      Heading3:           "COMMENTS"

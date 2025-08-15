@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1LSDT
+  Type:               Packed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          4
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DATE LAST CHANGE"
+      Label:              "DATE LAST CHANG"
+      Heading1:           "DATE LAST"
+      Heading2:           "CHANGE"

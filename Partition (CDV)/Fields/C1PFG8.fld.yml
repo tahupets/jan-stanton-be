@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1PFG8
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "MISC PRINT CTL FLAG 8"
+      Label:              "MISC PRINT CTL"
+      Heading1:           "PRT CTL"
+      Heading2:           "FLAG 8"

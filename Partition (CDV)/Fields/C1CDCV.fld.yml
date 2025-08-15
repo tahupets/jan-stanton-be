@@ -1,0 +1,15 @@
+﻿Field:
+  Name:               C1CDCV
+  Type:               Packed
+  Length:             9
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CREDIT DOLLAR COVERAGE"
+      Label:              "CREDIT DOLLAR C"
+      Heading1:           "DOLLAR"
+      Heading2:           "COVERAGE"

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1ILCL
+  Type:               Packed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "INT PHONE LOCAL NBR"
+      Label:              "INT PHONE LOCAL"
+      Heading1:           "INT PHONE"
+      Heading2:           "LOCAL"
+      Heading3:           "NBR"

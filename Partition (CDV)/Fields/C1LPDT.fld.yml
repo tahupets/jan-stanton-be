@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1LPDT
+  Type:               Packed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          4
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DATE OF LAST PAYMENT"
+      Label:              "DATE OF LAST PA"
+      Heading1:           "LAST PYMT"
+      Heading2:           "DATE"

@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1STXC
+  Type:               Alpha
+  Length:             2
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "STATE TAX CODE"
+      Label:              "STATE TAX CODE"
+      Heading1:           "STATE"
+      Heading2:           "TAX CD"

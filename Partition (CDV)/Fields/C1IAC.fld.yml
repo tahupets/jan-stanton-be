@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1IAC
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          4
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "INTERNATIONAL ACCESS #"
+      Label:              "INTERNATIONAL A"
+      Heading1:           "INTERNATIONAL"
+      Heading2:           "ACCESS #"

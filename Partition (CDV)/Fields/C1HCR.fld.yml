@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1HCR
+  Type:               Packed
+  Length:             11
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Edit Mask:          L
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "HIGH CREDIT"
+      Label:              "HIGH CREDIT"
+      Heading1:           "HIGH"
+      Heading2:           "CREDIT"

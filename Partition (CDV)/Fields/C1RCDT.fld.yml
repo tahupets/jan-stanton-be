@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1RCDT
+  Type:               Packed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          4
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "RECORD CREATION DATE"
+      Label:              "RECORD CREATION"
+      Heading1:           "CREATION"
+      Heading2:           "DATE"

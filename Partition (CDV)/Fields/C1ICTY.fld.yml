@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1ICTY
+  Type:               Packed
+  Length:             4
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "INT PHONE CITY CODE"
+      Label:              "INT PHONE CITY"
+      Heading1:           "INT PHONE"
+      Heading2:           "CITY"
+      Heading3:           "CODE"

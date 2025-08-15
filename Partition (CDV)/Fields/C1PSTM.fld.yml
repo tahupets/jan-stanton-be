@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1PSTM
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PRINT STATEMENTS?"
+      Label:              "PRINT STATEMENT"
+      Heading1:           "PRINT"
+      Heading2:           "STATEMENTS?"

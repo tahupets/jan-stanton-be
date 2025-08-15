@@ -1,0 +1,87 @@
+﻿File:
+  Name:                           LW3MARKUP
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3MARKUP
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         Yes
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Customer Markup Values"
+
+  Real Fields:
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3WEBC01:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CODE:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3PRFA:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3PRFN:
+      Type:               Decimal
+      Length:             15
+      Decimals:           3
+
+  Primary Keys:
+  - LW3SFID
+  - LW3WEBC01
+  - LW3CODE
+
+  Logical Views:
+  - LW3MARKUP1:
+      Identifier:         LW3MARKUP1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3MARKUP1
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "<New Logical>"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - LW3CODE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3WEBC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

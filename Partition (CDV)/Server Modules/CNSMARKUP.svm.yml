@@ -1,0 +1,744 @@
+﻿ServerModule:
+  Name:               CNSMARKUP
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Markup Features"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Server Module
+    * Platform        : REST APIs
+    * Name            : CNSMARKUP
+    * Identifier      : CNSMARKUP
+    * Ancestor        : PRIM_SRVM
+    * Written By      : Markup Features
+    * Written On      : 15th August 2025
+    * Description     : Markup Features
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Begin_Com Role(*EXTENDS #PRIM_SRVM)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CNRCODES) Name(#Utility_Codes) Desc('Code Table Utility') Help('Code Table Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERMLUTL) Name(#Utility_Multilinguals) Desc('Multilingual Utility') Help('Multilinguals Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    Define_Com Class(#CNRAPILG) Name(#Processor_ApiLog) Desc('API Log Processor') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Simple Field Definitions
+    * =======================================================
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    
+    * =======================================================
+    * Group Definitions
+    * =======================================================
+    
+    Group_By Name(#XG_USRPRF) Fields(#LW3CODE #LW3PRFA #LW3PRFN)
+    
+    * =======================================================
+    * Srvroutine Definitions
+    * =======================================================
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSMARKUP/markups
+    * Operation: GetMarkups
+    *
+    * Request
+    *    Parameter: none
+    *    Schema   : none
+    *
+    * Response
+    *    Schema   : (OK) markupValuesArray
+    *                      code - LW3CODE
+    *                      description - LW3PRFDSC
+    *                      value - LW3PRFN
+    *             : (ER) httpResponseObject
+    *
+    * Action  : Build the markup features for the selected customer account
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetMarkups) Response(*HTTP #uContext) Desc('Get Markup Features') Help('Build the markup features for the logged in user and selected customer account')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetMarkups) Name(#Operation)
+    Define_Com Class(#Com_Home.markupValuesArray) Name(#Array_MarkupValues)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetMarkups.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetMarkups.Response.Resp403.Object) Name(#Object_Resp403) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    If Cond(#Global_DataModel.upRetailOnly = 'Y')
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUserNotPermitted') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session Id is not valid.')
+    Set_Ref Com(#Object_Resp403) To(*CREATE_AS #Com_Home.GetMarkups.Response.Resp403.Object)
+    Set Com(#Object_Resp403) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp403 Content(#Object_Resp403)
+    
+    Else
+    #COM_OWNER.umGetMarkupFeatures Imarkupvaluesarray(#Array_MarkupValues)
+    #Operation.Response.SetContentJson Content(#Array_MarkupValues)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session Id is not valid.')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetMarkups.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed.')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetMarkups.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSMARKUP/markups
+    * Operation: usPutMarkups
+    *
+    * Request
+    *    Parameter: none
+    *    Schema   : none
+    *
+    * Response
+    *    Schema   : (OK) markupValuesArray
+    *                      code - LW3CODE
+    *                      description - LW3PRFDSC
+    *                      value - LW3PRFN
+    *             : (ER) httpResponseObject
+    *
+    * Action  : Update the markup features for the selected customer account
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usPutMarkups) Response(*HTTP #uContext) Desc('Get Markup Features') Help('Build the markup features for the logged in user and selected customer account')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.PutMarkups) Name(#Operation)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.PutMarkups.Response.ContentJson.Object) Name(#Object_ContentJson) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.PutMarkups.Response.Resp400.Object) Name(#Object_Resp400) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.PutMarkups.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.PutMarkups.Response.Resp403.Object) Name(#Object_Resp403) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    If Cond(#Global_DataModel.upRetailOnly = 'Y')
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUserNotPermitted') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session Id is not valid.')
+    Set_Ref Com(#Object_Resp403) To(*CREATE_AS #Com_Home.PutMarkups.Response.Resp403.Object)
+    Set Com(#Object_Resp403) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp403 Content(#Object_Resp403)
+    
+    Else
+    
+    #COM_OWNER.umUpdateMarkupFeatures Irequestobjectjson(#Operation.Request.ContentJson) Iarray_Httpresponse(#Array_HttpResponse) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    Set_Ref Com(#Object_ContentJson) To(*CREATE_AS #Com_Home.PutMarkups.Response.ContentJson.Object)
+    Set Com(#Object_ContentJson) Messages(#Array_HttpResponse)
+    #Operation.Response.SetContentJson Content(#Object_ContentJson)
+    
+    Else
+    Set_Ref Com(#Object_Resp400) To(*CREATE_AS #Com_Home.PutMarkups.Response.Resp400.Object)
+    Set Com(#Object_Resp400) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp400 Content(#Object_Resp400)
+    
+    Endif
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session Id is not valid.')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.PutMarkups.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed.')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.PutMarkups.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umGetMarkupFeatures
+    * Description....: Get the markup data for the selected customer account
+    * =======================================================
+    Mthroutine Name(umGetMarkupFeatures) Desc('Get Markup Features') Help('Get the markup data for the selected customer account') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#COM_HOME.markupValuesArray) Name(#iMarkupValuesArray) Pass(*BY_REFERENCE)
+    
+    * Get Storefront Default Markup Values
+    Select Fields(#XG_USRPRF) From_File(LW3MARKUP) With_Key(#Global_DataModel.upStorefrontId '*DEFAULT') Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * Do not show existing CE Base preferences
+    Continue If(*Not #LW3CODE.Contains( 'MSRP' ))
+    
+    #LW3PRFDSC := #Utility_Codes.umGetCodeDescriptionByCode( 'USRPRF' #LW3CODE )
+    
+    * Check for Markup Values for the specific customer account
+    Fetch Fields(#LW3PRFN #LW3PRFA) From_File(lw3markup1) With_Key(#Global_DataModel.upStorefrontId #LW3CODE #Global_DataModel.upCustomerId) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Add_Entry To_List(#iMarkupValuesArray)
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umUpdateMarkupFeatures
+    * Description....: Update the markup data for the selected customer account
+    * =======================================================
+    Mthroutine Name(umUpdateMarkupFeatures) Desc('Update Markup Features') Help('Update the markup data for the selected customer account') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#COM_HOME.PutMarkups.Request.ContentJson.Object) Name(#iRequestObjectJson) Pass(*BY_REFERENCE)
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    Define_Map For(*OUTPUT) Class(#lw3errcde) Name(#oReturnCode) Desc('Return Code Code')
+    
+    Define_Com Class(#PRIM_BOLN) Name(#L_)
+    
+    #oReturnCode := 'OK'
+    
+    * Check if any of the markup values except for promotions are greater than 0
+    Loc_Entry In_List(#iRequestObjectJson.markups) Where((#LW3PRFN > 0) And (#LW3CODE <> 'MSRP_PROMOTIONS'))
+    If_Status Is(*OKAY)
+    * Then check if any of the markup values except for promotions are equal to 0. This is not allowed
+    Loc_Entry In_List(#iRequestObjectJson.markups) Where((#LW3PRFN = 0) And (#LW3CODE <> 'MSRP_PROMOTIONS'))
+    If_Status Is(*OKAY)
+    #oReturnCode := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgMarkupValueUpdateError') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Markup percentages must either be all 0 or have values greater than 0 (except for promotions).')
+    Endif
+    
+    Endif
+    
+    If Cond(#oReturnCode = 'OK')
+    
+    #LW3SFID := #Global_DataModel.upStorefrontId
+    #LW3WEBC01 := #Global_DataModel.upCustomerId
+    
+    Selectlist Named(#iRequestObjectJson.markups)
+    
+    Fetch Fields(#LW3CODE) From_File(LW3MARKUP) With_Key(#Global_DataModel.upStorefrontId #Global_DataModel.upCustomerId #LW3CODE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    Update Fields(#LW3PRFN) In_File(LW3MARKUP) Io_Error(*NEXT) Val_Error(*NEXT)
+    Else
+    Insert Fields(#LW3SFID #LW3WEBC01 #LW3CODE #LW3PRFN) To_File(LW3MARKUP) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    
+    Endselect
+    
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgMarkupValueUpdateSuccess') Imessagetype('success') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Markup values have been successfully updated.')
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSetHttpResponseMessages
+    * Description....: Set Http Response Messages
+    * =======================================================
+    Mthroutine Name(umSetHttpResponseMessages) Desc('Set Http Response Messages') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3VARNAM) Name(#iVariableName)
+    Define_Map For(*INPUT) Class(#LW3MSGTYP) Name(#iMessageType)
+    Define_Map For(*INPUT) Class(#LW3FLDNAM) Name(#iFieldName) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iMessageDetails) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iSubstitutionVariable1) Mandatory('')
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Add_Entry To_List(#iArray_HttpResponse)
+    #iArray_HttpResponse.CurrentItem.code := #iVariableName
+    #iArray_HttpResponse.CurrentItem.type := #iMessageType
+    #iArray_HttpResponse.CurrentItem.message := #Utility_Multilinguals.umGetMultilingualText( #iVariableName #Global_DataModel.upCurrentLanguage )
+    
+    If Cond(#iFieldName <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.field := #iFieldName
+    Endif
+    If Cond(#iMessageDetails <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.detail := #iMessageDetails
+    Endif
+    If Cond(#iSubstitutionVariable1 <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.substitutions.Add Value(#iSubstitutionVariable1)
+    Endif
+    
+    Endroutine
+    
+    
+    End_Com
+
+  API Definition:
+    Language Handling:       NoAction
+    Partition Handling:      PathVariable
+    Publish as Swagger V2:   Yes
+    Publish as OpenAPI V3:   Yes
+    ServicePath:             /CNSMARKUP
+
+    Security Requirements:
+    - Security:
+
+        Security Schemes:
+        - HttpBearer:
+
+    Paths:
+    - /markups:
+
+        Operations:
+        - GetMarkups:
+            Verb:               Get
+            Server Routine:     usGetMarkups
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     markupValuesArray
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Forbidden:
+                Status Code:        403
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp403
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+        - PutMarkups:
+            Verb:               Put
+            Server Routine:     usPutMarkups
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+              Media Types:
+              - application/json:
+                  Media Type Id:      ContentJson
+
+                  Schema Object:
+                    Description:        markupValues
+                    Type:               Object
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+                    Properties:
+                    - markups:
+                        Description:        Markup Values Array
+                        Type:               Array
+                        Format:             Unspecified
+                        Required:           Yes
+                        Nullable:           No
+                        ReadOnly:           No
+                        WriteOnly:          No
+
+                        Items:
+                        - Description:        Markup Values
+                          Type:               Object
+                          Format:             Unspecified
+                          Required:           No
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Properties:
+                          - code:
+                              Description:        Markup Code
+                              Type:               Field
+                              Field Name:         LW3CODE
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - value:
+                              Description:        Markup Value
+                              Type:               Field
+                              Field Name:         LW3PRFN
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+            Responses:
+            - Success:
+                Status Code:        201
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Forbidden:
+                Status Code:        403
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp403
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Bad Request:
+                Status Code:        400
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp400
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    Components:
+      Schema:
+        Types:
+        - markupValuesArray:
+            Description:        Markup Values Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        Markup Values Object
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - code:
+                  Description:        Markup Code
+                  Type:               Field
+                  Field Name:         LW3CODE
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - description:
+                  Description:        Markup Description
+                  Type:               Field
+                  Field Name:         LW3PRFDSC
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - value:
+                  Description:        Markup Value
+                  Type:               Field
+                  Field Name:         LW3PRFN
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+        - httpResponseArray:
+            Description:        Http Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        Http Response Object
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - code:
+                  Description:        Multilingual Variable Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - message:
+                  Description:        Multilingual Variable Unicode Text
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - type:
+                  Description:        Message Type
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - field:
+                  Description:        Field Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - detail:
+                  Description:        Message Detail
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - substitutions:
+                  Description:        Substitution Variable
+                  Type:               Array
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+                  Items:
+                  - Description:        value
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+      Security Schemes:
+      - HttpBearer:
+          Type:                   HTTP
+          In:                     Unspecified
+          HTTP Scheme:            Bearer
+          HTTP Bearer Format:     JWT

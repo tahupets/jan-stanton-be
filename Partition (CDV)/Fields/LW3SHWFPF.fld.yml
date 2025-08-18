@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3SHWFPF
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Show in Featured Products Flag"
+      Label:              "Show in Feature"
+      Heading1:           "Show"
+      Heading2:           "in"
+      Heading3:           "Featured"

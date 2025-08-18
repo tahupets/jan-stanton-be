@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3GENPT
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Keyboard Shift:     SbcsAndDbcs
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Generic Position to"
+      Label:              "Generic"
+      Heading1:           "Generic"
+      Heading2:           "Position"
+      Heading3:           "To"

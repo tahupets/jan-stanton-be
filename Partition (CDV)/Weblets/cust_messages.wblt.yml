@@ -1,0 +1,77 @@
+﻿Weblet:
+  Name:               cust_messages
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Custom Messages"
+
+  XML: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!-- (c) 2002 LANSA                            -->
+    <!-- $Workfile:: std_messages.xml            $ -->
+    <!-- $UTCDate:: 2008-07-15 12:12:34Z         $ -->
+    <!-- $Revision:: 5                          $ -->
+    <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+       <lxml:context>
+          <lxml:images-path>/images</lxml:images-path>
+       </lxml:context>
+    </lxml:data>
+
+  Designs:
+  - Language:           ENG
+    Technology Service: LANSA XHTML
+
+    XSL: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!-- (c) 2002 LANSA                            -->
+      <!-- XHTML Custom Messages                     -->
+      <!-- $Workfile:: cust_messages.xsl           $ -->
+      <!-- $UTCDate:: 2010-12-30 12:12:34Z         $ -->
+      <!-- $Revision:: 1                           $ -->
+      <xsl:transform version="1.0" exclude-result-prefixes="lxml wd"
+                     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                     xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data"
+                     xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design"
+                     xmlns="http://www.w3.org/1999/xhtml">
+         <xsl:import href="std_types.xsl" />
+         <xsl:import href="std_util.xsl" />
+         <wd:definition>
+            <wd:group name="Custom Weblets" />
+         </wd:definition>
+         <wd:template name="messages">
+            <wd:description icon="icons/std_messages.ico">
+               <wd:name lang="ENG">Messages</wd:name>
+            </wd:description>
+         </wd:template>
+      
+         <xsl:template name="messages">
+            <xsl:param name="message_label" wd:tip_id="" select="'Messages: '" />
+            <xsl:if test="$lweb_design_or_preview">
+               <xsl:call-template name="std_script_reference.private" />
+               <xsl:call-template name="std_style_reference.private">
+                  <xsl:with-param name="caller_name" select="'std_messages.xsl'" />
+               </xsl:call-template>
+            </xsl:if>
+            <div id="__std_x_message_elem" class="messages_wrapper">
+               <div class="messages">
+                  <xsl:if test="not($lweb_design_mode)">
+                     <xsl:if test="not(/lxml:data/lxml:messages[lxml:message])">
+                        <xsl:attribute name="style">display:none;</xsl:attribute>
+                     </xsl:if>
+                  </xsl:if>
+                  <div class="messages_label">
+                     <xsl:value-of select="$message_label" />
+                  </div>
+                  <div class="messages_list">
+                     <ul id="messages_ul">
+                        <xsl:for-each select="/lxml:data/lxml:messages/lxml:message">
+                           <li>
+                              <xsl:value-of select="." />
+                           </li>
+                        </xsl:for-each>
+                     </ul>
+                  </div>
+               </div>
+            </div>
+         </xsl:template>
+      </xsl:transform>

@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3PCTDIS
+  Type:               Signed
+  Length:             5
+  Decimals:           2
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Promotions/Discounts Percent Discount"
+      Label:              "Prom % Discount"
+      Heading1:           "Promotions/Discounts"
+      Heading2:           "Percent"
+      Heading3:           "Discount"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Marginleft(200) Usepicklist(False) Width(271)
+    
+    End_Com
+    
+    End_Com

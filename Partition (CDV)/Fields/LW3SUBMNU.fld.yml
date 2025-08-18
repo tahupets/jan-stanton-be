@@ -1,0 +1,17 @@
+﻿Field:
+  Name:               LW3SUBMNU
+  Type:               Packed
+  Length:             10
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Reference Field:    LW3MNUID
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Sub Menu ID"
+      Label:              "Sub Menu ID"
+      Heading1:           "Sub"
+      Heading2:           "Menu"
+      Heading3:           "ID"

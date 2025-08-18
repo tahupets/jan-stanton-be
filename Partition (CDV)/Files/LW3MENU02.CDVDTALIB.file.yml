@@ -1,0 +1,103 @@
+﻿File:
+  Name:                           LW3MENU02
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3MENU02
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Menu Relationship"
+
+  Real Fields:
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3MNUID:
+      Type:               Decimal
+      Length:             10
+      Decimals:           0
+
+  - LW3SUBMNU:
+      Type:               Decimal
+      Length:             10
+      Decimals:           0
+
+  - LW3MNUORD:
+      Type:               Decimal
+      Length:             10
+      Decimals:           0
+
+  Primary Keys:
+  - LW3SFID
+  - LW3MNUID
+  - LW3SUBMNU
+
+  Logical Views:
+  - LW3MENU02A:
+      Identifier:         LW3MENU02A
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3MENU02A
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Ordered"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3MNUID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3MNUORD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3MENU02B:
+      Identifier:         LW3MENU02B
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3MENU02B
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Sub-Menu"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3SUBMNU:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

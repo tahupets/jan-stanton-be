@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               EECATP
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Email Attachment Type"
+      Label:              "Email Attach Tp"
+      Heading1:           "Email"
+      Heading2:           "Attachment"
+      Heading3:           "Type"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(178)
+    
+    End_Com
+    
+    End_Com

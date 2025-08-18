@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               LW3KWORDS
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Keyword list (' ' or , seperated)"
+      Label:              "Keyword list ('"
+      Heading1:           "Keyword"
+      Heading2:           "list"
+      Heading3:           "('"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(187) Usepicklist(False) Width(693)
+    
+    End_Com
+    
+    End_Com

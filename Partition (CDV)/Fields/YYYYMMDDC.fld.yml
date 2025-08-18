@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               YYYYMMDDC
+  Type:               Alpha
+  Length:             8
+  Decimals:           0
+  Default Value:      "*YYYYMMDDC"
+  Enabled For RDMLX:  No
+  System Field:       Yes
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Character date in format YYYYMMDD"
+      Label:              "Date .........."
+      Heading1:           "Date"
+      Heading2:           " "
+      Heading3:           " "

@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               CRITNUM
+  Type:               Packed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Number That Controls the Criteria Level"
+      Label:              "Number That Con"
+      Heading1:           "Number"
+      Heading2:           "That"
+      Heading3:           "Controls"

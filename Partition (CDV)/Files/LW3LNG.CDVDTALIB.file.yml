@@ -1,0 +1,122 @@
+﻿File:
+  Name:                           LW3LNG
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3LNG
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Language"
+
+  Real Fields:
+  - LW3LNGID:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3LNGDSC:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3LNGSEQ:
+      Type:               Decimal
+      Length:             3
+      Decimals:           0
+
+  - LW3LNGTCD:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3LNGBO:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  Primary Keys:
+  - LW3LNGID
+
+  Logical Views:
+  - LW3LNGL1:
+      Identifier:         LW3LNGL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3LNGL1
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By seq number"
+
+      Keys:
+      - LW3LNGSEQ:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3LNGL2:
+      Identifier:         LW3LNGL2
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3LNGL2
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Translator Code, ID"
+
+      Keys:
+      - LW3LNGTCD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3LNGID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  File Level Triggers:
+  - LW3LNGDSC:
+    - Trigger for LW3LNG:
+        Function:           LW3MT40
+        Trigger Points:
+        - Before Insert
+        - Before Update
+
+  Access Routes:
+  - LDM01:
+      Description:        LW3CNT01
+      File:               LW3CNT01
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3LNGID

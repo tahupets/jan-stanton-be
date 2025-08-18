@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               STDTBTCNF
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Standard Template Button - Confirm Delet"
+      Label:              "Standard Templa"
+      Heading1:           "Standard"
+      Heading2:           "Template"
+      Heading3:           "Button"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Marginleft(207) Usepicklist(False) Width(240)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'stdtbtcnf.stdtbtcnf') Name(#Weblet) Defaultweblet(True)
+    
+    End_Com
+    End_Com

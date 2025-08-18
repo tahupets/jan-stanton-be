@@ -1,0 +1,251 @@
+﻿Weblet:
+  Name:               web_component
+
+  Multilingual Details:
+  - ENG:
+      Description:        "web_component"
+
+  XML: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    
+    <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+       <lxml:context>
+          <lxml:images-path>/images</lxml:images-path>
+          <lxml:webapplication-title>WAM Title</lxml:webapplication-title><lxml:webroutine-title>Webroutine Title</lxml:webroutine-title><lxml:language iso-lang="en">ENG</lxml:language><lxml:dev-resources-path>file://C:/PROGRA~2/LANSA/LANSA/WAMEditor/Resources</lxml:dev-resources-path></lxml:context>
+       <lxml:lists/></lxml:data>
+
+  Designs:
+  - Language:           ENG
+    Technology Service: LANSA XHTML
+
+    XSL: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      
+      <!--LANSA for the Web-->
+      <!--Simple AJAX Request Object-->
+      <!--Author: Roc Chen-->
+      <!--Version: v1.06-->
+      <xsl:transform version="1.0" exclude-result-prefixes="lxml wd tsml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns:tsml="http://www.lansa.com/2002/XML/Generation-Metadata" xmlns="http://www.w3.org/1999/xhtml">
+         <xsl:import href="std_types.xsl"/>
+         <xsl:import href="std_keys.xsl"/>
+         <xsl:import href="basic_ajax.xsl"/>
+         <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8" indent="no"/>
+         <wd:definition>
+            <wd:group name="Custom Weblets"/>
+         </wd:definition>
+         <xsl:template name="SimpleAjax">
+            <xsl:param name="name"/>
+            <xsl:param name="reentryfield" select="'STDRENTRY'"/>
+            <xsl:param name="reentryvalue" select="'D'"/>
+            <xsl:param name="reentryfield2" select="'STDFUNREQ'"/>
+            <xsl:param name="reentryvalue2" select="'RETURN_VALUE'"/>
+            <xsl:param name="disabled_if" select="false()"/>
+            <xsl:param name="formname" select="'LANSA'"/>
+            <xsl:param name="url" select="''"/>
+            <xsl:param name="on_click_wamname" select="/lxml:data/lxml:context/lxml:webapplication"/>
+            <xsl:param name="on_click_wrname"/>
+            <xsl:param name="onload_js_function" select="'null'"/>
+            <xsl:param name="onwait_js_function" select="'null'"/>
+            <xsl:param name="onerror_js_function" select="'null'"/>
+            <xsl:param name="post_event_js_function" select="'null'"/>
+            <xsl:param name="send_method" select="'POST'"/>
+            <!-- <xsl:param name="protocol" select="'http:'" /> -->
+            <xsl:param name="display_area_id" select="concat('_', $name, '_container_')"/>
+            <xsl:param name="submit_form" select="true()"/>
+            <xsl:param name="no_form_listname"/>
+            <xsl:param name="fieldname_field"/>
+            <xsl:param name="presubmit_js" select="''"/>
+            <xsl:param name="no_session_form" select="false()"/>
+            <xsl:param name="css_class" select="''"/>
+            <xsl:param name="onload_relative_image_path" select="'progress.gif'"/>
+            <xsl:param name="onload_absolute_image_path">
+               <xsl:if test="$onload_relative_image_path != ''">
+                  <xsl:value-of select="$lweb_images_path"/>
+                  <xsl:text>/</xsl:text>
+                  <xsl:value-of select="$onload_relative_image_path"/>
+               </xsl:if>
+            </xsl:param>
+            <xsl:param name="onload_image_width" select="'100pt'"/>
+            <xsl:param name="onload_image_height" select="'7pt'"/>
+            <xsl:param name="onload_image_class"/>
+            <xsl:param name="white-spaceEscape" select="'unicode'"/>
+            <xsl:variable name="hiddenjs">
+               <xsl:if test="$reentryfield != ''">
+                  <xsl:choose>
+                     <xsl:when test="$submit_form">
+                        <xsl:text>InsertHidden(document.</xsl:text>
+                        <xsl:value-of select="$formname"/>
+                        <xsl:text>, '</xsl:text>
+                        <xsl:value-of select="$reentryfield"/>
+                        <xsl:text>', '</xsl:text>
+                        <xsl:value-of select="key('field-value', $reentryfield)"/>
+                        <xsl:text>');</xsl:text>
+                        <xsl:text>document.</xsl:text>
+                        <xsl:value-of select="$formname"/>
+                        <xsl:text>.</xsl:text>
+                        <xsl:value-of select="$reentryfield"/>
+                        <xsl:text>.value = '</xsl:text>
+                        <xsl:value-of select="$reentryvalue"/>
+                        <xsl:text>';</xsl:text>
+                        <xsl:text>InsertHidden(document.</xsl:text>
+                        <xsl:value-of select="$formname"/>
+                        <xsl:text>, '</xsl:text>
+                        <xsl:value-of select="$reentryfield2"/>
+                        <xsl:text>', '</xsl:text>
+                        <xsl:value-of select="key('field-value', $reentryfield2)"/>
+                        <xsl:text>');</xsl:text>
+                        <xsl:text>document.</xsl:text>
+                        <xsl:value-of select="$formname"/>
+                        <xsl:text>.</xsl:text>
+                        <xsl:value-of select="$reentryfield2"/>
+                        <xsl:text>.value = '</xsl:text>
+                        <xsl:value-of select="$reentryvalue2"/>
+                        <xsl:text>';</xsl:text>
+                     </xsl:when>
+                     <xsl:otherwise>
+                     __ajax.addParm("<xsl:value-of select="$reentryfield"/>", "<xsl:value-of select="$reentryvalue"/>");
+                     <xsl:if test="$reentryfield2 != ''">               
+                        __ajax.addParm("<xsl:value-of select="$reentryfield2"/>", "<xsl:value-of select="$reentryvalue2"/>");
+                     </xsl:if>
+                     </xsl:otherwise>
+                  </xsl:choose>
+               </xsl:if>
+            </xsl:variable>
+            <xsl:variable name="full_url">
+               <xsl:choose>
+                  <xsl:when test="($url = '') and ($on_click_wrname != '')">
+                     <xsl:text>_buildURL("</xsl:text>
+                     <xsl:value-of select="$on_click_wamname"/>",<xsl:text/>
+                     <xsl:text>"</xsl:text>
+                     <xsl:value-of select="$on_click_wrname"/>",<xsl:text/>
+                     <xsl:text>"</xsl:text>
+                     <xsl:value-of select="/lxml:data/lxml:context/lxml:technology-service"/>",<xsl:text/>
+                     <xsl:text>"</xsl:text>
+                     <xsl:value-of select="/lxml:data/lxml:context/lxml:action-request"/>",<xsl:text/>
+                     <xsl:text>"</xsl:text>
+                     <xsl:value-of select="/lxml:data/lxml:context/lxml:partition"/>",<xsl:text/>
+                     <xsl:text>"</xsl:text>
+                     <xsl:value-of select="/lxml:data/lxml:context/lxml:language"/>"<xsl:text disable-output-escaping="yes">, </xsl:text>
+                     <!-- <xsl:text>"</xsl:text>
+                     <xsl:value-of select="$protocol" />"<xsl:text disable-output-escaping="yes">, </xsl:text> -->
+                     <xsl:choose>
+                        <xsl:when test="/lxml:data/lxml:context/lxml:session-key-method = 'url'">
+                           <xsl:text>"</xsl:text>
+                           <xsl:value-of select="/lxml:data/lxml:context/lxml:session-key"/>"<xsl:text/>
+                        </xsl:when>
+                        <xsl:otherwise>null</xsl:otherwise>
+                     </xsl:choose>,"<xsl:value-of select="key('option', 'debug')"/>")<xsl:text/>
+                  </xsl:when>
+                  <xsl:otherwise>
+                     <xsl:text>"</xsl:text>
+                     <xsl:value-of select="$url"/>"<xsl:text/>
+                  </xsl:otherwise>
+               </xsl:choose>
+            </xsl:variable>
+            <span id="_{$name}_container_">
+               <xsl:if test="$css_class != ''">
+                  <xsl:attribute name="class">
+                     <xsl:value-of select="$css_class"/>
+                  </xsl:attribute>
+               </xsl:if>
+               <xsl:if test="($lweb_design_mode)">Ajax Request: <xsl:value-of select="$name"/>
+                  <xsl:if test="$onload_absolute_image_path != ''">
+                     <xsl:choose>
+                        <xsl:when test="$onload_image_width != ''">
+                           <img style="width:{$onload_image_width}; height:{$onload_image_height}; " src="{$onload_absolute_image_path}" align="middle">
+                              <xsl:if test="$onload_image_class!=''">
+                                 <xsl:attribute name="class">
+                                    <xsl:value-of select="$onload_image_class"/>
+                                 </xsl:attribute>
+                              </xsl:if>
+                           </img>
+                        </xsl:when>
+                        <xsl:otherwise>
+                           <img src="{$onload_absolute_image_path}" align="middle">
+                              <xsl:if test="$onload_image_class!=''">
+                                 <xsl:attribute name="class">
+                                    <xsl:value-of select="$onload_image_class"/>
+                                 </xsl:attribute>
+                              </xsl:if>
+                           </img>
+                        </xsl:otherwise>
+                     </xsl:choose>
+                  </xsl:if>
+               </xsl:if>
+               <xsl:comment>
+               </xsl:comment>
+            </span>
+            <xsl:call-template name="BasicAjax"/>
+            <script language="javascript" type="text/javascript">
+               <xsl:text disable-output-escaping="yes">
+      //&lt;![CDATA[
+               </xsl:text>
+                  function <xsl:value-of select="$name"/>(eventOwner)
+                  {
+                     <xsl:choose>
+                  <xsl:when test="$disabled_if">
+                           return false;
+                        </xsl:when>
+                  <xsl:otherwise>
+                     var __ajax = new ajaxFactory.ajaxRequest();
+                     <xsl:if test="$presubmit_js != ''">
+                        <xsl:value-of select="$presubmit_js"/>
+                     </xsl:if>
+                     __ajax.setEventOwner(eventOwner);
+                     var url = <xsl:value-of select="$full_url"/>;<xsl:text/>
+                     __ajax.setURL(url);
+                     __ajax.setSendMethod("<xsl:value-of select="$send_method"/>");
+                     <xsl:choose>
+                        <xsl:when test="$submit_form">
+                           __ajax.setFormName("<xsl:value-of select="$formname"/>");
+                        </xsl:when>
+                        <xsl:otherwise>
+                           __ajax.setFormName("");
+                        </xsl:otherwise>
+                     </xsl:choose>
+                     <xsl:if test="$display_area_id != ''">
+                     __ajax.setDisplayArea("<xsl:value-of select="$display_area_id"/>");
+                     </xsl:if>
+                     <xsl:if test="not($submit_form) and $formname != '' and $no_form_listname != '' and $fieldname_field != ''">
+                        <xsl:for-each select="/lxml:data/lxml:lists/lxml:list[@name=$no_form_listname]/lxml:list-entries/lxml:entry">
+                           __ajax._addFormData("<xsl:value-of select="$formname"/>", "<xsl:value-of select="lxml:column[@name=$fieldname_field]"/>");
+                        </xsl:for-each>
+                     </xsl:if>
+                     <xsl:value-of select="$hiddenjs"/>
+                     for(var i = 0; arguments.length <xsl:text disable-output-escaping="yes">&gt;</xsl:text> i; i++)
+                     {
+                        var arg = arguments[i];
+                        if (arg.name <xsl:text disable-output-escaping="yes">&amp;&amp;</xsl:text> arg.value != null)
+                        {
+                           __ajax.addParm(arg.name, arg.value);
+                        }
+                     }
+                     <xsl:if test="not($submit_form) or ($no_session_form)">
+                     __ajax.addParm("_SERVICENAME", "<xsl:value-of select="/lxml:data/lxml:context/lxml:service-name"/>");
+                     __ajax.addParm("_WEBAPP", "<xsl:value-of select="/lxml:data/lxml:context/lxml:webapplication"/>");
+                     __ajax.addParm("_WEBROUTINE", "<xsl:value-of select="/lxml:data/lxml:context/lxml:webroutine"/>");
+                     __ajax.addParm("_PARTITION", "<xsl:value-of select="/lxml:data/lxml:context/lxml:partition"/>");
+                     __ajax.addParm("_LANGUAGE", "<xsl:value-of select="/lxml:data/lxml:context/lxml:language"/>");
+               <xsl:if test="/lxml:data/lxml:context/lxml:session-key-method = 'hidden'">
+                     __ajax.addParm("_SESSIONKEY", "<xsl:value-of select="/lxml:data/lxml:context/lxml:session-key"/>");
+               </xsl:if>
+                     __ajax.addParm("_LW3TRCID", "<xsl:value-of select="key('option', 'trace')"/>");
+            </xsl:if>
+                     __ajax.setOnWait(<xsl:value-of select="$onwait_js_function"/>);
+                    __ajax.setOnLoad(<xsl:value-of select="$onload_js_function"/>);
+                    __ajax.setOnError(<xsl:value-of select="$onerror_js_function"/>);
+                    __ajax.setPostEventFunc(<xsl:value-of select="$post_event_js_function"/>);
+                    __ajax.whiteSpaceEscape = "<xsl:value-of select="$white-spaceEscape"/>";
+                     __ajax.sendRequest();
+                     <xsl:if test="($display_area_id != '') and ($onload_absolute_image_path != '')">
+                     __ajax.displayProgress("<xsl:value-of select="$onload_absolute_image_path"/>", "<xsl:value-of select="$onload_image_height"/>", "<xsl:value-of select="$onload_image_width"/>", "<xsl:value-of select="$onload_image_class"/>");
+                     </xsl:if>
+                  </xsl:otherwise>
+               </xsl:choose>
+                  }
+      <xsl:text disable-output-escaping="yes">
+      //]]&gt;
+                  </xsl:text>
+            </script>
+         </xsl:template>
+      </xsl:transform>

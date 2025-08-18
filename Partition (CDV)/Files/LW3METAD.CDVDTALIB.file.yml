@@ -1,0 +1,76 @@
+﻿File:
+  Name:                           LW3METAD
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3METAD
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 100000 10000 10) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Meta Data"
+
+  Real Fields:
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3PTYP:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3MTAKEY:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - LW3MTYP:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3LNGCOD:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3MTATXT:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  Primary Keys:
+  - LW3SFID
+  - LW3PTYP
+  - LW3MTAKEY
+  - LW3MTYP
+  - LW3LNGCOD
+
+  File Level Triggers:
+  - LW3SFID:
+    - Trigger for LW3METAD:
+        Function:           LW3MT46
+        Trigger Points:
+        - Before Insert
+        - Before Update

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3WAMNAM
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Wam Name"
+      Label:              "Wam Name"
+      Heading1:           "Wam"
+      Heading2:           "Name"
+      Heading3:           " "

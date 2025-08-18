@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3CTIMEV
+  Type:               Signed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          "'0 :  :  '"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Time Created (Virtual)"
+      Label:              "Time Created"
+      Heading1:           "Time"
+      Heading2:           "Created"
+      Heading3:           "(Virtual)"

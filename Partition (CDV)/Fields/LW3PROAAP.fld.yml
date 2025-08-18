@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               LW3PROAAP
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Promotions/Discounts Always Apply? (Y/ )"
+      Label:              "Prom AlwaysAppl"
+      Heading1:           "Promotions/Discounts"
+      Heading2:           "Always"
+      Heading3:           "Apply?"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Marginleft(210) Usepicklist(False) Width(244)
+    
+    End_Com
+    
+    End_Com

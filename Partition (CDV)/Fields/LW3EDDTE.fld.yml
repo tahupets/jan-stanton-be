@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3EDDTE
+  Type:               Packed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Effective End Date"
+      Label:              "Effective End D"
+      Heading1:           "Effective"
+      Heading2:           "End"
+      Heading3:           "Date"

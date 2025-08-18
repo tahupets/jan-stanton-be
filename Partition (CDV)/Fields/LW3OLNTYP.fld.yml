@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3OLNTYP
+  Type:               Alpha
+  Length:             2
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Order Line Type"
+      Label:              "Order Line Type"
+      Heading1:           "Order"
+      Heading2:           "Line"
+      Heading3:           "Type"

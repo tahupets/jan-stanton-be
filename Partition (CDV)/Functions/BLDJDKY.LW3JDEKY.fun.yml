@@ -1,0 +1,168 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * ==================================================
+    * Function: BLDJDKY / Build Item Search Keywords
+    * Process:  LW3JDEKY
+    * Commerce Edition
+    * ==================================================
+    
+    Function Options(*DIRECT)
+    
+    Define Field(#w_fkwflg) Type(*CHAR) Length(1) Desc('is first keyword flag')
+    Define Field(#w_cpos) Type(*DEC) Length(5) Decimals(0) Desc('position of first comma')
+    Define Field(#w_kword) Reffld(#lw3kword)
+    
+    * list of key words
+    Def_List Name(#keylist) Fields(#lw3kword #LW3PHRASE) Type(*WORKING) Entrys(*MAX)
+    
+    * ==================================================
+    * Mainline
+    * ==================================================
+    
+    #LW3LNGCOD := *LANGUAGE
+    
+    * clear the keyword file
+    Delete From_File(LW3KYWDL2) With_Key('Y') Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Select Fields(#lw3sfid) From_File(lw3sfrnt) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Select Fields(#lw3itemcd #LW3CATID) From_File(lw3c03) With_Key(#lw3sfid) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Change Field(#FXACTION) To(G)
+    Exchange Fields(#FXACTION #LW3ITEMCD)
+    Call Process(*DIRECT) Function(LW3AITM) If_Error(*NEXT)
+    
+    #LW3KEYSEQ := 0
+    Select Fields(#LW3KEYSEQ) From_File(lw3keywrd) With_Key(#lw3sfid #lw3itemcd) Io_Error(*NEXT) Val_Error(*NEXT) Options(*BACKWARDS)
+    Leave
+    Endselect
+    #LW3KEYSEQ += 1
+    
+    * Do one description field at a time
+    #lw3kwords := #LW3IDESC.uppercase.trim
+    Execute Subroutine(DO_DESC)
+    
+    #lw3kwords := #LW3DSCTXT.uppercase.trim
+    Execute Subroutine(DO_DESC)
+    
+    #lw3kwords := #univpr.uppercase.trim
+    Execute Subroutine(DO_DESC)
+    
+    * Add the item code as a keyword for autocomplete list
+    #lw3kword #lw3phrase := #lw3itemcd
+    Insert Fields(#lw3sfid #lw3itemcd #lw3keyseq #lw3kword #lw3jdenf #LW3PHRASE) To_File(lw3keywrd) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    #LW3KEYSEQ += 1
+    
+    * Add item's sub-category keywords
+    #lw3kwords := *blank
+    #W_CATID := #LW3CATID
+    
+    Select Fields(#LW3KWORD) From_File(LW3KEYWCAT) With_Key(#lw3sfid #W_CATID) Io_Error(*NEXT)
+    #lw3kwords := #lw3kwords + ' ' + #LW3KWORD.uppercase.trim
+    Endselect
+    
+    If Cond(#lw3kwords *NE *blank)
+    #LW3KWORD := *blank
+    Execute Subroutine(DO_DESC)
+    Endif
+    
+    * Add item's category/sub-category descriptions as keywords
+    Fetch Fields(#LW3CATNAM) From_File(LW3C01ML) With_Key(#lw3sfid #W_CATID #LW3LNGCOD) Io_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    #lw3kwords := #LW3CATNAM.uppercase.trim
+    Execute Subroutine(DO_DESC)
+    
+    Select Fields(#LW3CATID) From_File(LW3C02L2) With_Key(#lw3sfid #W_CATID) Io_Error(*NEXT)
+    
+    Fetch Fields(#LW3CATNAM) From_File(LW3C01ML) With_Key(#lw3sfid #LW3CATID #LW3LNGCOD) Io_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    #lw3kwords := #LW3CATNAM.uppercase.trim
+    Execute Subroutine(DO_DESC)
+    Endif
+    Endselect
+    Endif
+    
+    * Do higher level category/sub-category keywords
+    Begin_Loop
+    
+    Fetch Fields(#LW3CATID) From_File(LW3C02L2) With_Key(#lw3sfid #W_CATID) Io_Error(*NEXT)
+    If_Status Is(*OKAY)
+    Select Fields(#LW3KWORD) From_File(LW3KEYWCAT) With_Key(#lw3sfid #LW3CATID) Io_Error(*NEXT)
+    #lw3kwords := #lw3kwords + ' ' + #LW3KWORD.uppercase.trim
+    Endselect
+    
+    If Cond(#lw3kwords *NE *blank)
+    #LW3KWORD := *blank
+    Execute Subroutine(DO_DESC)
+    Endif
+    
+    #W_CATID := #LW3CATID
+    
+    Else
+    Leave
+    Endif
+    End_Loop
+    Endselect
+    Endselect
+    
+    Return
+    
+    * -------------------------------------------------------------------
+    Subroutine Name(DO_DESC)
+    
+    Clr_List Named(#keylist)
+    
+    Dowhile Cond(#lw3kwords ¬= '')
+    
+    * get from first character to the first ' '
+    #w_cpos := #lw3kwords.positionof( ' ' )
+    If Cond(#w_cpos <= 1)
+    If Cond(#w_cpos = 0)
+    #lw3kword #lw3phrase := #lw3kwords
+    #lw3kwords := ''
+    Else
+    #lw3kwords := #lw3kwords.deletesubstring( 1 1 )
+    Endif
+    
+    Else
+    #lw3kword := #lw3kwords.substring( 1 (#w_cpos - 1) )
+    #lw3phrase := #lw3kwords.substring( 1 80 )
+    * remove current keyword from the keywords field
+    #lw3kwords := #lw3kwords.deletesubstring( 1 #w_cpos )
+    Endif
+    
+    * remove any additional blanks the user may have entered
+    #lw3kword := #lw3kword.trim
+    #lw3kwords := #lw3kwords.trim
+    
+    Continue If(#LW3KWORD *EQ *blank)
+    
+    * don't add if the keyword is on the list of excluded keywords for this storefront
+    Check_For In_File(LW3KEYWEXC) With_Key(#lw3sfid #lw3kword) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    Continue
+    Endif
+    
+    * skip duplicates
+    #w_kword := #lw3kword
+    Loc_Entry In_List(#keylist) Where('#w_kword = #lw3kword') Ret_Entry(*NO)
+    If_Status Is_Not(*OKAY)
+    Add_Entry To_List(#keylist)
+    Endif
+    Endwhile
+    
+    #lw3jdenf := Y
+    Selectlist Named(#keylist)
+    
+    Check_For In_File(LW3KYWDL1) With_Key(#lw3sfid #lw3kword #lw3itemcd) Io_Error(*NEXT)
+    If_Status Is_Not(*EQUALKEY)
+    Insert Fields(#lw3sfid #lw3itemcd #lw3keyseq #lw3kword #lw3jdenf #LW3PHRASE) To_File(lw3keywrd) Io_Error(*NEXT) Val_Error(*NEXT)
+    #LW3KEYSEQ += 1
+    Endif
+    Endselect
+    Endroutine

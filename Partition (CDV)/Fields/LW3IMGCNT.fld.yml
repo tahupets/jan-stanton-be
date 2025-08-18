@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3IMGCNT
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      +1
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Alternate Image Count"
+      Label:              "Alternate Image"
+      Heading1:           "Alternate"
+      Heading2:           "Image"
+      Heading3:           "Count"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(187) Usepicklist(False) Width(241)
+    
+    End_Com
+    
+    End_Com

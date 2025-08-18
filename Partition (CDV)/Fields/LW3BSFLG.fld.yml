@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3BSFLG
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Show in Best Seller flag"
+      Label:              "Show in Best Se"
+      Heading1:           "Show"
+      Heading2:           "in"
+      Heading3:           "Best"

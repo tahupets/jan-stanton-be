@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               CNTFMT
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Content Format"
+      Label:              "Content Format"
+      Heading1:           "Content"
+      Heading2:           "Format"
+      Heading3:           " "

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               WRNAME
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Webroutine Name"
+      Label:              "Webroutine Name"
+      Heading1:           "Webroutine"
+      Heading2:           "Name"
+      Heading3:           " "

@@ -1,0 +1,71 @@
+﻿File:
+  Name:                           LW3PRORT
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3PRORT
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         Yes
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Promotions/Discounts Requirement - Type"
+
+  Real Fields:
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3PROMID:
+      Type:               Signed
+      Length:             8
+      Decimals:           0
+
+  - LW3SEQ:
+      Type:               Decimal
+      Length:             4
+      Decimals:           0
+
+  - LW3OLNTYP:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - LW3UM:
+      Type:               Alphanumeric
+      Length:             2
+      Decimals:           0
+
+  - LW3PMNVAL:
+      Type:               Decimal
+      Length:             15
+      Decimals:           4
+
+  - LW3PMXVAL:
+      Type:               Decimal
+      Length:             15
+      Decimals:           4
+
+  Primary Keys:
+  - LW3SFID
+  - LW3PROMID
+  - LW3SEQ

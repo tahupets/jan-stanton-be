@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               CNTLNG
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Content Language"
+      Label:              "Content Languag"
+      Heading1:           "Content"
+      Heading2:           "Language"
+      Heading3:           " "

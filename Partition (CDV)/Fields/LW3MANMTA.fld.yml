@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               LW3MANMTA
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Maintain Meta Data?"
+      Label:              "Maintain Meta D"
+      Heading1:           "Maintain"
+      Heading2:           "Meta"
+      Heading3:           "Data?"

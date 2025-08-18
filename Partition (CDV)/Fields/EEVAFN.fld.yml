@@ -1,0 +1,33 @@
+﻿Field:
+  Name:               EEVAFN
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Output Attributes:
+  - FUNC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Add Function"
+      Label:              "Add Function"
+      Heading1:           "Add Function"
+      Heading2:           "Add Function"
+      Heading3:           "Add Function"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(247)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'std_char.std_char') Name(#Weblet) Defaultweblet(True)
+    
+    End_Com
+    
+    End_Com

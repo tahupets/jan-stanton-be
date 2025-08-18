@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3PRMMNU
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Primary Menu Flag"
+      Label:              "Primary Menu Fl"
+      Heading1:           "Primary"
+      Heading2:           "Menu"
+      Heading3:           "Flag"

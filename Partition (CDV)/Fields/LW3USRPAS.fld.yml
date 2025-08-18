@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3USRPAS
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - ND
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "User Password"
+      Label:              "Password"
+      Heading1:           "User"
+      Heading2:           "Password"
+      Heading3:           " "

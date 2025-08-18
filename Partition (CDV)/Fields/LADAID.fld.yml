@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LADAID
+  Type:               Packed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Administration Application ID"
+      Label:              "Administration"
+      Heading1:           "Administration"
+      Heading2:           "Application"
+      Heading3:           "ID"

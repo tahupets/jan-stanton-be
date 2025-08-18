@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3PRDREF
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Reference Field:    LW3PRDXRF
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Cust Product Cross-Ref Indicator"
+      Label:              "Cust Product"
+      Heading1:           "Cust"
+      Heading2:           "Product"
+      Heading3:           "Cross-Ref"

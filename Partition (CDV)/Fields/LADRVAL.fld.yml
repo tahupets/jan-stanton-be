@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LADRVAL
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Administration Menu Rentry Value"
+      Label:              "Administration"
+      Heading1:           "Administration"
+      Heading2:           "Menu"
+      Heading3:           "Rentry"

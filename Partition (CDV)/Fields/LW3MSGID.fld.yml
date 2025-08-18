@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3MSGID
+  Type:               Alpha
+  Length:             7
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Message Id"
+      Label:              "Message Id"
+      Heading1:           "Message"
+      Heading2:           "Id"
+      Heading3:           " "

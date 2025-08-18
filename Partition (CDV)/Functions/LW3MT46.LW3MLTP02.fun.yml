@@ -1,0 +1,80 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * =======================================================
+    * Copyright .....: (C) = LANSA V12 SYSTEM =, 1992
+    * Process .......: LW3MLTP02
+    * Function ......: LW3MT46
+    * Type ..........: LW3METAD File Level Trigger
+    * Created by ....: D08PGMLIB
+    * Created on ....: 11/01/31 at LW3METAD
+    * =======================================================
+    Function Options(*DIRECT *LIGHTUSAGE *MLOPTIMISE) Rcv_List(#TRIG_LIST) Trigger(*FILE LW3METAD)
+    * =======================================================
+    * Working fields, lists and groups
+    * =======================================================
+    * At entry #TRIG_LIST will contain 0,1 or 2
+    * entries representing current and previous
+    * record images of file LW3METAD. Refer to the
+    * Technical Guide for details and examples.
+    * Do NOT define any fields in this list. They
+    * are automatically included by the compiler.
+    Def_List Name(#TRIG_LIST) Type(*WORKING) Entrys(2)
+    * =======================================================
+    * Function Mainline : LW3MT46
+    * =======================================================
+    * Assume a "good" return initially
+    Change Field(#TRIG_RETC) To('OK')
+    *
+    * >>> DELETE all "not defined" events from the  <<<
+    * >>> the following CASE construct. (ie: Remove <<<
+    * >>> WHEN VALUE_IS commands that are not part  <<<
+    * >>> of the definition of this trigger BEFORE  <<<
+    * >>> specifying details of the events that are <<<
+    * >>> part of the definition of this trigger).  <<<
+    * >>> This simplifies logic in this function    <<<
+    * >>> and ensures an ABORT if someone attempts  <<<
+    * >>> to cause it to be invoked during an event <<<
+    * >>> that it has not been set up to handle.    <<<
+    *
+    Case Of_Field(#TRIG_OPER)
+    
+    * Handle before insert event
+    When Value_Is('= BEFINS')
+    Get_Entry Number(1) From_List(#TRIG_LIST)
+    
+    * Store Front ID must exist in LW3SFRNT
+    Check_For In_File(LW3SFRNT) With_Key(#LW3SFID)
+    If_Status Is_Not(*EQUALKEY)
+    Execute Subroutine(message) With_Parms('CE0011')
+    #TRIG_RETC := 'VE'
+    Endif
+    
+    * Handle before update event
+    When Value_Is('= BEFUPD')
+    Get_Entry Number(1) From_List(#TRIG_LIST)
+    
+    * Store Front ID must exist in LW3SFRNT
+    Check_For In_File(LW3SFRNT) With_Key(#LW3SFID)
+    If_Status Is_Not(*EQUALKEY)
+    Execute Subroutine(message) With_Parms('CE0011')
+    #TRIG_RETC := 'VE'
+    Endif
+    
+    * Handle an event not catered for
+    Otherwise
+    Abort Msgtxt('File LW3METAD trigger function invalidly invoked/ used.')
+    Endcase
+    * Return control to the invoker
+    Return
+    
+    * Handle retrieval of messages
+    Subroutine Name(message) Parms((#LW3VARNAM *RECEIVED))
+    Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key(#LW3VARNAM *LANGUAGE)
+    If_Status Is(*OKAY)
+    Message Msgtxt(#LW3VARTXT)
+    Else
+    Message Msgtxt('Message not found in multilingual file.')
+    Endif
+    Endroutine

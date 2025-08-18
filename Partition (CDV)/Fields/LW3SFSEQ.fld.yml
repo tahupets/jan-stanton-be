@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3SFSEQ
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Store Front Sequence"
+      Label:              "Store Front Seq"
+      Heading1:           "Store"
+      Heading2:           "Front"
+      Heading3:           "Sequence"

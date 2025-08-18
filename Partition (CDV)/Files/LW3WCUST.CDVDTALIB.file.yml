@@ -5,7 +5,11 @@
   Record Format Name:             LW3WCUST
   Module Library:                 Same Library As File
   File Uses SQL on IBM i:         No
+<<<<<<< Updated upstream
   Enabled For RDMLX:              Yes
+=======
+  Enabled For RDMLX:              No
+>>>>>>> Stashed changes
   Enabled For Long Names:         No
   Share Data Path:                No
   Secure From File Overrides:     Yes
@@ -135,6 +139,7 @@
       Length:             2
       Decimals:           0
 
+<<<<<<< Updated upstream
   - LW3CDSTMP:
       Type:               Date Time
       Length:             26
@@ -145,6 +150,8 @@
       Length:             26
       Decimals:           0
 
+=======
+>>>>>>> Stashed changes
   Primary Keys:
   - LW3CUSIND
   - LW3WEBB2C

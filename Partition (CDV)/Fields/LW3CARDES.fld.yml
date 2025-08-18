@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3CARDES
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Session Cart Description"
+      Label:              "Description"
+      Heading1:           "Session"
+      Heading2:           "Cart"
+      Heading3:           "Description"

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3SESDAT
+  Type:               Alpha
+  Length:             8
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Session Date"
+      Label:              "Session Date"
+      Heading1:           "Session"
+      Heading2:           "Date"
+      Heading3:           " "

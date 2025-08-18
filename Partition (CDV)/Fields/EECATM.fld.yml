@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               EECATM
+  Type:               Signed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Reference Field:    EEVATM
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Output Attributes:
+  - TIMC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Add Time"
+      Label:              "Add Time"
+      Heading1:           "Add Time"
+      Heading2:           " "
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(216)
+    
+    End_Com
+    
+    End_Com

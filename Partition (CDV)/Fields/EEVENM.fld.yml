@@ -1,0 +1,33 @@
+﻿Field:
+  Name:               EEVENM
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Event Name"
+      Label:              "Event Name"
+      Heading1:           "Event"
+      Heading2:           "Name"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(247)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'std_char.std_char') Name(#Weblet) Defaultweblet(True)
+    
+    End_Com
+    
+    End_Com

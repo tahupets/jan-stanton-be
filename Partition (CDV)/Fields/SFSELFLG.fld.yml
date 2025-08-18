@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               SFSELFLG
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Store Front Selection Flag"
+      Label:              "Store Front Sel"
+      Heading1:           "Store"
+      Heading2:           "Front"
+      Heading3:           "Selection"

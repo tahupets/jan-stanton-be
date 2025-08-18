@@ -1,0 +1,94 @@
+﻿File:
+  Name:                           LW3PROMD
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3PROMD
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 100000 10000 10) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Promotions/Discounts Detail"
+
+  Real Fields:
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3PROMID:
+      Type:               Signed
+      Length:             8
+      Decimals:           0
+
+  - LW3SEQ:
+      Type:               Decimal
+      Length:             4
+      Decimals:           0
+
+  - LW3PCTDIS:
+      Type:               Signed
+      Length:             5
+      Decimals:           2
+
+  - LW3DOLDIS:
+      Type:               Signed
+      Length:             15
+      Decimals:           2
+
+  - LW3ITEMCD:
+      Type:               Alphanumeric
+      Length:             35
+      Decimals:           0
+
+  - LW3CATID:
+      Type:               Decimal
+      Length:             10
+      Decimals:           0
+
+  - LW3QTY:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
+  - LW3FREGFT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3SSHPTP:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  Primary Keys:
+  - LW3SFID
+  - LW3PROMID
+  - LW3SEQ
+
+  File Level Triggers:
+  - LW3SFID:
+    - Trigger for LW3PROMD:
+        Function:           LW3MT29
+        Trigger Points:
+        - Before Insert
+        - Before Update

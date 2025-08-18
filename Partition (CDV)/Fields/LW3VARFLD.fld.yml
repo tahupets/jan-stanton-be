@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3VARFLD
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Keyboard Shift:     SbcsAndDbcs
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "e-Biz Variable Alphanumeric Result"
+      Label:              "Alpha result"
+      Heading1:           "System Variable"
+      Heading2:           "Alphanumeric"
+      Heading3:           "Result"

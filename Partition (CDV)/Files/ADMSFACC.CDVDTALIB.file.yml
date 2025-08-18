@@ -1,0 +1,88 @@
+﻿File:
+  Name:                           ADMSFACC
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             ADMSFACC
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Admin Store Front Access"
+
+  Real Fields:
+  - LW3WEBUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  Primary Keys:
+  - LW3WEBUSR
+  - LW3SFID
+
+  Logical Views:
+  - ADMSFACCL1:
+      Identifier:         ADMSFACCL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      ADMSFACCL1
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "logical for CHECK_FOR inside SELECT"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - ADMSFACCL2:
+      Identifier:         ADMSFACCL2
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      ADMSFACCL2
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "BY STOREFRONT"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

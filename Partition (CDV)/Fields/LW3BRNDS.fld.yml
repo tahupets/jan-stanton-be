@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3BRNDS
+  Type:               Alpha
+  Length:             40
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Brand Description"
+      Label:              "Brand Descripti"
+      Heading1:           "Brand"
+      Heading2:           "Description"
+      Heading3:           " "

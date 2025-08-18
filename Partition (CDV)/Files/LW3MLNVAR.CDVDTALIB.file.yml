@@ -15,9 +15,15 @@
   Create I/O Module:              Yes
   Create Batch Control:           No
   IBM i High Speed Table:         No
+<<<<<<< Updated upstream
   Auto RRN Generation:            Yes
   Create RRNO Column:             Yes
   Auto RRNO Is Fixed:             Yes
+=======
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+>>>>>>> Stashed changes
   Convert Special Characters:     No
   Enable Commitment Control:      No
   Auto Commit:                    No

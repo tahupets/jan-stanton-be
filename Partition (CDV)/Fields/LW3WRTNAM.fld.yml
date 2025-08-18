@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3WRTNAM
+  Type:               Alpha
+  Length:             20
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Webroutine Name"
+      Label:              "Webroutine Name"
+      Heading1:           "Webroutine"
+      Heading2:           "Name"
+      Heading3:           " "

@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3DOLDIS
+  Type:               Signed
+  Length:             15
+  Decimals:           2
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Promotions/Discounts Dollar Discount"
+      Label:              "Prom $ Discount"
+      Heading1:           "Promotions/Discounts"
+      Heading2:           "Dollar"
+      Heading3:           "Discount"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Marginleft(190) Usepicklist(False) Width(337)
+    
+    End_Com
+    
+    End_Com

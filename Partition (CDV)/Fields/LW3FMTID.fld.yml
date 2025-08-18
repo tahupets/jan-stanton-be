@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               LW3FMTID
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Format ID"
+      Label:              "Format ID"
+      Heading1:           "Format ID"
+      Heading2:           " "
+      Heading3:           " "

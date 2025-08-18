@@ -1,0 +1,22 @@
+﻿Field:
+  Name:               STDADMSES
+  Type:               Signed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Reference Field:    STDSESSID
+  Edit Mask:          3
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Standard Admin Session"
+      Label:              "Standard Admin"
+      Heading1:           "Standard"
+      Heading2:           "Admin"
+      Heading3:           "Session"

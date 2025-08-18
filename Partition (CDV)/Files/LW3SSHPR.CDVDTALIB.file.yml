@@ -1,0 +1,147 @@
+﻿File:
+  Name:                           LW3SSHPR
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3SSHPR
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(10000     2000      3         ) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Shipping Rates"
+
+  Real Fields:
+  - LW3SSHPTP:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3SSHPDS:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  - LW3SSHPFR:
+      Type:               Decimal
+      Length:             7
+      Decimals:           2
+
+  - LW3SSHPWL:
+      Type:               Decimal
+      Length:             13
+      Decimals:           5
+
+  - LW3SSHPWP:
+      Type:               Decimal
+      Length:             7
+      Decimals:           2
+
+  - LW3SSHPVL:
+      Type:               Decimal
+      Length:             13
+      Decimals:           5
+
+  - LW3SSHPVP:
+      Type:               Decimal
+      Length:             7
+      Decimals:           2
+
+  - LW3SSHPSL:
+      Type:               Decimal
+      Length:             13
+      Decimals:           5
+
+  - LW3SSHPSP:
+      Type:               Decimal
+      Length:             7
+      Decimals:           2
+
+  - LW3ASTAT:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3SORTOR:
+      Type:               Signed
+      Length:             3
+      Decimals:           0
+
+  - LW3SSHPSQ:
+      Type:               Signed
+      Length:             5
+      Decimals:           0
+
+  - LW3SHPURL:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  - LW3SHPSUB:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3JSHPTY:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3SSHPPC:
+      Type:               Decimal
+      Length:             5
+      Decimals:           3
+
+  Primary Keys:
+  - LW3SSHPTP
+
+  Logical Views:
+  - LW3SSHPL1:
+      Identifier:         LW3SSHPL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3SSHPL1
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Active Shipping Rates Sorted"
+
+      Keys:
+      - LW3SORTOR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      Select/Omit Criteria:
+      - Action:             Select
+        Type:               Values
+        Field Name:         LW3ASTAT
+        Values:
+        - "'Y'"
+
+  File Level Triggers:
+  - LW3SSHPTP:
+    - Trigger for LW3SSHPR:
+        Function:           LW3MT19
+        Trigger Points:
+        - Before Insert
+        - Before Update

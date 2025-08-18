@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3SSHPSP
+  Type:               Packed
+  Length:             7
+  Decimals:           2
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Subtotal Price"
+      Label:              "Subtotal Price"
+      Heading1:           "Subtotal"
+      Heading2:           "Price"
+      Heading3:           " "

@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3CATSNM
+  Type:               Alpha
+  Length:             30
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Category Detail Name"
+      Label:              "Category Detail"
+      Heading1:           "Category"
+      Heading2:           "Detail"
+      Heading3:           "Name"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(401)
+    
+    End_Com
+    
+    End_Com

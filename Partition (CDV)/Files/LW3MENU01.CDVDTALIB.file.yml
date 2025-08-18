@@ -1,0 +1,165 @@
+﻿File:
+  Name:                           LW3MENU01
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3MENU01
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Menu Links"
+
+  Real Fields:
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3MNUID:
+      Type:               Decimal
+      Length:             10
+      Decimals:           0
+
+  - LW3MNUORD:
+      Type:               Decimal
+      Length:             10
+      Decimals:           0
+
+  - LW3LNKTYP:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3PRMMNU:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3DNSNM:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3MNUNME:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3MNUURL:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  - LW3MNUPGM:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3MNURTN:
+      Type:               Alphanumeric
+      Length:             25
+      Decimals:           0
+
+  - LW3LNKNEW:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3SECSEQ:
+      Type:               Decimal
+      Length:             3
+      Decimals:           0
+
+  - LW3RNTRYF:
+      Type:               Alphanumeric
+      Length:             9
+      Decimals:           0
+
+  - LW3RNTRYV:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  - LW3HTTP:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3MNUIMG:
+      Type:               Alphanumeric
+      Length:             100
+      Decimals:           0
+
+  Primary Keys:
+  - LW3SFID
+  - LW3MNUID
+
+  Logical Views:
+  - LW3MENU01A:
+      Identifier:         LW3MENU01A
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3MENUPRI
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Ordered Primary Menus"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3MNUORD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      Select/Omit Criteria:
+      - Action:             Select
+        Type:               Compare
+        Field Name:         LW3PRMMNU
+        Operator:           Equal
+        Value:              "'Y'"
+
+  - LW3MNU01B:
+      Identifier:         LW3MNU01B
+      Unique Key:         Yes
+      Access Path:        Immediate
+      Record Format:      LW3MNU01B
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Security Sequence"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3SECSEQ:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

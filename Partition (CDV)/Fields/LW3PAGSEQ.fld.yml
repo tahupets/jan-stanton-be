@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3PAGSEQ
+  Type:               Packed
+  Length:             7
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Page Sequence Number"
+      Label:              "Page Sequence N"
+      Heading1:           "Page"
+      Heading2:           "Sequence"
+      Heading3:           "Number"

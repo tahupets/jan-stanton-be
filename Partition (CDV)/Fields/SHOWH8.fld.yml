@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               SHOWH8
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Show H8"
+      Label:              "Show H8"
+      Heading1:           "Show"
+      Heading2:           "H8"
+      Heading3:           " "

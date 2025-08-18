@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3LOGIND
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Login option indicator"
+      Label:              "Login option"
+      Heading1:           "Login"
+      Heading2:           "Option"
+      Heading3:           "Indicator"

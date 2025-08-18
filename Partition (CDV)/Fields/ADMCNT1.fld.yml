@@ -1,0 +1,22 @@
+﻿Field:
+  Name:               ADMCNT1
+  Type:               Packed
+  Length:             7
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Reference Field:    LISTCOUNT
+  Edit Mask:          J
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Administration Top Menu List Counter"
+      Label:              "Administration"
+      Heading1:           "Administration"
+      Heading2:           "Top"
+      Heading3:           "Menu"

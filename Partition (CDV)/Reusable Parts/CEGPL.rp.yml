@@ -1,0 +1,34 @@
+﻿Reusable Part:
+  Name:               CEGPL
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE General Purpose Library"
+
+  Source: |
+    * **************************************************
+    *
+    *  COMPONENT:  STD_PANL
+    *
+    * **************************************************
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Mthroutine Name(GetWAMIntroText) Desc('Get WAM Intro Text')
+    Define_Map For(*INPUT) Class(#LW3SVNAME) Name(#IntroTextName)
+    Define_Map For(*INPUT) Class(#LW3SVLANG) Name(#ParagraphLanguage)
+    Define_Map For(*OUTPUT) Class(#LW3SVVALP) Name(#IntroTextParagraph)
+    
+    #LW3SVNAME := 'MSG:' + #IntroTextName.Value
+    #LW3SVLANG := #ParagraphLanguage.Value
+    If Cond(#LW3SVLANG.IsNull)
+    #LW3SVLANG := 'ENG'
+    Endif
+    #LW3SVVALP := "** Intro Text paragraph needs to be defined in LW3SYS (" + #LW3SVNAME + ").  Contact Support **"
+    Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key(#LW3SVNAME #LW3SVLANG) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    #IntroTextParagraph.Value := #LW3SVVALP
+    Endroutine
+    End_Com

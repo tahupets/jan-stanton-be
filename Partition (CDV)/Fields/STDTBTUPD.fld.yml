@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               STDTBTUPD
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Standard Template Button - Update"
+      Label:              "Standard Templa"
+      Heading1:           "Standard"
+      Heading2:           "Template"
+      Heading3:           "Button"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Marginleft(179) Usepicklist(False) Width(209)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'stdtbtupd.stdtbtupd') Name(#Weblet) Defaultweblet(True)
+    
+    End_Com
+    End_Com

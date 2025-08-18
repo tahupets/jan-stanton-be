@@ -1,0 +1,69 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * =======================================================
+    * Process Name - LW3PRO
+    * Process Description - Promotions functions
+    
+    * Function Name - LW3PITM
+    * Function Description - Item list API for Promotions
+    
+    * EXCHANGE FIELDS(In)
+    * #LW3SFID - Storefront ID
+    
+    * Passed list
+    * #LW3ITML  - List of item numbers and descriptions
+    
+    * =======================================================
+    * Summary of Changes
+    * =======================================================
+    * CR #  !  Date   ! Description
+    * -------------------------------------------------------
+    *       |         |
+    * =======================================================
+    Function Options(*DIRECT) Rcv_List(#LW3ITML)
+    
+    Define Field(#W_POS) Type(*DEC) Length(3) Decimals(0)
+    Define Field(#W_ITEM) Reffld(#LW3ITEMCD)
+    
+    * item list
+    Def_List Name(#LW3ITML) Fields(#LW3ITEMCD #LW3IDESC) Counter(#LISTCOUNT) Type(*WORKING) Entrys(*MAX)
+    
+    * =======================================================
+    * Program main line
+    * =======================================================
+    
+    Execute Subroutine(INIT)
+    
+    * Get the items
+    Execute Subroutine(GET_ITMS)
+    
+    Return
+    
+    * =======================================================
+    Subroutine Name(GET_ITMS)
+    
+    Select Fields(#LW3ITEMCD) From_File(LW3C03_3) With_Key(#LW3SFID) Io_Error(*NEXT) Return_Rrn(#LW3STDRRN)
+    
+    #W_ITEM := #LW3ITEMCD
+    Loc_Entry In_List(#LW3ITML) Where(#W_ITEM *EQ #LW3ITEMCD) Ret_Entry(*NO)
+    If_Status Is_Not(*OKAY)
+    
+    Change Field(#FXACTION) To(G)
+    Exchange Fields(#FXACTION #LW3ITEMCD)
+    Call Process(*DIRECT) Function(LW3AITM) If_Error(*NEXT)
+    If Cond(#LW3IDESC *NE *BLANK)
+    Add_Entry To_List(#LW3ITML)
+    Endif
+    Endif
+    Endselect
+    Endroutine
+     
+    * =======================================================
+    Subroutine Name(INIT)
+    
+    Clr_List Named(#LW3ITML)
+    
+    Endroutine
+    

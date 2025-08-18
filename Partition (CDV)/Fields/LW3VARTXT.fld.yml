@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               LW3VARTXT
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Variable Text"
+      Label:              "Variable Text"
+      Heading1:           "Variable"
+      Heading2:           "Text"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(187) Usepicklist(False) Width(693)
+    
+    End_Com
+    
+    End_Com

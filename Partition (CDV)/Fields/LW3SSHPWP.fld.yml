@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3SSHPWP
+  Type:               Packed
+  Length:             7
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Weight Price"
+      Label:              "Weight Price"
+      Heading1:           "Weight"
+      Heading2:           "Price"
+      Heading3:           " "

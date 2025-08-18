@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               EECCSQ
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Content Sequence"
+      Label:              "Content Sequenc"
+      Heading1:           "Content"
+      Heading2:           "Sequence"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(224)
+    
+    End_Com
+    
+    End_Com

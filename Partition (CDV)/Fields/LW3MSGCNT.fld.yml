@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3MSGCNT
+  Type:               Signed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Message Counter"
+      Label:              "Message Counter"
+      Heading1:           "Message"
+      Heading2:           "Counter"
+      Heading3:           " "

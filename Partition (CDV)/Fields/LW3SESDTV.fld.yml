@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3SESDTV
+  Type:               Signed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          Y
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Session Date (Virtual)"
+      Label:              "Session Date"
+      Heading1:           "Session"
+      Heading2:           "Date"
+      Heading3:           "(Virtual)"

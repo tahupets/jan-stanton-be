@@ -1,0 +1,154 @@
+﻿File:
+  Name:                           LW3C03
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3C03
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 100000 10000 10) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Category Products"
+
+  Real Fields:
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3CATID:
+      Type:               Decimal
+      Length:             10
+      Decimals:           0
+
+  - LW3ITEMCD:
+      Type:               Alphanumeric
+      Length:             35
+      Decimals:           0
+
+  - LW3SHWFPF:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3BSFLG:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3IMGCNT:
+      Type:               Decimal
+      Length:             3
+      Decimals:           0
+
+  Primary Keys:
+  - LW3SFID
+  - LW3CATID
+  - LW3ITEMCD
+
+  Logical Views:
+  - LW3C03_2:
+      Identifier:         LW3C03_2
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3C03_2
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Featured Products"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CATID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3SHWFPF:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3C03_3:
+      Identifier:         LW3C03_3
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3C03_3
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Get Category By Item"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3ITEMCD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3C03_4:
+      Identifier:         LW3C03_4
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3C03_4
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Get SF ID by item"
+
+      Keys:
+      - LW3ITEMCD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  File Level Triggers:
+  - LW3SFID:
+    - Trigger for LW3C03:
+        Function:           LW3MT08
+        Trigger Points:
+        - Before Insert
+        - Before Update
+
+  Access Routes:
+  - LW3C0301:
+      Description:        LW3ITML1
+      File:               LW3ITML1
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    1
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3ITEMCD

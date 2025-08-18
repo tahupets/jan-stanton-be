@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3PAGSIZ
+  Type:               Signed
+  Length:             4
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Page Size"
+      Label:              "Page Size"
+      Heading1:           "Page"
+      Heading2:           "Size"
+      Heading3:           " "

@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3MNUIMG
+  Type:               Alpha
+  Length:             100
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Menu Image Name"
+      Label:              "Menu Image Name"
+      Heading1:           "Menu"
+      Heading2:           "Image"
+      Heading3:           "Name"

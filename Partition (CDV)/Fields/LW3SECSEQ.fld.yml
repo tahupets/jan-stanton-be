@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3SECSEQ
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Security Sequence"
+      Label:              "Security Sequen"
+      Heading1:           "Security"
+      Heading2:           "Sequence"
+      Heading3:           " "

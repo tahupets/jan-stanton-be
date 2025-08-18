@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               W_CATID
+  Type:               Packed
+  Length:             10
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Category ID"
+      Label:              "Category ID"
+      Heading1:           "Category ID"
+      Heading2:           " "
+      Heading3:           " "

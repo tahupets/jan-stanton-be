@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               SHOWH3
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Show H3"
+      Label:              "Show H3"
+      Heading1:           "Show"
+      Heading2:           "H3"
+      Heading3:           " "

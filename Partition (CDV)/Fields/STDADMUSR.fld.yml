@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               STDADMUSR
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Reference Field:    STDWEBUSR
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Standard Admin User"
+      Label:              "Standard Admin"
+      Heading1:           "Standard"
+      Heading2:           "Admin"
+      Heading3:           "User"

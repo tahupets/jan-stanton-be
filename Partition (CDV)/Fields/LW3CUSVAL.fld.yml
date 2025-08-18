@@ -1,7 +1,11 @@
 ﻿Field:
   Name:               LW3CUSVAL
   Type:               Alpha
+<<<<<<< Updated upstream
   Length:             50
+=======
+  Length:             30
+>>>>>>> Stashed changes
   Decimals:           0
   Default Value:      "*BLANKS"
   Enabled For RDMLX:  No
@@ -18,6 +22,7 @@
       Heading1:           "Generated"
       Heading2:           "Customer"
       Heading3:           "Value"
+<<<<<<< Updated upstream
 
   Source: |
     *
@@ -28,3 +33,5 @@
     End_Com
     
     End_Com
+=======
+>>>>>>> Stashed changes

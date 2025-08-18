@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               CTYPID
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          J
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Content Type ID"
+      Label:              "Content Type ID"
+      Heading1:           "Content"
+      Heading2:           "Type"
+      Heading3:           "ID"

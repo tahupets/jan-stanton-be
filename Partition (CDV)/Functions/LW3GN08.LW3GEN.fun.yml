@@ -1,0 +1,374 @@
+﻿Function:
+  Enabled For RDMLX:  No
+
+  Source: |
+    * ======================================================
+    * Copyright ......: (C) LANSA Australia 1998
+    * Process ........: LW3GEN
+    * Function .......: LW3GN08
+    * Created on .....: 11/2000
+    * Description ....: Password Encryption
+    
+    * REQUIRED INPUT..: Before calling or executing this
+    * PARAMETERS......: function it is required to Exchange
+    * ................: the following fields:
+    * ................: 1. #LW3OBJMOD  - Object Mode
+    * ................:    -----   --------------------------
+    * ................:    Value   Description
+    * ................:    -----   --------------------------
+    * ................:    'ENC' - Encrypt password
+    * ................:    'CHK' - Check or validate password
+    
+    * ................: 2. #LW3CUSVAL  - 30 character
+    * ................:    encrypted password.
+    * ................: 3. #LW3USRPAS  - 10 character plain
+    * ................:    password. This is the actual
+    * ................:    password to be encrypted or
+    * ................:    validated against the encrypted
+    * ................:    password.
+    * ................:
+    * ................: OBJECT MODE and FIELD combinations:
+    * ................: -------------------------------------
+    * ................:  MODE       FIELD NAME    FIELD VALUE
+    * ................: =======     ==========    ===========
+    * ................:   To        #LW3OBJMOD ->    "ENC"
+    * ................: Encript     #LW3USRPAS -> Plain pword
+    * ................:             #LW3CUSVAL -> *BLANKS
+    * ................:
+    * ................:   To        #LW3OBJMOD ->    "CHK"
+    * ................: Check or    #LW3USRPAS -> Plain pword
+    * ................: Validate    #LW3CUSVAL -> This is the
+    * ................: Password                  encrypted
+    * ................:                           password.
+    * LW3ENCRYP
+    * =======================================================
+    * OUTPUT..........: This also returned the encrypted
+    * ................: password (#LW3ENCRYP) back to the
+    * ................: invoking function plus the return
+    * ................: code below. #LW3ENCRYP is a 30 char
+    * ................: LANSA field.
+    
+    * =======================================================
+    * RETURNED CODE   : When encryption module is deemed to
+    * Issued to the   : have failed or a mis-matched password
+    * invoking        : a return code will be issued to the
+    * function. ......: invoking function. (#LW3ERCODE)
+    * .................
+    * ................: Operation In Progress     Return Code
+    * ................: Password Encryption          OK, ER
+    * ................: Password Verification        OK, ER
+    * ................. NOTES: You should not return values
+    * ................. in LW3ERCODE nor in LW3ENCRYP fields
+    * ................. outside of this module.
+    * ======================================================
+    Function Options(*DIRECT *HEAVYUSAGE)
+    * =======================================================
+    * > > > > > >   W  A  R  N  I  N  G  < < < < < < < <
+    * DANGER - DANGER - DANGER
+    * =======================================================
+    * NOTE: Please do not attempt to change or replace any
+    * of the #INTABn default values as this will cause
+    * problems or errors in password encryption. I SUGGEST
+    * THAT YOU MAKE A BACKUP COPY BEFORE CHANGING THIS
+    * FUNCTION.
+    * SHOULD YOU REQUIRE YOUR OWN TRANSLATION CODE THIS CAN
+    * BE DONE BY CHANGING THE DEFAULT VALUE OF #OUTTABn TABLE
+    * BELOW. Please note that the tripple quotes is important
+    * as this handles lower case.
+    * =======================================================
+    Define Field(#INTAB1) Type(*CHAR) Length(5) Input_Atr(LC) Default(''' $#@_''')
+    Define Field(#INTAB2) Type(*CHAR) Length(10) Input_Atr(LC) Default('''abcdefghij''')
+    Define Field(#INTAB3) Type(*CHAR) Length(9) Input_Atr(LC) Default('''klmnopqrs''')
+    Define Field(#INTAB4) Type(*CHAR) Length(7) Input_Atr(LC) Default('''tuvwxyz''')
+    Define Field(#INTAB5) Type(*CHAR) Length(10) Input_Atr(LC) Default('''ABCDEFGHIJ''')
+    Define Field(#INTAB6) Type(*CHAR) Length(9) Input_Atr(LC) Default('''KLMNOPQRS''')
+    Define Field(#INTAB7) Type(*CHAR) Length(7) Input_Atr(LC) Default('''TUVWXYZ''')
+    Define Field(#INTAB8) Type(*CHAR) Length(10) Input_Atr(LC) Default('''0123456789''')
+    * =======================================================
+    * T R A N S L A T I O N  C O D E  T A B L E
+    * =======================================================
+    * This is the translation code table. Should you require
+    * your own translation code you can change the default
+    * value of #OUTTABn table below. Please do not change
+    * their field length.
+    * =======================================================
+    Define Field(#OUTAB1) Type(*CHAR) Length(5) Input_Atr(LC) Default('''3xq84''')
+    Define Field(#OUTAB2) Type(*CHAR) Length(10) Default('''N709+-3619''')
+    Define Field(#OUTAB3) Type(*CHAR) Length(9) Default('''95hFQ284=''')
+    Define Field(#OUTAB4) Type(*CHAR) Length(7) Default('''842@903''')
+    Define Field(#OUTAB5) Type(*CHAR) Length(10) Default('''-$!45791&J''')
+    Define Field(#OUTAB6) Type(*CHAR) Length(9) Default('''094(8173)''')
+    Define Field(#OUTAB7) Type(*CHAR) Length(7) Default('''+@>/D42''')
+    Define Field(#OUTAB8) Type(*CHAR) Length(10) Default('''@!*&nsoNA[''')
+    * =======================================================
+    * Define Index
+    Define Field(#II) Type(*DEC) Length(7) Decimals(0) Desc(INDEX)
+    Define Field(#JJ) Type(*DEC) Length(7) Decimals(0) Desc(INDEX)
+    Define Field(#KK) Type(*DEC) Length(7) Decimals(0) Desc(INDEX)
+    Define Field(#TT) Type(*DEC) Length(7) Decimals(0) Desc(INDEX)
+    Define Field(#MM) Type(*DEC) Length(7) Decimals(0) Desc(INDEX)
+    Define Field(#NN) Type(*DEC) Length(7) Decimals(0) Desc(INDEX)
+    Define Field(#LL) Type(*DEC) Length(10) Decimals(0) Desc(INDEX)
+    * DEFINE FIELD(#LENGTH) TYPE(*DEC)
+    * LENGTH(007) DECIMALS(0)
+    Define Field(#TABNUM) Type(*DEC) Length(7) Decimals(0)
+    
+    * Define table field.
+    Define Field(#PWDTABL) Type(*CHAR) Length(10) Input_Atr(LC) Default(*BLANKS)
+    Define Field(#GRPTABL) Type(*CHAR) Length(10) Default(*BLANKS)
+    Define Field(#DATETIM) Type(*CHAR) Length(14) Default(*DATETIMEC)
+    Define Field(#ENCRYPT) Type(*CHAR) Length(10) Input_Atr(LC)
+    Define Field(#DECRYPTED) Type(*CHAR) Length(10) Input_Atr(LC)
+    
+    * Define Arrays
+    Def_Array Name(#PWD) Indexes(#KK) Overlaying(#ENCRYPT) Type(*CHAR) Tot_Entry(10) Entry_Len(1)
+    
+    Def_Array Name(#PIN) Indexes(#KK) Overlaying(#PWDTABL) Type(*CHAR) Tot_Entry(10) Entry_Len(1)
+    Def_Array Name(#GRP) Indexes(#KK) Overlaying(#GRPTABL) Type(*CHAR) Tot_Entry(10) Entry_Len(1)
+    Def_Array Name(#DAT) Indexes(#II) Overlaying(#DATETIM) Type(*CHAR) Tot_Entry(14) Entry_Len(1)
+    Def_Array Name(#ENC) Indexes(#NN) Overlaying(#LW3ENCRYP) Type(*CHAR) Tot_Entry(30) Entry_Len(1)
+    Def_Array Name(#VAL) Indexes(#JJ) Overlaying(#LW3CUSVAL) Type(*CHAR) Tot_Entry(30) Entry_Len(1)
+    Def_Array Name(#PLN) Indexes(#TT) Overlaying(#DECRYPTED) Type(*CHAR) Tot_Entry(10) Entry_Len(1)
+    
+    Def_Array Name(#IN1) Indexes(#JJ) Overlaying(#INTAB1) Type(*CHAR) Tot_Entry(5) Entry_Len(1)
+    Def_Array Name(#IN2) Indexes(#JJ) Overlaying(#INTAB2) Type(*CHAR) Tot_Entry(10) Entry_Len(1)
+    Def_Array Name(#IN3) Indexes(#JJ) Overlaying(#INTAB3) Type(*CHAR) Tot_Entry(9) Entry_Len(1)
+    Def_Array Name(#IN4) Indexes(#JJ) Overlaying(#INTAB4) Type(*CHAR) Tot_Entry(7) Entry_Len(1)
+    Def_Array Name(#IN5) Indexes(#JJ) Overlaying(#INTAB5) Type(*CHAR) Tot_Entry(10) Entry_Len(1)
+    Def_Array Name(#IN6) Indexes(#JJ) Overlaying(#INTAB6) Type(*CHAR) Tot_Entry(9) Entry_Len(1)
+    Def_Array Name(#IN7) Indexes(#JJ) Overlaying(#INTAB7) Type(*CHAR) Tot_Entry(7) Entry_Len(1)
+    Def_Array Name(#IN8) Indexes(#JJ) Overlaying(#INTAB8) Type(*CHAR) Tot_Entry(10) Entry_Len(1)
+    
+    Def_Array Name(#TB1) Indexes(#MM) Overlaying(#OUTAB1) Type(*CHAR) Tot_Entry(5) Entry_Len(1)
+    Def_Array Name(#TB2) Indexes(#MM) Overlaying(#OUTAB2) Type(*CHAR) Tot_Entry(10) Entry_Len(1)
+    Def_Array Name(#TB3) Indexes(#MM) Overlaying(#OUTAB3) Type(*CHAR) Tot_Entry(9) Entry_Len(1)
+    Def_Array Name(#TB4) Indexes(#MM) Overlaying(#OUTAB4) Type(*CHAR) Tot_Entry(7) Entry_Len(1)
+    Def_Array Name(#TB5) Indexes(#MM) Overlaying(#OUTAB5) Type(*CHAR) Tot_Entry(10) Entry_Len(1)
+    Def_Array Name(#TB6) Indexes(#MM) Overlaying(#OUTAB6) Type(*CHAR) Tot_Entry(9) Entry_Len(1)
+    Def_Array Name(#TB7) Indexes(#MM) Overlaying(#OUTAB7) Type(*CHAR) Tot_Entry(7) Entry_Len(1)
+    Def_Array Name(#TB8) Indexes(#MM) Overlaying(#OUTAB8) Type(*CHAR) Tot_Entry(10) Entry_Len(1)
+    
+    * =======================================================
+    * Program mainline
+    * =======================================================
+    
+    Exchange Fields(#LW3ERCODE #LW3ENCRYP) Option(*ALWAYS)
+    * FIELD(#ENCRYPT #LW3ENCRYP) TO(*NULL)
+    Change Field(#LW3ERCODE) To(OK)
+    * FIELDS((#LW3OBJMOD)(#LW3USRPAS)(#LW3CUSVAL))
+    Change Field(#PWDTABL) To(#LW3USRPAS)
+    Case Of_Field(#LW3OBJMOD)
+    When Value_Is(' = ENC')
+    Execute Subroutine(SCRAMBLE1)
+    Execute Subroutine(SCRAMBLE2)
+    When Value_Is(' = CHK')
+    Change Field(#LW3ENCRYP) To(#LW3CUSVAL)
+    Execute Subroutine(SCRAMBLE1)
+    Execute Subroutine(SCRAMBLE2)
+    Execute Subroutine(VALPASWORD)
+    Otherwise
+    Change Field(#LW3ERCODE) To(ER)
+    Endcase
+    
+    * FIELDS((#LW3USRPAS) (#ENCRYPT) (#GRPTABL) (#DATETIM) (#
+    * LW3ERCODE) (#LW3CUSVAL) (#LW3ENCRYP))
+    Return
+    
+    * =======================================================
+    * Do the encryption
+    * =======================================================
+    Subroutine Name(SCRAMBLE1)
+    Begin_Loop Using(#II) To(10)
+    Change Field(#KK) To(#II)
+    Case Of_Field(#PIN#KK)
+    When Value_Is('< ''a''')
+    Execute Subroutine(GETEQCODE) With_Parms(#II 5 1)
+    When Value_Is('<= ''j''')
+    Execute Subroutine(GETEQCODE) With_Parms(#II 10 2)
+    When Value_Is('<= ''s''')
+    Execute Subroutine(GETEQCODE) With_Parms(#II 9 3)
+    When Value_Is('<= ''z''')
+    Execute Subroutine(GETEQCODE) With_Parms(#II 7 4)
+    When Value_Is('<= J')
+    Execute Subroutine(GETEQCODE) With_Parms(#II 10 5)
+    When Value_Is('<= S')
+    Execute Subroutine(GETEQCODE) With_Parms(#II 9 6)
+    When Value_Is('<= Z')
+    Execute Subroutine(GETEQCODE) With_Parms(#II 7 7)
+    Otherwise
+    Execute Subroutine(GETEQCODE) With_Parms(#II 10 8)
+    Endcase
+    End_Loop
+    Endroutine
+    
+    * =======================================================
+    * Mix them together.
+    * =======================================================
+    Subroutine Name(SCRAMBLE2)
+    Begin_Loop Using(#KK) To(10)
+    Change Field(#II) To('#KK + 4')
+    Case Of_Field(#KK)
+    When Value_Is('= 1')
+    Change Field(#NN) To(15)
+    Change Field(#ENC#NN) To(#PWD#KK)
+    Change Field(#NN) To(1)
+    Change Field(#ENC#NN) To(#GRP#KK)
+    Change Field(#NN) To(3)
+    Change Field(#ENC#NN) To(#DAT#II)
+    When Value_Is('= 2')
+    Change Field(#NN) To(5)
+    Change Field(#ENC#NN) To(#PWD#KK)
+    Change Field(#NN) To(16)
+    Change Field(#ENC#NN) To(#GRP#KK)
+    Change Field(#NN) To(4)
+    Change Field(#ENC#NN) To(#DAT#II)
+    When Value_Is('= 3')
+    Change Field(#NN) To(20)
+    Change Field(#ENC#NN) To(#PWD#KK)
+    Change Field(#NN) To(9)
+    Change Field(#ENC#NN) To(#GRP#KK)
+    Change Field(#NN) To(13)
+    Change Field(#ENC#NN) To(#DAT#II)
+    When Value_Is('= 4')
+    Change Field(#NN) To(6)
+    Change Field(#ENC#NN) To(#PWD#KK)
+    Change Field(#NN) To(24)
+    Change Field(#ENC#NN) To(#GRP#KK)
+    Change Field(#NN) To(30)
+    Change Field(#ENC#NN) To(#DAT#II)
+    When Value_Is('= 5')
+    Change Field(#NN) To(18)
+    Change Field(#ENC#NN) To(#PWD#KK)
+    Change Field(#NN) To(26)
+    Change Field(#ENC#NN) To(#GRP#KK)
+    Change Field(#NN) To(17)
+    Change Field(#ENC#NN) To(#DAT#II)
+    When Value_Is('= 6')
+    Change Field(#NN) To(14)
+    Change Field(#ENC#NN) To(#PWD#KK)
+    Change Field(#NN) To(11)
+    Change Field(#ENC#NN) To(#GRP#KK)
+    Change Field(#NN) To(22)
+    Change Field(#ENC#NN) To(#DAT#II)
+    When Value_Is('= 7')
+    Change Field(#NN) To(2)
+    Change Field(#ENC#NN) To(#PWD#KK)
+    Change Field(#NN) To(8)
+    Change Field(#ENC#NN) To(#GRP#KK)
+    Change Field(#NN) To(28)
+    Change Field(#ENC#NN) To(#DAT#II)
+    When Value_Is('= 8')
+    Change Field(#NN) To(29)
+    Change Field(#ENC#NN) To(#PWD#KK)
+    Change Field(#NN) To(10)
+    Change Field(#ENC#NN) To(#GRP#KK)
+    Change Field(#NN) To(7)
+    Change Field(#ENC#NN) To(#DAT#II)
+    When Value_Is('= 9')
+    Change Field(#NN) To(27)
+    Change Field(#ENC#NN) To(#PWD#KK)
+    Change Field(#NN) To(23)
+    Change Field(#ENC#NN) To(#GRP#KK)
+    Change Field(#NN) To(12)
+    Change Field(#ENC#NN) To(#DAT#II)
+    When Value_Is('= 10')
+    Change Field(#NN) To(25)
+    Change Field(#ENC#NN) To(#PWD#KK)
+    Change Field(#NN) To(21)
+    Change Field(#ENC#NN) To(#GRP#KK)
+    Change Field(#NN) To(19)
+    Change Field(#ENC#NN) To(#DAT#II)
+    Endcase
+    End_Loop
+    Endroutine
+    
+    * =======================================================
+    * Find the replacement characters.
+    * =======================================================
+    Subroutine Name(GETEQCODE) Parms((#TT *RECEIVED) #LENGTH (#TABNUM *RECEIVED))
+    Change Field(#KK) To(#TT)
+    Begin_Loop Using(#LL) To(#LENGTH)
+    Change Field(#JJ) To(#LL)
+    Change Field(#MM) To(#LL)
+    Case Of_Field(#TABNUM)
+    When Value_Is('= 1')
+    If Cond('#PIN#KK *EQ #IN1#JJ')
+    Change Field(#PWD#KK) To(#TB1#MM)
+    Change Field(#GRP#KK) To('''1''')
+    Endif
+    When Value_Is('= 2')
+    If Cond('#PIN#KK *EQ #IN2#JJ')
+    Change Field(#PWD#KK) To(#TB2#MM)
+    Change Field(#GRP#KK) To('''2''')
+    Endif
+    When Value_Is('= 3')
+    If Cond('#PIN#KK *EQ #IN3#JJ')
+    Change Field(#PWD#KK) To(#TB3#MM)
+    Change Field(#GRP#KK) To('''3''')
+    Endif
+    When Value_Is('= 4')
+    If Cond('#PIN#KK *EQ #IN4#JJ')
+    Change Field(#PWD#KK) To(#TB4#MM)
+    Change Field(#GRP#KK) To('''4''')
+    Endif
+    When Value_Is('= 5')
+    If Cond('#PIN#KK *EQ #IN5#JJ')
+    Change Field(#PWD#KK) To(#TB5#MM)
+    Change Field(#GRP#KK) To('''5''')
+    Endif
+    When Value_Is('= 6')
+    If Cond('#PIN#KK *EQ #IN6#JJ')
+    Change Field(#PWD#KK) To(#TB6#MM)
+    Change Field(#GRP#KK) To('''6''')
+    Endif
+    When Value_Is('= 7')
+    If Cond('#PIN#KK *EQ #IN7#JJ')
+    Change Field(#PWD#KK) To(#TB7#MM)
+    Change Field(#GRP#KK) To('''7''')
+    Endif
+    When Value_Is('= 8')
+    If Cond('#PIN#KK *EQ #IN8#JJ')
+    Change Field(#PWD#KK) To(#TB8#MM)
+    Change Field(#GRP#KK) To('''8''')
+    Endif
+    Endcase
+    End_Loop
+    Change Field(#II) To(#TT)
+    Endroutine
+    
+    * =======================================================
+    * Verify password entered by the use from invoking prog.
+    * =======================================================
+    Subroutine Name(VALPASWORD)
+    Begin_Loop Using(#JJ) To(30)
+    Change Field(#NN) To(#JJ)
+    Case Of_Field(#JJ)
+    When Value_Is('= 3')
+    Change Field(#ENC#NN) To(#VAL#JJ)
+    When Value_Is('= 4')
+    Change Field(#ENC#NN) To(#VAL#JJ)
+    When Value_Is('= 13')
+    Change Field(#ENC#NN) To(#VAL#JJ)
+    When Value_Is('= 30')
+    Change Field(#ENC#NN) To(#VAL#JJ)
+    When Value_Is('= 17')
+    Change Field(#ENC#NN) To(#VAL#JJ)
+    When Value_Is('= 22')
+    Change Field(#ENC#NN) To(#VAL#JJ)
+    When Value_Is('= 28')
+    Change Field(#ENC#NN) To(#VAL#JJ)
+    When Value_Is('= 7')
+    Change Field(#ENC#NN) To(#VAL#JJ)
+    When Value_Is('= 12')
+    Change Field(#ENC#NN) To(#VAL#JJ)
+    When Value_Is('= 19')
+    Change Field(#ENC#NN) To(#VAL#JJ)
+    Endcase
+    End_Loop
+    
+    If Cond('#LW3CUSVAL *NE #LW3ENCRYP')
+    Change Field(#LW3ERCODE) To(ER)
+    Endif
+    
+    Endroutine
+    * ==============E=N=D====================================

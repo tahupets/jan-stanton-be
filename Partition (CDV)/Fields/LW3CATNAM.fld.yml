@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3CATNAM
+  Type:               Alpha
+  Length:             30
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Category Name"
+      Label:              "Category Name"
+      Heading1:           "Category"
+      Heading2:           "Name"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(187) Usepicklist(False) Width(501)
+    
+    End_Com
+    
+    End_Com

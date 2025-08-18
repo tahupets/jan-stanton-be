@@ -1,0 +1,124 @@
+﻿Weblet:
+  Name:               ce_style_v2
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE Cascading Style Sheet"
+
+  XML: |
+    <?xml version="1.0"?>
+    
+    <!-- (c) 2002 LANSA                            -->
+    <!-- $Workfile:: std_style_v2.xml            $ -->
+    <!-- $UTCDate:: 2008-07-15 12:12:34Z         $ -->
+    <!-- $Revision:: 4                          $ -->
+    <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+       <lxml:context>
+          <lxml:images-path>/images</lxml:images-path>
+          <lxml:webapplication-title>WAM Title</lxml:webapplication-title><lxml:webroutine-title>Webroutine Title</lxml:webroutine-title><lxml:language iso-lang="en">ENG</lxml:language><lxml:dev-resources-path>file://C:/PROGRA~2/LANSAS~1/LANSA/WAMEditor/Resources</lxml:dev-resources-path></lxml:context>
+       <lxml:lists/></lxml:data>
+
+  Designs:
+  - Language:           ENG
+    Technology Service: LANSA XHTML
+
+    XSL: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      
+      <!-- (c) 2002, 2011 LANSA                      -->
+      <!-- XHTML CE Cascading Style Sheet      -->
+      <!-- $Workfile:: std_style_v2.xsl            $ -->
+      <!-- $UTCDate:: 2014-08-27 16:23:15Z         $ -->
+      <!-- $Revision:: 10                          $ -->
+      <xsl:transform version="1.0" exclude-result-prefixes="lxml wd" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns="http://www.w3.org/1999/xhtml">
+         <xsl:import href="std_types.xsl"/>
+         <xsl:import href="std_variables.xsl"/>
+         <wd:definition>
+            <wd:group name="Utility Weblets"/>
+         </wd:definition>
+         <wd:template name="style">
+            <wd:description icon="icons/std_style.ico">
+               <wd:name lang="ENG">Style default</wd:name>
+            </wd:description>
+            <wd:param name="theme_css_filename">
+               <wd:tip lang="ENG">Theme CSS file. Use an empty string ('') to use the default theme. Use 'none' to not include a default theme, which is the case when using a theme style defined in the WAM layout</wd:tip>
+            </wd:param>
+            <wd:param name="css_files">
+               <wd:tip lang="ENG">Comma separated list of extra CSS files to include.</wd:tip>
+            </wd:param>
+         </wd:template>
+         <xsl:template name="style">
+            <xsl:param name="theme_css_filename" select="'theme_default.min.css'" wd:tip_id="" wd:type="std:css_link_filename"/>
+            <xsl:param name="css_files" select="''" wd:tip_id=""/>
+            <xsl:variable name="expand_css">
+               <xsl:if test="$lweb_design_mode">?expand=yes</xsl:if>
+            </xsl:variable>
+            <!-- <input id="test-louna-0" type="hidden" value="" /> -->
+            <link rel="stylesheet" type="text/css" href="{$lweb_style_path}/std_style.min.css{$expand_css}" charset="iso-8859-1"/>
+            <xsl:variable name="theme_css_resolved_filename">
+               <xsl:choose>
+                  <xsl:when test="$theme_css_filename = ''">theme_default.min.css</xsl:when>
+                  <xsl:otherwise>
+                     <xsl:value-of select="$theme_css_filename"/>
+                  </xsl:otherwise>
+               </xsl:choose>
+            </xsl:variable>
+            <xsl:if test="$theme_css_resolved_filename != 'none'">
+               <xsl:if test="$theme_css_resolved_filename != 'theme_default.min.css'">
+                  <!-- <input id="test-louna-0.a" type="hidden" value="" /> -->
+                  <link href="{$lweb_style_path}/theme_default.min.css{$expand_css}" type="text/css" rel="stylesheet" charset="iso-8859-1"/>
+               </xsl:if>
+               <!-- <input id="test-louna-0.b" type="hidden"
+                      value="{$lweb_style_path}/{$theme_css_resolved_filename}{$expand_css}" /> -->
+               <link rel="stylesheet" type="text/css" href="{$lweb_style_path}/{$theme_css_resolved_filename}{$expand_css}" charset="iso-8859-1"/>
+            </xsl:if>
+            <xsl:if test="boolean($lweb_std_css_language_overlay)">
+               <!-- <input id="test-louna-0.c" type="hidden" value="" /> -->
+               <link href="{$lweb_style_path}/{$lweb_std_css_language_overlay}{$expand_css}" type="text/css" rel="stylesheet"/>
+            </xsl:if>
+            <!-- <input id="test-louna-1" type="hidden"
+                   value="{$lweb_images_path}/{.}{$expand_css}" /> -->
+            <xsl:apply-templates select="/lxml:data/lxml:external-resources/lxml:style">
+               <xsl:with-param name="expand_css" select="$expand_css"/>
+            </xsl:apply-templates>
+            <xsl:call-template name="csslinks.private">
+               <xsl:with-param name="css_files" select="$css_files"/>
+               <xsl:with-param name="expand_css" select="$expand_css"/>
+            </xsl:call-template>
+            <!-- <input id="test-louna-3" type="hidden"
+                   value="{$lweb_images_path}/{.}{$expand_css}" /> -->
+            <style type="text/css">
+         .hidden {
+         <xsl:choose>
+                  <xsl:when test="$lweb_design_mode">visibility: hidden;</xsl:when>
+                  <xsl:otherwise>display: none;</xsl:otherwise>
+               </xsl:choose>
+         }
+            </style>
+         </xsl:template>
+         <xsl:template match="/lxml:data/lxml:external-resources/lxml:style">
+            <xsl:param name="expand_css" select="''"/>
+            <!-- <input type="hidden" id="test-louna-2"
+                   value="{$lweb_images_path}/{.}{$expand_css}" /> -->
+            <link href="{$lweb_images_path}/{.}{$expand_css}" type="text/css" rel="stylesheet" charset="{@charset}"/>
+         </xsl:template>
+         <xsl:template name="csslinks.private">
+            <xsl:param name="css_files" select="''"/>
+            <xsl:param name="expand_css" select="''"/>
+            <xsl:choose>
+               <xsl:when test="not($css_files)"/>
+               <xsl:when test="contains($css_files, ',')">
+                  <xsl:if test="not(starts-with($css_files, ','))">
+                     <link href="{$lweb_style_path}/{substring-before($css_files, ',')}{$expand_css}" type="text/css" rel="stylesheet"/>
+                  </xsl:if>
+                  <xsl:call-template name="csslinks.private">
+                     <xsl:with-param name="css_files" select="substring-after($css_files, ',')"/>
+                     <xsl:with-param name="expand_css" select="$expand_css"/>
+                  </xsl:call-template>
+               </xsl:when>
+               <xsl:otherwise>
+                  <link href="{$lweb_style_path}/{$css_files}{$expand_css}" type="text/css" rel="stylesheet"/>
+               </xsl:otherwise>
+            </xsl:choose>
+         </xsl:template>
+      </xsl:transform>

@@ -1,0 +1,50 @@
+﻿File:
+  Name:                           LW3SHPML
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3SHPML
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(10000     2000      3         ) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Shipping Carrier ML Description"
+
+  Real Fields:
+  - LW3SSHPTP:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3LNGCOD:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3SSHPDS:
+      Type:               Alphanumeric
+      Length:             20
+      Decimals:           0
+
+  Primary Keys:
+  - LW3SSHPTP
+  - LW3LNGCOD

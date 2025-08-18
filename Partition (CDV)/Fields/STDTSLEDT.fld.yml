@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               STDTSLEDT
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Standard Template Select - Edit"
+      Label:              "Edit"
+      Heading1:           " "
+      Heading2:           " "
+      Heading3:           "Edit"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(178)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'stdtsledt.stdtsledt') Name(#Weblet) Defaultweblet(True)
+    
+    End_Com
+    End_Com

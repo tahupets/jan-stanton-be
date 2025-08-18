@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3UTIMEV
+  Type:               Signed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          "'0 :  :  '"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Time Updated (Virtual)"
+      Label:              "Time Updated"
+      Heading1:           "Time"
+      Heading2:           "Updated"
+      Heading3:           "(Virtual)"

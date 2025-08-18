@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3SHPSUB
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Substitution Required in URL"
+      Label:              "Expand URL"
+      Heading1:           "Substitution"
+      Heading2:           "Required"
+      Heading3:           "In  URL"

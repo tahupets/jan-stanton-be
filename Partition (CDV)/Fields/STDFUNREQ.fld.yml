@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               STDFUNREQ
+  Type:               Alpha
+  Length:             30
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Standard Function Request"
+      Label:              "Std Function Rq"
+      Heading1:           "Standard"
+      Heading2:           "Function"
+      Heading3:           "Request"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(401)
+    
+    End_Com
+    
+    End_Com

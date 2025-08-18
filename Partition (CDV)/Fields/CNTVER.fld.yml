@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               CNTVER
+  Type:               Packed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          J
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Content Version"
+      Label:              "Content Version"
+      Heading1:           "Content"
+      Heading2:           "Version"
+      Heading3:           " "

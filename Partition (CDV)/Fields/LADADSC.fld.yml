@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LADADSC
+  Type:               Alpha
+  Length:             30
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Administration Application Description"
+      Label:              "Administration"
+      Heading1:           "Administration"
+      Heading2:           "Application"
+      Heading3:           "Description"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(233) Usepicklist(False) Width(455)
+    
+    End_Com
+    
+    End_Com

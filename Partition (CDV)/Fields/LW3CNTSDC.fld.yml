@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               LW3CNTSDC
+  Type:               Alpha
+  Length:             15
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Content Short Dsc"
+      Label:              "SHORT DESC"
+      Heading1:           "Content Short Dsc"
+      Heading2:           " "
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(187) Usepicklist(False) Width(357)
+    
+    End_Com
+    
+    End_Com

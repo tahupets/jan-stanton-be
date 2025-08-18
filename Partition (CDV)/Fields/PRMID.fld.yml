@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               PRMID
+  Type:               Alpha
+  Length:             100
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Parameter ID"
+      Label:              "Parameter ID"
+      Heading1:           "Parameter"
+      Heading2:           "ID"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(363)
+    
+    End_Com
+    
+    End_Com

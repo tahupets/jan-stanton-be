@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3IDESC
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Reference Field:    IMDESC
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Item Description"
+      Label:              "Description"
+      Heading1:           "Description"
+      Heading2:           " "
+      Heading3:           " "

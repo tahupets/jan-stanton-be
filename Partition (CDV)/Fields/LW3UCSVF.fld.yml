@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3UCSVF
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Upload CSV Flag"
+      Label:              "Upload CSV Flag"
+      Heading1:           "Upload"
+      Heading2:           "CSV"
+      Heading3:           "Flag"

@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3SSHPFR
+  Type:               Packed
+  Length:             7
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Flat Rate"
+      Label:              "Flat Rate"
+      Heading1:           "Flat"
+      Heading2:           "Rate"
+      Heading3:           " "

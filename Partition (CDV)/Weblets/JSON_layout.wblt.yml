@@ -1,0 +1,157 @@
+﻿Weblet:
+  Name:               JSON_layout
+
+  Multilingual Details:
+  - ENG:
+      Description:        "JSON Layout"
+
+  XML: |
+    <?xml version="1.0"?>
+    <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+       <lxml:context>
+          <lxml:images-path>/images</lxml:images-path>
+          <lxml:webapplication-title>WAM Title</lxml:webapplication-title><lxml:webroutine-title>Webroutine Title</lxml:webroutine-title><lxml:language iso-lang="en">ENG</lxml:language></lxml:context>
+       <lxml:lists/></lxml:data>
+
+  Designs:
+  - Language:           ENG
+    Technology Service: LANSA XHTML
+
+    XSL: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      
+      <!--(c) 2003 LANSA-->
+      <!--XHTML Layout-->
+      <!--$Workfile:: xml2json.xsl $-->
+      <!--$Revision:: 1.11 $-->
+      <xsl:transform version="1.0" exclude-result-prefixes="lxml wd" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns="http://www.w3.org/1999/xhtml">
+         <xsl:import href="std_types.xsl"/>
+         <xsl:import href="std_keys.xsl"/>
+         <xsl:import href="std_variables.xsl"/>
+         <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8" indent="yes"/>
+         <xsl:template name="layout" wd:role="std:layout">
+            <xsl:apply-templates select="/lxml:data" mode="json"/>
+         </xsl:template>
+         <xsl:template match="/lxml:data" mode="json">
+            <xsl:text>({"LANSA":{"fields":{</xsl:text>
+            <xsl:apply-templates select="lxml:fields/lxml:field" mode="json"/>
+            <xsl:text>}, "lists":{</xsl:text>
+            <xsl:apply-templates select="lxml:lists/lxml:list" mode="json"/>
+            <xsl:text>}}})</xsl:text>
+         </xsl:template>
+         <xsl:template match="lxml:field" mode="json">
+            <xsl:call-template name="enc-str">
+               <xsl:with-param name="str" select="@name"/>
+            </xsl:call-template>
+            <xsl:text>:{"value":</xsl:text>
+            <xsl:call-template name="enc-str">
+               <xsl:with-param name="str" select="lxml:value"/>
+            </xsl:call-template>
+            <xsl:text>}</xsl:text>
+            <xsl:if test="following-sibling::*">,</xsl:if>
+         </xsl:template>
+         <xsl:template match="lxml:list" mode="json">
+            <xsl:call-template name="enc-str">
+               <xsl:with-param name="str" select="@name"/>
+            </xsl:call-template>
+            <xsl:text>:[</xsl:text>
+            <xsl:apply-templates select="lxml:list-entries/lxml:entry" mode="json"/>
+            <xsl:text>]</xsl:text>
+            <xsl:if test="following-sibling::*">,</xsl:if>
+         </xsl:template>
+         <xsl:template match="lxml:entry" mode="json">
+            <xsl:text>{</xsl:text>
+            <xsl:apply-templates select="lxml:column" mode="json"/>
+            <xsl:text>}</xsl:text>
+            <xsl:if test="following-sibling::*">,</xsl:if>
+         </xsl:template>
+         <xsl:template match="lxml:column" mode="json">
+            <xsl:call-template name="enc-str">
+               <xsl:with-param name="str" select="@name"/>
+            </xsl:call-template>
+            <xsl:text>:{"id":</xsl:text>
+            <xsl:call-template name="enc-str">
+               <xsl:with-param name="str" select="@id"/>
+            </xsl:call-template>
+            <xsl:text>, "value":</xsl:text>
+            <xsl:call-template name="enc-str">
+               <xsl:with-param name="str" select="."/>
+            </xsl:call-template>
+            <xsl:text>}</xsl:text>
+            <xsl:if test="following-sibling::*">,</xsl:if>
+         </xsl:template>
+         <xsl:template name="enc-str">
+            <xsl:param name="str"/>
+            <xsl:text>"</xsl:text>
+            <xsl:call-template name="escape-bs">
+               <xsl:with-param name="str" select="$str"/>
+            </xsl:call-template>
+            <xsl:text>"</xsl:text>
+         </xsl:template>
+         <xsl:template name="escape-bs">
+            <xsl:param name="str"/>
+            <xsl:choose>
+               <xsl:when test="contains($str,'\')">
+                  <xsl:call-template name="escape-quot">
+                     <xsl:with-param name="str" select="concat(substring-before($str,'\'),'\\')"/>
+                  </xsl:call-template>
+                  <xsl:call-template name="escape-bs">
+                     <xsl:with-param name="str" select="substring-after($str,'\')"/>
+                  </xsl:call-template>
+               </xsl:when>
+               <xsl:otherwise>
+                  <xsl:call-template name="escape-quot">
+                     <xsl:with-param name="str" select="$str"/>
+                  </xsl:call-template>
+               </xsl:otherwise>
+            </xsl:choose>
+         </xsl:template>
+         <xsl:template name="escape-quot">
+            <xsl:param name="str"/>
+            <xsl:choose>
+               <xsl:when test="contains($str,'&quot;')">
+                  <xsl:call-template name="escape-others">
+                     <xsl:with-param name="str" select="concat(substring-before($str,'&quot;'),'\&quot;')"/>
+                  </xsl:call-template>
+                  <xsl:call-template name="escape-quot">
+                     <xsl:with-param name="str" select="substring-after($str,'&quot;')"/>
+                  </xsl:call-template>
+               </xsl:when>
+               <xsl:otherwise>
+                  <xsl:call-template name="escape-others">
+                     <xsl:with-param name="str" select="$str"/>
+                  </xsl:call-template>
+               </xsl:otherwise>
+            </xsl:choose>
+         </xsl:template>
+         <xsl:template name="escape-others">
+            <xsl:param name="str"/>
+            <xsl:choose>
+               <xsl:when test="' ' != ' '">
+                  <xsl:choose>
+                     <xsl:when test="contains($str,' ')">
+                        <xsl:call-template name="escape-others">
+                           <xsl:with-param name="str" select="concat(substring-before($str, ' '),'\n',substring-after($str,' '))"/>
+                        </xsl:call-template>
+                     </xsl:when>
+                     <xsl:when test="contains($str,' ')">
+                        <xsl:call-template name="escape-others">
+                           <xsl:with-param name="str" select="concat(substring-before($str,' '),'\r',substring-after($str,' '))"/>
+                        </xsl:call-template>
+                     </xsl:when>
+                     <xsl:when test="contains($str,' ')">
+                        <xsl:call-template name="escape-others">
+                           <xsl:with-param name="str" select="concat(substring-before($str,' '),'\t',substring-after($str,' '))"/>
+                        </xsl:call-template>
+                     </xsl:when>
+                     <xsl:otherwise>
+                        <xsl:value-of select="$str"/>
+                     </xsl:otherwise>
+                  </xsl:choose>
+               </xsl:when>
+               <xsl:otherwise>
+                  <xsl:value-of select="$str"/>
+               </xsl:otherwise>
+            </xsl:choose>
+         </xsl:template>
+      </xsl:transform>

@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3PAGPOS
+  Type:               Signed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Page Count"
+      Label:              "Page Count"
+      Heading1:           "Page"
+      Heading2:           "Count"
+      Heading3:           " "

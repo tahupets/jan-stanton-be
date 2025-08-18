@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               EECCDT
+  Type:               Signed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Reference Field:    EEVCDT
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Output Attributes:
+  - CYDU
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Change Date"
+      Label:              "Change Date"
+      Heading1:           "Change Date"
+      Heading2:           " "
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(232)
+    
+    End_Com
+    
+    End_Com

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               STDROWNUM
+  Type:               Packed
+  Length:             7
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       Yes
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Standard *WEBEVENT template field"
+      Label:              "Std *WEBEVENT"
+      Heading1:           "Std *WEBEVENT"
+      Heading2:           "template field"
+      Heading3:           " "

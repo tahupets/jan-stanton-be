@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3SSHPPC
+  Type:               Packed
+  Length:             5
+  Decimals:           3
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Subtotal Percentage"
+      Label:              "Subtotal %"
+      Heading1:           "Subtotal"
+      Heading2:           "     %"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(232)
+    
+    End_Com
+    
+    End_Com

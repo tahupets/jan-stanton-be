@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3FREGFT
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Free Gift? (Y/ )"
+      Label:              "Free Gift? (Y/"
+      Heading1:           "Free"
+      Heading2:           "Gift?"
+      Heading3:           "(Y/"

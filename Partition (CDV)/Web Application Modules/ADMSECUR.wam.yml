@@ -1,0 +1,2770 @@
+﻿Wam:
+  Name:               ADMSECUR
+  Enabled For RDMLX:  Yes
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Security Administration"
+
+  Source: |
+    * WAM ADMSECUR - Security Administration
+    * -----------------------------------------------------
+    Function Options(*DIRECT)
+    
+    Begin_Com Role(*EXTENDS #PRIM_WAM) Sessiongroupname('CEADM') Sessiontimeout(0)
+    
+    Def_List Name(#menulst) Fields(#LW3MNUNME #LW3MNUID #LW3CINDT #w_dirty #w_flgval #lw3sfid) Counter(#listcount) Type(*WORKING) Entrys(*MAX)
+    
+    Def_List Name(#amenulst) Fields(#LW3MNUNME #LW3MNUID #LW3CINDT #w_dirty #w_flgval #lw3sfid) Counter(#listcount) Type(*WORKING) Entrys(*MAX)
+    Def_List Name(#smenulst) Fields(#LW3MNUNME #LW3MNUID #LW3CINDT #w_dirty #w_flgval #lw3sfid) Counter(#listcount) Type(*WORKING) Entrys(*MAX)
+    
+    Define Field(#w_loopf) Type(*CHAR) Length(1)
+    Define Field(#w_dirty) Type(*CHAR) Length(1)
+    Define Field(#w_count) Reffld(#listcount)
+    
+    Define Field(#w_menuid) Reffld(#LW3MNUID)
+    
+    Define Field(#w_flgval) Type(*CHAR) Length(1)
+    
+    Define Field(#w_webusr) Reffld(#lw3webusr)
+    Define Field(#w_admusr) Type(*CHAR) Length(1)
+    Define Field(#rl_webusr) Reffld(#lw3webusr)
+    
+    Define Field(#W_CNTID) Reffld(#Lw3CNTID) Desc('Content ID')
+    Def_List Name(#WL_CONTENTLIST) Fields(#LW3CNTID #LW3CNTSDC #Lw3CNTLDC) Type(*WORKING) Entrys(*MAX)
+    
+    Define Field(#W_ISROLE) Reffld(#STD_BOOL) Desc('Set to True if User is a Role')
+    
+    Def_List Name(#sflst) Fields(#lw3sfid #lw3name) Type(*WORKING) Entrys(*MAX)
+    Def_List Name(#rolelst) Fields(#LW3CODE #LW3CDES) Type(*WORKING) Entrys(*MAX)
+    Web_Map For(*INPUT) Fields(#stdadmusr #stdadmses)
+    
+    * CE General Purpose Library
+    Define_Com Class(#CEGPL)
+    
+    Web_Map For(*BOTH) Fields(#LW3WEBUSR #LW3SFID (#LW3SFCUR *HIDDEN))
+    Web_Map For(*OUTPUT) Fields(#S_PARAG #lw3name)
+    
+    * multilingual variable list
+    Def_List Name(#ls_mlnvar) Fields(#FXVARNAM #FXVARTXT) Type(*WORKING) Entrys(*MAX)
+    Web_Map For(*BOTH) Fields(#ls_mlnvar #FXWAMNAM #FXWRTNAM)
+    
+    Webroutine Name(wrmain)
+    Web_Map For(*INPUT) Fields(#stdrentry)
+    Web_Map For(*BOTH) Fields(#w_sfid #w_webusr #sflst #amenulst #lw3mhtml #smenulst)
+    Web_Map For(*BOTH) Fields(#LW3UCMNUF) Desc('Use Content Menu Flag')
+    Web_Map For(*BOTH) Fields(#W_CNTID) Desc('Content ID')
+    
+    Execute Subroutine(init_sf)
+    
+    * get multi-lingual info
+    #FXWAMNAM := ADMSECUR
+    #FXWRTNAM := WRMAIN
+    Execute Subroutine(multi)
+    
+    Call Webroutine(#ADMDYNMNU.bldmenu)
+    Execute Subroutine(common)
+    
+    * Retrieve flag for using content based menu
+    #LW3UCMNUF := *BLANKS
+    Fetch Fields(#LW3UCMNUF) From_File(LW3SFEXT) With_Key(#LW3SFID) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Case Of_Field(#stdrentry)
+    
+    When Value_Is(= U)
+    
+    #LW3VARFLD := ''
+    #LW3VARFLD := #LW3VARFLD.repeat( 256 )
+    
+    If Cond(#W_SFID = 99)
+    
+    Selectlist Named(#amenulst)
+    If Cond(#w_flgval = Y)
+    Fetch Fields(#LW3SECSEQ) From_File(LW3MENU01) With_Key(#lw3sfid #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    #LW3VARFLD := #LW3VARFLD.ReplaceSubstring( #LW3SECSEQ 1 'Y' )
+    Endif
+    Endselect
+    
+    Else
+    
+    Selectlist Named(#smenulst)
+    If Cond(#w_flgval = Y)
+    Fetch Fields(#LW3SECSEQ) From_File(LW3MENU01) With_Key(#lw3sfid #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    #LW3VARFLD := #LW3VARFLD.ReplaceSubstring( #LW3SECSEQ 1 'Y' )
+    Endif
+    Endselect
+    Endif
+    
+    #LW3CNTID := #W_CNTID
+    
+    * Check if user ID is a role
+    Execute Subroutine(SEC_TYPE) With_Parms(#W_ISROLE)
+    
+    If Cond(#w_sfid *EQ 99)
+    
+    Check_For In_File(LW3SECURA) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#io$sts = EQ)
+    Update Fields(#LW3VARFLD) In_File(LW3SECURA) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
+    Else
+    #lw3webusr := #rl_webusr
+    Insert Fields(#LW3VARFLD #lw3webusr) To_File(LW3SECURA) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    Else
+    
+    Check_For In_File(LW3SECUR) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#io$sts = EQ)
+    Update Fields(#LW3VARFLD #LW3CNTID) In_File(LW3SECUR) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
+    Else
+    #lw3webusr := #rl_webusr
+    Insert Fields(#LW3WEBUSR #LW3VARFLD #LW3CNTID) To_File(LW3SECUR) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    Endif
+    
+    Otherwise
+    
+    Endcase
+    
+    Execute Subroutine(bld_dd)
+    
+    #stdrentry := ''
+    
+    Endroutine
+    
+    Webroutine Name(get_secur)
+    Web_Map For(*INPUT) Fields(#w_sfid #w_webusr)
+    Web_Map For(*OUTPUT) Fields(#amenulst #smenulst #LW3VARFLD)
+    Web_Map For(*BOTH) Fields(#w_admusr)
+    Web_Map For(*BOTH) Fields(#LW3UCMNUF) Desc('Use Content Menu Flag')
+    Web_Map For(*BOTH) Fields(#W_CNTID (#WL_CONTENTLIST *PRIVATE)) Desc('Content Menu Fields')
+    
+    * get multi-lingual info
+    #FXWAMNAM := ADMSECUR
+    #FXWRTNAM := GET_SECUR
+    Execute Subroutine(multi)
+    #LW3LNGCOD := *LANGUAGE
+    
+    If Cond(#lw3sfid *EQ *zero)
+    #lw3sfid := #w_sfid
+    Endif
+    
+    Execute Subroutine(common)
+    * Check if user ID is a role
+    Execute Subroutine(SEC_TYPE) With_Parms(#W_ISROLE)
+    
+    #LW3CNTID := *NULL
+    If Cond(#w_sfid *EQ 99)
+    Fetch Fields(#LW3VARFLD) From_File(LW3SECURA) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
+    Else
+    Fetch Fields(#LW3VARFLD #LW3CNTID) From_File(LW3SECUR) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    
+    If Cond(#LW3UCMNUF = 'Y')
+    
+    #W_CNTID := #LW3CNTID
+    Execute Subroutine(bld_content_dd)
+    
+    Else
+    
+    Execute Subroutine(bld_tree)
+    
+    Selectlist Named(#menulst)
+    If Cond(#lw3sfid = #w_sfid)
+    If Cond(#w_sfid = 99)
+    Add_Entry To_List(#amenulst)
+    Else
+    Add_Entry To_List(#smenulst)
+    Endif
+    Endif
+    Endselect
+    
+    Endif
+    
+    If Cond(#w_webusr.IsNumber)
+    #w_admusr := X
+    Endif
+    Endroutine
+    
+    Webroutine Name(get_roles)
+    Web_Map For(*INPUT) Fields(#w_sfid)
+    Web_Map For(*OUTPUT) Fields(#w_webusr #rolelst)
+    Message Msgtxt(#w_sfid.AsString + '-' + #w_webusr)
+    * get multi-lingual info
+    #FXWAMNAM := ADMSECUR
+    #FXWRTNAM := GET_ROLES
+    Execute Subroutine(multi)
+    #LW3LNGCOD := *LANGUAGE
+    
+    Execute Subroutine(common)
+    
+    Clr_List Named(#rolelst)
+    
+    #rolelst := *DEFAULT
+    Add_Entry To_List(#rolelst)
+    
+    If Cond(#w_sfid = 99)
+    #lw3ctype := ADMROLE
+    Else
+    #lw3ctype := USRROLE
+    Endif
+    
+    Select Fields(#LW3CODE #LW3CDES #LW3LNGCOD) From_File(lw3codes) With_Key(#lw3ctype) Io_Error(*NEXT) Val_Error(*NEXT)
+    Continue If(#LW3LNGCOD *NE *LANGUAGE)
+    Continue If(#lw3code = '#')
+    Add_Entry To_List(#rolelst)
+    Endselect
+    #LW3LNGCOD := *LANGUAGE
+    Endroutine
+    
+    
+    Subroutine Name(SEC_TYPE) Parms((#W_ISROLE *RETURNED))
+    
+    #W_ISROLE := False
+    #rl_webusr := #w_webusr
+    
+    * Check if user ID is a role
+    If Cond(#w_webusr.trim.CurChars *LE 3)
+    #lw3code := #w_webusr.trim
+    
+    If Cond(#w_sfid *EQ 99)
+    #lw3ctype := ADMROL
+    Else
+    #lw3ctype := USRROL
+    Endif
+    
+    Check_For In_File(LW3CODES) With_Key(#lw3ctype #lw3code #LW3LNGCOD) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If_Status Is(*EQUALKEY)
+    * Concatenate SFID and role for role security web user id
+    #rl_webusr := #w_sfid.AsString + #w_webusr
+    #W_ISROLE := True
+    Endif
+    Endif
+    Endroutine
+    
+    
+    Subroutine Name(bld_tree)
+    
+    Clr_List Named(#menulst)
+    
+    #lw3sfid := #W_SFID
+    #LW3LNGCOD := *LANGUAGE
+    #w_loopf := N
+    #w_flgval := ''
+    
+    #LW3CORD := 0
+    #LW3CINDT := 0
+    Select Fields(#LW3MNUNME #LW3MNUID #LW3SECSEQ) From_File(LW3MENU01A) With_Key(#LW3SFID) Io_Error(*NEXT) Val_Error(*NEXT)
+    Fetch Fields(#LW3MNUNME) From_File(LW3MENUML) With_Key(#LW3SFID #LW3MNUID #LW3LNGCOD) Io_Error(*NEXT) Val_Error(*NEXT)
+    Check_For In_File(LW3MENU02) With_Key(#lw3sfid #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#io$sts = EQ)
+    #w_dirty := Y
+    #w_loopf := Y
+    Else
+    #w_dirty := N
+    Endif
+    
+    Execute Subroutine(set_check)
+    Add_Entry To_List(#menulst)
+    Endselect
+    
+    Dowhile Cond(#w_loopf = Y)
+    #w_loopf := N
+    #LW3CORD := 0
+    Selectlist Named(#menulst)
+    #LW3CORD += 1
+    
+    If Cond(#w_dirty = Y)
+    #w_dirty := N
+    Upd_Entry In_List(#menulst)
+    #LW3CINDT += 20
+    #w_menuid := #lw3mnuid
+    #w_count := 0
+    Select Fields(#LW3SUBMNU) From_File(LW3MENU02A) With_Key(#LW3SFID #w_menuid) Io_Error(*NEXT) Val_Error(*NEXT)
+    #lw3mnuid := #lw3submnu
+    Fetch Fields(#LW3MNUNME #LW3SECSEQ) From_File(LW3MENU01) With_Key(#LW3SFID #LW3SUBMNU) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#io$sts ¬= OK)
+    Continue
+    Endif
+    Fetch Fields(#LW3MNUNME) From_File(LW3MENUML) With_Key(#LW3SFID #LW3SUBMNU #LW3LNGCOD) Io_Error(*NEXT) Val_Error(*NEXT)
+    Check_For In_File(LW3MENU02) With_Key(#lw3sfid #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#io$sts = EQ)
+    #w_dirty := Y
+    #w_loopf := Y
+    Else
+    #w_dirty := N
+    Endif
+    
+    Execute Subroutine(set_check)
+    Add_Entry To_List(#menulst) After(#LW3CORD)
+    #LW3CORD += 1
+    #w_count += 1
+    Endselect
+    #LW3CINDT -= 20
+    #LW3CORD -= #w_count
+    
+    Endif
+    
+    Endselect
+    Endwhile
+    
+    Endroutine
+    
+    Subroutine Name(bld_dd)
+    
+    Endroutine
+    
+    Subroutine Name(set_check)
+    
+    #w_flgval := ''
+    
+    If Cond(#lw3secseq *GT *zero)
+    If Cond(#LW3VARFLD.substring( #LW3SECSEQ 1 ) = 'Y')
+    #w_flgval := Y
+    Endif
+    Endif
+    
+    Endroutine
+    
+    Subroutine Name(common)
+    
+    #w_sfid := #lw3sfid
+    #LW3LNGCOD := *LANGUAGE
+    
+    * Get Intro Paragraph
+    Define Field(#S_PARAG) Type(*CHAR) Length(256) Desc('Intro Paragraph')
+    
+    #LW3TXTNAM := 'SECURITYADMIN'
+    
+    #CEGPL.GetWAMIntroText Introtextname(#LW3TXTNAM) Paragraphlanguage(*LANGUAGE) Introtextparagraph(#S_PARAG)
+    
+    * Get Storefront name
+    If Cond(#LW3SFID = 99)
+    #LW3VARTXT := 'Administration Site'
+    Fetch Fields(#LW3VARTXT) From_File(lw3mlnvar) With_Key('LBL_ADMIN_SITE' *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    #lw3name := #LW3VARTXT
+    Else
+    Fetch Fields(#LW3NAME) From_File(LW3SFML) With_Key(#LW3SFID *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    Fetch Fields(#LW3NAME) From_File(LW3SFRNT) With_Key(#LW3SFID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    #LW3VARTXT := '*** Invalid Storefront ***'
+    Fetch Fields(#LW3VARTXT) From_File(lw3mlnvar) With_Key('LBL_INVALID_STOREFRONT' *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    #lw3name := #LW3VARTXT
+    Endif
+    Endif
+    Endif
+    Endroutine
+    
+    Subroutine Name(bld_content_dd)
+    
+    Clr_List Named(#WL_CONTENTLIST)
+    
+    #WL_CONTENTLIST := *NULL
+    Add_Entry To_List(#WL_CONTENTLIST)
+    
+    #LW3LNGID := *LANGUAGE
+    Select Fields(#WL_CONTENTLIST) From_File(LW3CNT01) With_Key(#LW3LNGID) Io_Error(*NEXT) Val_Error(*NEXT)
+    Add_Entry To_List(#WL_CONTENTLIST)
+    Endselect
+    
+    Sort_List Named(#WL_CONTENTLIST) By_Fields(#LW3CNTSDC)
+    
+    Endroutine
+    
+    * get multilingual information
+    Subroutine Name(multi)
+    Exchange Fields(#FXWAMNAM #FXWRTNAM)
+    Call Process(*DIRECT) Function(LW3MLAD) If_Error(*NEXT) Pass_Lst(#ls_mlnvar)
+    Endroutine
+    
+    * Send a message
+    Subroutine Name(SEND_MSG)
+    Exchange Fields(#LW3VARNAM #LW3LNGID #LW3MSGSUB)
+    Call Process(*DIRECT) Function(LW3MSG) If_Error(*NEXT)
+    Endroutine
+    
+    * pass the received storefront id
+    Subroutine Name(init_sf)
+    If Cond(#LW3SFCUR <> 0)
+    #LW3SFID := #LW3SFCUR
+    Endif
+    Endroutine
+    
+    * The following event handler will handle invalid session
+    Evtroutine Handling(#COM_OWNER.SessionInvalid) Options(*NOCLEARMESSAGES *NOCLEARERRORS)
+    #LW3VARNAM := MSG_LW32307
+    #LW3LNGID := *LANGUAGE
+    #LW3MSGSUB := *blank
+    Execute Subroutine(SEND_MSG)
+    Transfer Toroutine(#WADMLGN1.LWBOP01C1)
+    Endroutine
+    
+    End_Com
+
+  Web Routines:
+  - GET_ROLES:
+      XML: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        
+        <!-- WAM       : ADMSECUR - ?
+             Webroutine: get_roles - 
+             Timestamp : 2024-06-13T22:13:24-05:00 -->
+        
+        <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+        
+        <lxml:server-instructions>
+        <lxml:client-charset></lxml:client-charset>
+        <lxml:cookies><lxml:cookie name="STDSESSID"><lxml:value field-name="STDSESSID"></lxml:value>
+        <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
+        <lxml:domain></lxml:domain>
+        <lxml:path>/; HttpOnly</lxml:path>
+        <lxml:secure></lxml:secure>
+        </lxml:cookie>
+        <lxml:cookie name="STDWEBUSR"><lxml:value field-name="STDWEBUSR"></lxml:value>
+        <lxml:expires field-name=""></lxml:expires>
+        <lxml:domain field-name=""></lxml:domain>
+        <lxml:path field-name=""></lxml:path>
+        <lxml:secure field-name=""></lxml:secure>
+        </lxml:cookie>
+        </lxml:cookies>
+        <lxml:ssi></lxml:ssi>
+        </lxml:server-instructions>
+        
+        <lxml:context>
+        <lxml:user-id>LANSAJAN</lxml:user-id>
+        <lxml:webapplication>ADMSECUR</lxml:webapplication>
+        <lxml:webapplication-title>?</lxml:webapplication-title>
+        <lxml:webroutine>get_roles</lxml:webroutine>
+        <lxml:webroutine-title></lxml:webroutine-title>
+        <lxml:service-name></lxml:service-name>
+        <lxml:partition>CED</lxml:partition>
+        <lxml:language iso-lang="en">ENG</lxml:language>
+        <lxml:dec-separator>.</lxml:dec-separator>
+        <lxml:images-path>/images</lxml:images-path>
+        <lxml:action-request>/cgi-bin/lansaweb</lxml:action-request>
+        </lxml:context>
+        
+        <lxml:options>
+        <lxml:option name="DBCS" shift-chars="true">false</lxml:option>
+        <lxml:option name="align-right">true</lxml:option>
+        <lxml:option name="check-numeric">false</lxml:option>
+        <lxml:option name="debug" />
+        <lxml:option name="trace" />
+        <lxml:option name="task" />
+        </lxml:options>
+        
+        <lxml:variables />
+        
+        <lxml:messages></lxml:messages>
+        
+        <lxml:fields>
+        <lxml:field name="LW3WEBUSR">
+        <lxml:caption>
+        <lxml:label>User Id</lxml:label>
+        <lxml:description>Web User Name</lxml:description>
+        <lxml:heading-1>Web</lxml:heading-1>
+        <lxml:heading-2>User</lxml:heading-2>
+        <lxml:heading-3>Name</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="LW3SFID">
+        <lxml:caption>
+        <lxml:label>Store Front ID</lxml:label>
+        <lxml:description>Store Front ID</lxml:description>
+        <lxml:heading-1>Store</lxml:heading-1>
+        <lxml:heading-2>Front</lxml:heading-2>
+        <lxml:heading-3>ID</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="LW3SFCUR">
+        <lxml:caption>
+        <lxml:label>Current Store F</lxml:label>
+        <lxml:description>Current Store Front</lxml:description>
+        <lxml:heading-1>Current</lxml:heading-1>
+        <lxml:heading-2>Store</lxml:heading-2>
+        <lxml:heading-3>Front</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="S_PARAG">
+        <lxml:caption>
+        <lxml:label>S_PARAG</lxml:label>
+        <lxml:description>Intro Paragraph</lxml:description>
+        <lxml:heading-1>S_PARAG</lxml:heading-1>
+        <lxml:heading-2></lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="LW3NAME">
+        <lxml:caption>
+        <lxml:label>Store Front Nam</lxml:label>
+        <lxml:description>Store Front Name</lxml:description>
+        <lxml:heading-1>Store</lxml:heading-1>
+        <lxml:heading-2>Front</lxml:heading-2>
+        <lxml:heading-3>Name</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="FXWAMNAM">
+        <lxml:caption>
+        <lxml:label>Wam Name</lxml:label>
+        <lxml:description>Wam Name</lxml:description>
+        <lxml:heading-1>Wam</lxml:heading-1>
+        <lxml:heading-2>Name</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="FXWRTNAM">
+        <lxml:caption>
+        <lxml:label>Webroutine Name</lxml:label>
+        <lxml:description>Webroutine Name</lxml:description>
+        <lxml:heading-1>Webroutine</lxml:heading-1>
+        <lxml:heading-2>Name</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="W_WEBUSR">
+        <lxml:caption>
+        <lxml:label>User Id</lxml:label>
+        <lxml:description>Web User Name</lxml:description>
+        <lxml:heading-1>Web</lxml:heading-1>
+        <lxml:heading-2>User</lxml:heading-2>
+        <lxml:heading-3>Name</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        </lxml:fields>
+        
+        <lxml:lists>
+        <lxml:list name="LS_MLNVAR" row-count="5">
+        <lxml:list-header>
+        <lxml:header name="FXVARNAM">
+        <lxml:heading-1>Variable</lxml:heading-1>
+        <lxml:heading-2>Name</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="FXVARTXT">
+        <lxml:heading-1>Variable</lxml:heading-1>
+        <lxml:heading-2>Text</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        </lxml:list-header>
+        <lxml:list-entries>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0001.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0001.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0002.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0002.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0003.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0003.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0004.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0004.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0005.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0005.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
+        </lxml:entry>
+        </lxml:list-entries>
+        </lxml:list>
+        
+        <lxml:list name="ROLELST" row-count="5">
+        <lxml:list-header>
+        <lxml:header name="LW3CODE">
+        <lxml:heading-1>Code</lxml:heading-1>
+        <lxml:heading-2> </lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3CDES">
+        <lxml:heading-1>Code</lxml:heading-1>
+        <lxml:heading-2>Description</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        </lxml:list-header>
+        <lxml:list-entries>
+        <lxml:entry>
+        <lxml:column name="LW3CODE" id="ROLELST.0001.LW3CODE">ABC</lxml:column>
+        <lxml:column name="LW3CDES" id="ROLELST.0001.LW3CDES">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoO</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3CODE" id="ROLELST.0002.LW3CODE">ABC</lxml:column>
+        <lxml:column name="LW3CDES" id="ROLELST.0002.LW3CDES">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoO</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3CODE" id="ROLELST.0003.LW3CODE">ABC</lxml:column>
+        <lxml:column name="LW3CDES" id="ROLELST.0003.LW3CDES">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoO</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3CODE" id="ROLELST.0004.LW3CODE">ABC</lxml:column>
+        <lxml:column name="LW3CDES" id="ROLELST.0004.LW3CDES">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoO</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3CODE" id="ROLELST.0005.LW3CODE">ABC</lxml:column>
+        <lxml:column name="LW3CDES" id="ROLELST.0005.LW3CDES">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoO</lxml:column>
+        </lxml:entry>
+        </lxml:list-entries>
+        </lxml:list>
+        
+        </lxml:lists>
+        
+        </lxml:data>
+        
+
+      Designs:
+      - Language:           ENG
+        Technology Service: LANSA JQMOBILE
+
+        XSL: |
+          <?xml version="1.0" encoding="UTF-8"?>
+          
+          <!-- WAM       : ADMSECUR - Security Administration
+               Webroutine: get_roles - 
+               Timestamp : 2014-12-30T09:49:45-06:00 -->
+          
+          <xsl:transform version="1.0" exclude-result-prefixes="lxml wd" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+          
+          <xsl:import href="std_keys.xsl" />
+          <xsl:import href="std_variables.xsl" />
+          <xsl:import href="std_hidden.xsl" />
+          <xsl:import href="admsecur_layout.xsl" />
+          
+          <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8" indent="no" />
+          
+          <xsl:template match="/">
+          <xsl:call-template name="layout" />
+          </xsl:template>
+          
+          <xsl:template match="/lxml:data">
+          <input type="text" id="{$lweb_WRName}_LW3WEBUSR" name="LW3WEBUSR" value="{key('field-value', 'LW3WEBUSR')}" size="10" maxlength="10" class="lstd_Field text" data-lstddatatype="alpha| |10" wd:caption="{key('field-caption', 'LW3WEBUSR')/lxml:description}" />
+          <br />
+          <input type="number" id="{$lweb_WRName}_LW3SFID" name="LW3SFID" value="{key('field-value', 'LW3SFID')}" data-lstdformattedvalue="{key('field-value', 'LW3SFID')}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{key('field-caption', 'LW3SFID')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_S_PARAG" name="S_PARAG" value="{key('field-value', 'S_PARAG')}" size="60" maxlength="256" class="lstd_Field utext" data-lstddatatype="alpha| |256" wd:caption="{key('field-caption', 'S_PARAG')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_LW3NAME" name="LW3NAME" value="{key('field-value', 'LW3NAME')}" size="30" maxlength="30" class="lstd_Field text" data-lstddatatype="alpha| |30" wd:caption="{key('field-caption', 'LW3NAME')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_FXWAMNAM" name="FXWAMNAM" value="{key('field-value', 'FXWAMNAM')}" size="10" maxlength="10" class="lstd_Field utext" data-lstddatatype="alpha| |10" wd:caption="{key('field-caption', 'FXWAMNAM')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_FXWRTNAM" name="FXWRTNAM" value="{key('field-value', 'FXWRTNAM')}" size="20" maxlength="20" class="lstd_Field utext" data-lstddatatype="alpha| |20" wd:caption="{key('field-caption', 'FXWRTNAM')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_W_WEBUSR" name="W_WEBUSR" value="{key('field-value', 'W_WEBUSR')}" size="10" maxlength="10" class="lstd_Field text" data-lstddatatype="alpha| |10" wd:caption="{key('field-caption', 'W_WEBUSR')/lxml:description}" />
+          <br />
+          <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='LS_MLNVAR']" wd:listname="LS_MLNVAR">
+          <xsl:with-param name="class" select="''" />
+          <xsl:with-param name="countSwatch" select="''" />
+          <xsl:with-param name="dividerSwatch" select="''" />
+          <xsl:with-param name="hasSearchFilter" select="false()" />
+          <xsl:with-param name="hideIf" select="false()" />
+          <xsl:with-param name="inset" select="false()" />
+          <xsl:with-param name="searchFilterPlaceholder" select="''" />
+          <xsl:with-param name="searchFilterSwatch" />
+          <xsl:with-param name="splitIcon" select="''" />
+          <xsl:with-param name="splitSwatch" select="''" />
+          <xsl:with-param name="swatch" select="''" />
+          <xsl:with-param name="listItemClass" select="''" />
+          <xsl:with-param name="filterTextColumn" select="''" />
+          </xsl:apply-templates>
+          <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='ROLELST']" wd:listname="ROLELST">
+          <xsl:with-param name="class" select="''" />
+          <xsl:with-param name="countSwatch" select="''" />
+          <xsl:with-param name="dividerSwatch" select="''" />
+          <xsl:with-param name="hasSearchFilter" select="false()" />
+          <xsl:with-param name="hideIf" select="false()" />
+          <xsl:with-param name="inset" select="false()" />
+          <xsl:with-param name="searchFilterPlaceholder" select="''" />
+          <xsl:with-param name="searchFilterSwatch" />
+          <xsl:with-param name="splitIcon" select="''" />
+          <xsl:with-param name="splitSwatch" select="''" />
+          <xsl:with-param name="swatch" select="''" />
+          <xsl:with-param name="listItemClass" select="''" />
+          <xsl:with-param name="filterTextColumn" select="''" />
+          </xsl:apply-templates>
+          </xsl:template>
+          
+          <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='LS_MLNVAR']">
+          <xsl:param name="class" select="''" />
+          <xsl:param name="countSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="dividerSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="hasSearchFilter" select="false()" wd:type="std:boolean" />
+          <xsl:param name="hideIf" select="false()" wd:type="std:boolean" />
+          <xsl:param name="inset" select="false()" wd:type="std:boolean" />
+          <xsl:param name="searchFilterPlaceholder" select="''" />
+          <xsl:param name="searchFilterSwatch" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="splitIcon" select="''" wd:type="std:jqm_icon" />
+          <xsl:param name="splitSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="swatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="listItemClass" select="''" />
+          <xsl:param name="filterTextColumn" select="''" />
+          <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='LS_MLNVAR']" />
+          <xsl:if test="not($lweb_design_mode)">
+          <input type="hidden" name="LS_MLNVAR.." value="0" />
+          </xsl:if>
+          <xsl:if test="not($hideIf) or $lweb_design_mode">
+          <ul data-role="listview" id="LS_MLNVAR">
+          <xsl:choose>
+          <xsl:when test="$lweb_design_mode">
+          <xsl:attribute name="class">lstd-design-list <xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+          <xsl:if test="$class != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:if>
+          </xsl:otherwise>
+          </xsl:choose>
+          <xsl:if test="$swatch != ''">
+          <xsl:attribute name="data-theme"><xsl:value-of select="$swatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$countSwatch != ''">
+          <xsl:attribute name="data-count-theme"><xsl:value-of select="$countSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$dividerSwatch != ''">
+          <xsl:attribute name="data-divider-theme"><xsl:value-of select="$dividerSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitSwatch != ''">
+          <xsl:attribute name="data-split-theme"><xsl:value-of select="$splitSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitIcon!= ''">
+          <xsl:attribute name="data-split-icon"><xsl:value-of select="$splitIcon" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$inset">
+          <xsl:attribute name="data-inset">true</xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$hasSearchFilter">
+          <xsl:attribute name="data-filter">true</xsl:attribute>
+          <xsl:if test="$searchFilterPlaceholder != ''">
+          <xsl:attribute name="data-filter-placeholder"><xsl:value-of select="$searchFilterPlaceholder" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$searchFilterSwatch != ''">
+          <xsl:attribute name="data-filter-theme"><xsl:value-of select="$searchFilterSwatch" /></xsl:attribute>
+          </xsl:if>
+          </xsl:if>
+          <li data-role="list-divider">
+          <span class="FXVARNAM">
+          <xsl:for-each select="key('list','LS_MLNVAR')/lxml:list-header/lxml:header[1]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="FXVARTXT">
+          <xsl:for-each select="key('list','LS_MLNVAR')/lxml:list-header/lxml:header[2]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          </li>
+          <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+          <xsl:variable name="FXVARNAM" select="lxml:column[1]" />
+          <xsl:variable name="FXVARTXT" select="lxml:column[2]" />
+          <li>
+          <xsl:if test="$listItemClass != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$listItemClass" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$filterTextColumn != ''">
+          <xsl:attribute name="data-filtertext"><xsl:value-of select="lxml:column[@name = $filterTextColumn]" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$lweb_design_mode">
+          <xsl:attribute name="style">min-width:50px;</xsl:attribute>
+          </xsl:if>
+          <input type="text" id="{concat($lweb_WRName,'_', $FXVARNAM/@id)}" name="{$FXVARNAM/@id}" value="{$FXVARNAM}" size="35" maxlength="35" class="lstd_Field utext" data-lstddatatype="alpha| |35" wd:caption="{normalize-space(concat(key('column-caption', 'LS_MLNVAR_FXVARNAM')/lxml:heading-1,' ',key('column-caption', 'LS_MLNVAR_FXVARNAM')/lxml:heading-2,' ',key('column-caption', 'LS_MLNVAR_FXVARNAM')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $FXVARTXT/@id)}" name="{$FXVARTXT/@id}" value="{$FXVARTXT}" size="60" maxlength="256" class="lstd_Field text" data-lstddatatype="alpha| |256" wd:caption="{normalize-space(concat(key('column-caption', 'LS_MLNVAR_FXVARTXT')/lxml:heading-1,' ',key('column-caption', 'LS_MLNVAR_FXVARTXT')/lxml:heading-2,' ',key('column-caption', 'LS_MLNVAR_FXVARTXT')/lxml:heading-3))}" />
+          </li>
+          </xsl:for-each>
+          </ul>
+          </xsl:if>
+          </xsl:template>
+          
+          
+          
+          <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='ROLELST']">
+          <xsl:param name="class" select="''" />
+          <xsl:param name="countSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="dividerSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="hasSearchFilter" select="false()" wd:type="std:boolean" />
+          <xsl:param name="hideIf" select="false()" wd:type="std:boolean" />
+          <xsl:param name="inset" select="false()" wd:type="std:boolean" />
+          <xsl:param name="searchFilterPlaceholder" select="''" />
+          <xsl:param name="searchFilterSwatch" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="splitIcon" select="''" wd:type="std:jqm_icon" />
+          <xsl:param name="splitSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="swatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="listItemClass" select="''" />
+          <xsl:param name="filterTextColumn" select="''" />
+          <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='ROLELST']" />
+          <xsl:if test="not($lweb_design_mode)">
+          <input type="hidden" name="ROLELST.." value="0" />
+          </xsl:if>
+          <xsl:if test="not($hideIf) or $lweb_design_mode">
+          <ul data-role="listview" id="ROLELST">
+          <xsl:choose>
+          <xsl:when test="$lweb_design_mode">
+          <xsl:attribute name="class">lstd-design-list <xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+          <xsl:if test="$class != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:if>
+          </xsl:otherwise>
+          </xsl:choose>
+          <xsl:if test="$swatch != ''">
+          <xsl:attribute name="data-theme"><xsl:value-of select="$swatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$countSwatch != ''">
+          <xsl:attribute name="data-count-theme"><xsl:value-of select="$countSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$dividerSwatch != ''">
+          <xsl:attribute name="data-divider-theme"><xsl:value-of select="$dividerSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitSwatch != ''">
+          <xsl:attribute name="data-split-theme"><xsl:value-of select="$splitSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitIcon!= ''">
+          <xsl:attribute name="data-split-icon"><xsl:value-of select="$splitIcon" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$inset">
+          <xsl:attribute name="data-inset">true</xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$hasSearchFilter">
+          <xsl:attribute name="data-filter">true</xsl:attribute>
+          <xsl:if test="$searchFilterPlaceholder != ''">
+          <xsl:attribute name="data-filter-placeholder"><xsl:value-of select="$searchFilterPlaceholder" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$searchFilterSwatch != ''">
+          <xsl:attribute name="data-filter-theme"><xsl:value-of select="$searchFilterSwatch" /></xsl:attribute>
+          </xsl:if>
+          </xsl:if>
+          <li data-role="list-divider">
+          <span class="LW3CODE">
+          <xsl:for-each select="key('list','ROLELST')/lxml:list-header/lxml:header[1]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3CDES">
+          <xsl:for-each select="key('list','ROLELST')/lxml:list-header/lxml:header[2]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          </li>
+          <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+          <xsl:variable name="LW3CODE" select="lxml:column[1]" />
+          <xsl:variable name="LW3CDES" select="lxml:column[2]" />
+          <li>
+          <xsl:if test="$listItemClass != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$listItemClass" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$filterTextColumn != ''">
+          <xsl:attribute name="data-filtertext"><xsl:value-of select="lxml:column[@name = $filterTextColumn]" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$lweb_design_mode">
+          <xsl:attribute name="style">min-width:50px;</xsl:attribute>
+          </xsl:if>
+          <input type="text" id="{concat($lweb_WRName,'_', $LW3CODE/@id)}" name="{$LW3CODE/@id}" value="{$LW3CODE}" size="3" maxlength="3" class="lstd_Field utext" data-lstddatatype="alpha| |3" wd:caption="{normalize-space(concat(key('column-caption', 'ROLELST_LW3CODE')/lxml:heading-1,' ',key('column-caption', 'ROLELST_LW3CODE')/lxml:heading-2,' ',key('column-caption', 'ROLELST_LW3CODE')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $LW3CDES/@id)}" name="{$LW3CDES/@id}" value="{$LW3CDES}" size="30" maxlength="30" class="lstd_Field text" data-lstddatatype="alpha| |30" wd:caption="{normalize-space(concat(key('column-caption', 'ROLELST_LW3CDES')/lxml:heading-1,' ',key('column-caption', 'ROLELST_LW3CDES')/lxml:heading-2,' ',key('column-caption', 'ROLELST_LW3CDES')/lxml:heading-3))}" />
+          </li>
+          </xsl:for-each>
+          </ul>
+          </xsl:if>
+          </xsl:template>
+          
+          
+          
+          <xsl:template match="/lxml:data" mode="content.hidden">
+          <xsl:apply-imports />
+          
+          <input type="hidden" id="{$lweb_WRName}_LW3SFCUR" name="LW3SFCUR" value="{key('field-value', 'LW3SFCUR')}" data-lstddatatype="packed|2|0|." wd:caption="{key('field-caption', 'LW3SFCUR')/lxml:description}" />
+          
+          </xsl:template>
+          </xsl:transform>
+
+      - Language:           ENG
+        Technology Service: LANSA XHTML
+
+        XSL: |
+          <?xml version="1.0"?>
+          <!-- Web application : ADMSECUR            Security Administration                 -->
+          <!-- Web routine     : get_roles                                                   -->
+          <!-- Timestamp       : 2010-09-03T12:46:19-05:00                                   -->
+          <xsl:transform version="1.0" exclude-result-prefixes="lxml wd"
+                         xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data"
+                         xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design"
+                         xmlns="http://www.w3.org/1999/xhtml"
+                         xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+             <xsl:import href="std_keys.xsl" />
+             <xsl:import href="std_variables.xsl" />
+             <xsl:import href="web_component_layout.xsl" />
+             <xsl:import href="cust_dropdown.xsl" />
+             <xsl:import href="web_component.xsl" />
+             <xsl:import href="desc_lookup.xsl" />
+             <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8"
+                         indent="no" />
+          
+             <xsl:template match="/">
+                <xsl:call-template name="layout">
+                   <!-- <xsl:with-param name="company_logo_image" select="?" /> -->
+                   <!-- <xsl:with-param name="company_logo_image_right" select="?" /> -->
+                   <!-- <xsl:with-param name="body_class" select="?" /> -->
+                   <!-- <xsl:with-param name="form_class" select="?" /> -->
+                   <!-- <xsl:with-param name="show_title" select="?" /> -->
+                   <!-- <xsl:with-param name="title_text" select="?" /> -->
+                   <!-- <xsl:with-param name="show_messages" select="?" /> -->
+                   <!-- <xsl:with-param name="relative_css_link_filename" select="?" /> -->
+                   <!-- <xsl:with-param name="output_charset" select="?" /> -->
+                   <!-- <xsl:with-param name="has_layout" select="?" /> -->
+                   <!-- <xsl:with-param name="build_my_own_layout" select="?" /> -->
+                   <!-- <xsl:with-param name="data_xml_only" select="?" /> -->
+                   <!-- <xsl:with-param name="styleSheet" select="?" /> -->
+                   <!-- <xsl:with-param name="XML_ssi" select="?" /> -->
+                   <!-- <xsl:with-param name="XML_context_info" select="?" /> -->
+                   <!-- <xsl:with-param name="XML_options" select="?" /> -->
+                   <!-- <xsl:with-param name="XML_variables" select="?" /> -->
+                   <!-- <xsl:with-param name="XML_messages" select="?" /> -->
+                </xsl:call-template>
+             </xsl:template>
+          
+             <xsl:template match="/lxml:data">
+                <div class="hidden">
+                   <input onchange="return isValidNumber(this, '2', '0', '.')"
+                          class="number" maxlength="2" size="2" name="LW3SFID"
+                          value="{key('field-value', 'LW3SFID')}" />
+                   <input type="hidden" name="LW3SFCUR"
+                          value="{key('field-value', 'LW3SFCUR')}" />
+                </div>
+                <fieldset>
+                   <legend class="bold">
+                      <xsl:call-template name="desc_lookup">
+                         <xsl:with-param name="name" select="'LBL_ROLE_FILTER'" />
+                      </xsl:call-template>
+                   </legend>
+                   <table cellspacing="5" cellpadding="5">
+                      <tbody>
+                         <tr>
+                            <td class="caption">
+                               <xsl:call-template name="desc_lookup">
+                                  <xsl:with-param name="name" select="'LBL_ROLE'" />
+                               </xsl:call-template>:</td>
+                            <td>
+                               <xsl:call-template name="cust_dropdown">
+                                  <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                                  <xsl:with-param name="presubmit_js"
+                                                  select="'get_sec();return 0;'" />
+                                  <xsl:with-param name="captionfield" select="'LW3CDES'" />
+                                  <xsl:with-param name="codefield" select="'LW3CODE'" />
+                                  <xsl:with-param name="listname" select="'ROLELST'" />
+                                  <xsl:with-param name="name" select="'W_WEBUSR'" />
+                                  <!-- <xsl:with-param name="id" select="?" /> -->
+                                  <xsl:with-param name="value"
+                                                  select="key('field-value', 'W_WEBUSR')" />
+                                  <xsl:with-param name="display_mode" select="'input'" />
+                                  <!-- <xsl:with-param name="items" select="?" /> -->
+                                  <!-- <xsl:with-param name="selector_field" select="?" /> -->
+                                  <!-- <xsl:with-param name="selector_value_eq" select="?" /> -->
+                                  <!-- <xsl:with-param name="tagfield1" select="?" /> -->
+                                  <!-- <xsl:with-param name="tagfield2" select="?" /> -->
+                                  <!-- <xsl:with-param name="tagfield3" select="?" /> -->
+                                  <!-- <xsl:with-param name="submit_tagfields" select="?" /> -->
+                                  <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                                  <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                                  <!-- <xsl:with-param name="formname" select="?" /> -->
+                                  <!-- <xsl:with-param name="pos_absolute" select="?" /> -->
+                                  <!-- <xsl:with-param name="width_design" select="?" /> -->
+                                  <!-- <xsl:with-param name="on_change_wamname" select="?" /> -->
+                                  <!-- <xsl:with-param name="on_change_wrname" select="?" /> -->
+                                  <!-- <xsl:with-param name="protocol" select="?" /> -->
+                                  <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                                  <!-- <xsl:with-param name="disabled" select="?" /> -->
+                                  <!-- <xsl:with-param name="class" select="?" /> -->
+                                  <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
+                                  <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                               </xsl:call-template>
+                            </td>
+                         </tr>
+                      </tbody>
+                   </table>
+                </fieldset>
+                <br />
+                <br />
+             </xsl:template>
+          </xsl:transform>
+
+  - GET_SECUR:
+      XML: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        
+        <!-- WAM       : ADMSECUR - ?
+             Webroutine: get_secur - 
+             Timestamp : 2024-06-13T22:13:24-05:00 -->
+        
+        <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+        
+        <lxml:server-instructions>
+        <lxml:client-charset></lxml:client-charset>
+        <lxml:cookies><lxml:cookie name="STDSESSID"><lxml:value field-name="STDSESSID"></lxml:value>
+        <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
+        <lxml:domain></lxml:domain>
+        <lxml:path>/; HttpOnly</lxml:path>
+        <lxml:secure></lxml:secure>
+        </lxml:cookie>
+        <lxml:cookie name="STDWEBUSR"><lxml:value field-name="STDWEBUSR"></lxml:value>
+        <lxml:expires field-name=""></lxml:expires>
+        <lxml:domain field-name=""></lxml:domain>
+        <lxml:path field-name=""></lxml:path>
+        <lxml:secure field-name=""></lxml:secure>
+        </lxml:cookie>
+        </lxml:cookies>
+        <lxml:ssi></lxml:ssi>
+        </lxml:server-instructions>
+        
+        <lxml:context>
+        <lxml:user-id>LANSAJAN</lxml:user-id>
+        <lxml:webapplication>ADMSECUR</lxml:webapplication>
+        <lxml:webapplication-title>?</lxml:webapplication-title>
+        <lxml:webroutine>get_secur</lxml:webroutine>
+        <lxml:webroutine-title></lxml:webroutine-title>
+        <lxml:service-name></lxml:service-name>
+        <lxml:partition>CED</lxml:partition>
+        <lxml:language iso-lang="en">ENG</lxml:language>
+        <lxml:dec-separator>.</lxml:dec-separator>
+        <lxml:images-path>/images</lxml:images-path>
+        <lxml:action-request>/cgi-bin/lansaweb</lxml:action-request>
+        </lxml:context>
+        
+        <lxml:options>
+        <lxml:option name="DBCS" shift-chars="true">false</lxml:option>
+        <lxml:option name="align-right">true</lxml:option>
+        <lxml:option name="check-numeric">false</lxml:option>
+        <lxml:option name="debug" />
+        <lxml:option name="trace" />
+        <lxml:option name="task" />
+        </lxml:options>
+        
+        <lxml:variables />
+        
+        <lxml:messages></lxml:messages>
+        
+        <lxml:fields>
+        <lxml:field name="LW3WEBUSR">
+        <lxml:caption>
+        <lxml:label>User Id</lxml:label>
+        <lxml:description>Web User Name</lxml:description>
+        <lxml:heading-1>Web</lxml:heading-1>
+        <lxml:heading-2>User</lxml:heading-2>
+        <lxml:heading-3>Name</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="LW3SFID">
+        <lxml:caption>
+        <lxml:label>Store Front ID</lxml:label>
+        <lxml:description>Store Front ID</lxml:description>
+        <lxml:heading-1>Store</lxml:heading-1>
+        <lxml:heading-2>Front</lxml:heading-2>
+        <lxml:heading-3>ID</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="LW3SFCUR">
+        <lxml:caption>
+        <lxml:label>Current Store F</lxml:label>
+        <lxml:description>Current Store Front</lxml:description>
+        <lxml:heading-1>Current</lxml:heading-1>
+        <lxml:heading-2>Store</lxml:heading-2>
+        <lxml:heading-3>Front</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="S_PARAG">
+        <lxml:caption>
+        <lxml:label>S_PARAG</lxml:label>
+        <lxml:description>Intro Paragraph</lxml:description>
+        <lxml:heading-1>S_PARAG</lxml:heading-1>
+        <lxml:heading-2></lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="LW3NAME">
+        <lxml:caption>
+        <lxml:label>Store Front Nam</lxml:label>
+        <lxml:description>Store Front Name</lxml:description>
+        <lxml:heading-1>Store</lxml:heading-1>
+        <lxml:heading-2>Front</lxml:heading-2>
+        <lxml:heading-3>Name</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="FXWAMNAM">
+        <lxml:caption>
+        <lxml:label>Wam Name</lxml:label>
+        <lxml:description>Wam Name</lxml:description>
+        <lxml:heading-1>Wam</lxml:heading-1>
+        <lxml:heading-2>Name</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="FXWRTNAM">
+        <lxml:caption>
+        <lxml:label>Webroutine Name</lxml:label>
+        <lxml:description>Webroutine Name</lxml:description>
+        <lxml:heading-1>Webroutine</lxml:heading-1>
+        <lxml:heading-2>Name</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="LW3VARFLD">
+        <lxml:caption>
+        <lxml:label>Alpha result</lxml:label>
+        <lxml:description>e-Biz Variable Alphanumeric Result</lxml:description>
+        <lxml:heading-1>System Variable</lxml:heading-1>
+        <lxml:heading-2>Alphanumeric</lxml:heading-2>
+        <lxml:heading-3>Result</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="W_ADMUSR">
+        <lxml:caption>
+        <lxml:label>w_admusr</lxml:label>
+        <lxml:description>w_admusr</lxml:description>
+        <lxml:heading-1>w_admusr</lxml:heading-1>
+        <lxml:heading-2></lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="LW3UCMNUF">
+        <lxml:caption>
+        <lxml:label>Flag for Using</lxml:label>
+        <lxml:description>Flag for Using Content Menus</lxml:description>
+        <lxml:heading-1>Flag for</lxml:heading-1>
+        <lxml:heading-2>Using</lxml:heading-2>
+        <lxml:heading-3>Content Menus</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="W_CNTID">
+        <lxml:caption>
+        <lxml:label>Content ID</lxml:label>
+        <lxml:description>Content ID</lxml:description>
+        <lxml:heading-1>Content ID</lxml:heading-1>
+        <lxml:heading-2> </lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        </lxml:fields>
+        
+        <lxml:lists>
+        <lxml:list name="LS_MLNVAR" row-count="5">
+        <lxml:list-header>
+        <lxml:header name="FXVARNAM">
+        <lxml:heading-1>Variable</lxml:heading-1>
+        <lxml:heading-2>Name</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="FXVARTXT">
+        <lxml:heading-1>Variable</lxml:heading-1>
+        <lxml:heading-2>Text</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        </lxml:list-header>
+        <lxml:list-entries>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0001.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0001.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0002.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0002.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0003.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0003.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0004.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0004.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0005.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0005.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
+        </lxml:entry>
+        </lxml:list-entries>
+        </lxml:list>
+        
+        <lxml:list name="AMENULST" row-count="5">
+        <lxml:list-header>
+        <lxml:header name="LW3MNUNME">
+        <lxml:heading-1>Menu</lxml:heading-1>
+        <lxml:heading-2>Name</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3MNUID">
+        <lxml:heading-1>Menu</lxml:heading-1>
+        <lxml:heading-2>Id</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3CINDT">
+        <lxml:heading-1>Category</lxml:heading-1>
+        <lxml:heading-2>Indent</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="W_DIRTY">
+        <lxml:heading-1>w_dirty</lxml:heading-1>
+        <lxml:heading-2></lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="W_FLGVAL">
+        <lxml:heading-1>w_flgval</lxml:heading-1>
+        <lxml:heading-2></lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3SFID">
+        <lxml:heading-1>Store</lxml:heading-1>
+        <lxml:heading-2>Front</lxml:heading-2>
+        <lxml:heading-3>ID</lxml:heading-3>
+        </lxml:header>
+        </lxml:list-header>
+        <lxml:list-entries>
+        <lxml:entry>
+        <lxml:column name="LW3MNUNME" id="AMENULST.0001.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
+        <lxml:column name="LW3MNUID" id="AMENULST.0001.LW3MNUID">1234567890</lxml:column>
+        <lxml:column name="LW3CINDT" id="AMENULST.0001.LW3CINDT">12</lxml:column>
+        <lxml:column name="W_DIRTY" id="AMENULST.0001.W_DIRTY">A</lxml:column>
+        <lxml:column name="W_FLGVAL" id="AMENULST.0001.W_FLGVAL">A</lxml:column>
+        <lxml:column name="LW3SFID" id="AMENULST.0001.LW3SFID">12</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3MNUNME" id="AMENULST.0002.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
+        <lxml:column name="LW3MNUID" id="AMENULST.0002.LW3MNUID">1234567890</lxml:column>
+        <lxml:column name="LW3CINDT" id="AMENULST.0002.LW3CINDT">12</lxml:column>
+        <lxml:column name="W_DIRTY" id="AMENULST.0002.W_DIRTY">A</lxml:column>
+        <lxml:column name="W_FLGVAL" id="AMENULST.0002.W_FLGVAL">A</lxml:column>
+        <lxml:column name="LW3SFID" id="AMENULST.0002.LW3SFID">12</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3MNUNME" id="AMENULST.0003.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
+        <lxml:column name="LW3MNUID" id="AMENULST.0003.LW3MNUID">1234567890</lxml:column>
+        <lxml:column name="LW3CINDT" id="AMENULST.0003.LW3CINDT">12</lxml:column>
+        <lxml:column name="W_DIRTY" id="AMENULST.0003.W_DIRTY">A</lxml:column>
+        <lxml:column name="W_FLGVAL" id="AMENULST.0003.W_FLGVAL">A</lxml:column>
+        <lxml:column name="LW3SFID" id="AMENULST.0003.LW3SFID">12</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3MNUNME" id="AMENULST.0004.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
+        <lxml:column name="LW3MNUID" id="AMENULST.0004.LW3MNUID">1234567890</lxml:column>
+        <lxml:column name="LW3CINDT" id="AMENULST.0004.LW3CINDT">12</lxml:column>
+        <lxml:column name="W_DIRTY" id="AMENULST.0004.W_DIRTY">A</lxml:column>
+        <lxml:column name="W_FLGVAL" id="AMENULST.0004.W_FLGVAL">A</lxml:column>
+        <lxml:column name="LW3SFID" id="AMENULST.0004.LW3SFID">12</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3MNUNME" id="AMENULST.0005.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
+        <lxml:column name="LW3MNUID" id="AMENULST.0005.LW3MNUID">1234567890</lxml:column>
+        <lxml:column name="LW3CINDT" id="AMENULST.0005.LW3CINDT">12</lxml:column>
+        <lxml:column name="W_DIRTY" id="AMENULST.0005.W_DIRTY">A</lxml:column>
+        <lxml:column name="W_FLGVAL" id="AMENULST.0005.W_FLGVAL">A</lxml:column>
+        <lxml:column name="LW3SFID" id="AMENULST.0005.LW3SFID">12</lxml:column>
+        </lxml:entry>
+        </lxml:list-entries>
+        </lxml:list>
+        
+        <lxml:list name="SMENULST" row-count="5">
+        <lxml:list-header>
+        <lxml:header name="LW3MNUNME">
+        <lxml:heading-1>Menu</lxml:heading-1>
+        <lxml:heading-2>Name</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3MNUID">
+        <lxml:heading-1>Menu</lxml:heading-1>
+        <lxml:heading-2>Id</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3CINDT">
+        <lxml:heading-1>Category</lxml:heading-1>
+        <lxml:heading-2>Indent</lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="W_DIRTY">
+        <lxml:heading-1>w_dirty</lxml:heading-1>
+        <lxml:heading-2></lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="W_FLGVAL">
+        <lxml:heading-1>w_flgval</lxml:heading-1>
+        <lxml:heading-2></lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3SFID">
+        <lxml:heading-1>Store</lxml:heading-1>
+        <lxml:heading-2>Front</lxml:heading-2>
+        <lxml:heading-3>ID</lxml:heading-3>
+        </lxml:header>
+        </lxml:list-header>
+        <lxml:list-entries>
+        <lxml:entry>
+        <lxml:column name="LW3MNUNME" id="SMENULST.0001.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
+        <lxml:column name="LW3MNUID" id="SMENULST.0001.LW3MNUID">1234567890</lxml:column>
+        <lxml:column name="LW3CINDT" id="SMENULST.0001.LW3CINDT">12</lxml:column>
+        <lxml:column name="W_DIRTY" id="SMENULST.0001.W_DIRTY">A</lxml:column>
+        <lxml:column name="W_FLGVAL" id="SMENULST.0001.W_FLGVAL">A</lxml:column>
+        <lxml:column name="LW3SFID" id="SMENULST.0001.LW3SFID">12</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3MNUNME" id="SMENULST.0002.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
+        <lxml:column name="LW3MNUID" id="SMENULST.0002.LW3MNUID">1234567890</lxml:column>
+        <lxml:column name="LW3CINDT" id="SMENULST.0002.LW3CINDT">12</lxml:column>
+        <lxml:column name="W_DIRTY" id="SMENULST.0002.W_DIRTY">A</lxml:column>
+        <lxml:column name="W_FLGVAL" id="SMENULST.0002.W_FLGVAL">A</lxml:column>
+        <lxml:column name="LW3SFID" id="SMENULST.0002.LW3SFID">12</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3MNUNME" id="SMENULST.0003.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
+        <lxml:column name="LW3MNUID" id="SMENULST.0003.LW3MNUID">1234567890</lxml:column>
+        <lxml:column name="LW3CINDT" id="SMENULST.0003.LW3CINDT">12</lxml:column>
+        <lxml:column name="W_DIRTY" id="SMENULST.0003.W_DIRTY">A</lxml:column>
+        <lxml:column name="W_FLGVAL" id="SMENULST.0003.W_FLGVAL">A</lxml:column>
+        <lxml:column name="LW3SFID" id="SMENULST.0003.LW3SFID">12</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3MNUNME" id="SMENULST.0004.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
+        <lxml:column name="LW3MNUID" id="SMENULST.0004.LW3MNUID">1234567890</lxml:column>
+        <lxml:column name="LW3CINDT" id="SMENULST.0004.LW3CINDT">12</lxml:column>
+        <lxml:column name="W_DIRTY" id="SMENULST.0004.W_DIRTY">A</lxml:column>
+        <lxml:column name="W_FLGVAL" id="SMENULST.0004.W_FLGVAL">A</lxml:column>
+        <lxml:column name="LW3SFID" id="SMENULST.0004.LW3SFID">12</lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3MNUNME" id="SMENULST.0005.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
+        <lxml:column name="LW3MNUID" id="SMENULST.0005.LW3MNUID">1234567890</lxml:column>
+        <lxml:column name="LW3CINDT" id="SMENULST.0005.LW3CINDT">12</lxml:column>
+        <lxml:column name="W_DIRTY" id="SMENULST.0005.W_DIRTY">A</lxml:column>
+        <lxml:column name="W_FLGVAL" id="SMENULST.0005.W_FLGVAL">A</lxml:column>
+        <lxml:column name="LW3SFID" id="SMENULST.0005.LW3SFID">12</lxml:column>
+        </lxml:entry>
+        </lxml:list-entries>
+        </lxml:list>
+        
+        <lxml:list name="WL_CONTENTLIST" row-count="5">
+        <lxml:list-header>
+        <lxml:header name="LW3CNTID">
+        <lxml:heading-1>Content ID</lxml:heading-1>
+        <lxml:heading-2> </lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3CNTSDC">
+        <lxml:heading-1>Content Short Dsc</lxml:heading-1>
+        <lxml:heading-2> </lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3CNTLDC">
+        <lxml:heading-1>Content Long Dsc</lxml:heading-1>
+        <lxml:heading-2> </lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        </lxml:list-header>
+        <lxml:list-entries>
+        <lxml:entry>
+        <lxml:column name="LW3CNTID" id="WL_CONTENTLIST.0001.LW3CNTID"></lxml:column>
+        <lxml:column name="LW3CNTSDC" id="WL_CONTENTLIST.0001.LW3CNTSDC"></lxml:column>
+        <lxml:column name="LW3CNTLDC" id="WL_CONTENTLIST.0001.LW3CNTLDC"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3CNTID" id="WL_CONTENTLIST.0002.LW3CNTID"></lxml:column>
+        <lxml:column name="LW3CNTSDC" id="WL_CONTENTLIST.0002.LW3CNTSDC"></lxml:column>
+        <lxml:column name="LW3CNTLDC" id="WL_CONTENTLIST.0002.LW3CNTLDC"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3CNTID" id="WL_CONTENTLIST.0003.LW3CNTID"></lxml:column>
+        <lxml:column name="LW3CNTSDC" id="WL_CONTENTLIST.0003.LW3CNTSDC"></lxml:column>
+        <lxml:column name="LW3CNTLDC" id="WL_CONTENTLIST.0003.LW3CNTLDC"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3CNTID" id="WL_CONTENTLIST.0004.LW3CNTID"></lxml:column>
+        <lxml:column name="LW3CNTSDC" id="WL_CONTENTLIST.0004.LW3CNTSDC"></lxml:column>
+        <lxml:column name="LW3CNTLDC" id="WL_CONTENTLIST.0004.LW3CNTLDC"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3CNTID" id="WL_CONTENTLIST.0005.LW3CNTID"></lxml:column>
+        <lxml:column name="LW3CNTSDC" id="WL_CONTENTLIST.0005.LW3CNTSDC"></lxml:column>
+        <lxml:column name="LW3CNTLDC" id="WL_CONTENTLIST.0005.LW3CNTLDC"></lxml:column>
+        </lxml:entry>
+        </lxml:list-entries>
+        </lxml:list>
+        
+        </lxml:lists>
+        
+        </lxml:data>
+        
+
+      Designs:
+      - Language:           ENG
+        Technology Service: LANSA JQMOBILE
+
+        XSL: |
+          <?xml version="1.0" encoding="UTF-8"?>
+          
+          <!-- WAM       : ADMSECUR - Security Administration
+               Webroutine: get_secur - 
+               Timestamp : 2014-12-30T09:49:44-06:00 -->
+          
+          <xsl:transform version="1.0" exclude-result-prefixes="lxml wd" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+          
+          <xsl:import href="std_keys.xsl" />
+          <xsl:import href="std_variables.xsl" />
+          <xsl:import href="std_hidden.xsl" />
+          <xsl:import href="admsecur_layout.xsl" />
+          
+          <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8" indent="no" />
+          
+          <xsl:template match="/">
+          <xsl:call-template name="layout" />
+          </xsl:template>
+          
+          <xsl:template match="/lxml:data">
+          <input type="text" id="{$lweb_WRName}_LW3WEBUSR" name="LW3WEBUSR" value="{key('field-value', 'LW3WEBUSR')}" size="10" maxlength="10" class="lstd_Field text" data-lstddatatype="alpha| |10" wd:caption="{key('field-caption', 'LW3WEBUSR')/lxml:description}" />
+          <br />
+          <input type="number" id="{$lweb_WRName}_LW3SFID" name="LW3SFID" value="{key('field-value', 'LW3SFID')}" data-lstdformattedvalue="{key('field-value', 'LW3SFID')}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{key('field-caption', 'LW3SFID')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_S_PARAG" name="S_PARAG" value="{key('field-value', 'S_PARAG')}" size="60" maxlength="256" class="lstd_Field utext" data-lstddatatype="alpha| |256" wd:caption="{key('field-caption', 'S_PARAG')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_LW3NAME" name="LW3NAME" value="{key('field-value', 'LW3NAME')}" size="30" maxlength="30" class="lstd_Field text" data-lstddatatype="alpha| |30" wd:caption="{key('field-caption', 'LW3NAME')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_FXWAMNAM" name="FXWAMNAM" value="{key('field-value', 'FXWAMNAM')}" size="10" maxlength="10" class="lstd_Field utext" data-lstddatatype="alpha| |10" wd:caption="{key('field-caption', 'FXWAMNAM')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_FXWRTNAM" name="FXWRTNAM" value="{key('field-value', 'FXWRTNAM')}" size="20" maxlength="20" class="lstd_Field utext" data-lstddatatype="alpha| |20" wd:caption="{key('field-caption', 'FXWRTNAM')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_LW3VARFLD" name="LW3VARFLD" value="{key('field-value', 'LW3VARFLD')}" size="60" maxlength="256" class="lstd_Field utext" data-lstddatatype="alpha|O|256" wd:caption="{key('field-caption', 'LW3VARFLD')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_W_ADMUSR" name="W_ADMUSR" value="{key('field-value', 'W_ADMUSR')}" size="1" maxlength="1" class="lstd_Field utext" data-lstddatatype="alpha| |1" wd:caption="{key('field-caption', 'W_ADMUSR')/lxml:description}" />
+          <br />
+          <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='LS_MLNVAR']" wd:listname="LS_MLNVAR">
+          <xsl:with-param name="class" select="''" />
+          <xsl:with-param name="countSwatch" select="''" />
+          <xsl:with-param name="dividerSwatch" select="''" />
+          <xsl:with-param name="hasSearchFilter" select="false()" />
+          <xsl:with-param name="hideIf" select="false()" />
+          <xsl:with-param name="inset" select="false()" />
+          <xsl:with-param name="searchFilterPlaceholder" select="''" />
+          <xsl:with-param name="searchFilterSwatch" />
+          <xsl:with-param name="splitIcon" select="''" />
+          <xsl:with-param name="splitSwatch" select="''" />
+          <xsl:with-param name="swatch" select="''" />
+          <xsl:with-param name="listItemClass" select="''" />
+          <xsl:with-param name="filterTextColumn" select="''" />
+          </xsl:apply-templates>
+          <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='AMENULST']" wd:listname="AMENULST">
+          <xsl:with-param name="class" select="''" />
+          <xsl:with-param name="countSwatch" select="''" />
+          <xsl:with-param name="dividerSwatch" select="''" />
+          <xsl:with-param name="hasSearchFilter" select="false()" />
+          <xsl:with-param name="hideIf" select="false()" />
+          <xsl:with-param name="inset" select="false()" />
+          <xsl:with-param name="searchFilterPlaceholder" select="''" />
+          <xsl:with-param name="searchFilterSwatch" />
+          <xsl:with-param name="splitIcon" select="''" />
+          <xsl:with-param name="splitSwatch" select="''" />
+          <xsl:with-param name="swatch" select="''" />
+          <xsl:with-param name="listItemClass" select="''" />
+          <xsl:with-param name="filterTextColumn" select="''" />
+          </xsl:apply-templates>
+          <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='SMENULST']" wd:listname="SMENULST">
+          <xsl:with-param name="class" select="''" />
+          <xsl:with-param name="countSwatch" select="''" />
+          <xsl:with-param name="dividerSwatch" select="''" />
+          <xsl:with-param name="hasSearchFilter" select="false()" />
+          <xsl:with-param name="hideIf" select="false()" />
+          <xsl:with-param name="inset" select="false()" />
+          <xsl:with-param name="searchFilterPlaceholder" select="''" />
+          <xsl:with-param name="searchFilterSwatch" />
+          <xsl:with-param name="splitIcon" select="''" />
+          <xsl:with-param name="splitSwatch" select="''" />
+          <xsl:with-param name="swatch" select="''" />
+          <xsl:with-param name="listItemClass" select="''" />
+          <xsl:with-param name="filterTextColumn" select="''" />
+          </xsl:apply-templates>
+          </xsl:template>
+          
+          <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='LS_MLNVAR']">
+          <xsl:param name="class" select="''" />
+          <xsl:param name="countSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="dividerSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="hasSearchFilter" select="false()" wd:type="std:boolean" />
+          <xsl:param name="hideIf" select="false()" wd:type="std:boolean" />
+          <xsl:param name="inset" select="false()" wd:type="std:boolean" />
+          <xsl:param name="searchFilterPlaceholder" select="''" />
+          <xsl:param name="searchFilterSwatch" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="splitIcon" select="''" wd:type="std:jqm_icon" />
+          <xsl:param name="splitSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="swatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="listItemClass" select="''" />
+          <xsl:param name="filterTextColumn" select="''" />
+          <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='LS_MLNVAR']" />
+          <xsl:if test="not($lweb_design_mode)">
+          <input type="hidden" name="LS_MLNVAR.." value="0" />
+          </xsl:if>
+          <xsl:if test="not($hideIf) or $lweb_design_mode">
+          <ul data-role="listview" id="LS_MLNVAR">
+          <xsl:choose>
+          <xsl:when test="$lweb_design_mode">
+          <xsl:attribute name="class">lstd-design-list <xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+          <xsl:if test="$class != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:if>
+          </xsl:otherwise>
+          </xsl:choose>
+          <xsl:if test="$swatch != ''">
+          <xsl:attribute name="data-theme"><xsl:value-of select="$swatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$countSwatch != ''">
+          <xsl:attribute name="data-count-theme"><xsl:value-of select="$countSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$dividerSwatch != ''">
+          <xsl:attribute name="data-divider-theme"><xsl:value-of select="$dividerSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitSwatch != ''">
+          <xsl:attribute name="data-split-theme"><xsl:value-of select="$splitSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitIcon!= ''">
+          <xsl:attribute name="data-split-icon"><xsl:value-of select="$splitIcon" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$inset">
+          <xsl:attribute name="data-inset">true</xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$hasSearchFilter">
+          <xsl:attribute name="data-filter">true</xsl:attribute>
+          <xsl:if test="$searchFilterPlaceholder != ''">
+          <xsl:attribute name="data-filter-placeholder"><xsl:value-of select="$searchFilterPlaceholder" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$searchFilterSwatch != ''">
+          <xsl:attribute name="data-filter-theme"><xsl:value-of select="$searchFilterSwatch" /></xsl:attribute>
+          </xsl:if>
+          </xsl:if>
+          <li data-role="list-divider">
+          <span class="FXVARNAM">
+          <xsl:for-each select="key('list','LS_MLNVAR')/lxml:list-header/lxml:header[1]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="FXVARTXT">
+          <xsl:for-each select="key('list','LS_MLNVAR')/lxml:list-header/lxml:header[2]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          </li>
+          <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+          <xsl:variable name="FXVARNAM" select="lxml:column[1]" />
+          <xsl:variable name="FXVARTXT" select="lxml:column[2]" />
+          <li>
+          <xsl:if test="$listItemClass != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$listItemClass" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$filterTextColumn != ''">
+          <xsl:attribute name="data-filtertext"><xsl:value-of select="lxml:column[@name = $filterTextColumn]" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$lweb_design_mode">
+          <xsl:attribute name="style">min-width:50px;</xsl:attribute>
+          </xsl:if>
+          <input type="text" id="{concat($lweb_WRName,'_', $FXVARNAM/@id)}" name="{$FXVARNAM/@id}" value="{$FXVARNAM}" size="35" maxlength="35" class="lstd_Field utext" data-lstddatatype="alpha| |35" wd:caption="{normalize-space(concat(key('column-caption', 'LS_MLNVAR_FXVARNAM')/lxml:heading-1,' ',key('column-caption', 'LS_MLNVAR_FXVARNAM')/lxml:heading-2,' ',key('column-caption', 'LS_MLNVAR_FXVARNAM')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $FXVARTXT/@id)}" name="{$FXVARTXT/@id}" value="{$FXVARTXT}" size="60" maxlength="256" class="lstd_Field text" data-lstddatatype="alpha| |256" wd:caption="{normalize-space(concat(key('column-caption', 'LS_MLNVAR_FXVARTXT')/lxml:heading-1,' ',key('column-caption', 'LS_MLNVAR_FXVARTXT')/lxml:heading-2,' ',key('column-caption', 'LS_MLNVAR_FXVARTXT')/lxml:heading-3))}" />
+          </li>
+          </xsl:for-each>
+          </ul>
+          </xsl:if>
+          </xsl:template>
+          
+          
+          
+          <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='AMENULST']">
+          <xsl:param name="class" select="''" />
+          <xsl:param name="countSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="dividerSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="hasSearchFilter" select="false()" wd:type="std:boolean" />
+          <xsl:param name="hideIf" select="false()" wd:type="std:boolean" />
+          <xsl:param name="inset" select="false()" wd:type="std:boolean" />
+          <xsl:param name="searchFilterPlaceholder" select="''" />
+          <xsl:param name="searchFilterSwatch" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="splitIcon" select="''" wd:type="std:jqm_icon" />
+          <xsl:param name="splitSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="swatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="listItemClass" select="''" />
+          <xsl:param name="filterTextColumn" select="''" />
+          <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='AMENULST']" />
+          <xsl:if test="not($lweb_design_mode)">
+          <input type="hidden" name="AMENULST.." value="0" />
+          </xsl:if>
+          <xsl:if test="not($hideIf) or $lweb_design_mode">
+          <ul data-role="listview" id="AMENULST">
+          <xsl:choose>
+          <xsl:when test="$lweb_design_mode">
+          <xsl:attribute name="class">lstd-design-list <xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+          <xsl:if test="$class != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:if>
+          </xsl:otherwise>
+          </xsl:choose>
+          <xsl:if test="$swatch != ''">
+          <xsl:attribute name="data-theme"><xsl:value-of select="$swatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$countSwatch != ''">
+          <xsl:attribute name="data-count-theme"><xsl:value-of select="$countSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$dividerSwatch != ''">
+          <xsl:attribute name="data-divider-theme"><xsl:value-of select="$dividerSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitSwatch != ''">
+          <xsl:attribute name="data-split-theme"><xsl:value-of select="$splitSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitIcon!= ''">
+          <xsl:attribute name="data-split-icon"><xsl:value-of select="$splitIcon" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$inset">
+          <xsl:attribute name="data-inset">true</xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$hasSearchFilter">
+          <xsl:attribute name="data-filter">true</xsl:attribute>
+          <xsl:if test="$searchFilterPlaceholder != ''">
+          <xsl:attribute name="data-filter-placeholder"><xsl:value-of select="$searchFilterPlaceholder" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$searchFilterSwatch != ''">
+          <xsl:attribute name="data-filter-theme"><xsl:value-of select="$searchFilterSwatch" /></xsl:attribute>
+          </xsl:if>
+          </xsl:if>
+          <li data-role="list-divider">
+          <span class="LW3MNUNME">
+          <xsl:for-each select="key('list','AMENULST')/lxml:list-header/lxml:header[1]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3MNUID">
+          <xsl:for-each select="key('list','AMENULST')/lxml:list-header/lxml:header[2]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3CINDT">
+          <xsl:for-each select="key('list','AMENULST')/lxml:list-header/lxml:header[3]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="W_DIRTY">
+          <xsl:for-each select="key('list','AMENULST')/lxml:list-header/lxml:header[4]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="W_FLGVAL">
+          <xsl:for-each select="key('list','AMENULST')/lxml:list-header/lxml:header[5]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3SFID">
+          <xsl:for-each select="key('list','AMENULST')/lxml:list-header/lxml:header[6]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          </li>
+          <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+          <xsl:variable name="LW3MNUNME" select="lxml:column[1]" />
+          <xsl:variable name="LW3MNUID" select="lxml:column[2]" />
+          <xsl:variable name="LW3CINDT" select="lxml:column[3]" />
+          <xsl:variable name="W_DIRTY" select="lxml:column[4]" />
+          <xsl:variable name="W_FLGVAL" select="lxml:column[5]" />
+          <xsl:variable name="LW3SFID" select="lxml:column[6]" />
+          <li>
+          <xsl:if test="$listItemClass != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$listItemClass" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$filterTextColumn != ''">
+          <xsl:attribute name="data-filtertext"><xsl:value-of select="lxml:column[@name = $filterTextColumn]" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$lweb_design_mode">
+          <xsl:attribute name="style">min-width:50px;</xsl:attribute>
+          </xsl:if>
+          <input type="text" id="{concat($lweb_WRName,'_', $LW3MNUNME/@id)}" name="{$LW3MNUNME/@id}" value="{$LW3MNUNME}" size="50" maxlength="50" class="lstd_Field text" data-lstddatatype="alpha| |50" wd:caption="{normalize-space(concat(key('column-caption', 'AMENULST_LW3MNUNME')/lxml:heading-1,' ',key('column-caption', 'AMENULST_LW3MNUNME')/lxml:heading-2,' ',key('column-caption', 'AMENULST_LW3MNUNME')/lxml:heading-3))}" />
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3MNUID/@id)}" name="{$LW3MNUID/@id}" value="{$LW3MNUID}" data-lstdformattedvalue="{$LW3MNUID}" size="16" maxlength="10" class="lstd_Field number" data-lstddatatype="packed|10|0|." wd:caption="{normalize-space(concat(key('column-caption', 'AMENULST_LW3MNUID')/lxml:heading-1,' ',key('column-caption', 'AMENULST_LW3MNUID')/lxml:heading-2,' ',key('column-caption', 'AMENULST_LW3MNUID')/lxml:heading-3))}" />
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3CINDT/@id)}" name="{$LW3CINDT/@id}" value="{$LW3CINDT}" data-lstdformattedvalue="{$LW3CINDT}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{normalize-space(concat(key('column-caption', 'AMENULST_LW3CINDT')/lxml:heading-1,' ',key('column-caption', 'AMENULST_LW3CINDT')/lxml:heading-2,' ',key('column-caption', 'AMENULST_LW3CINDT')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $W_DIRTY/@id)}" name="{$W_DIRTY/@id}" value="{$W_DIRTY}" size="1" maxlength="1" class="lstd_Field utext" data-lstddatatype="alpha| |1" wd:caption="{normalize-space(concat(key('column-caption', 'AMENULST_W_DIRTY')/lxml:heading-1,' ',key('column-caption', 'AMENULST_W_DIRTY')/lxml:heading-2,' ',key('column-caption', 'AMENULST_W_DIRTY')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $W_FLGVAL/@id)}" name="{$W_FLGVAL/@id}" value="{$W_FLGVAL}" size="1" maxlength="1" class="lstd_Field utext" data-lstddatatype="alpha| |1" wd:caption="{normalize-space(concat(key('column-caption', 'AMENULST_W_FLGVAL')/lxml:heading-1,' ',key('column-caption', 'AMENULST_W_FLGVAL')/lxml:heading-2,' ',key('column-caption', 'AMENULST_W_FLGVAL')/lxml:heading-3))}" />
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3SFID/@id)}" name="{$LW3SFID/@id}" value="{$LW3SFID}" data-lstdformattedvalue="{$LW3SFID}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{normalize-space(concat(key('column-caption', 'AMENULST_LW3SFID')/lxml:heading-1,' ',key('column-caption', 'AMENULST_LW3SFID')/lxml:heading-2,' ',key('column-caption', 'AMENULST_LW3SFID')/lxml:heading-3))}" />
+          </li>
+          </xsl:for-each>
+          </ul>
+          </xsl:if>
+          </xsl:template>
+          
+          
+          
+          <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='SMENULST']">
+          <xsl:param name="class" select="''" />
+          <xsl:param name="countSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="dividerSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="hasSearchFilter" select="false()" wd:type="std:boolean" />
+          <xsl:param name="hideIf" select="false()" wd:type="std:boolean" />
+          <xsl:param name="inset" select="false()" wd:type="std:boolean" />
+          <xsl:param name="searchFilterPlaceholder" select="''" />
+          <xsl:param name="searchFilterSwatch" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="splitIcon" select="''" wd:type="std:jqm_icon" />
+          <xsl:param name="splitSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="swatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="listItemClass" select="''" />
+          <xsl:param name="filterTextColumn" select="''" />
+          <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='SMENULST']" />
+          <xsl:if test="not($lweb_design_mode)">
+          <input type="hidden" name="SMENULST.." value="0" />
+          </xsl:if>
+          <xsl:if test="not($hideIf) or $lweb_design_mode">
+          <ul data-role="listview" id="SMENULST">
+          <xsl:choose>
+          <xsl:when test="$lweb_design_mode">
+          <xsl:attribute name="class">lstd-design-list <xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+          <xsl:if test="$class != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:if>
+          </xsl:otherwise>
+          </xsl:choose>
+          <xsl:if test="$swatch != ''">
+          <xsl:attribute name="data-theme"><xsl:value-of select="$swatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$countSwatch != ''">
+          <xsl:attribute name="data-count-theme"><xsl:value-of select="$countSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$dividerSwatch != ''">
+          <xsl:attribute name="data-divider-theme"><xsl:value-of select="$dividerSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitSwatch != ''">
+          <xsl:attribute name="data-split-theme"><xsl:value-of select="$splitSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitIcon!= ''">
+          <xsl:attribute name="data-split-icon"><xsl:value-of select="$splitIcon" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$inset">
+          <xsl:attribute name="data-inset">true</xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$hasSearchFilter">
+          <xsl:attribute name="data-filter">true</xsl:attribute>
+          <xsl:if test="$searchFilterPlaceholder != ''">
+          <xsl:attribute name="data-filter-placeholder"><xsl:value-of select="$searchFilterPlaceholder" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$searchFilterSwatch != ''">
+          <xsl:attribute name="data-filter-theme"><xsl:value-of select="$searchFilterSwatch" /></xsl:attribute>
+          </xsl:if>
+          </xsl:if>
+          <li data-role="list-divider">
+          <span class="LW3MNUNME">
+          <xsl:for-each select="key('list','SMENULST')/lxml:list-header/lxml:header[1]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3MNUID">
+          <xsl:for-each select="key('list','SMENULST')/lxml:list-header/lxml:header[2]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3CINDT">
+          <xsl:for-each select="key('list','SMENULST')/lxml:list-header/lxml:header[3]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="W_DIRTY">
+          <xsl:for-each select="key('list','SMENULST')/lxml:list-header/lxml:header[4]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="W_FLGVAL">
+          <xsl:for-each select="key('list','SMENULST')/lxml:list-header/lxml:header[5]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3SFID">
+          <xsl:for-each select="key('list','SMENULST')/lxml:list-header/lxml:header[6]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          </li>
+          <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+          <xsl:variable name="LW3MNUNME" select="lxml:column[1]" />
+          <xsl:variable name="LW3MNUID" select="lxml:column[2]" />
+          <xsl:variable name="LW3CINDT" select="lxml:column[3]" />
+          <xsl:variable name="W_DIRTY" select="lxml:column[4]" />
+          <xsl:variable name="W_FLGVAL" select="lxml:column[5]" />
+          <xsl:variable name="LW3SFID" select="lxml:column[6]" />
+          <li>
+          <xsl:if test="$listItemClass != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$listItemClass" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$filterTextColumn != ''">
+          <xsl:attribute name="data-filtertext"><xsl:value-of select="lxml:column[@name = $filterTextColumn]" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$lweb_design_mode">
+          <xsl:attribute name="style">min-width:50px;</xsl:attribute>
+          </xsl:if>
+          <input type="text" id="{concat($lweb_WRName,'_', $LW3MNUNME/@id)}" name="{$LW3MNUNME/@id}" value="{$LW3MNUNME}" size="50" maxlength="50" class="lstd_Field text" data-lstddatatype="alpha| |50" wd:caption="{normalize-space(concat(key('column-caption', 'SMENULST_LW3MNUNME')/lxml:heading-1,' ',key('column-caption', 'SMENULST_LW3MNUNME')/lxml:heading-2,' ',key('column-caption', 'SMENULST_LW3MNUNME')/lxml:heading-3))}" />
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3MNUID/@id)}" name="{$LW3MNUID/@id}" value="{$LW3MNUID}" data-lstdformattedvalue="{$LW3MNUID}" size="16" maxlength="10" class="lstd_Field number" data-lstddatatype="packed|10|0|." wd:caption="{normalize-space(concat(key('column-caption', 'SMENULST_LW3MNUID')/lxml:heading-1,' ',key('column-caption', 'SMENULST_LW3MNUID')/lxml:heading-2,' ',key('column-caption', 'SMENULST_LW3MNUID')/lxml:heading-3))}" />
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3CINDT/@id)}" name="{$LW3CINDT/@id}" value="{$LW3CINDT}" data-lstdformattedvalue="{$LW3CINDT}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{normalize-space(concat(key('column-caption', 'SMENULST_LW3CINDT')/lxml:heading-1,' ',key('column-caption', 'SMENULST_LW3CINDT')/lxml:heading-2,' ',key('column-caption', 'SMENULST_LW3CINDT')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $W_DIRTY/@id)}" name="{$W_DIRTY/@id}" value="{$W_DIRTY}" size="1" maxlength="1" class="lstd_Field utext" data-lstddatatype="alpha| |1" wd:caption="{normalize-space(concat(key('column-caption', 'SMENULST_W_DIRTY')/lxml:heading-1,' ',key('column-caption', 'SMENULST_W_DIRTY')/lxml:heading-2,' ',key('column-caption', 'SMENULST_W_DIRTY')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $W_FLGVAL/@id)}" name="{$W_FLGVAL/@id}" value="{$W_FLGVAL}" size="1" maxlength="1" class="lstd_Field utext" data-lstddatatype="alpha| |1" wd:caption="{normalize-space(concat(key('column-caption', 'SMENULST_W_FLGVAL')/lxml:heading-1,' ',key('column-caption', 'SMENULST_W_FLGVAL')/lxml:heading-2,' ',key('column-caption', 'SMENULST_W_FLGVAL')/lxml:heading-3))}" />
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3SFID/@id)}" name="{$LW3SFID/@id}" value="{$LW3SFID}" data-lstdformattedvalue="{$LW3SFID}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{normalize-space(concat(key('column-caption', 'SMENULST_LW3SFID')/lxml:heading-1,' ',key('column-caption', 'SMENULST_LW3SFID')/lxml:heading-2,' ',key('column-caption', 'SMENULST_LW3SFID')/lxml:heading-3))}" />
+          </li>
+          </xsl:for-each>
+          </ul>
+          </xsl:if>
+          </xsl:template>
+          
+          
+          
+          <xsl:template match="/lxml:data" mode="content.hidden">
+          <xsl:apply-imports />
+          
+          <input type="hidden" id="{$lweb_WRName}_LW3SFCUR" name="LW3SFCUR" value="{key('field-value', 'LW3SFCUR')}" data-lstddatatype="packed|2|0|." wd:caption="{key('field-caption', 'LW3SFCUR')/lxml:description}" />
+          
+          </xsl:template>
+          </xsl:transform>
+
+      - Language:           ENG
+        Technology Service: LANSA XHTML
+
+        XSL: |
+          <?xml version="1.0"?>
+          
+          <!-- Web application : ADMSECUR            Security Administration                 -->
+          <!-- Web routine     : get_secur                                                   -->
+          <!-- Timestamp       : 2010-09-03T12:19:22-05:00                                   -->
+          <xsl:transform version="1.0" exclude-result-prefixes="lxml wd" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+             <xsl:import href="std_keys.xsl"/>
+             <xsl:import href="std_variables.xsl"/>
+             <xsl:import href="std_checkbox.xsl"/>
+             <xsl:import href="web_component_layout.xsl"/>
+             <xsl:import href="std_button.xsl"/>
+             <xsl:import href="desc_lookup.xsl"/>
+             <xsl:import href="multi_button.xsl"/>
+             <xsl:import href="std_dropdown.xsl"/>
+             <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8" indent="no"/>
+             <xsl:template match="/">
+                <xsl:call-template name="layout">
+                   <!-- <xsl:with-param name="company_logo_image" select="?" /> -->
+                   <!-- <xsl:with-param name="company_logo_image_right" select="?" /> -->
+                   <!-- <xsl:with-param name="body_class" select="?" /> -->
+                   <!-- <xsl:with-param name="form_class" select="?" /> -->
+                   <!-- <xsl:with-param name="show_title" select="?" /> -->
+                   <!-- <xsl:with-param name="title_text" select="?" /> -->
+                   <!-- <xsl:with-param name="show_messages" select="?" /> -->
+                   <!-- <xsl:with-param name="relative_css_link_filename" select="?" /> -->
+                   <!-- <xsl:with-param name="output_charset" select="?" /> -->
+                   <!-- <xsl:with-param name="has_layout" select="?" /> -->
+                   <!-- <xsl:with-param name="build_my_own_layout" select="?" /> -->
+                   <!-- <xsl:with-param name="data_xml_only" select="?" /> -->
+                   <!-- <xsl:with-param name="styleSheet" select="?" /> -->
+                   <!-- <xsl:with-param name="XML_ssi" select="?" /> -->
+                   <!-- <xsl:with-param name="XML_context_info" select="?" /> -->
+                   <!-- <xsl:with-param name="XML_options" select="?" /> -->
+                   <!-- <xsl:with-param name="XML_variables" select="?" /> -->
+                   <!-- <xsl:with-param name="XML_messages" select="?" /> -->
+                </xsl:call-template>
+             </xsl:template>
+             <xsl:template match="/lxml:data">
+                <div class="hidden">
+                   <input onchange="return isValidNumber(this, '2', '0', '.')" class="number" maxlength="2" size="2" name="LW3SFID" value="{key('field-value', 'LW3SFID')}"/>
+                   <input type="hidden" name="LW3SFCUR" value="{key('field-value', 'LW3SFCUR')}"/>
+                </div>
+                <table cellspacing="3" cellpadding="0" summary="" border="0">
+                   <tbody></tbody>
+                </table>
+                <div class="hidden__"></div>
+                <fieldset>
+                   <xsl:choose>
+                      <xsl:when test="(key('field-value', 'LW3UCMNUF') = 'Y') or ($lweb_design_mode)">
+                         <table>
+                            <tbody>
+                               <tr>
+                                  <td>
+                                     <xsl:call-template name="desc_lookup">
+                                        <xsl:with-param name="name" select="'LBL_CONTENT'"/>
+                                     </xsl:call-template>
+                                  </td>
+                                  <td>
+                                     <xsl:call-template name="std_dropdown">
+                                        <xsl:with-param name="value" select="key('field-value', 'W_CNTID')"/>
+                                        <xsl:with-param name="captionfield" select="'LW3CNTSDC'"/>
+                                        <xsl:with-param name="codefield" select="'LW3CNTID'"/>
+                                        <xsl:with-param name="listname" select="'WL_CONTENTLIST'"/>
+                                        <xsl:with-param name="name" select="'W_CNTID'"/>
+                                     </xsl:call-template>
+                                  </td>
+                               </tr>
+                            </tbody>
+                         </table>
+                      </xsl:when>
+                      <xsl:otherwise>
+                         <legend class="bold">
+                            <xsl:call-template name="desc_lookup">
+                               <xsl:with-param name="name" select="'LBL_ROLE_ACCESS'"/>
+                            </xsl:call-template>
+                         </legend>
+                         <br/>
+                         <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='AMENULST']" wd:listname="AMENULST"/>
+                         <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='SMENULST']" wd:listname="SMENULST"/>
+                      </xsl:otherwise>
+                   </xsl:choose>
+                   <br/>
+                </fieldset>
+                <br/>
+                <xsl:call-template name="multi_button">
+                   <xsl:with-param name="hide_if" select="key('field-value', 'W_ADMUSR') = 'Y' or key('field-value', 'W_ADMUSR') = 'X'"/>
+                   <xsl:with-param name="caption" select="key('desc-lookup', 'BTN_UPDATE')"/>
+                   <xsl:with-param name="on_click_wrname" select="'wrmain'"/>
+                   <xsl:with-param name="on_click_wamname" select="'ADMSECUR'"/>
+                   <xsl:with-param name="reentryvalue" select="'U'"/>
+                   <xsl:with-param name="name" select="concat('o', position(), '_LANSA_22400')"/>
+                   <xsl:with-param name="moclass" select="'multi_button_mo'"/>
+                   <xsl:with-param name="reentryfield" select="'STDRENTRY'"/>
+                   <!-- <xsl:with-param name="currentrowhfield" select="?" /> -->
+                   <!-- <xsl:with-param name="currentrownumval" select="?" /> -->
+                   <!-- <xsl:with-param name="formname" select="?" /> -->
+                   <!-- <xsl:with-param name="pos_absolute_design" select="?" /> -->
+                   <!-- <xsl:with-param name="width_design" select="?" /> -->
+                   <!-- <xsl:with-param name="height_design" select="?" /> -->
+                   <!-- <xsl:with-param name="protocol" select="?" /> -->
+                   <!-- <xsl:with-param name="show_in_new_window" select="?" /> -->
+                   <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                   <!-- <xsl:with-param name="disabled" select="?" /> -->
+                   <!-- <xsl:with-param name="title" select="?" /> -->
+                   <!-- <xsl:with-param name="class" select="?" /> -->
+                   <!-- <xsl:with-param name="presubmit_js" select="?" /> -->
+                   <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                   <!-- <xsl:with-param name="default_button" select="?" /> -->
+                </xsl:call-template>
+             </xsl:template>
+             <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='AMENULST']">
+                <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='AMENULST']"/>
+                <input type="hidden" name="AMENULST.." value="{count(lxml:list-entries/lxml:entry[1])}"/>
+                <table>
+                   <tbody>
+                      <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+                         <xsl:variable name="LW3MNUNME" select="lxml:column[1]"/>
+                         <xsl:variable name="LW3MNUID" select="lxml:column[2]"/>
+                         <xsl:variable name="LW3CINDT" select="lxml:column[3]"/>
+                         <xsl:variable name="W_DIRTY" select="lxml:column[4]"/>
+                         <xsl:variable name="W_FLGVAL" select="lxml:column[5]"/>
+                         <xsl:variable name="LW3SFID" select="lxml:column[6]"/>
+                         <tr>
+                            <td>
+                               <xsl:attribute name="style">
+                                  padding-left:<xsl:value-of select="$LW3CINDT"/>px;
+                               </xsl:attribute>
+                               <xsl:call-template name="std_checkbox">
+                                  <xsl:with-param name="disabled" select="key('field-value', 'W_ADMUSR') = 'Y'"/>
+                                  <xsl:with-param name="offcode" select="''"/>
+                                  <xsl:with-param name="oncode" select="'Y'"/>
+                                  <xsl:with-param name="caption" select="$LW3MNUNME"/>
+                                  <xsl:with-param name="name" select="$W_FLGVAL/@id"/>
+                                  <xsl:with-param name="value" select="$W_FLGVAL"/>
+                                  <xsl:with-param name="display_mode" select="'input'"/>
+                                  <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                                  <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                                  <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                                  <!-- <xsl:with-param name="formname" select="?" /> -->
+                                  <!-- <xsl:with-param name="on_click_wamname" select="?" /> -->
+                                  <!-- <xsl:with-param name="on_click_wrname" select="?" /> -->
+                                  <!-- <xsl:with-param name="protocol" select="?" /> -->
+                                  <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                                  <!-- <xsl:with-param name="alignment" select="?" /> -->
+                                  <!-- <xsl:with-param name="pos_absolute" select="?" /> -->
+                                  <!-- <xsl:with-param name="class" select="?" /> -->
+                                  <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
+                                  <!-- <xsl:with-param name="text_class" select="?" /> -->
+                                  <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                               </xsl:call-template>
+                               <input type="hidden" name="{$LW3MNUNME/@id}" value="{$LW3MNUNME}"/>
+                               <input type="hidden" name="{$LW3MNUID/@id}" value="{$LW3MNUID}"/>
+                               <input type="hidden" name="{$LW3CINDT/@id}" value="{$LW3CINDT}"/>
+                               <input type="hidden" name="{$W_DIRTY/@id}" value="{$W_DIRTY}"/>
+                               <input type="hidden" name="{$LW3SFID/@id}" value="{$LW3SFID}"/>
+                            </td>
+                         </tr>
+                      </xsl:for-each>
+                   </tbody>
+                </table>
+             </xsl:template>
+             <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='SMENULST']">
+                <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='SMENULST']"/>
+                <input type="hidden" name="SMENULST.." value="{count(lxml:list-entries/lxml:entry[1])}"/>
+                <table>
+                   <tbody>
+                      <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+                         <xsl:variable name="LW3MNUNME" select="lxml:column[1]"/>
+                         <xsl:variable name="LW3MNUID" select="lxml:column[2]"/>
+                         <xsl:variable name="LW3CINDT" select="lxml:column[3]"/>
+                         <xsl:variable name="W_DIRTY" select="lxml:column[4]"/>
+                         <xsl:variable name="W_FLGVAL" select="lxml:column[5]"/>
+                         <xsl:variable name="LW3SFID" select="lxml:column[6]"/>
+                         <tr>
+                            <td>
+                               <xsl:attribute name="style">
+                                  padding-left:<xsl:value-of select="$LW3CINDT"/>px;
+                               </xsl:attribute>
+                               <xsl:call-template name="std_checkbox">
+                                  <xsl:with-param name="disabled" select="key('field-value', 'W_ADMUSR') = 'Y'"/>
+                                  <xsl:with-param name="offcode" select="''"/>
+                                  <xsl:with-param name="oncode" select="'Y'"/>
+                                  <xsl:with-param name="caption" select="$LW3MNUNME"/>
+                                  <xsl:with-param name="name" select="$W_FLGVAL/@id"/>
+                                  <xsl:with-param name="value" select="$W_FLGVAL"/>
+                                  <xsl:with-param name="display_mode" select="'input'"/>
+                                  <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                                  <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                                  <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                                  <!-- <xsl:with-param name="formname" select="?" /> -->
+                                  <!-- <xsl:with-param name="on_click_wamname" select="?" /> -->
+                                  <!-- <xsl:with-param name="on_click_wrname" select="?" /> -->
+                                  <!-- <xsl:with-param name="protocol" select="?" /> -->
+                                  <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                                  <!-- <xsl:with-param name="alignment" select="?" /> -->
+                                  <!-- <xsl:with-param name="pos_absolute" select="?" /> -->
+                                  <!-- <xsl:with-param name="class" select="?" /> -->
+                                  <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
+                                  <!-- <xsl:with-param name="text_class" select="?" /> -->
+                                  <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                               </xsl:call-template>
+                               <input type="hidden" name="{$LW3MNUNME/@id}" value="{$LW3MNUNME}"/>
+                               <input type="hidden" name="{$LW3MNUID/@id}" value="{$LW3MNUID}"/>
+                               <input type="hidden" name="{$LW3CINDT/@id}" value="{$LW3CINDT}"/>
+                               <input type="hidden" name="{$W_DIRTY/@id}" value="{$W_DIRTY}"/>
+                               <input type="hidden" name="{$LW3SFID/@id}" value="{$LW3SFID}"/>
+                            </td>
+                         </tr>
+                      </xsl:for-each>
+                   </tbody>
+                </table>
+             </xsl:template>
+          </xsl:transform>
+
+  - WRMAIN:
+      XML: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        
+        <!-- WAM       : ADMSECUR - Security Administration
+             Webroutine: wrmain - 
+             Timestamp : 2014-12-30T10:16:24-06:00 -->
+        <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+           <lxml:server-instructions>
+              <lxml:client-charset></lxml:client-charset>
+              <lxml:cookies><lxml:cookie name="STDSESSID"><lxml:value field-name="STDSESSID"></lxml:value>
+                    <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
+                    <lxml:domain></lxml:domain>
+                    <lxml:path>/; HttpOnly</lxml:path>
+                    <lxml:secure></lxml:secure>
+                 </lxml:cookie>
+                 <lxml:cookie name="STDWEBUSR"><lxml:value field-name="STDWEBUSR"></lxml:value>
+                    <lxml:expires field-name=""></lxml:expires>
+                    <lxml:domain field-name=""></lxml:domain>
+                    <lxml:path field-name=""></lxml:path>
+                    <lxml:secure field-name=""></lxml:secure>
+                 </lxml:cookie>
+              </lxml:cookies>
+              <lxml:ssi></lxml:ssi>
+           </lxml:server-instructions>
+           <lxml:context>
+              <lxml:user-id>
+              </lxml:user-id>
+              <lxml:webapplication>ADMSECUR</lxml:webapplication>
+              <lxml:webapplication-title>Security Administration</lxml:webapplication-title>
+              <lxml:webroutine>wrmain</lxml:webroutine>
+              <lxml:webroutine-title></lxml:webroutine-title>
+              <lxml:service-name></lxml:service-name>
+              <lxml:partition>CML</lxml:partition>
+              <lxml:language iso-lang="en">ENG</lxml:language>
+              <lxml:dec-separator>.</lxml:dec-separator>
+              <lxml:images-path>/images</lxml:images-path>
+              <lxml:action-request>/cgi-bin/lansaweb</lxml:action-request>
+              <lxml:dev-resources-path>file://C:/PROGRA~2/LANSA/LANSA/WAMEditor/Resources</lxml:dev-resources-path></lxml:context>
+           <lxml:options>
+              <lxml:option name="DBCS">false</lxml:option>
+              <lxml:option name="align-right">true</lxml:option>
+              <lxml:option name="check-numeric">false</lxml:option>
+              <lxml:option name="debug"/>
+              <lxml:option name="trace"/>
+              <lxml:option name="task"/>
+           </lxml:options>
+           <lxml:variables/>
+           <lxml:messages></lxml:messages>
+           </lxml:data>
+
+      Designs:
+      - Language:           ENG
+        Technology Service: LANSA JQMOBILE
+
+        XSL: |
+          <?xml version="1.0" encoding="UTF-8"?>
+          
+          <!-- WAM       : ADMSECUR - Security Administration
+               Webroutine: wrmain - 
+               Timestamp : 2014-12-30T09:49:43-06:00 -->
+          
+          <xsl:transform version="1.0" exclude-result-prefixes="lxml wd" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+          
+          <xsl:import href="std_keys.xsl" />
+          <xsl:import href="std_variables.xsl" />
+          <xsl:import href="std_hidden.xsl" />
+          <xsl:import href="admsecur_layout.xsl" />
+          
+          <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8" indent="no" />
+          
+          <xsl:template match="/">
+          <xsl:call-template name="layout" />
+          </xsl:template>
+          
+          <xsl:template match="/lxml:data">
+          <input type="text" id="{$lweb_WRName}_LW3WEBUSR" name="LW3WEBUSR" value="{key('field-value', 'LW3WEBUSR')}" size="10" maxlength="10" class="lstd_Field text" data-lstddatatype="alpha| |10" wd:caption="{key('field-caption', 'LW3WEBUSR')/lxml:description}" />
+          <br />
+          <input type="number" id="{$lweb_WRName}_LW3SFID" name="LW3SFID" value="{key('field-value', 'LW3SFID')}" data-lstdformattedvalue="{key('field-value', 'LW3SFID')}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{key('field-caption', 'LW3SFID')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_S_PARAG" name="S_PARAG" value="{key('field-value', 'S_PARAG')}" size="60" maxlength="256" class="lstd_Field utext" data-lstddatatype="alpha| |256" wd:caption="{key('field-caption', 'S_PARAG')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_LW3NAME" name="LW3NAME" value="{key('field-value', 'LW3NAME')}" size="30" maxlength="30" class="lstd_Field text" data-lstddatatype="alpha| |30" wd:caption="{key('field-caption', 'LW3NAME')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_FXWAMNAM" name="FXWAMNAM" value="{key('field-value', 'FXWAMNAM')}" size="10" maxlength="10" class="lstd_Field utext" data-lstddatatype="alpha| |10" wd:caption="{key('field-caption', 'FXWAMNAM')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_FXWRTNAM" name="FXWRTNAM" value="{key('field-value', 'FXWRTNAM')}" size="20" maxlength="20" class="lstd_Field utext" data-lstddatatype="alpha| |20" wd:caption="{key('field-caption', 'FXWRTNAM')/lxml:description}" />
+          <br />
+          <input type="number" id="{$lweb_WRName}_W_SFID" name="W_SFID" value="{key('field-value', 'W_SFID')}" data-lstdformattedvalue="{key('field-value', 'W_SFID')}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{key('field-caption', 'W_SFID')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_W_WEBUSR" name="W_WEBUSR" value="{key('field-value', 'W_WEBUSR')}" size="10" maxlength="10" class="lstd_Field text" data-lstddatatype="alpha| |10" wd:caption="{key('field-caption', 'W_WEBUSR')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_LW3MHTML" name="LW3MHTML" value="{key('field-value', 'LW3MHTML')}" size="60" maxlength="65535" class="lstd_Field text" data-lstddatatype="varchar| |65535" wd:caption="{key('field-caption', 'LW3MHTML')/lxml:description}" />
+          <br />
+          <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='LS_MLNVAR']" wd:listname="LS_MLNVAR">
+          <xsl:with-param name="class" select="''" />
+          <xsl:with-param name="countSwatch" select="''" />
+          <xsl:with-param name="dividerSwatch" select="''" />
+          <xsl:with-param name="hasSearchFilter" select="false()" />
+          <xsl:with-param name="hideIf" select="false()" />
+          <xsl:with-param name="inset" select="false()" />
+          <xsl:with-param name="searchFilterPlaceholder" select="''" />
+          <xsl:with-param name="searchFilterSwatch" />
+          <xsl:with-param name="splitIcon" select="''" />
+          <xsl:with-param name="splitSwatch" select="''" />
+          <xsl:with-param name="swatch" select="''" />
+          <xsl:with-param name="listItemClass" select="''" />
+          <xsl:with-param name="filterTextColumn" select="''" />
+          </xsl:apply-templates>
+          <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='SFLST']" wd:listname="SFLST">
+          <xsl:with-param name="class" select="''" />
+          <xsl:with-param name="countSwatch" select="''" />
+          <xsl:with-param name="dividerSwatch" select="''" />
+          <xsl:with-param name="hasSearchFilter" select="false()" />
+          <xsl:with-param name="hideIf" select="false()" />
+          <xsl:with-param name="inset" select="false()" />
+          <xsl:with-param name="searchFilterPlaceholder" select="''" />
+          <xsl:with-param name="searchFilterSwatch" />
+          <xsl:with-param name="splitIcon" select="''" />
+          <xsl:with-param name="splitSwatch" select="''" />
+          <xsl:with-param name="swatch" select="''" />
+          <xsl:with-param name="listItemClass" select="''" />
+          <xsl:with-param name="filterTextColumn" select="''" />
+          </xsl:apply-templates>
+          <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='AMENULST']" wd:listname="AMENULST">
+          <xsl:with-param name="class" select="''" />
+          <xsl:with-param name="countSwatch" select="''" />
+          <xsl:with-param name="dividerSwatch" select="''" />
+          <xsl:with-param name="hasSearchFilter" select="false()" />
+          <xsl:with-param name="hideIf" select="false()" />
+          <xsl:with-param name="inset" select="false()" />
+          <xsl:with-param name="searchFilterPlaceholder" select="''" />
+          <xsl:with-param name="searchFilterSwatch" />
+          <xsl:with-param name="splitIcon" select="''" />
+          <xsl:with-param name="splitSwatch" select="''" />
+          <xsl:with-param name="swatch" select="''" />
+          <xsl:with-param name="listItemClass" select="''" />
+          <xsl:with-param name="filterTextColumn" select="''" />
+          </xsl:apply-templates>
+          <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='SMENULST']" wd:listname="SMENULST">
+          <xsl:with-param name="class" select="''" />
+          <xsl:with-param name="countSwatch" select="''" />
+          <xsl:with-param name="dividerSwatch" select="''" />
+          <xsl:with-param name="hasSearchFilter" select="false()" />
+          <xsl:with-param name="hideIf" select="false()" />
+          <xsl:with-param name="inset" select="false()" />
+          <xsl:with-param name="searchFilterPlaceholder" select="''" />
+          <xsl:with-param name="searchFilterSwatch" />
+          <xsl:with-param name="splitIcon" select="''" />
+          <xsl:with-param name="splitSwatch" select="''" />
+          <xsl:with-param name="swatch" select="''" />
+          <xsl:with-param name="listItemClass" select="''" />
+          <xsl:with-param name="filterTextColumn" select="''" />
+          </xsl:apply-templates>
+          </xsl:template>
+          
+          <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='LS_MLNVAR']">
+          <xsl:param name="class" select="''" />
+          <xsl:param name="countSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="dividerSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="hasSearchFilter" select="false()" wd:type="std:boolean" />
+          <xsl:param name="hideIf" select="false()" wd:type="std:boolean" />
+          <xsl:param name="inset" select="false()" wd:type="std:boolean" />
+          <xsl:param name="searchFilterPlaceholder" select="''" />
+          <xsl:param name="searchFilterSwatch" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="splitIcon" select="''" wd:type="std:jqm_icon" />
+          <xsl:param name="splitSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="swatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="listItemClass" select="''" />
+          <xsl:param name="filterTextColumn" select="''" />
+          <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='LS_MLNVAR']" />
+          <xsl:if test="not($lweb_design_mode)">
+          <input type="hidden" name="LS_MLNVAR.." value="0" />
+          </xsl:if>
+          <xsl:if test="not($hideIf) or $lweb_design_mode">
+          <ul data-role="listview" id="LS_MLNVAR">
+          <xsl:choose>
+          <xsl:when test="$lweb_design_mode">
+          <xsl:attribute name="class">lstd-design-list <xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+          <xsl:if test="$class != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:if>
+          </xsl:otherwise>
+          </xsl:choose>
+          <xsl:if test="$swatch != ''">
+          <xsl:attribute name="data-theme"><xsl:value-of select="$swatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$countSwatch != ''">
+          <xsl:attribute name="data-count-theme"><xsl:value-of select="$countSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$dividerSwatch != ''">
+          <xsl:attribute name="data-divider-theme"><xsl:value-of select="$dividerSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitSwatch != ''">
+          <xsl:attribute name="data-split-theme"><xsl:value-of select="$splitSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitIcon!= ''">
+          <xsl:attribute name="data-split-icon"><xsl:value-of select="$splitIcon" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$inset">
+          <xsl:attribute name="data-inset">true</xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$hasSearchFilter">
+          <xsl:attribute name="data-filter">true</xsl:attribute>
+          <xsl:if test="$searchFilterPlaceholder != ''">
+          <xsl:attribute name="data-filter-placeholder"><xsl:value-of select="$searchFilterPlaceholder" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$searchFilterSwatch != ''">
+          <xsl:attribute name="data-filter-theme"><xsl:value-of select="$searchFilterSwatch" /></xsl:attribute>
+          </xsl:if>
+          </xsl:if>
+          <li data-role="list-divider">
+          <span class="FXVARNAM">
+          <xsl:for-each select="key('list','LS_MLNVAR')/lxml:list-header/lxml:header[1]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="FXVARTXT">
+          <xsl:for-each select="key('list','LS_MLNVAR')/lxml:list-header/lxml:header[2]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          </li>
+          <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+          <xsl:variable name="FXVARNAM" select="lxml:column[1]" />
+          <xsl:variable name="FXVARTXT" select="lxml:column[2]" />
+          <li>
+          <xsl:if test="$listItemClass != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$listItemClass" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$filterTextColumn != ''">
+          <xsl:attribute name="data-filtertext"><xsl:value-of select="lxml:column[@name = $filterTextColumn]" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$lweb_design_mode">
+          <xsl:attribute name="style">min-width:50px;</xsl:attribute>
+          </xsl:if>
+          <input type="text" id="{concat($lweb_WRName,'_', $FXVARNAM/@id)}" name="{$FXVARNAM/@id}" value="{$FXVARNAM}" size="35" maxlength="35" class="lstd_Field utext" data-lstddatatype="alpha| |35" wd:caption="{normalize-space(concat(key('column-caption', 'LS_MLNVAR_FXVARNAM')/lxml:heading-1,' ',key('column-caption', 'LS_MLNVAR_FXVARNAM')/lxml:heading-2,' ',key('column-caption', 'LS_MLNVAR_FXVARNAM')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $FXVARTXT/@id)}" name="{$FXVARTXT/@id}" value="{$FXVARTXT}" size="60" maxlength="256" class="lstd_Field text" data-lstddatatype="alpha| |256" wd:caption="{normalize-space(concat(key('column-caption', 'LS_MLNVAR_FXVARTXT')/lxml:heading-1,' ',key('column-caption', 'LS_MLNVAR_FXVARTXT')/lxml:heading-2,' ',key('column-caption', 'LS_MLNVAR_FXVARTXT')/lxml:heading-3))}" />
+          </li>
+          </xsl:for-each>
+          </ul>
+          </xsl:if>
+          </xsl:template>
+          
+          
+          
+          <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='SFLST']">
+          <xsl:param name="class" select="''" />
+          <xsl:param name="countSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="dividerSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="hasSearchFilter" select="false()" wd:type="std:boolean" />
+          <xsl:param name="hideIf" select="false()" wd:type="std:boolean" />
+          <xsl:param name="inset" select="false()" wd:type="std:boolean" />
+          <xsl:param name="searchFilterPlaceholder" select="''" />
+          <xsl:param name="searchFilterSwatch" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="splitIcon" select="''" wd:type="std:jqm_icon" />
+          <xsl:param name="splitSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="swatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="listItemClass" select="''" />
+          <xsl:param name="filterTextColumn" select="''" />
+          <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='SFLST']" />
+          <xsl:if test="not($lweb_design_mode)">
+          <input type="hidden" name="SFLST.." value="0" />
+          </xsl:if>
+          <xsl:if test="not($hideIf) or $lweb_design_mode">
+          <ul data-role="listview" id="SFLST">
+          <xsl:choose>
+          <xsl:when test="$lweb_design_mode">
+          <xsl:attribute name="class">lstd-design-list <xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+          <xsl:if test="$class != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:if>
+          </xsl:otherwise>
+          </xsl:choose>
+          <xsl:if test="$swatch != ''">
+          <xsl:attribute name="data-theme"><xsl:value-of select="$swatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$countSwatch != ''">
+          <xsl:attribute name="data-count-theme"><xsl:value-of select="$countSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$dividerSwatch != ''">
+          <xsl:attribute name="data-divider-theme"><xsl:value-of select="$dividerSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitSwatch != ''">
+          <xsl:attribute name="data-split-theme"><xsl:value-of select="$splitSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitIcon!= ''">
+          <xsl:attribute name="data-split-icon"><xsl:value-of select="$splitIcon" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$inset">
+          <xsl:attribute name="data-inset">true</xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$hasSearchFilter">
+          <xsl:attribute name="data-filter">true</xsl:attribute>
+          <xsl:if test="$searchFilterPlaceholder != ''">
+          <xsl:attribute name="data-filter-placeholder"><xsl:value-of select="$searchFilterPlaceholder" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$searchFilterSwatch != ''">
+          <xsl:attribute name="data-filter-theme"><xsl:value-of select="$searchFilterSwatch" /></xsl:attribute>
+          </xsl:if>
+          </xsl:if>
+          <li data-role="list-divider">
+          <span class="LW3SFID">
+          <xsl:for-each select="key('list','SFLST')/lxml:list-header/lxml:header[1]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3NAME">
+          <xsl:for-each select="key('list','SFLST')/lxml:list-header/lxml:header[2]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          </li>
+          <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+          <xsl:variable name="LW3SFID" select="lxml:column[1]" />
+          <xsl:variable name="LW3NAME" select="lxml:column[2]" />
+          <li>
+          <xsl:if test="$listItemClass != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$listItemClass" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$filterTextColumn != ''">
+          <xsl:attribute name="data-filtertext"><xsl:value-of select="lxml:column[@name = $filterTextColumn]" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$lweb_design_mode">
+          <xsl:attribute name="style">min-width:50px;</xsl:attribute>
+          </xsl:if>
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3SFID/@id)}" name="{$LW3SFID/@id}" value="{$LW3SFID}" data-lstdformattedvalue="{$LW3SFID}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{normalize-space(concat(key('column-caption', 'SFLST_LW3SFID')/lxml:heading-1,' ',key('column-caption', 'SFLST_LW3SFID')/lxml:heading-2,' ',key('column-caption', 'SFLST_LW3SFID')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $LW3NAME/@id)}" name="{$LW3NAME/@id}" value="{$LW3NAME}" size="30" maxlength="30" class="lstd_Field text" data-lstddatatype="alpha| |30" wd:caption="{normalize-space(concat(key('column-caption', 'SFLST_LW3NAME')/lxml:heading-1,' ',key('column-caption', 'SFLST_LW3NAME')/lxml:heading-2,' ',key('column-caption', 'SFLST_LW3NAME')/lxml:heading-3))}" />
+          </li>
+          </xsl:for-each>
+          </ul>
+          </xsl:if>
+          </xsl:template>
+          
+          
+          
+          <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='AMENULST']">
+          <xsl:param name="class" select="''" />
+          <xsl:param name="countSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="dividerSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="hasSearchFilter" select="false()" wd:type="std:boolean" />
+          <xsl:param name="hideIf" select="false()" wd:type="std:boolean" />
+          <xsl:param name="inset" select="false()" wd:type="std:boolean" />
+          <xsl:param name="searchFilterPlaceholder" select="''" />
+          <xsl:param name="searchFilterSwatch" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="splitIcon" select="''" wd:type="std:jqm_icon" />
+          <xsl:param name="splitSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="swatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="listItemClass" select="''" />
+          <xsl:param name="filterTextColumn" select="''" />
+          <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='AMENULST']" />
+          <xsl:if test="not($lweb_design_mode)">
+          <input type="hidden" name="AMENULST.." value="0" />
+          </xsl:if>
+          <xsl:if test="not($hideIf) or $lweb_design_mode">
+          <ul data-role="listview" id="AMENULST">
+          <xsl:choose>
+          <xsl:when test="$lweb_design_mode">
+          <xsl:attribute name="class">lstd-design-list <xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+          <xsl:if test="$class != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:if>
+          </xsl:otherwise>
+          </xsl:choose>
+          <xsl:if test="$swatch != ''">
+          <xsl:attribute name="data-theme"><xsl:value-of select="$swatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$countSwatch != ''">
+          <xsl:attribute name="data-count-theme"><xsl:value-of select="$countSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$dividerSwatch != ''">
+          <xsl:attribute name="data-divider-theme"><xsl:value-of select="$dividerSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitSwatch != ''">
+          <xsl:attribute name="data-split-theme"><xsl:value-of select="$splitSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitIcon!= ''">
+          <xsl:attribute name="data-split-icon"><xsl:value-of select="$splitIcon" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$inset">
+          <xsl:attribute name="data-inset">true</xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$hasSearchFilter">
+          <xsl:attribute name="data-filter">true</xsl:attribute>
+          <xsl:if test="$searchFilterPlaceholder != ''">
+          <xsl:attribute name="data-filter-placeholder"><xsl:value-of select="$searchFilterPlaceholder" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$searchFilterSwatch != ''">
+          <xsl:attribute name="data-filter-theme"><xsl:value-of select="$searchFilterSwatch" /></xsl:attribute>
+          </xsl:if>
+          </xsl:if>
+          <li data-role="list-divider">
+          <span class="LW3MNUNME">
+          <xsl:for-each select="key('list','AMENULST')/lxml:list-header/lxml:header[1]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3MNUID">
+          <xsl:for-each select="key('list','AMENULST')/lxml:list-header/lxml:header[2]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3CINDT">
+          <xsl:for-each select="key('list','AMENULST')/lxml:list-header/lxml:header[3]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="W_DIRTY">
+          <xsl:for-each select="key('list','AMENULST')/lxml:list-header/lxml:header[4]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="W_FLGVAL">
+          <xsl:for-each select="key('list','AMENULST')/lxml:list-header/lxml:header[5]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3SFID">
+          <xsl:for-each select="key('list','AMENULST')/lxml:list-header/lxml:header[6]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          </li>
+          <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+          <xsl:variable name="LW3MNUNME" select="lxml:column[1]" />
+          <xsl:variable name="LW3MNUID" select="lxml:column[2]" />
+          <xsl:variable name="LW3CINDT" select="lxml:column[3]" />
+          <xsl:variable name="W_DIRTY" select="lxml:column[4]" />
+          <xsl:variable name="W_FLGVAL" select="lxml:column[5]" />
+          <xsl:variable name="LW3SFID" select="lxml:column[6]" />
+          <li>
+          <xsl:if test="$listItemClass != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$listItemClass" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$filterTextColumn != ''">
+          <xsl:attribute name="data-filtertext"><xsl:value-of select="lxml:column[@name = $filterTextColumn]" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$lweb_design_mode">
+          <xsl:attribute name="style">min-width:50px;</xsl:attribute>
+          </xsl:if>
+          <input type="text" id="{concat($lweb_WRName,'_', $LW3MNUNME/@id)}" name="{$LW3MNUNME/@id}" value="{$LW3MNUNME}" size="50" maxlength="50" class="lstd_Field text" data-lstddatatype="alpha| |50" wd:caption="{normalize-space(concat(key('column-caption', 'AMENULST_LW3MNUNME')/lxml:heading-1,' ',key('column-caption', 'AMENULST_LW3MNUNME')/lxml:heading-2,' ',key('column-caption', 'AMENULST_LW3MNUNME')/lxml:heading-3))}" />
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3MNUID/@id)}" name="{$LW3MNUID/@id}" value="{$LW3MNUID}" data-lstdformattedvalue="{$LW3MNUID}" size="16" maxlength="10" class="lstd_Field number" data-lstddatatype="packed|10|0|." wd:caption="{normalize-space(concat(key('column-caption', 'AMENULST_LW3MNUID')/lxml:heading-1,' ',key('column-caption', 'AMENULST_LW3MNUID')/lxml:heading-2,' ',key('column-caption', 'AMENULST_LW3MNUID')/lxml:heading-3))}" />
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3CINDT/@id)}" name="{$LW3CINDT/@id}" value="{$LW3CINDT}" data-lstdformattedvalue="{$LW3CINDT}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{normalize-space(concat(key('column-caption', 'AMENULST_LW3CINDT')/lxml:heading-1,' ',key('column-caption', 'AMENULST_LW3CINDT')/lxml:heading-2,' ',key('column-caption', 'AMENULST_LW3CINDT')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $W_DIRTY/@id)}" name="{$W_DIRTY/@id}" value="{$W_DIRTY}" size="1" maxlength="1" class="lstd_Field utext" data-lstddatatype="alpha| |1" wd:caption="{normalize-space(concat(key('column-caption', 'AMENULST_W_DIRTY')/lxml:heading-1,' ',key('column-caption', 'AMENULST_W_DIRTY')/lxml:heading-2,' ',key('column-caption', 'AMENULST_W_DIRTY')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $W_FLGVAL/@id)}" name="{$W_FLGVAL/@id}" value="{$W_FLGVAL}" size="1" maxlength="1" class="lstd_Field utext" data-lstddatatype="alpha| |1" wd:caption="{normalize-space(concat(key('column-caption', 'AMENULST_W_FLGVAL')/lxml:heading-1,' ',key('column-caption', 'AMENULST_W_FLGVAL')/lxml:heading-2,' ',key('column-caption', 'AMENULST_W_FLGVAL')/lxml:heading-3))}" />
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3SFID/@id)}" name="{$LW3SFID/@id}" value="{$LW3SFID}" data-lstdformattedvalue="{$LW3SFID}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{normalize-space(concat(key('column-caption', 'AMENULST_LW3SFID')/lxml:heading-1,' ',key('column-caption', 'AMENULST_LW3SFID')/lxml:heading-2,' ',key('column-caption', 'AMENULST_LW3SFID')/lxml:heading-3))}" />
+          </li>
+          </xsl:for-each>
+          </ul>
+          </xsl:if>
+          </xsl:template>
+          
+          
+          
+          <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='SMENULST']">
+          <xsl:param name="class" select="''" />
+          <xsl:param name="countSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="dividerSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="hasSearchFilter" select="false()" wd:type="std:boolean" />
+          <xsl:param name="hideIf" select="false()" wd:type="std:boolean" />
+          <xsl:param name="inset" select="false()" wd:type="std:boolean" />
+          <xsl:param name="searchFilterPlaceholder" select="''" />
+          <xsl:param name="searchFilterSwatch" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="splitIcon" select="''" wd:type="std:jqm_icon" />
+          <xsl:param name="splitSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="swatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="listItemClass" select="''" />
+          <xsl:param name="filterTextColumn" select="''" />
+          <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='SMENULST']" />
+          <xsl:if test="not($lweb_design_mode)">
+          <input type="hidden" name="SMENULST.." value="0" />
+          </xsl:if>
+          <xsl:if test="not($hideIf) or $lweb_design_mode">
+          <ul data-role="listview" id="SMENULST">
+          <xsl:choose>
+          <xsl:when test="$lweb_design_mode">
+          <xsl:attribute name="class">lstd-design-list <xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+          <xsl:if test="$class != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:if>
+          </xsl:otherwise>
+          </xsl:choose>
+          <xsl:if test="$swatch != ''">
+          <xsl:attribute name="data-theme"><xsl:value-of select="$swatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$countSwatch != ''">
+          <xsl:attribute name="data-count-theme"><xsl:value-of select="$countSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$dividerSwatch != ''">
+          <xsl:attribute name="data-divider-theme"><xsl:value-of select="$dividerSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitSwatch != ''">
+          <xsl:attribute name="data-split-theme"><xsl:value-of select="$splitSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitIcon!= ''">
+          <xsl:attribute name="data-split-icon"><xsl:value-of select="$splitIcon" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$inset">
+          <xsl:attribute name="data-inset">true</xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$hasSearchFilter">
+          <xsl:attribute name="data-filter">true</xsl:attribute>
+          <xsl:if test="$searchFilterPlaceholder != ''">
+          <xsl:attribute name="data-filter-placeholder"><xsl:value-of select="$searchFilterPlaceholder" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$searchFilterSwatch != ''">
+          <xsl:attribute name="data-filter-theme"><xsl:value-of select="$searchFilterSwatch" /></xsl:attribute>
+          </xsl:if>
+          </xsl:if>
+          <li data-role="list-divider">
+          <span class="LW3MNUNME">
+          <xsl:for-each select="key('list','SMENULST')/lxml:list-header/lxml:header[1]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3MNUID">
+          <xsl:for-each select="key('list','SMENULST')/lxml:list-header/lxml:header[2]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3CINDT">
+          <xsl:for-each select="key('list','SMENULST')/lxml:list-header/lxml:header[3]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="W_DIRTY">
+          <xsl:for-each select="key('list','SMENULST')/lxml:list-header/lxml:header[4]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="W_FLGVAL">
+          <xsl:for-each select="key('list','SMENULST')/lxml:list-header/lxml:header[5]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          <span class="LW3SFID">
+          <xsl:for-each select="key('list','SMENULST')/lxml:list-header/lxml:header[6]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          </li>
+          <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+          <xsl:variable name="LW3MNUNME" select="lxml:column[1]" />
+          <xsl:variable name="LW3MNUID" select="lxml:column[2]" />
+          <xsl:variable name="LW3CINDT" select="lxml:column[3]" />
+          <xsl:variable name="W_DIRTY" select="lxml:column[4]" />
+          <xsl:variable name="W_FLGVAL" select="lxml:column[5]" />
+          <xsl:variable name="LW3SFID" select="lxml:column[6]" />
+          <li>
+          <xsl:if test="$listItemClass != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$listItemClass" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$filterTextColumn != ''">
+          <xsl:attribute name="data-filtertext"><xsl:value-of select="lxml:column[@name = $filterTextColumn]" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$lweb_design_mode">
+          <xsl:attribute name="style">min-width:50px;</xsl:attribute>
+          </xsl:if>
+          <input type="text" id="{concat($lweb_WRName,'_', $LW3MNUNME/@id)}" name="{$LW3MNUNME/@id}" value="{$LW3MNUNME}" size="50" maxlength="50" class="lstd_Field text" data-lstddatatype="alpha| |50" wd:caption="{normalize-space(concat(key('column-caption', 'SMENULST_LW3MNUNME')/lxml:heading-1,' ',key('column-caption', 'SMENULST_LW3MNUNME')/lxml:heading-2,' ',key('column-caption', 'SMENULST_LW3MNUNME')/lxml:heading-3))}" />
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3MNUID/@id)}" name="{$LW3MNUID/@id}" value="{$LW3MNUID}" data-lstdformattedvalue="{$LW3MNUID}" size="16" maxlength="10" class="lstd_Field number" data-lstddatatype="packed|10|0|." wd:caption="{normalize-space(concat(key('column-caption', 'SMENULST_LW3MNUID')/lxml:heading-1,' ',key('column-caption', 'SMENULST_LW3MNUID')/lxml:heading-2,' ',key('column-caption', 'SMENULST_LW3MNUID')/lxml:heading-3))}" />
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3CINDT/@id)}" name="{$LW3CINDT/@id}" value="{$LW3CINDT}" data-lstdformattedvalue="{$LW3CINDT}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{normalize-space(concat(key('column-caption', 'SMENULST_LW3CINDT')/lxml:heading-1,' ',key('column-caption', 'SMENULST_LW3CINDT')/lxml:heading-2,' ',key('column-caption', 'SMENULST_LW3CINDT')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $W_DIRTY/@id)}" name="{$W_DIRTY/@id}" value="{$W_DIRTY}" size="1" maxlength="1" class="lstd_Field utext" data-lstddatatype="alpha| |1" wd:caption="{normalize-space(concat(key('column-caption', 'SMENULST_W_DIRTY')/lxml:heading-1,' ',key('column-caption', 'SMENULST_W_DIRTY')/lxml:heading-2,' ',key('column-caption', 'SMENULST_W_DIRTY')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $W_FLGVAL/@id)}" name="{$W_FLGVAL/@id}" value="{$W_FLGVAL}" size="1" maxlength="1" class="lstd_Field utext" data-lstddatatype="alpha| |1" wd:caption="{normalize-space(concat(key('column-caption', 'SMENULST_W_FLGVAL')/lxml:heading-1,' ',key('column-caption', 'SMENULST_W_FLGVAL')/lxml:heading-2,' ',key('column-caption', 'SMENULST_W_FLGVAL')/lxml:heading-3))}" />
+          <input type="number" id="{concat($lweb_WRName,'_', $LW3SFID/@id)}" name="{$LW3SFID/@id}" value="{$LW3SFID}" data-lstdformattedvalue="{$LW3SFID}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{normalize-space(concat(key('column-caption', 'SMENULST_LW3SFID')/lxml:heading-1,' ',key('column-caption', 'SMENULST_LW3SFID')/lxml:heading-2,' ',key('column-caption', 'SMENULST_LW3SFID')/lxml:heading-3))}" />
+          </li>
+          </xsl:for-each>
+          </ul>
+          </xsl:if>
+          </xsl:template>
+          
+          
+          
+          <xsl:template match="/lxml:data" mode="content.hidden">
+          <xsl:apply-imports />
+          
+          <input type="hidden" id="{$lweb_WRName}_LW3SFCUR" name="LW3SFCUR" value="{key('field-value', 'LW3SFCUR')}" data-lstddatatype="packed|2|0|." wd:caption="{key('field-caption', 'LW3SFCUR')/lxml:description}" />
+          
+          </xsl:template>
+          </xsl:transform>
+
+      - Language:           ENG
+        Technology Service: LANSA XHTML
+
+        XSL: |
+          <?xml version="1.0"?>
+          
+          <!-- Web application : ADMSECUR            Security Administration                 -->
+          <!-- Web routine     : wrmain                                                      -->
+          <!-- Timestamp       : 2010-09-03T11:26:48-05:00                                   -->
+          <xsl:transform version="1.0" exclude-result-prefixes="lxml wd" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+             <xsl:import href="std_keys.xsl"/>
+             <xsl:import href="std_variables.xsl"/>
+             <xsl:import href="wadmlgn1_layout.xsl"/>
+             <xsl:import href="std_checkbox.xsl"/>
+             <xsl:import href="web_component.xsl"/>
+             <xsl:import href="desc_lookup.xsl"/>
+             <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8" indent="no"/>
+             <xsl:template match="/">
+                <xsl:comment> Web application : ADMSECUR              Security Maintenance</xsl:comment>
+                <xsl:comment> Web routine     : wrmain</xsl:comment>
+                <xsl:call-template name="layout">
+                   <!-- <xsl:with-param name="has_form" select="?" /> -->
+                   <!-- <xsl:with-param name="no_layout" select="?" /> -->
+                   <!-- <xsl:with-param name="body_class" select="?" /> -->
+                   <!-- <xsl:with-param name="form_class" select="?" /> -->
+                   <xsl:with-param name="show_title" select="false()"/>
+                   <!-- <xsl:with-param name="title_text" select="?" /> -->
+                   <!-- <xsl:with-param name="show_messages" select="?" /> -->
+                   <!-- <xsl:with-param name="onload_script" select="?" /> -->
+                   <!-- <xsl:with-param name="onunload_script" select="?" /> -->
+                   <!-- <xsl:with-param name="javascript_files" select="?" /> -->
+                   <!-- <xsl:with-param name="theme_css_filename" select="?" /> -->
+                   <!-- <xsl:with-param name="css_files" select="?" /> -->
+                </xsl:call-template>
+             </xsl:template>
+             <xsl:template match="/lxml:data">
+                <!-- <script src="http://malsup.github.com/jquery.blockUI.js">
+                </script> -->
+                <script type="text/javascript" src="/js/stickytooltips.js">
+          /***********************************************
+          * Sticky Tooltip script- (c) Dynamic Drive DHTML code library (www.dynamicdrive.com)
+          * This notice MUST stay intact for legal use
+          * Visit Dynamic Drive at http://www.dynamicdrive.com/ for this script and 100s more
+          ***********************************************/
+                </script>
+                <div class="hidden">
+                   <input onchange="return isValidNumber(this, '2', '0', '.')" class="number" maxlength="2" size="2" name="LW3SFID" value="{key('field-value', 'LW3SFID')}"/>
+                   <input type="hidden" name="LW3SFCUR" value="{key('field-value', 'LW3SFCUR')}"/>
+                   <input type="hidden" name="LW3UCMNUF" value="{key('field-value', 'LW3UCMNUF')}"/>
+                </div>
+                <table width="100%">
+                   <tbody>
+                      <tr>
+                         <td class=" " colspan="2" align="left">
+                            <h1 style="color: #002888;">
+                               <xsl:call-template name="desc_lookup">
+                                  <xsl:with-param name="name" select="'ADMSECUR_WRMAIN'"/>
+                               </xsl:call-template>
+                            </h1>
+                            <div>
+                               <table>
+                                  <tbody>
+                                     <tr>
+                                        <td>
+                                           <span data-tooltip="sticky1">
+                                              <img src="/img/QmarkHelp.gif" width="20" height="20"/>
+                                           </span>
+                                           <!--HTML for the tooltips-->
+                                           <div id="mystickytooltip" class="stickytooltip">
+                                              <div style="padding:5px">
+                                                 <div id="sticky1" class="atip" style="width:250px">
+                                                    <h1>
+                                                       <xsl:call-template name="desc_lookup">
+                                                          <xsl:with-param name="name" select="'TXT_SECADMHELP_HDR'"/>
+                                                       </xsl:call-template>
+                                                    </h1>
+                                                    <p>
+                                                       <xsl:call-template name="desc_lookup">
+                                                          <xsl:with-param name="name" select="'TXT_SECADMHELP_1'"/>
+                                                       </xsl:call-template>
+                                                       <xsl:call-template name="desc_lookup">
+                                                          <xsl:with-param name="name" select="'TXT_SECADMHELP_2'"/>
+                                                       </xsl:call-template>
+                                                       <xsl:call-template name="desc_lookup">
+                                                          <xsl:with-param name="name" select="'TXT_SECADMHELP_3'"/>
+                                                       </xsl:call-template>
+                                                       <xsl:call-template name="desc_lookup">
+                                                          <xsl:with-param name="name" select="'TXT_SECADMHELP_4'"/>
+                                                       </xsl:call-template>
+                                                       <xsl:call-template name="desc_lookup">
+                                                          <xsl:with-param name="name" select="'TXT_SECADMHELP_5'"/>
+                                                       </xsl:call-template>
+                                                    </p>
+                                                 </div>
+                                                 <!-- <div class="stickystatus"></div> -->
+                                              </div>
+                                           </div>
+                                        </td>
+                                     </tr>
+                                  </tbody>
+                               </table>
+                            </div>
+                            <div class="main_separator" style=" "></div>
+                         </td>
+                      </tr>
+                   </tbody>
+                </table>
+                <xsl:call-template name="SimpleAjax">
+                   <xsl:with-param name="onload_relative_image_path" select="''"/>
+                   <xsl:with-param name="on_click_wrname" select="'get_roles'"/>
+                   <xsl:with-param name="on_click_wamname" select="'ADMSECUR'"/>
+                   <xsl:with-param name="name" select="'get_roles'"/>
+                </xsl:call-template>
+                <script language="javascript" type="text/javascript">
+                    $(document).ready(function() {
+                            get_roles();
+                    });
+                </script>
+                <div id="containerDiv">
+                   <xsl:call-template name="SimpleAjax">
+                      <xsl:with-param name="onload_relative_image_path" select="''"/>
+                      <xsl:with-param name="on_click_wrname" select="'get_secur'"/>
+                      <xsl:with-param name="on_click_wamname" select="'ADMSECUR'"/>
+                      <xsl:with-param name="name" select="'get_sec'"/>
+                   </xsl:call-template>
+                </div>
+                <br/>
+             </xsl:template>
+          </xsl:transform>

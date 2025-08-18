@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               LW3UFLG
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Allow CE use flag"
+      Label:              "Allow CE use"
+      Heading1:           "CE"
+      Heading2:           "use"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(187) Usepicklist(False) Width(222)
+    
+    End_Com
+    
+    End_Com

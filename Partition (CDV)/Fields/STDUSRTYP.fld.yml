@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               STDUSRTYP
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "B-to-B User Type"
+      Label:              "B-to-B User"
+      Heading1:           "User Type"
+      Heading2:           "User"
+      Heading3:           "Type"

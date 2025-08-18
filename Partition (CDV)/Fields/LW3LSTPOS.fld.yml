@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3LSTPOS
+  Type:               Alpha
+  Length:             7
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "List position control field"
+      Label:              "List Position.."
+      Heading1:           "List"
+      Heading2:           "Position"
+      Heading3:           " "

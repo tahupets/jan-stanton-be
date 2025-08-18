@@ -1,0 +1,83 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * =======================================================
+    * Copyright .....: (C) = Itwal Lansa SYSTEM =, 1989
+    * Process .......: LWMVRPR01
+    * Function ......: LWNMVR1
+    * Created by ....: CHENR
+    * Created on ....: 10/11/29 at 16:23:37
+    * Description ...: Get Multilingual Variable List for Webroutine
+    * =======================================================
+    * INPUT Parms:
+    * =======================================================
+    * #LW3WAMNAM - WAM Name
+    * #LW3WRTNAM - webroutine name
+    * #LW3LNGID - Language Code
+    * ======================================================
+    * #w_kepmvr - Y: NOT to clear multi-lingual var list
+    * =======================================================
+    * OUTPUT Parms:
+    * =======================================================
+    *
+    * =======================================================
+    * Working fields, lists and groups
+    * =======================================================
+    Define Field(#w_kepmvr) Reffld(#STD_FLAG) Desc('Y - not to clear multi-lingual var list') Default(*blank)
+    Define Field(#w_tmpcod) Reffld(#LW3VARNAM)
+    *
+    * multilingual variable list
+    Def_List Name(#ls_mlnvar) Fields(#LW3VARNAM #LW3VARTXT) Type(*WORKING) Entrys(9999)
+    * ====================================
+    *
+    *
+    * =======================================================
+    * Program Mainline : LWNMVR1
+    * =======================================================
+    *
+    Function Options(*DIRECT *HEAVYUSAGE) Rcv_List(#ls_mlnvar)
+    *
+    If Cond(#LW3LNGID = *BLANKS)
+    #LW3LNGID := *LANGUAGE
+    Endif
+    *
+    #LW3WAMNAM := #LW3WAMNAM.UpperCase
+    #LW3WRTNAM := #LW3WRTNAM.UpperCase
+    *
+    If Cond(#w_kepmvr *NE 'Y')
+    Clr_List Named(#ls_mlnvar)
+    Endif
+    *
+    * get page title
+    #w_tmpcod := #LW3WAMNAM + '_' + #LW3WRTNAM
+    Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key(#w_tmpcod #LW3LNGID) Io_Error(*NEXT) Val_Error(*NEXT) Keep_Last(50)
+    If_Status Is(*OKAY)
+    #LW3VARNAM := 'PAGE_TITLE'
+    Add_Entry To_List(#ls_mlnvar)
+    Endif
+    *
+    * common variables
+    * SELECT FIELDS(#LW3VARNAM) FROM_FILE(LW3MVRLUP) WITH_KEY('LWEBSYS' 'COMMON') IO_ERROR(*NEXT) VAL_ERROR(*NEXT)
+    Select Fields(#LW3VARNAM) From_File(LW3MVRLUP) With_Key('ADMIN' 'COMMON') Io_Error(*NEXT) Val_Error(*NEXT)
+    #LW3VARTXT := ''
+    Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key(#LW3VARNAM #LW3LNGID) Io_Error(*NEXT) Val_Error(*NEXT) Keep_Last(50)
+    Add_Entry To_List(#ls_mlnvar)
+    Endselect
+    * specific variables for the WAM/Webroutine
+    Select Fields(#LW3VARNAM) From_File(LW3MVRLUP) With_Key(#LW3WAMNAM #LW3WRTNAM) Io_Error(*NEXT) Val_Error(*NEXT)
+    * do not add duplicate name
+    * CHECK_FOR IN_FILE(LW3MVRL02) WITH_KEY(#LW3VARNAM 'LWEBSYS' 'COMMON') IO_ERROR(*NEXT)
+    Check_For In_File(LW3MVRL02) With_Key(#LW3VARNAM 'ADMIN' 'COMMON') Io_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    Continue
+    Endif
+    *
+    #LW3VARTXT := ''
+    Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key(#LW3VARNAM #LW3LNGID) Io_Error(*NEXT) Val_Error(*NEXT) Keep_Last(50)
+    Add_Entry To_List(#ls_mlnvar)
+    Endselect
+    *
+    Return
+    
+    

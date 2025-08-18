@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3GENLN
+  Type:               Packed
+  Length:             7
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Generic Length"
+      Label:              "Generic Length"
+      Heading1:           "Generic"
+      Heading2:           "Length"
+      Heading3:           " "

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3VERSEQ
+  Type:               Alpha
+  Length:             15
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "e-Biz Version Sequence Number"
+      Label:              "e-Biz Version"
+      Heading1:           "E-Biz"
+      Heading2:           "Version"
+      Heading3:           "Sequence"

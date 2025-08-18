@@ -1,0 +1,33 @@
+﻿Field:
+  Name:               LW3IGP2
+  Type:               String
+  Length:             6
+  Decimals:           0
+  Default Value:      "*SQLNULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - ASQN
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Pricing SF Code"
+      Label:              "Pricing SF Code"
+      Heading1:           "Pricing"
+      Heading2:           "SF"
+      Heading3:           "Code"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(TRUE) Usepicklist(FALSE)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'std_char.std_char') Name(#WebletTemplate) Defaultweblet(True)
+    
+    End_Com
+    
+    End_Com

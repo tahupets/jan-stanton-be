@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               SHOWV8
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Show V8"
+      Label:              "Show V8"
+      Heading1:           "Show"
+      Heading2:           "V8"
+      Heading3:           " "

@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               CONTID
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Content ID"
+      Label:              "Content ID"
+      Heading1:           "Content"
+      Heading2:           "ID"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(224)
+    
+    End_Com
+    
+    End_Com

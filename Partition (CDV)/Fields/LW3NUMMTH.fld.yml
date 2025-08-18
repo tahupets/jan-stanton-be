@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3NUMMTH
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Number of Months"
+      Label:              "Number of Month"
+      Heading1:           "Number"
+      Heading2:           "of"
+      Heading3:           "Months"

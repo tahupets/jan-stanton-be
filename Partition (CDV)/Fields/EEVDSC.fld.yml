@@ -1,0 +1,34 @@
+﻿Field:
+  Name:               EEVDSC
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Event Description"
+      Label:              "Event Descripti"
+      Heading1:           "Event"
+      Heading2:           "Description"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(555)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'std_char.std_char') Name(#Weblet) Defaultweblet(True)
+    
+    End_Com
+    
+    End_Com

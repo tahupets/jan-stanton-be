@@ -1,0 +1,105 @@
+﻿File:
+  Name:                           LW3SECURA
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3SECURA
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE(10000     2000      3         ) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Admin Web Access Control File"
+
+  Real Fields:
+  - LW3WEBUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CRTUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3CSTAMP:
+      Type:               Signed
+      Length:             12
+      Decimals:           0
+
+  - LW3UPDUSR:
+      Type:               Alphanumeric
+      Length:             10
+      Decimals:           0
+
+  - LW3USTAMP:
+      Type:               Signed
+      Length:             12
+      Decimals:           0
+
+  - LW3VARFLD:
+      Type:               Alphanumeric
+      Length:             256
+      Decimals:           0
+
+  Primary Keys:
+  - LW3WEBUSR
+
+  Virtual Fields:
+  - LW3CDATEV:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+      Virtual Field Type: Substring
+      Derive On Input:    Yes
+      Derive On Output:   No
+      Source Field:       LW3CSTAMP
+      Start Position:     7
+
+  - LW3CTIMEV:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+      Virtual Field Type: Substring
+      Derive On Input:    Yes
+      Derive On Output:   No
+      Source Field:       LW3CSTAMP
+      Start Position:     1
+
+  - LW3UDATEV:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+      Virtual Field Type: Substring
+      Derive On Input:    Yes
+      Derive On Output:   No
+      Source Field:       LW3USTAMP
+      Start Position:     7
+
+  - LW3UTIMEV:
+      Type:               Signed
+      Length:             6
+      Decimals:           0
+      Virtual Field Type: Substring
+      Derive On Input:    Yes
+      Derive On Output:   No
+      Source Field:       LW3USTAMP
+      Start Position:     1

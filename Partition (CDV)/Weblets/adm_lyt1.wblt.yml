@@ -1,0 +1,875 @@
+﻿Weblet:
+  Name:               adm_lyt1
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Admin base layout"
+
+  XML: |
+    <?xml version="1.0"?>
+    
+    <!-- (c) 2003 LANSA                            -->
+    <!-- XHTML Standard Layout Schema #1           -->
+    <!-- $Workfile::   std_layout1_v2.xml        $ -->
+    <!-- $Revision::   1.0                       $ -->
+    <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+       <lxml:context>
+          <lxml:images-path>/images</lxml:images-path>
+          <lxml:webapplication-title>WAM Title</lxml:webapplication-title><lxml:webroutine-title>Webroutine Title</lxml:webroutine-title><lxml:language iso-lang="en">ENG</lxml:language><lxml:dev-resources-path>file://C:/PROGRA~2/LANSA/LANSA/WAMEditor/Resources</lxml:dev-resources-path></lxml:context>
+       <lxml:fields/><lxml:lists/></lxml:data>
+
+  Designs:
+  - Language:           ENG
+    Technology Service: LANSA XHTML
+
+    XSL: |
+      <?xml version="1.0"?>
+      
+      <!-- (c) 2003 LANSA                            -->
+      <!-- XHTML Standard Layout Schema #1           -->
+      <!-- $Workfile::   std_layout1_v2.xsl        $ -->
+      <!-- $Revision::   1.6                       $ -->
+      <xsl:transform version="1.0" exclude-result-prefixes="lxml wd" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns="http://www.w3.org/1999/xhtml">
+         <xsl:import href="std_variables.xsl"/>
+         <xsl:import href="std_types.xsl"/>
+         <xsl:import href="dynamic.xsl"/>
+         <xsl:import href="cust_dropdown.xsl"/>
+         <xsl:import href="std_anchor.xsl"/>
+         <xsl:import href="ce_style_v2.xsl"/>
+         <xsl:import href="std_script.xsl"/>
+         <xsl:import href="std_hidden.xsl"/>
+         <xsl:import href="cust_messages.xsl"/>
+         <xsl:import href="std_menu_item_v2.xsl"/>
+         <xsl:import href="desc_lookup.xsl"/>
+         <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8" indent="no"/>
+         <wd:definition>
+            <wd:group name="Layout Weblets"/>
+         </wd:definition>
+         <wd:template name="std_layout1_v2">
+            <wd:description icon="icons/std_layout.ico">
+               <wd:name lang="ENG">Standard layout schema #1</wd:name>
+            </wd:description>
+         </wd:template>
+         <xsl:template name="std_layout1_v2" wd:role="std:layout">
+            <xsl:param name="title_text" wd:tip_id="" wd:type="std:mtxt_variable">
+               <xsl:choose>
+                  <xsl:when test="key('desc-lookup', 'PAGE_TITLE')">
+                     <xsl:value-of select="key('desc-lookup', 'PAGE_TITLE')"/>
+                  </xsl:when>
+                  <xsl:otherwise>
+                     <xsl:value-of select="/lxml:data/lxml:context/lxml:webroutine-title"/>
+                  </xsl:otherwise>
+               </xsl:choose>
+            </xsl:param>
+            <xsl:param name="show_left_menu" select="true()" wd:tip_id="" wd:type="std:boolean"/>
+            <xsl:param name="show_top_menu" select="false()" wd:tip_id="" wd:type="std:boolean"/>
+            <xsl:param name="show_right_menu" select="false()" wd:tip_id="" wd:type="std:boolean"/>
+            <xsl:param name="show_storefront" select="true()" wd:tip_id="" wd:type="std:boolean"/>
+            <xsl:param name="body_class" wd:tip_id="" wd:type="std:css_style_class[tagName='body']"/>
+            <xsl:param name="form_class" wd:tip_id="" wd:type="std:css_style_class[tagName='form']"/>
+            <xsl:param name="has_form" select="true()" wd:tip_id="" wd:type="std:boolean"/>
+            <xsl:param name="no_layout" select="false()" wd:tip_id="" wd:type="std:boolean"/>
+            <xsl:param name="show_title" select="true()" wd:tip_id="" wd:type="std:boolean"/>
+            <xsl:param name="show_messages" select="true()" wd:tip_id="" wd:type="std:boolean"/>
+            <xsl:param name="onload_script" select="'SetFocus();initializeEditor();'" wd:tip_id=""/>
+            <xsl:param name="onunload_script" select="''" wd:tip_id=""/>
+            <xsl:param name="include_std_scripts" select="true()" wd:tip_id="" wd:type="std:boolean"/>
+            <xsl:param name="javascript_files" select="''"/>
+            <xsl:param name="additional_script_files" select="''"/>
+            <xsl:param name="theme_css_filename" select="''" wd:tip_id="" wd:type="std:css_link_filename"/>
+            <xsl:param name="include_std_styles" select="true()" wd:tip_id="" wd:type="std:boolean"/>
+            <xsl:param name="css_files" select="''"/>
+            <xsl:param name="additional_css_files" select="''"/>
+            <xsl:param name="output_charset" select="/lxml:data/lxml:server-instructions/lxml:client-charset" wd:tip_id=""/>
+            <xsl:param name="trap_script_errors" select="true()" wd:type="std:boolean"/>
+            <xsl:if test="not($lweb_design_mode)">
+               <xsl:text disable-output-escaping="yes">&lt;</xsl:text>
+               <xsl:text>!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"</xsl:text>
+               <xsl:text disable-output-escaping="yes">&gt;
+               </xsl:text>
+            </xsl:if>
+            <html>
+               <head>
+                  <title>
+                     <xsl:value-of select="$title_text"/>
+                  </title>
+                  <meta content="ie=edge" http-equiv="x-ua-compatible"/>
+                  <meta content="text/html; charset={$output_charset}" http-equiv="Content-Type"/>
+                  <link rel="SHORTCUT ICON" href="/favicon.ico"/>
+                  <xsl:call-template name="header_content.override"/>
+                  <xsl:if test="$include_std_styles">
+                     <xsl:call-template name="style">
+                        <xsl:with-param name="theme_css_filename" select="$theme_css_filename"/>
+                        <xsl:with-param name="css_files" select="''"/>
+                     </xsl:call-template>
+                     <link rel="stylesheet" type="text/css" href="/lib/jquery-slidemenu/jqueryslidemenu.css"/>
+                  </xsl:if>
+                  <xsl:if test="$css_files != ''">
+                     <xsl:call-template name="csslinks.private">
+                        <xsl:with-param name="css_files" select="$css_files"/>
+                     </xsl:call-template>
+                  </xsl:if>
+                  <xsl:if test="$additional_css_files != ''">
+                     <xsl:call-template name="csslinks.private">
+                        <xsl:with-param name="css_files" select="$additional_css_files"/>
+                     </xsl:call-template>
+                  </xsl:if>
+                  <xsl:if test="$lweb_WAMName = 'LW3SFMNT'">
+                     <link rel="stylesheet" type="text/css" href="/images/Layout-Assets/styles/smart_filter.css"/>
+                  </xsl:if>
+                  <style type="text/css">
+                     <xsl:text>
+               .hidden{
+                     </xsl:text>
+                     <xsl:choose>
+                        <xsl:when test="$lweb_design_mode">visibility: hidden;</xsl:when>
+                        <xsl:otherwise>display: none;</xsl:otherwise>
+                     </xsl:choose>
+                     <xsl:text>
+               }
+                     </xsl:text>
+                     <xsl:call-template name="css_style.override"/>
+                  </style>
+                  <link rel="stylesheet" type="text/css" href="/lib/jquery/css/smoothness/jquery-ui-1.8.10.all.css"/>
+                  <xsl:if test="not($lweb_design_mode)">
+                     <xsl:choose>
+                        <xsl:when test="$include_std_scripts">
+                           <xsl:call-template name="script">
+                              <xsl:with-param name="javascript_files" select="''"/>
+                              <xsl:with-param name="trap_script_errors" select="$trap_script_errors"/>
+                           </xsl:call-template>
+                           <script language="javascript" type="text/javascript">
+      function initializeEditor(){  if(document.LANSA.W_LOADRTE != null){ if(document.LANSA.W_LOADRTE.value == 'Y') { initEditor(); } }}
+                  </script>
+                           <script type="text/javascript">
+                              <xsl:text disable-output-escaping="yes">
+      function handleEnter(e, buttonid) {
+          var charCode;
+      
+          if(e &amp;&amp; e.which){
+              charCode = e.which;
+          }else if(window.event){
+              e = window.event;
+              charCode = e.keyCode;
+          }
+      
+          if(charCode == 13) {
+            buttonid = '#' + buttonid;
+            $(buttonid).click();
+          }
+      }
+            </xsl:text>
+                           </script>
+                           <script src="/lib/jquery/jquery-1.3.2.min.js"></script>
+                           <script src="/lib/jquery-slidemenu/jqueryslidemenu.js"></script>
+                           <script src="/js/admin.js"></script>
+                           <script src="/lib/jquery-ui/jquery-ui-1.8.11.custom.min.js"></script>
+                           <xsl:if test="$lweb_WAMName = 'LW3SFMNT'">
+                              <script src="/images/Layout-Assets/scripts/pages/smart_filter.js" language="javascript" type="text/javascript"></script>
+                           </xsl:if>
+                        </xsl:when>
+                        <xsl:otherwise>
+                           <script language="javascript" type="text/javascript">
+                              <xsl:text disable-output-escaping="yes">//&lt;![CDATA[
+               </xsl:text>
+      var lws = window.lwebSession = {};       
+      var g_lxmlServiceName = lws.serviceName = "<xsl:value-of select="$lweb_context/lxml:service-name"/>";
+      var g_lxmlWAMName = lws.WAMName = "<xsl:value-of select="$lweb_WAMName"/>";
+      var g_lxmlWRName = lws.WRName = "<xsl:value-of select="$lweb_context/lxml:webroutine"/>";
+      var g_lxmlTs = lws.TS = "<xsl:value-of select="$lweb_context/lxml:technology-service"/>";
+      var g_lxmlAR = lws.AR = "<xsl:value-of select="$lweb_context/lxml:action-request"/>";
+      var g_lxmlPartition = lws.partition = "<xsl:value-of select="$lweb_context/lxml:partition"/>";
+      var g_lxmlLang = lws.language = "<xsl:value-of select="$lweb_part_language"/>";
+      var g_lmxlSKMethod = lws.SKMethod = "<xsl:value-of select="$lweb_context/lxml:session-key-method"/>";
+      var g_lxmlSK = lws.SK = "<xsl:value-of select="$lweb_context/lxml:session-key"/>";
+      var g_debug = lws.debug = "<xsl:value-of select="key('option', 'debug')"/>";
+      var g_lw3Trace = lws.trace = "<xsl:value-of select="key('option', 'trace')"/>";
+      var g_lweb_images_path = lws.imagePath = "<xsl:value-of select="$lweb_images_path"/>";
+                  <xsl:text disable-output-escaping="yes">//]]&gt;</xsl:text>
+                           </script>
+                        </xsl:otherwise>
+                     </xsl:choose>
+                     <xsl:if test="($javascript_files != '')">
+                        <xsl:call-template name="JSIncludes.private">
+                           <xsl:with-param name="javascript_files" select="$javascript_files"/>
+                        </xsl:call-template>
+                     </xsl:if>
+                     <xsl:if test="($additional_script_files != '')">
+                        <xsl:call-template name="JSIncludes.private">
+                           <xsl:with-param name="javascript_files" select="$additional_script_files"/>
+                        </xsl:call-template>
+                     </xsl:if>
+                     <script language="javascript" type="text/javascript">
+         //<xsl:text disable-output-escaping="yes">&lt;</xsl:text>![CDATA[
+                        <xsl:call-template name="script.override"/>
+         //]]<xsl:text disable-output-escaping="yes">&gt;
+         </xsl:text>
+                     </script>
+                  </xsl:if>
+               </head>
+               <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" rightmargin="0" bottommargin="0">
+                  <xsl:if test="boolean($onload_script)">
+                     <xsl:attribute name="onload">
+                        <xsl:value-of select="$onload_script"/>
+                     </xsl:attribute>
+                  </xsl:if>
+                  <xsl:if test="boolean($onunload_script)">
+                     <xsl:attribute name="onunload">
+                        <xsl:value-of select="$onunload_script"/>
+                     </xsl:attribute>
+                  </xsl:if>
+                  <xsl:if test="$body_class!=''">
+                     <xsl:attribute name="class">
+                        <xsl:value-of select="$body_class"/>
+                     </xsl:attribute>
+                  </xsl:if>
+                  <xsl:choose>
+                     <xsl:when test="not($no_layout)">
+                        <xsl:if test="$has_form">
+                           <xsl:text disable-output-escaping="yes">&lt;form onsubmit="return _HandleDefaultSubmit(this);" method="post" name="LANSA" action="</xsl:text>
+                           <xsl:value-of select="$lweb_context/lxml:action-request"/>
+                           <xsl:text disable-output-escaping="yes">?"&gt;</xsl:text>
+                        </xsl:if>
+                        <input type="hidden" name="LW3UTYP" value="{key('field-value', 'LW3UTYP')}"/>
+                        <div id="contentWindow" style="display:none;">
+                           <iframe id="contentFrame" style="width:955px; height:650px" src="/img/ajax-loader.gif" frameborder="0" name="contentFrame">
+                                   iFrames not supported.
+                           <!--We need the following space character to ensure that we end up with both opending and closing tags, and not the XML shorthand notation-->
+                              <xsl:text/>
+                              <!--We need the following space character to ensure that we end up with both opending and closing tags, and not the XML shorthand notation-->
+                              <xsl:text> </xsl:text>
+                           </iframe>
+                        </div>
+                        <table height="100%" cellspacing="0" cellpadding="0" width="100%" border="0">
+                           <tbody>
+                              <tr class="std_layout_outline">
+                                 <td width="100%" colspan="3">
+                                    <table cellspacing="0" cellpadding="0" width="100%" border="0">
+                                       <tbody>
+                                          <tr>
+                                             <td class="adm_headerl">
+                                                <span style="width:100%">
+                                                   <xsl:comment/>
+                                                </span>
+                                             </td>
+                                             <td class="adm_headerr">
+                                                <span style="width:100%">
+                                                   <xsl:comment/>
+                                                   <xsl:if test="$show_storefront">
+                                                      <div id="StatusTable">
+                                                         <table>
+                                                            <tbody>
+                                                               <tr>
+                                                                  <td class="caption">
+                                                                     <xsl:value-of select="key('desc-lookup', 'LBL_ACTIVE_STOREFRONT')"/>
+                                                                  </td>
+                                                                  <td>
+                                                                     <xsl:value-of select="key('field-value', 'LW3NAME')"/>
+                                                                  </td>
+                                                               </tr>
+                                                            </tbody>
+                                                         </table>
+                                                      </div>
+                                                   </xsl:if>
+                                                </span>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </td>
+                              </tr>
+                              <tr class="std_layout_outline">
+                                 <xsl:if test="not($show_right_menu) and not(key('design_doc_name', 'std_layout1_v2.xsl'))">
+                                    <td class="std_menutop_bg">
+                                       <input type="hidden" name="SFSELFLG" value="{key('field-value', 'SFSELFLG')}"/>
+                                       <input type="hidden" name="WRNAME" value="{key('field-value', 'WRNAME')}"/>
+                                       <span style="width:100%">
+                                          <xsl:comment/>
+                                       </span>
+                                       <input type="hidden" name="LADAID" value="{key('field-value', 'LADAID')}"/>
+                                       <input type="hidden" name="ADMCNT1" value="{key('field-value', 'ADMCNT1')}"/>
+                                       <input type="hidden" name="ADMCNT2" value="{key('field-value', 'ADMCNT2')}"/>
+                                       <input type="hidden" name="CNTCAT" value="{key('field-value', 'CNTCAT')}"/>
+                                    </td>
+                                 </xsl:if>
+                                 <td class="std_menutop_bg" valign="middle" colspan="3" align="center">
+                                    <xsl:if test="not($show_right_menu) and not(key('design_doc_name', 'std_layout1_v2.xsl'))">
+                                       <xsl:attribute name="align">left</xsl:attribute>
+                                    </xsl:if>
+                                    <xsl:choose>
+                                       <xsl:when test="$show_top_menu or key('design_doc_name', 'std_layout1_v2.xsl')">
+                                          <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='TOP_MENU']"/>
+                                       </xsl:when>
+                                       <xsl:otherwise>
+                                          <span style="width:100%;">
+                                             <xsl:comment/>
+                                          </span>
+                                       </xsl:otherwise>
+                                    </xsl:choose>
+                                    <xsl:call-template name="dynamic">
+                                       <xsl:with-param name="name" select="concat('o', position(), '_LANSA_9059')"/>
+                                       <xsl:with-param name="value" select="key('field-value', 'LW3MHTML')"/>
+                                    </xsl:call-template>
+                                 </td>
+                              </tr>
+                              <xsl:if test="key('field-value', 'SFSELFLG') = 'Y'">
+                                 <tr>
+                                    <td></td>
+                                 </tr>
+                                 <tr>
+                                    <td style="height: 14px;">
+                                       <xsl:value-of select="key('desc-lookup', 'LBL_STORE_FRONT')"/>
+                                    </td>
+                                 </tr>
+                                 <tr>
+                                    <td>
+                                       <xsl:call-template name="cust_dropdown">
+                                          <!-- <xsl:with-param name="on_change_wamname" select="?" /> -->
+                                          <xsl:with-param name="formname" select="'LANSA'"/>
+                                          <xsl:with-param name="on_change_wrname" select="key('field-value', 'WRNAME')"/>
+                                          <xsl:with-param name="captionfield" select="'W_SFNM'"/>
+                                          <xsl:with-param name="codefield" select="'W_SFID'"/>
+                                          <xsl:with-param name="listname" select="'HSFLIST'"/>
+                                          <xsl:with-param name="name" select="'W_SFID'"/>
+                                          <xsl:with-param name="value" select="key('field-value', 'W_SFID')"/>
+                                          <!-- <xsl:with-param name="display_mode" select="?" /> -->
+                                          <!-- <xsl:with-param name="items" select="?" /> -->
+                                          <!-- <xsl:with-param name="selector_field" select="?" /> -->
+                                          <!-- <xsl:with-param name="selector_value_eq" select="?" /> -->
+                                          <!-- <xsl:with-param name="tagfield1" select="?" /> -->
+                                          <!-- <xsl:with-param name="tagfield2" select="?" /> -->
+                                          <!-- <xsl:with-param name="tagfield3" select="?" /> -->
+                                          <!-- <xsl:with-param name="submit_tagfields" select="?" /> -->
+                                          <xsl:with-param name="reentryfield" select="'STDRENTRY'"/>
+                                          <xsl:with-param name="reentryvalue" select="'Q'"/>
+                                          <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                                          <!-- <xsl:with-param name="pos_absolute" select="?" /> -->
+                                          <!-- <xsl:with-param name="width_design" select="?" /> -->
+                                          <!-- <xsl:with-param name="protocol" select="?" /> -->
+                                          <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                                          <!-- <xsl:with-param name="disabled" select="?" /> -->
+                                          <!-- <xsl:with-param name="class" select="?" /> -->
+                                          <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
+                                          <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                                       </xsl:call-template>
+                                       <input type="hidden" name="WRNAME" value="{key('field-value', 'WRNAME')}"/>
+                                    </td>
+                                 </tr>
+                                 <tr>
+                                    <td></td>
+                                 </tr>
+                              </xsl:if>
+                              <tr>
+                                 <td class="std_layout_outline" height="100%" valign="top" align="center">
+                                    <!-- <xsl:if test="$show_left_menu or key('design_doc_name', 'std_layout1_v2.xsl')"> -->
+                                    <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='LEFT_MENU']"/>
+                                    <!-- </xsl:if> -->
+                                 </td>
+                                 <td class="std_layout_v2_content" valign="top" width="95%">
+                                    <xsl:if test="$show_title">
+                                       <h1 class="pageTitle">
+                                          <xsl:value-of select="$title_text"/>
+                                       </h1>
+                                    </xsl:if>
+                                    <xsl:if test="$show_messages">
+                                       <xsl:call-template name="messages">
+                                          <xsl:with-param name="message_label" select="key('desc-lookup', 'LBL_MESSAGES')"/>
+                                       </xsl:call-template>
+                                    </xsl:if>
+                                    <!--
+                                    <xsl:if test="key('field-value', 'S_PARAG')">
+                                       <div class="IntroParagraph">
+                                          <xsl:value-of select="key('field-value', 'S_PARAG')" />
+                                       </div>
+                                    </xsl:if>
+      -->
+                                    <div class="hidden">
+                                       <input type="hidden" name="LW3SFID" value="{key('field-value', 'LW3SFID')}"/>
+                                       <input type="hidden" name="LW3WEBUSR" value="{key('field-value', 'LW3WEBUSR')}"/>
+                                    </div>
+                                    <xsl:apply-templates select="*" wd:role="std:webroutine"/>
+                                    <xsl:call-template name="hidden_fields"/>
+                                 </td>
+                                 <td class="std_layout_outline" valign="top" align="right">
+                                    <xsl:if test="$show_right_menu or key('design_doc_name', 'adm_lyt1.xsl')">
+                                       <xsl:call-template name="layout-right-menu.override"/>
+                                    </xsl:if>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td class="std_layout_outline" height="100%"></td>
+                                 <td></td>
+                                 <td class="std_layout_outline" height="100%"></td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        <xsl:if test="$has_form">
+                           <xsl:text disable-output-escaping="yes">&lt;/form&gt;</xsl:text>
+                        </xsl:if>
+                     </xsl:when>
+                     <xsl:otherwise>
+                        <xsl:call-template name="layout-form.private">
+                           <xsl:with-param name="show_messages" select="$show_messages"/>
+                           <xsl:with-param name="show_title" select="$show_title"/>
+                           <xsl:with-param name="title_text" select="$title_text"/>
+                           <xsl:with-param name="has_form" select="$has_form"/>
+                           <xsl:with-param name="form_class" select="$form_class"/>
+                        </xsl:call-template>
+                     </xsl:otherwise>
+                  </xsl:choose>
+               </body>
+            </html>
+         </xsl:template>
+         <xsl:template name="layout-left-menu.override">
+            <table cellspacing="0" cellpadding="0" width="150">
+               <tbody>
+                  <tr>
+                     <td>
+                        <xsl:call-template name="std_menu_item_v2">
+                           <xsl:with-param name="caption" select="'test'"/>
+                           <!-- <xsl:with-param name="href" select="?" /> -->
+                           <!-- <xsl:with-param name="protocol" select="?" /> -->
+                           <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                           <!-- <xsl:with-param name="wamname" select="?" /> -->
+                           <!-- <xsl:with-param name="wrname" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                           <!-- <xsl:with-param name="formname" select="?" /> -->
+                           <!-- <xsl:with-param name="style" select="?" /> -->
+                           <!-- <xsl:with-param name="class" select="?" /> -->
+                           <!-- <xsl:with-param name="selected_class" select="?" /> -->
+                           <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                           <!-- <xsl:with-param name="is_selected_if_also" select="?" /> -->
+                           <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                        </xsl:call-template>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>
+                        <xsl:call-template name="std_menu_item_v2">
+                           <!-- <xsl:with-param name="caption" select="?" /> -->
+                           <!-- <xsl:with-param name="href" select="?" /> -->
+                           <!-- <xsl:with-param name="protocol" select="?" /> -->
+                           <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                           <!-- <xsl:with-param name="wamname" select="?" /> -->
+                           <!-- <xsl:with-param name="wrname" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                           <!-- <xsl:with-param name="formname" select="?" /> -->
+                           <!-- <xsl:with-param name="style" select="?" /> -->
+                           <!-- <xsl:with-param name="class" select="?" /> -->
+                           <!-- <xsl:with-param name="selected_class" select="?" /> -->
+                           <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                           <!-- <xsl:with-param name="is_selected_if_also" select="?" /> -->
+                           <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                        </xsl:call-template>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>
+                        <xsl:call-template name="std_menu_item_v2">
+                           <!-- <xsl:with-param name="caption" select="?" /> -->
+                           <!-- <xsl:with-param name="href" select="?" /> -->
+                           <!-- <xsl:with-param name="protocol" select="?" /> -->
+                           <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                           <!-- <xsl:with-param name="wamname" select="?" /> -->
+                           <!-- <xsl:with-param name="wrname" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                           <!-- <xsl:with-param name="formname" select="?" /> -->
+                           <!-- <xsl:with-param name="style" select="?" /> -->
+                           <!-- <xsl:with-param name="class" select="?" /> -->
+                           <!-- <xsl:with-param name="selected_class" select="?" /> -->
+                           <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                           <!-- <xsl:with-param name="is_selected_if_also" select="?" /> -->
+                           <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                        </xsl:call-template>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>test
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>test</td>
+                  </tr>
+                  <tr>
+                     <td>
+                        <xsl:value-of select="key('field-caption', 'LW3COUNT')/lxml:description"/>
+                        <input class="number" maxlength="7" onchange="return isValidNumber(this, '3', '0', '.')" size="7" name="LW3COUNT" value="{key('field-value', 'LW3COUNT')}"/>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>
+                        <xsl:value-of select="key('field-caption', 'LW3COUNT2')/lxml:description"/>
+                        <input class="number" maxlength="7" onchange="return isValidNumber(this, '3', '0', '.')" size="7" name="LW3COUNT2" value="{key('field-value', 'LW3COUNT2')}"/>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>test</td>
+                  </tr>
+                  <tr>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td></td>
+                  </tr>
+               </tbody>
+            </table>
+         </xsl:template>
+         <xsl:template name="layout-top-menu.override">
+            <table cellspacing="0" cellpadding="0">
+               <tbody>
+                  <tr>
+                     <td>
+                        <xsl:call-template name="std_menu_item_v2">
+                           <!-- <xsl:with-param name="caption" select="?" /> -->
+                           <!-- <xsl:with-param name="href" select="?" /> -->
+                           <!-- <xsl:with-param name="protocol" select="?" /> -->
+                           <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                           <!-- <xsl:with-param name="wamname" select="?" /> -->
+                           <!-- <xsl:with-param name="wrname" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                           <!-- <xsl:with-param name="formname" select="?" /> -->
+                           <!-- <xsl:with-param name="style" select="?" /> -->
+                           <!-- <xsl:with-param name="class" select="?" /> -->
+                           <!-- <xsl:with-param name="selected_class" select="?" /> -->
+                           <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                           <!-- <xsl:with-param name="is_selected_if_also" select="?" /> -->
+                           <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                        </xsl:call-template>
+                     </td>
+                     <td>
+                        <xsl:call-template name="std_menu_item_v2">
+                           <!-- <xsl:with-param name="caption" select="?" /> -->
+                           <!-- <xsl:with-param name="href" select="?" /> -->
+                           <!-- <xsl:with-param name="protocol" select="?" /> -->
+                           <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                           <!-- <xsl:with-param name="wamname" select="?" /> -->
+                           <!-- <xsl:with-param name="wrname" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                           <!-- <xsl:with-param name="formname" select="?" /> -->
+                           <!-- <xsl:with-param name="style" select="?" /> -->
+                           <!-- <xsl:with-param name="class" select="?" /> -->
+                           <!-- <xsl:with-param name="selected_class" select="?" /> -->
+                           <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                           <!-- <xsl:with-param name="is_selected_if_also" select="?" /> -->
+                           <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                        </xsl:call-template>
+                     </td>
+                     <td>
+                        <xsl:call-template name="std_menu_item_v2">
+                           <!-- <xsl:with-param name="caption" select="?" /> -->
+                           <!-- <xsl:with-param name="href" select="?" /> -->
+                           <!-- <xsl:with-param name="protocol" select="?" /> -->
+                           <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                           <!-- <xsl:with-param name="wamname" select="?" /> -->
+                           <!-- <xsl:with-param name="wrname" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                           <!-- <xsl:with-param name="formname" select="?" /> -->
+                           <!-- <xsl:with-param name="style" select="?" /> -->
+                           <!-- <xsl:with-param name="class" select="?" /> -->
+                           <!-- <xsl:with-param name="selected_class" select="?" /> -->
+                           <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                           <!-- <xsl:with-param name="is_selected_if_also" select="?" /> -->
+                           <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                        </xsl:call-template>
+                     </td>
+                     <td>
+                        <xsl:call-template name="std_menu_item_v2">
+                           <!-- <xsl:with-param name="caption" select="?" /> -->
+                           <!-- <xsl:with-param name="href" select="?" /> -->
+                           <!-- <xsl:with-param name="protocol" select="?" /> -->
+                           <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                           <!-- <xsl:with-param name="wamname" select="?" /> -->
+                           <!-- <xsl:with-param name="wrname" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                           <!-- <xsl:with-param name="formname" select="?" /> -->
+                           <!-- <xsl:with-param name="style" select="?" /> -->
+                           <!-- <xsl:with-param name="class" select="?" /> -->
+                           <!-- <xsl:with-param name="selected_class" select="?" /> -->
+                           <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                           <!-- <xsl:with-param name="is_selected_if_also" select="?" /> -->
+                           <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                        </xsl:call-template>
+                     </td>
+                     <td></td>
+                     <td></td>
+                     <td></td>
+                     <td></td>
+                     <td></td>
+                     <td></td>
+                  </tr>
+               </tbody>
+            </table>
+         </xsl:template>
+         <xsl:template name="layout-right-menu.override">
+            <table cellspacing="0" cellpadding="0" width="150">
+               <tbody>
+                  <tr>
+                     <td>
+                        <xsl:call-template name="std_menu_item_v2">
+                           <!-- <xsl:with-param name="caption" select="?" /> -->
+                           <!-- <xsl:with-param name="href" select="?" /> -->
+                           <!-- <xsl:with-param name="protocol" select="?" /> -->
+                           <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                           <!-- <xsl:with-param name="wamname" select="?" /> -->
+                           <!-- <xsl:with-param name="wrname" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                           <!-- <xsl:with-param name="formname" select="?" /> -->
+                           <!-- <xsl:with-param name="style" select="?" /> -->
+                           <!-- <xsl:with-param name="class" select="?" /> -->
+                           <!-- <xsl:with-param name="selected_class" select="?" /> -->
+                           <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                           <!-- <xsl:with-param name="is_selected_if_also" select="?" /> -->
+                           <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                        </xsl:call-template>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>
+                        <xsl:call-template name="std_menu_item_v2">
+                           <!-- <xsl:with-param name="caption" select="?" /> -->
+                           <!-- <xsl:with-param name="href" select="?" /> -->
+                           <!-- <xsl:with-param name="protocol" select="?" /> -->
+                           <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                           <!-- <xsl:with-param name="wamname" select="?" /> -->
+                           <!-- <xsl:with-param name="wrname" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                           <!-- <xsl:with-param name="formname" select="?" /> -->
+                           <!-- <xsl:with-param name="style" select="?" /> -->
+                           <!-- <xsl:with-param name="class" select="?" /> -->
+                           <!-- <xsl:with-param name="selected_class" select="?" /> -->
+                           <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                           <!-- <xsl:with-param name="is_selected_if_also" select="?" /> -->
+                           <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                        </xsl:call-template>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>
+                        <xsl:call-template name="std_menu_item_v2">
+                           <!-- <xsl:with-param name="caption" select="?" /> -->
+                           <!-- <xsl:with-param name="href" select="?" /> -->
+                           <!-- <xsl:with-param name="protocol" select="?" /> -->
+                           <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                           <!-- <xsl:with-param name="wamname" select="?" /> -->
+                           <!-- <xsl:with-param name="wrname" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                           <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                           <!-- <xsl:with-param name="formname" select="?" /> -->
+                           <!-- <xsl:with-param name="style" select="?" /> -->
+                           <!-- <xsl:with-param name="class" select="?" /> -->
+                           <!-- <xsl:with-param name="selected_class" select="?" /> -->
+                           <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                           <!-- <xsl:with-param name="is_selected_if_also" select="?" /> -->
+                           <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                        </xsl:call-template>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td></td>
+                  </tr>
+               </tbody>
+            </table>
+         </xsl:template>
+         <xsl:template name="layout-form.private">
+            <xsl:param name="has_form" select="true()"/>
+            <xsl:param name="form_class"/>
+            <xsl:param name="show_title"/>
+            <xsl:param name="title_text"/>
+            <xsl:param name="show_messages"/>
+            <xsl:if test="$show_title">
+               <h1 class="pageTitle">
+                  <xsl:value-of select="$title_text"/>
+               </h1>
+            </xsl:if>
+            <xsl:if test="$show_messages">
+               <xsl:call-template name="messages">
+                  <xsl:with-param name="message_label" select="key('desc-lookup', 'LBL_MESSAGES')"/>
+               </xsl:call-template>
+            </xsl:if>
+            <!--
+               <xsl:if test="key('field-value', 'S_PARAG')">
+                  <div class="IntroParagraph">
+                     <xsl:value-of select="key('field-value', 'S_PARAG')" />
+                  </div>
+               </xsl:if>
+      -->
+            <xsl:choose>
+               <xsl:when test="$has_form">
+                  <form name="LANSA" action="{$lweb_context/lxml:action-request}?" method="post" onsubmit="return _HandleDefaultSubmit(this);">
+                     <xsl:if test="$form_class!=''">
+                        <xsl:attribute name="class">
+                           <xsl:value-of select="$form_class"/>
+                        </xsl:attribute>
+                     </xsl:if>
+                     <xsl:if test="key('field-value', 'S_PARAG')">
+                        <div class="IntroParagraph">
+                           <xsl:value-of select="key('field-value', 'S_PARAG')"/>
+                        </div>
+                     </xsl:if>
+                     <div class="hidden">
+                        <input type="hidden" name="LW3SFID" value="{key('field-value', 'LW3SFID')}"/>
+                        <input type="hidden" name="LW3WEBUSR" value="{key('field-value', 'LW3WEBUSR')}"/>
+                     </div>
+                     <xsl:apply-templates wd:role="std:webroutine" select="*"/>
+                     <xsl:call-template name="hidden_fields"/>
+                  </form>
+               </xsl:when>
+               <xsl:otherwise>
+                  <xsl:apply-templates select="*" wd:role="std:webroutine"/>
+               </xsl:otherwise>
+            </xsl:choose>
+         </xsl:template>
+         <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='TOP_MENU']">
+            <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='TOP_MENU']"/>
+            <input type="hidden" name="TOP_MENU.." value="{count(lxml:list-entries/lxml:entry[1])}"/>
+            <div class="std_grid_wrapper" id="TOP_MENU_wrap">
+               <xsl:if test="/lxml:data/lxml:context[@design]">
+                  <xsl:attribute name="class">std_grid_wrapper_designtime</xsl:attribute>
+               </xsl:if>
+               <table cellpadding="0" border="0" cellspacing="0">
+                  <tbody>
+                     <tr>
+                        <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+                           <xsl:variable name="LADMDSC" select="lxml:column[1]"/>
+                           <xsl:variable name="LADMWAM" select="lxml:column[2]"/>
+                           <xsl:variable name="LADMWR" select="lxml:column[3]"/>
+                           <td>
+                              <xsl:call-template name="std_anchor">
+                                 <!-- <xsl:with-param name="currentrowhfield" select="?" /> -->
+                                 <xsl:with-param name="on_click_wrname" select="$LADMWR"/>
+                                 <xsl:with-param name="on_click_wamname" select="$LADMWAM"/>
+                                 <xsl:with-param name="name" select="$LADMDSC/@id"/>
+                                 <xsl:with-param name="value" select="$LADMDSC"/>
+                                 <!-- <xsl:with-param name="currentrownumval" select="?" /> -->
+                                 <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                                 <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                                 <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                                 <!-- <xsl:with-param name="formname" select="?" /> -->
+                                 <!-- <xsl:with-param name="url" select="?" /> -->
+                                 <!-- <xsl:with-param name="protocol" select="?" /> -->
+                                 <!-- <xsl:with-param name="show_in_new_window" select="?" /> -->
+                                 <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                                 <!-- <xsl:with-param name="pos_absolute_design" select="?" /> -->
+                                 <!-- <xsl:with-param name="width_design" select="?" /> -->
+                                 <!-- <xsl:with-param name="relative-image-path" select="?" /> -->
+                                 <!-- <xsl:with-param name="absolute-image-path" select="?" /> -->
+                                 <!-- <xsl:with-param name="class" select="?" /> -->
+                                 <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
+                                 <!-- <xsl:with-param name="text_class" select="?" /> -->
+                                 <!-- <xsl:with-param name="presubmit_js" select="?" /> -->
+                                 <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                              </xsl:call-template>
+                              <input type="hidden" name="{$LADMWAM/@id}" value="{$LADMWAM}"/>
+                              <input type="hidden" name="{$LADMWR/@id}" value="{$LADMWR}"/>
+                           </td>
+                        </xsl:for-each>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </xsl:template>
+         <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='LEFT_MENU']">
+            <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='LEFT_MENU']"/>
+            <input type="hidden" name="LEFT_MENU.." value="{count(lxml:list-entries/lxml:entry[1])}"/>
+            <div class="std_grid_wrapper" id="LEFT_MENU_wrap">
+               <xsl:if test="/lxml:data/lxml:context[@design]">
+                  <xsl:attribute name="class">std_grid_wrapper_designtime</xsl:attribute>
+               </xsl:if>
+               <table cellpadding="0" border="0" cellspacing="0">
+                  <tbody>
+                     <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+                        <xsl:variable name="LADMDSC" select="lxml:column[1]"/>
+                        <xsl:variable name="LADMWAM" select="lxml:column[2]"/>
+                        <xsl:variable name="LADMWR" select="lxml:column[3]"/>
+                        <xsl:variable name="LADRVAL" select="lxml:column[4]"/>
+                        <xsl:variable name="LADRFLD" select="lxml:column[5]"/>
+                        <!-- concat('document.LANSA.', lxml:column[@name='LADRFLD'], '.value=&quot;', lxml:column[@name='LADRVAL'], '$quot;;') -->
+                        <!--   lxml:column[@name='LADRFLD'] != '' -->
+                        <xsl:variable name="rentryjs">
+                           <xsl:choose>
+                              <xsl:when test="$LADRFLD != '          '">
+                                 <xsl:value-of select="concat('document.LANSA.', $LADRFLD, '.value=&quot;', $LADRVAL, '&quot;;')"/>
+                              </xsl:when>
+                              <xsl:otherwise>
+                                 <xsl:value-of select="''"/>
+                              </xsl:otherwise>
+                           </xsl:choose>
+                        </xsl:variable>
+                        <tr>
+                           <td>
+                              <nobr>
+                                 <xsl:call-template name="std_anchor">
+                                    <!-- <xsl:with-param name="currentrowhfield" select="?" /> -->
+                                    <xsl:with-param name="on_click_wrname" select="$LADMWR"/>
+                                    <xsl:with-param name="on_click_wamname" select="$LADMWAM"/>
+                                    <xsl:with-param name="name" select="$LADMDSC/@id"/>
+                                    <xsl:with-param name="value" select="$LADMDSC"/>
+                                    <xsl:with-param name="reentryvalue" select="'Q'"/>
+                                    <!-- <xsl:with-param name="currentrownumval" select="?" /> -->
+                                    <xsl:with-param name="reentryfield" select="'STDRENTRY'"/>
+                                    <!-- select="'CNTCAT'" /> -->
+                                    <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                                    <!-- <xsl:with-param name="formname" select="?" /> -->
+                                    <!-- <xsl:with-param name="url" select="?" /> -->
+                                    <!-- <xsl:with-param name="protocol" select="?" /> -->
+                                    <!-- <xsl:with-param name="show_in_new_window" select="?" /> -->
+                                    <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                                    <!-- <xsl:with-param name="pos_absolute_design" select="?" /> -->
+                                    <!-- <xsl:with-param name="width_design" select="?" /> -->
+                                    <!-- <xsl:with-param name="relative-image-path" select="?" /> -->
+                                    <!-- <xsl:with-param name="absolute-image-path" select="?" /> -->
+                                    <!-- <xsl:with-param name="class" select="?" /> -->
+                                    <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
+                                    <!-- <xsl:with-param name="text_class" select="?" /> -->
+                                    <xsl:with-param name="presubmit_js" select="$rentryjs"/>
+                                    <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                                 </xsl:call-template>
+                              </nobr>
+                              <input type="hidden" name="{$LADRVAL/@id}" value="{$LADRVAL}"/>
+                              <input type="hidden" name="{$LADRFLD/@id}" value="{$LADRFLD}"/>
+                              <input type="hidden" name="{$LADMWAM/@id}" value="{$LADMWAM}"/>
+                              <input type="hidden" name="{$LADMWR/@id}" value="{$LADMWR}"/>
+                           </td>
+                        </tr>
+                     </xsl:for-each>
+                  </tbody>
+               </table>
+            </div>
+         </xsl:template>
+         <xsl:template name="header_content.override">
+            <xsl:text/>
+         </xsl:template>
+         <xsl:template name="css_style.override">
+            <xsl:text/>
+         </xsl:template>
+         <xsl:template name="script.override">
+            <xsl:text/>
+         </xsl:template>
+      </xsl:transform>

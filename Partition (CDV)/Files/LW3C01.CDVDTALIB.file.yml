@@ -1,0 +1,386 @@
+﻿File:
+  Name:                           LW3C01
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3C01
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 100000 10000 10) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Category Master"
+
+  Real Fields:
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3CATID:
+      Type:               Decimal
+      Length:             10
+      Decimals:           0
+
+  - LW3CATNAM:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - LW3CATPRI:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3CATEND:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3CATIMG:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3PCTYP:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3STDTE:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - LW3EDDTE:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - LW3NSHOW:
+      Type:               Decimal
+      Length:             3
+      Decimals:           0
+
+  - LW3SHWTPF:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3CATORD:
+      Type:               Decimal
+      Length:             3
+      Decimals:           0
+
+  - LW3FTPRD:
+      Type:               Alphanumeric
+      Length:             35
+      Decimals:           0
+
+  - LW3SHWFPF:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  - LW3CATURL:
+      Type:               Alphanumeric
+      Length:             80
+      Decimals:           0
+
+  - LW3CATSNM:
+      Type:               Alphanumeric
+      Length:             30
+      Decimals:           0
+
+  - LW3ICMPF:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  Primary Keys:
+  - LW3SFID
+  - LW3CATID
+
+  Logical Views:
+  - LW3C01L1:
+      Identifier:         LW3C01L1
+      Unique Key:         Yes
+      Access Path:        Immediate
+      Record Format:      LW3C01L1
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Ordered"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3PCTYP:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CATORD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      Select/Omit Criteria:
+      - Action:             Select
+        Type:               Compare
+        Field Name:         LW3CATPRI
+        Operator:           Equal
+        Value:              "'Y'"
+
+  - LW3C01L2:
+      Identifier:         LW3C01L2
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3C01L2
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Category by URL String"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CATURL:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3C01L3:
+      Identifier:         LW3C01L3
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3C01L3
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By SF/Type"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3PCTYP:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CATORD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3C01L4:
+      Identifier:         LW3C01L4
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3CO1L4
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "show in tcat"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3SHWTPF:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CATORD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      Select/Omit Criteria:
+      - Action:             Select
+        Type:               Compare
+        Field Name:         LW3CATPRI
+        Operator:           Equal
+        Value:              "'Y'"
+
+  - LW3C01L5:
+      Identifier:         LW3C01L5
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3C01L5
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "featured cat"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3SHWFPF:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CATORD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      Select/Omit Criteria:
+      - Action:             Select
+        Type:               Compare
+        Field Name:         LW3CATPRI
+        Operator:           Equal
+        Value:              "'Y'"
+
+  - LW3C01L6:
+      Identifier:         LW3C01L6
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3C01L6
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "featured subcat"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3SHWFPF:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CATID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3C01L7:
+      Identifier:         LW3C01L7
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3C01L7
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "Storefront, Category Type, Category ID"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      - LW3PCTYP:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CATID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  File Level Triggers:
+  - LW3SFID:
+    - New Trigger:
+        Function:           LW3MT06
+        Trigger Points:
+        - Before Insert
+        - Before Update
+
+  Access Routes:
+  - LW3C0101:
+      Description:        LW3C01ML
+      File:               LW3C01ML
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3SFID
+      - LW3CATID
+
+  - LW3C0102:
+      Description:        LW3C02
+      File:               LW3C02
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3SFID
+      - LW3CATID
+
+  - LW3C0103:
+      Description:        LW3C03
+      File:               LW3C03
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3SFID
+      - LW3CATID
+
+  - LW3C0104:
+      Description:        LW3KEYWCAT
+      File:               LW3KEYWCAT
+      Library:            "*FIRST"
+      Association Type:   Derive
+      Association Rule:   Derive
+      Documentation Only: No
+      Maximum Records:    9999
+      Default Action:     Ignore
+      Keep Last:          0
+      Derivation:         After Virtual Fields
+
+      Keys:
+      - LW3SFID
+      - LW3CATID

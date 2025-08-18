@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3STDTE
+  Type:               Packed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Effective Start Date"
+      Label:              "Effective Start"
+      Heading1:           "Effective"
+      Heading2:           "Start"
+      Heading3:           "Date"

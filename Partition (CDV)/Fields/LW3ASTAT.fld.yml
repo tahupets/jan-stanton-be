@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3ASTAT
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Active Status"
+      Label:              "Active Status"
+      Heading1:           "Active"
+      Heading2:           "Status"
+      Heading3:           " "

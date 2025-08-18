@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               PRMVAL
+  Type:               String
+  Length:             65535
+  Decimals:           0
+  Default Value:      "*NULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Parameter Value"
+      Label:              "Parameter Value"
+      Heading1:           "Parameter"
+      Heading2:           "Value"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(555)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'std_varchar.std_varchar') Name(#Weblet) Defaultweblet(True)
+    
+    End_Com
+    
+    End_Com

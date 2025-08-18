@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3CDATEV
+  Type:               Signed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          Y
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Date Created (Virtual)"
+      Label:              "Date Created"
+      Heading1:           "Date"
+      Heading2:           "Created"
+      Heading3:           "(Virtual)"

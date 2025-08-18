@@ -1,0 +1,31 @@
+﻿Field:
+  Name:               LW3PROEXD
+  Type:               Signed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Edit Mask:          W
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Promotions/Discounts Expiry Date"
+      Label:              "Prom Exp Date"
+      Heading1:           "Promotions/Discounts"
+      Heading2:           "Expiry"
+      Heading3:           "Date"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Marginleft(172) Usepicklist(False) Width(256)
+    
+    End_Com
+    
+    End_Com

@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3SFTHEM
+  Type:               Alpha
+  Length:             25
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Reference Field:    LW3THNAM
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Storefront theme name"
+      Label:              "Storefront them"
+      Heading1:           "Storefront"
+      Heading2:           "theme"
+      Heading3:           "name"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(555)
+    
+    End_Com
+    
+    End_Com

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               FXSQL
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SQL Statement"
+      Label:              "SQL Statement"
+      Heading1:           "SQL"
+      Heading2:           "Statement"
+      Heading3:           " "

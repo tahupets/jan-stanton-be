@@ -1,0 +1,72 @@
+﻿Weblet:
+  Name:               jquery_datepicker
+
+  Multilingual Details:
+  - ENG:
+      Description:        "jquery datepicker"
+
+  XML: |
+    <?xml version="1.0"?>
+    <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+       <lxml:context>
+          <lxml:images-path>/images</lxml:images-path>
+          <lxml:webapplication-title>WAM Title</lxml:webapplication-title><lxml:webroutine-title>Webroutine Title</lxml:webroutine-title><lxml:language iso-lang="en">ENG</lxml:language></lxml:context>
+       <lxml:lists/></lxml:data>
+
+  Designs:
+  - Language:           ENG
+    Technology Service: LANSA XHTML
+
+    XSL: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!--     LANSA for the Web                   -->
+      <xsl:transform version="1.0" exclude-result-prefixes="lxml wd tsml"
+                     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                     xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data"
+                     xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design"
+                     xmlns:tsml="http://www.lansa.com/2002/XML/Generation-Metadata"
+                     xmlns="http://www.w3.org/1999/xhtml">
+         <xsl:import href="std_types.xsl" />
+         <xsl:import href="desc_lookup.xsl" />
+         <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8"
+                     indent="no" />
+         <wd:types>
+            <wd:type name="wd:datetype">
+               <wd:enumerationlist value="''" display="default" />
+               <wd:enumerationlist value="'p'" display="Past" />
+               <wd:enumerationlist value="'f'" display="Future" />
+            </wd:type>
+         </wd:types>
+      
+         <xsl:template name="jquery_datepicker">
+            <xsl:param name="datetype" wd:tip_id="" wd:type="wd:datetype" />
+            <link rel="stylesheet" type="text/css"
+                  href="/images/style/jquery-ui-1.8.7.custom.css" />
+            <script type="text/javascript"
+                    src="/images/script/jquery-ui-1.8.7.custom.min.js">
+            </script>
+            <script>
+      $(document).ready(function() {
+          $(".datepicker").datepicker({
+          showOn: 'both',
+          dateFormat:'yy/mm/dd',
+          constrainInput:true,
+          buttonImage: '/IMAGES/fp_im003.gif',
+          buttonImageOnly: true,
+          altFormat: 'yymmdd',
+          <xsl:if test="$datetype='p'">maxDate: 0,</xsl:if>
+               <xsl:if test="$datetype='f'">minDate: 0,</xsl:if>
+          changeMonth: true,
+          changeYear:true,
+          monthNamesShort: ['<xsl:value-of select="substring(key('desc-lookup', 'MONTH_JANUARY'), 0, 4)" />','<xsl:value-of select="substring(key('desc-lookup', 'MONTH_FEBRUARY'), 0, 4)" />','<xsl:value-of select="substring(key('desc-lookup', 'MONTH_MARCH'), 0, 4)" />','<xsl:value-of select="substring(key('desc-lookup', 'MONTH_APRIL'), 0, 4)" />','<xsl:value-of select="substring(key('desc-lookup', 'MONTH_MAY'), 0, 4)" />','<xsl:value-of select="substring(key('desc-lookup', 'MONTH_JUNE'), 0, 4)" />',
+                            '<xsl:value-of select="substring(key('desc-lookup', 'MONTH_JULY'), 0, 4)" />','<xsl:value-of select="substring(key('desc-lookup', 'MONTH_AUGUST'), 0, 4)" />','<xsl:value-of select="substring(key('desc-lookup', 'MONTH_SEPTEMBER'), 0, 4)" />','<xsl:value-of select="substring(key('desc-lookup', 'MONTH_OCTOBER'), 0, 4)" />','<xsl:value-of select="substring(key('desc-lookup', 'MONTH_NOVEMBER'), 0, 4)" />','<xsl:value-of select="substring(key('desc-lookup', 'MONTH_DECEMBER'), 0, 4)" />'],    
+          monthNames: ['<xsl:value-of select="key('desc-lookup', 'MONTH_JANUARY')" />','<xsl:value-of select="key('desc-lookup', 'MONTH_FEBRUARY')" />','<xsl:value-of select="key('desc-lookup', 'MONTH_MARCH')" />','<xsl:value-of select="key('desc-lookup', 'MONTH_APRIL')" />','<xsl:value-of select="key('desc-lookup', 'MONTH_MAY')" />','<xsl:value-of select="key('desc-lookup', 'MONTH_JUNE')" />',
+                            '<xsl:value-of select="key('desc-lookup', 'MONTH_JULY')" />','<xsl:value-of select="key('desc-lookup', 'MONTH_AUGUST')" />','<xsl:value-of select="key('desc-lookup', 'MONTH_SEPTEMBER')" />','<xsl:value-of select="key('desc-lookup', 'MONTH_OCTOBER')" />','<xsl:value-of select="key('desc-lookup', 'MONTH_NOVEMBER')" />','<xsl:value-of select="key('desc-lookup', 'MONTH_DECEMBER')" />'],    
+          dayNamesMin: ['<xsl:value-of select="substring(key('desc-lookup', 'DAY_SUNDAY'), 0, 3)" />','<xsl:value-of select="substring(key('desc-lookup', 'DAY_MONDAY'), 0, 3)" />','<xsl:value-of select="substring(key('desc-lookup', 'DAY_TUESDAY'), 0, 3)" />','<xsl:value-of select="substring(key('desc-lookup', 'DAY_WEDNESDAY'), 0, 3)" />','<xsl:value-of select="substring(key('desc-lookup', 'DAY_THURSDAY'), 0, 3)" />','<xsl:value-of select="substring(key('desc-lookup', 'DAY_FRIDAY'), 0, 3)" />','<xsl:value-of select="substring(key('desc-lookup', 'DAY_SATURDAY'), 0, 3)" />'],
+          dayNames: ['<xsl:value-of select="key('desc-lookup', 'DAY_SUNDAY')" />','<xsl:value-of select="key('desc-lookup', 'DAY_MONDAY')" />','<xsl:value-of select="key('desc-lookup', 'DAY_TUESDAY')" />','<xsl:value-of select="key('desc-lookup', 'DAY_WEDNESDAY')" />','<xsl:value-of select="key('desc-lookup', 'DAY_THURSDAY')" />','<xsl:value-of select="key('desc-lookup', 'DAY_FRIDAY')" />','<xsl:value-of select="key('desc-lookup', 'DAY_SATURDAY')" />']
+          });
+      
+          });
+            </script>
+         </xsl:template>
+      </xsl:transform>

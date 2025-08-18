@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3MINQTY
+  Type:               Signed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Minimum Quantity"
+      Label:              "Minimum Quantit"
+      Heading1:           "Minimum"
+      Heading2:           "Quantity"
+      Heading3:           " "

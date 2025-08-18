@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               EEVADT
+  Type:               Signed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Output Attributes:
+  - CYDC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Add Date"
+      Label:              "Add Date"
+      Heading1:           "Add Date"
+      Heading2:           "Add Date"
+      Heading3:           "Add Date"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(232)
+    
+    End_Com
+    
+    End_Com

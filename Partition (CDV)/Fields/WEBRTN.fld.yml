@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               WEBRTN
+  Type:               Alpha
+  Length:             30
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Web Routine"
+      Label:              "Web Routine"
+      Heading1:           "Web"
+      Heading2:           "Routine"
+      Heading3:           " "

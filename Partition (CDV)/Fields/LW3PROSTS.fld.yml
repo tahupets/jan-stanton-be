@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               LW3PROSTS
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Promotions/Discounts Status"
+      Label:              "Prom Status"
+      Heading1:           "Promotions/Discounts"
+      Heading2:           "Status"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(178)
+    
+    End_Com
+    
+    End_Com

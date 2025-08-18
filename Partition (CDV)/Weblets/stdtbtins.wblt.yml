@@ -1,0 +1,364 @@
+﻿Weblet:
+  Name:               stdtbtins
+
+  Multilingual Details:
+  - ENG:
+      Description:        "<No description in this language>"
+
+  XML: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+       <lxml:context>
+          <lxml:images-path>/images</lxml:images-path>
+       </lxml:context>
+    </lxml:data>
+
+  Designs:
+  - Language:           ENG
+    Technology Service: LANSA XHTML
+
+    XSL: |
+      <?xml version="1.0"?>
+      <!-- (c) 2003 LANSA                            -->
+      <!-- XHTML Standard Tplt Btn - Insert          -->
+      <!-- $Workfile::   stdtbtins.xsl             $ -->
+      <!-- $Revision::   1.0                       $ -->
+      <xsl:transform version="1.0" exclude-result-prefixes="lxml wd"
+                     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                     xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data"
+                     xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design"
+                     xmlns="http://www.w3.org/1999/xhtml">
+         <xsl:import href="std_variables.xsl" />
+         <xsl:import href="std_keys.xsl" />
+         <xsl:import href="std_types.xsl" />
+         <xsl:import href="std_util.xsl" />
+         <xsl:import href="multi_button.xsl" />
+         <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8"
+                     indent="yes" />
+         <wd:definition>
+            <wd:group name="Custom Weblets" />
+         </wd:definition>
+         <wd:template name="stdtbtins">
+            <wd:description icon="icons/std_button.ico">
+               <wd:name lang="ENG">Standard Template Button - Insert</wd:name>
+            </wd:description>
+            <wd:param name="caption">
+               <wd:tip lang="ENG">Text to display on the button.</wd:tip>
+            </wd:param>
+            <wd:param name="left_relative_image_path">
+               <wd:tip lang="ENG">Image filename, relative to images directory, of the image to display on 
+      
+      the left of the button.</wd:tip>
+            </wd:param>
+            <wd:param name="left_absolute_image_path">
+               <wd:tip lang="ENG">Image URL of the image to display on the left of the button. Not required 
+      
+      if left_relative_image_path is specified.</wd:tip>
+            </wd:param>
+            <wd:param name="left_image_height">
+               <wd:tip lang="ENG">Height of left image.</wd:tip>
+            </wd:param>
+            <wd:param name="right_relative_image_path">
+               <wd:tip lang="ENG">Image filename, relative to images directory, of the image to display on 
+      
+      the right of the button.</wd:tip>
+            </wd:param>
+            <wd:param name="right_absolute_image_path">
+               <wd:tip lang="ENG">Image URL of the image to display on the right of the button. Not required 
+      
+      if right_relative_image_path is specified.</wd:tip>
+            </wd:param>
+            <wd:param name="right_image_height">
+               <wd:tip lang="ENG">Height of right image.</wd:tip>
+            </wd:param>
+            <wd:param name="left_image_class">
+               <wd:tip lang="ENG">The CSS class of the left image. Can be used to control, for example, 
+      
+      image alignment.</wd:tip>
+            </wd:param>
+            <wd:param name="right_image_class">
+               <wd:tip lang="ENG">The CSS class of the right image. Can be used to control, for example, 
+      
+      image alignment.</wd:tip>
+            </wd:param>
+         </wd:template>
+      
+         <xsl:template name="stdtbtins">
+            <xsl:param name="name" wd:tip_id="" />
+            <xsl:param name="caption" wd:type="std:mtxt_variable" select="'Save'" />
+      <!--      <xsl:param name="left_relative_image_path" wd:type="std:html_img_relative"
+                       select="'ZZ/Save.gif'" />
+            <xsl:param name="left_absolute_image_path">
+               <xsl:if test="$left_relative_image_path != ''">
+                  <xsl:value-of select="$lweb_images_path" />
+                  <xsl:text>/</xsl:text>
+                  <xsl:value-of select="$left_relative_image_path" />
+               </xsl:if>
+            </xsl:param>
+            <xsl:param name="left_image_height" select="'12pt'" />
+            <xsl:param name="right_relative_image_path"
+                       wd:type="std:html_img_relative" select="''" />
+            <xsl:param name="right_absolute_image_path">
+               <xsl:if test="$right_relative_image_path != ''">
+                  <xsl:value-of select="$lweb_images_path" />
+                  <xsl:text>/</xsl:text>
+                  <xsl:value-of select="$right_relative_image_path" />
+               </xsl:if>
+            </xsl:param>
+            <xsl:param name="right_image_height" select="'12pt'" />
+      -->
+            <xsl:param name="reentryfield" wd:tip_id=""
+                       wd:type="std:field_name_in[wam=$on_click_wamname][webrtn=$on_click_wrname]"
+                       select="'STDFUNREQ'" />
+            <xsl:param name="reentryvalue" wd:tip_id="" select="'INSERT'" />
+            <xsl:param name="hide_if" wd:tip_id="" wd:type="std:boolean"
+                       select="false()" />
+            <xsl:param name="formname" wd:tip_id="" wd:type="std:html_formname"
+                       select="'LANSA'" />
+            <xsl:param name="on_click_wamname" wd:tip_id="" wd:type="std:wam"
+                       select="/lxml:data/lxml:context/lxml:webapplication" />
+            <xsl:param name="on_click_wrname" wd:tip_id=""
+                       wd:type="std:webroutine[wam=$on_click_wamname]"
+                       select="/lxml:data/lxml:context/lxml:webroutine" />
+            <xsl:param name="protocol" wd:tip_id="" wd:type="std:protocol" />
+            <xsl:param name="show_in_new_window" wd:tip_id="" wd:type="std:boolean"
+                       select="false()" />
+            <xsl:param name="target_window_name" wd:tip_id=""
+                       wd:type="std:target_window">
+               <xsl:if test="$show_in_new_window">_blank</xsl:if>
+            </xsl:param>
+            <xsl:param name="disabled" wd:tip_id="" wd:type="std:boolean" />
+      <!--
+            <xsl:param name="title" wd:tip_id="" wd:type="std:mtxt_variable" />
+            <xsl:param name="pos_absolute_design" wd:tip_id=""
+                       select="'left:0pt;top:0pt;'" wd:role="std:pos_absolute_design" />
+            <xsl:param name="width_design" wd:tip_id="" select="'0pt'"
+                       wd:role="std:width_design" />
+            <xsl:param name="height_design" wd:tip_id="" select="'0pt'"
+                       wd:role="std:height_design" />
+      -->
+            <xsl:param name="class" wd:tip_id=""
+                       wd:type="std:css_style_class[tagName='button']"
+                       select="'multi_button2'" />
+            <xsl:param name="mouseover_class" wd:tip_id=""
+                       wd:type="std:css_style_class[tagName='button']"
+                       select="'multi_button2_mo'" />
+      <!--
+            <xsl:param name="left_image_class" wd:tip_id=""
+                       wd:type="std:css_style_class[tagName='img']" />
+            <xsl:param name="right_image_class" wd:tip_id=""
+                       wd:type="std:css_style_class[tagName='img']" />
+            <xsl:param name="text_class" wd:tip_id=""
+                       wd:type="std:css_style_class[tagName='span']"
+                       select="'std_image_button_text'" />
+      -->
+            <xsl:param name="presubmit_js" wd:tip_id="" />
+            <xsl:param name="tab_index" wd:tip_id="" />
+            <xsl:param name="default_button" wd:tip_id="" wd:type="std:boolean"
+                       select="true()" wd:role="std:default_submit" />
+            <xsl:call-template name="multi_button">
+               <xsl:with-param name="tab_index" select="$tab_index" />
+               <xsl:with-param name="presubmit_js" select="$presubmit_js" />
+               <!-- <xsl:with-param name="hide_focus" select="?" /> -->
+               <xsl:with-param name="disabled" select="$disabled" />
+               <xsl:with-param name="moclass" select="$mouseover_class" />
+               <xsl:with-param name="class" select="$class" />
+               <xsl:with-param name="target_window_name" select="$target_window_name" />
+               <xsl:with-param name="show_in_new_window" select="$show_in_new_window" />
+               <xsl:with-param name="protocol" select="$protocol" />
+               <xsl:with-param name="on_click_wrname" select="$on_click_wrname" />
+               <xsl:with-param name="on_click_wamname" select="$on_click_wamname" />
+               <!-- <xsl:with-param name="url" select="?" /> -->
+               <xsl:with-param name="formname" select="$formname" />
+               <xsl:with-param name="hide_if" select="$hide_if" />
+               <xsl:with-param name="reentryvalue" select="$reentryvalue" />
+               <xsl:with-param name="reentryfield" select="$reentryfield" />
+               <!-- <xsl:with-param name="currentrowhfield" select="?" /> -->
+               <xsl:with-param name="caption" select="$caption" />
+               <xsl:with-param name="name" select="$name" />
+               <!-- <xsl:with-param name="currentrownumval" select="?" /> -->
+               <!-- <xsl:with-param name="padding" select="?" /> -->
+               <!-- <xsl:with-param name="inline" select="?" /> -->
+            </xsl:call-template>
+            <!--
+            <xsl:if test="not($hide_if) or /lxml:data/lxml:context[@design]">
+               <xsl:variable name="hiddenjs">
+                  <xsl:if test="$reentryfield != ''">
+                     <xsl:text>InsertHidden(document.</xsl:text>
+                     <xsl:value-of select="$formname" />
+                     <xsl:text>, '</xsl:text>
+                     <xsl:value-of select="$reentryfield" />
+                     <xsl:text>', '</xsl:text>
+                     <xsl:value-of select="key('field-value', $reentryfield)" />
+                     <xsl:text>');</xsl:text>
+                     <xsl:text>document.</xsl:text>
+                     <xsl:value-of select="$formname" />
+                     <xsl:text>.</xsl:text>
+                     <xsl:value-of select="$reentryfield" />
+                     <xsl:text>.value = '</xsl:text>
+                     <xsl:value-of select="$reentryvalue" />
+                     <xsl:text>';</xsl:text>
+                  </xsl:if>
+               </xsl:variable>
+               <xsl:variable name="target_and_prot">
+                  <xsl:choose>
+                     <xsl:when test="$target_window_name != ''">
+                        <xsl:text>, '</xsl:text>
+                        <xsl:value-of select="$target_window_name" />
+                        <xsl:text>'</xsl:text>
+                     </xsl:when>
+                     <xsl:otherwise>, null</xsl:otherwise>
+                  </xsl:choose>
+                  <xsl:if test="$protocol!=''">
+                     <xsl:text>, '</xsl:text>
+                     <xsl:value-of select="$protocol" />
+                     <xsl:text>'</xsl:text>
+                  </xsl:if>
+               </xsl:variable>
+               <xsl:variable name="onclick">
+                  <xsl:value-of select="concat($presubmit_js, $hiddenjs)" />
+                  <xsl:text>HandleEvent('</xsl:text>
+                  <xsl:value-of select="$on_click_wamname" />', '<xsl:value-of select="$on_click_wrname" />', document.<xsl:value-of select="$formname" />
+                  <xsl:value-of select="$target_and_prot" />
+                  <xsl:text>)</xsl:text>
+               </xsl:variable>
+               <xsl:if test="boolean($default_button)">
+                  <script language="javascript" type="text/javascript">
+               //<xsl:comment>
+                        <xsl:if test="$formname != ''">
+                           <xsl:variable name="handler_name">
+                              <xsl:text>on</xsl:text>
+                              <xsl:value-of select="$formname" />_<xsl:value-of select="position()" />
+                              <xsl:text>SubmitHandler</xsl:text>
+                           </xsl:variable>
+                  function <xsl:value-of select="$handler_name" />(oForm)
+                  {
+                     <xsl:value-of select="$onclick" />
+                     return false;
+                  }
+                  document.<xsl:value-of select="$formname" />.setAttribute("__defaultSubmitHandler", 
+      
+      "return <xsl:value-of select="$handler_name" />(oForm)");
+                  </xsl:if>
+               //</xsl:comment>
+                  </script>
+               </xsl:if>
+               <button>
+                  <xsl:call-template name="make_size_and_pos_style.private">
+      -->
+            <!-- <xsl:with-param name="in_attribute" select="?" /> -->
+            <!-- <xsl:with-param name="default_height" select="?" /> -->
+            <!-- <xsl:with-param name="default_width" select="?" /> -->
+            <!--
+                     <xsl:with-param name="caller_name"
+                                     select="'std_image_button.xsl'" />
+                     <xsl:with-param name="pos_absolute" select="$pos_absolute_design" />
+                     <xsl:with-param name="height" select="$height_design" />
+                     <xsl:with-param name="width" select="$width_design" />
+                  </xsl:call-template>
+                  <xsl:if test="$name!=''">
+                     <xsl:attribute name="id">
+                        <xsl:value-of select="$name" />
+                     </xsl:attribute>
+                  </xsl:if>
+                  <xsl:choose>
+                     <xsl:when test="boolean($default_button)">
+                        <xsl:attribute name="type">submit</xsl:attribute>
+                     </xsl:when>
+                     <xsl:otherwise>
+                        <xsl:attribute name="onclick">
+                           <xsl:value-of select="$onclick" />
+                        </xsl:attribute>
+                     </xsl:otherwise>
+                  </xsl:choose>
+                  <xsl:if test="$class != ''">
+                     <xsl:attribute name="class">
+                        <xsl:value-of select="$class" />
+                     </xsl:attribute>
+                  </xsl:if>
+                  <xsl:if test="$mouseover_class != ''">
+                     <xsl:attribute name="onmouseenter">
+                        <xsl:text>this.className = '</xsl:text>
+                        <xsl:value-of select="$mouseover_class" />
+                        <xsl:text>'</xsl:text>
+                     </xsl:attribute>
+                     <xsl:attribute name="onmouseleave">
+                        <xsl:text>this.className = '</xsl:text>
+                        <xsl:value-of select="$class" />
+                        <xsl:text>'</xsl:text>
+                     </xsl:attribute>
+                  </xsl:if>
+                  <xsl:if test="$tab_index != ''">
+                     <xsl:attribute name="tabindex">
+                        <xsl:value-of select="$tab_index" />
+                     </xsl:attribute>
+                  </xsl:if>
+                  <xsl:if test="boolean($disabled)">
+                     <xsl:attribute name="disabled">
+                        <xsl:text>disabled</xsl:text>
+                     </xsl:attribute>
+                  </xsl:if>
+                  <xsl:if test="$title != ''">
+                     <xsl:attribute name="title">
+                        <xsl:value-of select="$title" />
+                     </xsl:attribute>
+                  </xsl:if>
+                  <xsl:if test="$left_absolute_image_path != ''">
+                     <xsl:choose>
+                        <xsl:when test="$left_image_height != ''">
+                           <img style="height:{$left_image_height}" align="middle"
+                                src="{$left_absolute_image_path}">
+                              <xsl:if test="$left_image_class!=''">
+                                 <xsl:attribute name="class">
+                                    <xsl:value-of select="$left_image_class" />
+                                 </xsl:attribute>
+                              </xsl:if>
+                           </img>
+                        </xsl:when>
+                        <xsl:otherwise>
+                           <img src="{$left_absolute_image_path}" align="middle">
+                              <xsl:if test="$left_image_class!=''">
+                                 <xsl:attribute name="class">
+                                    <xsl:value-of select="$left_image_class" />
+                                 </xsl:attribute>
+                              </xsl:if>
+                           </img>
+                        </xsl:otherwise>
+                     </xsl:choose>
+                  </xsl:if>
+                  <span>
+                     <xsl:if test="$text_class != ''">
+                        <xsl:attribute name="class">
+                           <xsl:value-of select="$text_class" />
+                        </xsl:attribute>
+                     </xsl:if>
+                     <xsl:value-of select="$caption" />
+                  </span>
+                  <xsl:if test="$right_absolute_image_path != ''">
+                     <xsl:choose>
+                        <xsl:when test="$right_image_height != ''">
+                           <img style="height:{$right_image_height}"
+                                src="{$right_absolute_image_path}" align="middle">
+                              <xsl:if test="$right_image_class!=''">
+                                 <xsl:attribute name="class">
+                                    <xsl:value-of select="$right_image_class" />
+                                 </xsl:attribute>
+                              </xsl:if>
+                           </img>
+                        </xsl:when>
+                        <xsl:otherwise>
+                           <img src="{$right_absolute_image_path}" align="middle">
+                              <xsl:if test="$right_image_class!=''">
+                                 <xsl:attribute name="class">
+                                    <xsl:value-of select="$right_image_class" />
+                                 </xsl:attribute>
+                              </xsl:if>
+                           </img>
+                        </xsl:otherwise>
+                     </xsl:choose>
+                  </xsl:if>
+               </button>
+            </xsl:if>
+      -->
+         </xsl:template>
+      </xsl:transform>

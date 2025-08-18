@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3NXTFUN
+  Type:               Alpha
+  Length:             7
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Next function name"
+      Label:              "Function ......"
+      Heading1:           "Function"
+      Heading2:           " "
+      Heading3:           " "

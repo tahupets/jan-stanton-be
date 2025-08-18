@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3RNTRYF
+  Type:               Alpha
+  Length:             9
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Re-Entry Field Name"
+      Label:              "Re-Entry Field"
+      Heading1:           "Re-Entry"
+      Heading2:           "Field"
+      Heading3:           "Name"

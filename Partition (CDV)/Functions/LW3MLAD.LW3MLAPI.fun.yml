@@ -1,0 +1,84 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * =======================================================
+    * Process .......: LW3MLAPI
+    * Function ......: LW3MLAD
+    * Description ...: Multilingual API for Admin site
+    * =======================================================
+    * INPUT Parms:
+    * =======================================================
+    * #FXWAMNAM - WAM Name
+    * #FXWRTNAM - webroutine name
+    * #FXLNGCOD - Language Code
+    * =======================================================
+    * OUTPUT Parms:
+    * =======================================================
+    * List returned ls_mlnvar
+    *
+    * =======================================================
+    *
+    Function Options(*DIRECT *HEAVYUSAGE) Rcv_List(#ls_mlnvar)
+    
+    * Working fields, lists and groups
+    * =======================================================
+    Define Field(#w_tmpcod) Reffld(#FXVARNAM) Desc('For page title')
+    *
+    * multilingual variable list
+    Def_List Name(#ls_mlnvar) Fields(#FXVARNAM #FXVARTXT) Type(*WORKING) Entrys(*MAX)
+    *
+    * =======================================================
+    * Program Mainline : LW3MULT
+    * =======================================================
+    *
+    If_Null Field(#FXLNGCOD)
+    #FXLNGCOD := *LANGUAGE
+    Endif
+    *
+    #FXWAMNAM := #FXWAMNAM.UpperCase
+    #FXWRTNAM := #FXWRTNAM.UpperCase
+    
+    Clr_List Named(#ls_mlnvar)
+    *
+    * get page title
+    #w_tmpcod := #FXWAMNAM + '_' + #FXWRTNAM
+    Fetch Fields(#LW3VARNAM #LW3VARTXT) From_File(LW3MLNVAR) With_Key(#w_tmpcod #FXLNGCOD) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #FXVARNAM := #LW3VARNAM
+    #FXVARTXT := #LW3VARTXT
+    Add_Entry To_List(#ls_mlnvar)
+    *
+    #FXVARNAM := 'PAGE_TITLE'
+    Add_Entry To_List(#ls_mlnvar)
+    Endif
+    *
+    * common variables
+    Select Fields(#LW3VARNAM) From_File(LW3MVRLUP) With_Key('ADMIN' 'COMMON') Io_Error(*NEXT) Val_Error(*NEXT)
+    #FXVARNAM := #LW3VARNAM
+    #FXVARTXT := ''
+    Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key(#FXVARNAM #FXLNGCOD) Io_Error(*NEXT) Val_Error(*NEXT)
+    #FXVARTXT := #LW3VARTXT
+    Add_Entry To_List(#ls_mlnvar)
+    Endselect
+    *
+    * specific variables for the WAM/Webroutine
+    Select Fields(#LW3VARNAM) From_File(LW3MVRLUP) With_Key(#FXWAMNAM #FXWRTNAM) Io_Error(*NEXT) Val_Error(*NEXT)
+    * do not add duplicate name
+    Check_For In_File(LW3MVRL02) With_Key(#LW3VARNAM 'ADMIN' 'COMMON') Io_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    Continue
+    Endif
+    
+    #FXVARNAM := #LW3VARNAM
+    
+    #FXVARTXT := ''
+    Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key(#FXVARNAM #FXLNGCOD) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    #FXVARTXT := #LW3VARTXT
+    
+    Add_Entry To_List(#ls_mlnvar)
+    Endselect
+    
+    Return
+    

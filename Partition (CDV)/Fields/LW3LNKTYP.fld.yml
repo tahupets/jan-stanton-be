@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3LNKTYP
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Link Type"
+      Label:              "Link Type"
+      Heading1:           "Link"
+      Heading2:           "Type"
+      Heading3:           " "

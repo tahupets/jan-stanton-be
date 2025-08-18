@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3CATSUB
+  Type:               Packed
+  Length:             10
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Sub Category ID"
+      Label:              "Sub Category ID"
+      Heading1:           "Sub"
+      Heading2:           "Category"
+      Heading3:           "ID"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(187) Usepicklist(False) Width(280)
+    
+    End_Com
+    
+    End_Com

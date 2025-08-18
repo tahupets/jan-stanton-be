@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3PCTYP
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Product Category Type"
+      Label:              "Product Categor"
+      Heading1:           "Product"
+      Heading2:           "Category"
+      Heading3:           "Type"

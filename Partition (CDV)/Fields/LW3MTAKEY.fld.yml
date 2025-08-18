@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3MTAKEY
+  Type:               Alpha
+  Length:             20
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Meta Data Key"
+      Label:              "Meta Data Key"
+      Heading1:           "Meta"
+      Heading2:           "Data"
+      Heading3:           "Key"

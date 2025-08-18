@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3SMEDF
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Social Media Flag"
+      Label:              "Social Media Fl"
+      Heading1:           "Social"
+      Heading2:           "Media"
+      Heading3:           "Flag"

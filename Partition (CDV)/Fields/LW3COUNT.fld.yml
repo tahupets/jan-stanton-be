@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3COUNT
+  Type:               Signed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Counter Field"
+      Label:              "Counter Field"
+      Heading1:           "Counter"
+      Heading2:           "Field"
+      Heading3:           " "

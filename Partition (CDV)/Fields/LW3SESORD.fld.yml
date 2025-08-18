@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               LW3SESORD
+  Type:               Alpha
+  Length:             25
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Order Number"
+      Label:              "Order Number"
+      Heading1:           "Order"
+      Heading2:           "Number"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(232)
+    
+    End_Com
+    
+    End_Com

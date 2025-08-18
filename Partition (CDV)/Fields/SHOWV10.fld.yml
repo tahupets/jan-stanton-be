@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               SHOWV10
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Show V10"
+      Label:              "Show V10"
+      Heading1:           "Show"
+      Heading2:           "V10"
+      Heading3:           " "

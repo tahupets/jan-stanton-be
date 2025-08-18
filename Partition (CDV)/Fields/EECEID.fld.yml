@@ -1,0 +1,27 @@
+﻿Field:
+  Name:               EECEID
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Reference Field:    EEVID
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Event ID"
+      Label:              "Event ID"
+      Heading1:           "Event ID"
+      Heading2:           " "
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(209)
+    
+    End_Com
+    
+    End_Com

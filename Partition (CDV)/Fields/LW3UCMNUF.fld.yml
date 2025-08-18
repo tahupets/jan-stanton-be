@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               LW3UCMNUF
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Flag for Using Content Menus"
+      Label:              "Flag for Using"
+      Heading1:           "Flag for"
+      Heading2:           "Using"
+      Heading3:           "Content Menus"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Usepicklist(False) Componentversion(1) Height(21) Marginleft(181) Width(223)
+    
+    End_Com
+    
+    End_Com

@@ -1,0 +1,103 @@
+﻿File:
+  Name:                           LW3CNT
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3CNT
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     No
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Content"
+
+  Real Fields:
+  - LW3CNTID:
+      Type:               Decimal
+      Length:             8
+      Decimals:           0
+
+  - LW3FMTID:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3LNGID:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3CNTSDC:
+      Type:               Alphanumeric
+      Length:             15
+      Decimals:           0
+
+  - LW3CNTLDC:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  Primary Keys:
+  - LW3CNTID
+  - LW3LNGID
+
+  Logical Views:
+  - LW3CNT01:
+      Identifier:         LW3CNT01
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3CNT01
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        " Language"
+
+      Keys:
+      - LW3LNGID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  - LW3CNT02:
+      Identifier:         LW3CNT02
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3CNT02
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        " Format"
+
+      Keys:
+      - LW3FMTID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+  File Level Triggers:
+  - LW3FMTID:
+    - Trigger for LW3CNT:
+        Function:           LW3MT38
+        Trigger Points:
+        - Before Insert
+        - Before Update

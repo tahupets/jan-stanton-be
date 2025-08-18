@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               W_SFID
+  Type:               Packed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Reference Field:    LW3SFID
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Store Front"
+      Label:              "Store Front"
+      Heading1:           "Store"
+      Heading2:           "Front"
+      Heading3:           " "

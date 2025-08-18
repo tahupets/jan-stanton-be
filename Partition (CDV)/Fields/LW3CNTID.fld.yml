@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               LW3CNTID
+  Type:               Packed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Content ID"
+      Label:              "Content ID"
+      Heading1:           "Content ID"
+      Heading2:           " "
+      Heading3:           " "

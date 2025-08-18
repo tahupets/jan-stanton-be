@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3TOPRRN
+  Type:               Packed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Reference Field:    LW3STDRRN
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Top entry RRN"
+      Label:              "Top entry RRN"
+      Heading1:           "Top"
+      Heading2:           "Entry"
+      Heading3:           "RRN"

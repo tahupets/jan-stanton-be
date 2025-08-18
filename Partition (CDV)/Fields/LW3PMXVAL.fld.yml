@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3PMXVAL
+  Type:               Packed
+  Length:             15
+  Decimals:           4
+  Default Value:      "*ZERO"
+  Edit Mask:          J
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Promotions Maximum Value"
+      Label:              "Promotions Maxi"
+      Heading1:           "Promotions"
+      Heading2:           "Maximum"
+      Heading3:           "Value"

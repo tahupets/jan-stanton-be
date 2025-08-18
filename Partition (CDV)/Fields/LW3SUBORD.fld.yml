@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3SUBORD
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Sub-category Order"
+      Label:              "Sub-category Or"
+      Heading1:           "Sub-category"
+      Heading2:           "Order"
+      Heading3:           " "

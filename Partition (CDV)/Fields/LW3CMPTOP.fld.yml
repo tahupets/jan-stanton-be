@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3CMPTOP
+  Type:               Alpha
+  Length:             20
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Web component for top of page"
+      Label:              "Web page top"
+      Heading1:           "Web component"
+      Heading2:           "page"
+      Heading3:           "top"

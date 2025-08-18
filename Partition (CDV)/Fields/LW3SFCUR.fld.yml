@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3SFCUR
+  Type:               Packed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Reference Field:    LW3SFID
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Current Store Front"
+      Label:              "Current Store F"
+      Heading1:           "Current"
+      Heading2:           "Store"
+      Heading3:           "Front"

@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3SSHPVP
+  Type:               Packed
+  Length:             7
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Edit Mask:          J
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Volume Price"
+      Label:              "Volume Price"
+      Heading1:           "Volume"
+      Heading2:           "Price"
+      Heading3:           " "

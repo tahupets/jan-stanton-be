@@ -1,0 +1,95 @@
+﻿Weblet:
+  Name:               desc_lookup
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Multilingual Description Lookup"
+
+  XML: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+       <lxml:context>
+          <lxml:images-path>/images</lxml:images-path>
+       </lxml:context>
+    </lxml:data>
+
+  Designs:
+  - Language:           ENG
+    Technology Service: LANSA XHTML
+
+    XSL: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!--     LANSA for the Web                   -->
+      <xsl:transform version="1.0" exclude-result-prefixes="lxml wd tsml"
+                     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                     xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data"
+                     xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design"
+                     xmlns:tsml="http://www.lansa.com/2002/XML/Generation-Metadata"
+                     xmlns="http://www.w3.org/1999/xhtml">
+         <xsl:import href="std_types.xsl" />
+         <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8"
+                     indent="no" />
+         <xsl:key name="desc-lookup"
+                  match="/lxml:data/lxml:lists/lxml:list[@name='LS_MLNVAR']/lxml:list-entries/lxml:entry/lxml:column[2]"
+                  use="../lxml:column[1]" />
+         <xsl:key name="rsvr-lookup"
+                  match="/lxml:data/lxml:lists/lxml:list[@name='LS_RSVVAL']/lxml:list-entries/lxml:entry/lxml:column[2]"
+                  use="../lxml:column[1]" />
+         <wd:definition>
+            <wd:group name="Custom Weblets" />
+         </wd:definition>
+         <wd:template name="desc_lookup">
+            <wd:description icon="icons/std_date.ico">
+               <wd:name lang="ENG">Variable Lookup</wd:name>
+            </wd:description>
+         </wd:template>
+         <wd:types>
+            <wd:type name="cust:lookup_list">
+               <wd:enumerationlist value="'LS_MLNVAR'"
+                                   display="Multilingual Variable List" />
+               <wd:enumerationlist value="'LS_RSVVAL'"
+                                   display="Reserved Variable List" />
+            </wd:type>
+         </wd:types>
+      
+         <xsl:template name="desc_lookup">
+            <xsl:param name="name" wd:tip_id="" />
+            <xsl:param name="disable_output_escaping" wd:tip_id=""
+                       wd:type="std:boolean" select="false()" />
+            <xsl:param name="lookup_list" wd:tip_id="" wd:type="cust:lookup_list"
+                       select="'LS_MLNVAR'" />
+            <xsl:choose>
+               <xsl:when test="$lweb_design_mode">
+                  <xsl:value-of select="$name" />&#160;description
+               </xsl:when>
+               <xsl:otherwise>
+                  <xsl:choose>
+                     <xsl:when test="$lookup_list = 'LS_MLNVAR'">
+                        <xsl:choose>
+                           <xsl:when test="$disable_output_escaping">
+                              <xsl:value-of disable-output-escaping="yes"
+                                            select="key('desc-lookup', $name)" />
+                           </xsl:when>
+                           <xsl:otherwise>
+                              <xsl:value-of disable-output-escaping="no"
+                                            select="key('desc-lookup', $name)" />
+                           </xsl:otherwise>
+                        </xsl:choose>
+                     </xsl:when>
+                     <xsl:when test="$lookup_list = 'LS_RSVVAL'">
+                        <xsl:choose>
+                           <xsl:when test="$disable_output_escaping">
+                              <xsl:value-of disable-output-escaping="yes"
+                                            select="key('rsvr-lookup', $name)" />
+                           </xsl:when>
+                           <xsl:otherwise>
+                              <xsl:value-of disable-output-escaping="no"
+                                            select="key('rsvr-lookup', $name)" />
+                           </xsl:otherwise>
+                        </xsl:choose>
+                     </xsl:when>
+                  </xsl:choose>
+               </xsl:otherwise>
+            </xsl:choose>
+         </xsl:template>
+      </xsl:transform>

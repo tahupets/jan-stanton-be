@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               SHOWH9
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Show H9"
+      Label:              "Show H9"
+      Heading1:           "Show"
+      Heading2:           "H9"
+      Heading3:           " "

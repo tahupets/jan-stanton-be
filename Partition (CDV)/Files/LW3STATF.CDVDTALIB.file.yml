@@ -1,0 +1,83 @@
+﻿File:
+  Name:                           LW3STATF
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3STATF
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              No
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 10000     2000      3) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE State master file"
+
+  Real Fields:
+  - LW3LNGCOD:
+      Type:               Alphanumeric
+      Length:             4
+      Decimals:           0
+
+  - LW3CTRY:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3STATE:
+      Type:               Alphanumeric
+      Length:             3
+      Decimals:           0
+
+  - LW3STATED:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - LW3UFLG:
+      Type:               Alphanumeric
+      Length:             1
+      Decimals:           0
+
+  Primary Keys:
+  - LW3LNGCOD
+  - LW3CTRY
+  - LW3STATE
+
+  Logical Views:
+  - LW3STAT01:
+      Identifier:         LW3STAT01
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      LW3STAT01
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "<New Logical>"
+
+      Keys:
+      - LW3STATE:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CTRY:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

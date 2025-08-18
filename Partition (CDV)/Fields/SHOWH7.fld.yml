@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               SHOWH7
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Show H7"
+      Label:              "Show H7"
+      Heading1:           "Show"
+      Heading2:           "H7"
+      Heading3:           " "

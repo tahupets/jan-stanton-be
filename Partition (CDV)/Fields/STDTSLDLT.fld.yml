@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               STDTSLDLT
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Standard Template Select - Delete"
+      Label:              "Delete"
+      Heading1:           " "
+      Heading2:           " "
+      Heading3:           "Delete"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Marginleft(174) Usepicklist(False) Width(204)
+    
+    End_Com
+    
+    Begin_Com Role(*Weblet 'stdtsldlt.stdtsldlt') Name(#Weblet) Defaultweblet(True)
+    
+    End_Com
+    End_Com

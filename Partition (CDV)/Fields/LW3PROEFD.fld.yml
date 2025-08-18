@@ -1,0 +1,31 @@
+﻿Field:
+  Name:               LW3PROEFD
+  Type:               Signed
+  Length:             8
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Edit Mask:          W
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Promotions/Discounts Effective Date"
+      Label:              "Prom Eff Date"
+      Heading1:           "Promotions/Discounts"
+      Heading2:           "Effective"
+      Heading3:           "Date"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Marginleft(186) Usepicklist(False) Width(271)
+    
+    End_Com
+    
+    End_Com

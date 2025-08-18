@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               LW3TXTNAM
+  Type:               Alpha
+  Length:             20
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Intro text name"
+      Label:              "Variable name"
+      Heading1:           "Variable"
+      Heading2:           "Name"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(324)
+    
+    End_Com
+    
+    End_Com

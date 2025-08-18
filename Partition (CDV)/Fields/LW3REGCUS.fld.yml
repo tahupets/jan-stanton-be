@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3REGCUS
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "'N'"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Registered Customer Status Indicator"
+      Label:              "Registered"
+      Heading1:           "Registered"
+      Heading2:           "Customer Status"
+      Heading3:           "Indicator"

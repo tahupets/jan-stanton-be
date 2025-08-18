@@ -1,0 +1,78 @@
+﻿File:
+  Name:                           LW3KEYWCAT
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             LW3KEYWCAT
+  Module Library:                 Same Library As File
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         No
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         No
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            No
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             No
+  Convert Special Characters:     Yes
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( 100000 10000 10) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Category Keywords"
+
+  Real Fields:
+  - LW3SFID:
+      Type:               Decimal
+      Length:             2
+      Decimals:           0
+
+  - LW3CATID:
+      Type:               Decimal
+      Length:             10
+      Decimals:           0
+
+  - LW3KEYSEQ:
+      Type:               Decimal
+      Length:             9
+      Decimals:           0
+
+  - LW3KWORD:
+      Type:               String
+      Length:             64
+      Decimals:           0
+
+  Primary Keys:
+  - LW3SFID
+  - LW3CATID
+  - LW3KEYSEQ
+
+  Logical Views:
+  - L3WKYWCL1:
+      Identifier:         L3WKYWCL1
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      L3WKYWCL1
+      Dynamic Select:     No
+      Parameters:         " "
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Keyword"
+
+      Keys:
+      - LW3SFID:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3KWORD:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned

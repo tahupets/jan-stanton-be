@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3PMNVAL
+  Type:               Packed
+  Length:             15
+  Decimals:           4
+  Default Value:      "*ZERO"
+  Edit Mask:          J
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Promotions Minimum Value"
+      Label:              "Promotions Mini"
+      Heading1:           "Promotions"
+      Heading2:           "Minimum"
+      Heading3:           "Value"

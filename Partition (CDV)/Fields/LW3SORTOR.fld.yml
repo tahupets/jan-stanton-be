@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3SORTOR
+  Type:               Signed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Sort Order"
+      Label:              "Sort Order"
+      Heading1:           "Sort"
+      Heading2:           "Order"
+      Heading3:           " "

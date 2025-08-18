@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3EMEDTA
+  Type:               Alpha
+  Length:             250
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Keyboard Shift:     SbcsAndDbcs
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "E-mail Data (E-mail Engine)"
+      Label:              "E-mail Data"
+      Heading1:           "E-mail"
+      Heading2:           "Data"
+      Heading3:           " "

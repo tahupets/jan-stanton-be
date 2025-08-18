@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3MSGTXT
+  Type:               Alpha
+  Length:             132
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Keyboard Shift:     SbcsAndDbcs
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Message Text"
+      Label:              "Message Text"
+      Heading1:           "Message"
+      Heading2:           "Text"
+      Heading3:           " "

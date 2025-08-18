@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3VARSEQ
+  Type:               Packed
+  Length:             7
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Variable Display Sequence"
+      Label:              "Variable Displa"
+      Heading1:           "Variable"
+      Heading2:           "Display"
+      Heading3:           "Sequence"

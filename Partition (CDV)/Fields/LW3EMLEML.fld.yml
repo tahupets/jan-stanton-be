@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3EMLEML
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Email List Email"
+      Label:              "Email List Emai"
+      Heading1:           "Email"
+      Heading2:           "List"
+      Heading3:           "Email"

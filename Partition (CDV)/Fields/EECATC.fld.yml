@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               EECATC
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Email Attachment"
+      Label:              "Email Attachmen"
+      Heading1:           "Email"
+      Heading2:           "Attachment"
+      Heading3:           " "

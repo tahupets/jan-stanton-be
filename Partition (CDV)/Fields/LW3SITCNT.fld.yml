@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3SITCNT
+  Type:               Signed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          3
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Session Item Total Count"
+      Label:              "Total Count"
+      Heading1:           "Session"
+      Heading2:           "Item"
+      Heading3:           "Total"

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               APPLID
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Application ID"
+      Label:              "Application ID"
+      Heading1:           "Application"
+      Heading2:           "ID"
+      Heading3:           " "

@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3SSHPDS
+  Type:               Alpha
+  Length:             20
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Shipping Description"
+      Label:              "Shipping Type"
+      Heading1:           "Description"
+      Heading2:           " "
+      Heading3:           " "

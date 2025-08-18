@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               LW3PROORI
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Promotions/Discounts Order Origin"
+      Label:              "Prom/Disc Orig"
+      Heading1:           "Promotions/Discounts"
+      Heading2:           "Order"
+      Heading3:           "Origin"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Marginleft(174) Usepicklist(False) Width(219)
+    
+    End_Com
+    
+    End_Com

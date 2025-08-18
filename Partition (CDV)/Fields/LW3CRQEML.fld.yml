@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3CRQEML
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Catalog Request Email"
+      Label:              "Catalog Request"
+      Heading1:           "Catalog"
+      Heading2:           "Request"
+      Heading3:           "Email"

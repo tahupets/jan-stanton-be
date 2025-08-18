@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               STDLISTID
+  Type:               Alpha
+  Length:             4
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Standard List ID"
+      Label:              "List ID"
+      Heading1:           "Standard"
+      Heading2:           "List"
+      Heading3:           "ID"

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3PREV
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "lw3prev"
+      Label:              "lw3prev"
+      Heading1:           "lw3prev"
+      Heading2:           " "
+      Heading3:           " "

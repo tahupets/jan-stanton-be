@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3KEYSEQ
+  Type:               Packed
+  Length:             9
+  Decimals:           0
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Keyword Sequence"
+      Label:              "Keyword Sequenc"
+      Heading1:           "Keyword"
+      Heading2:           "Sequence"
+      Heading3:           " "

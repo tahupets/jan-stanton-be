@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3NSHOW
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Number of Categories to Show (left menu)"
+      Label:              "Number of Categ"
+      Heading1:           "Number"
+      Heading2:           "of"
+      Heading3:           "Categories"

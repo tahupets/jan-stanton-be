@@ -1,0 +1,112 @@
+﻿Function:
+  Enabled For RDMLX:  No
+
+  Source: |
+    * =======================================================
+    * Copyright .....: Lansa Inc, 2001 (C)
+    * Process .......: LW3V01
+    * Function ......: LW3V001
+    * Created by ....: LANSA
+    * Created on ....: 14/03/2001
+    * Description ...: Validation of Email ID
+    * =======================================================
+    * Input Parameter is LW3CEMAIL and Output parameter is
+    * LW3VALERR ('Y' or 'N')
+    * LW3VALERR = 'Y' - Error on email id
+    * LW3VALERR = 'N' - No Error on email id
+    * =======================================================
+    Function Options(*DIRECT)
+    Define Field(#ZSTRING1) Type(*CHAR) Length(256)
+    Define Field(#ZSTRING2) Type(*CHAR) Length(256)
+    * work variables
+    Define Field(#ZRETPOS) Type(*DEC) Length(2) Decimals(0)
+    Define Field(#ZRETPOS1) Type(*DEC) Length(2) Decimals(0)
+    Define Field(#ZWKPOS) Type(*DEC) Length(2) Decimals(0)
+    Define Field(#ZWKVAR) Type(*CHAR) Length(1)
+    Define Field(#ZWKRES) Type(*CHAR) Length(1)
+    Define Field(#ZDOT) Type(*CHAR) Length(1) Default(.)
+    
+    Change Field(#LW3VALERR) To(N)
+    * Moving all alphabets and numbers to variable
+    Change Field(#ZSTRING1) To('''ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz''')
+    Change Field(#ZSTRING2) To('''ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz''')
+    
+    * First scan for '@'
+    
+    Use Builtin(SCANSTRING) With_Args(#LW3CEMAIL '@') To_Get(#ZRETPOS)
+    
+    If Cond('#ZRETPOS *GT 0')
+    
+    Change Field(#ZWKPOS) To('#ZRETPOS + 1')
+    * get the value next to @
+    Substring Field(#LW3CEMAIL #ZWKPOS 1) Into_Field(#ZWKVAR)
+    If Cond('#ZWKVAR = *BLANKS')
+    Change Field(#LW3VALERR) To(Y)
+    Goto Label(END)
+    Endif
+    Endif
+    
+    
+    * Check the value entered before and after @
+    * The value entered should be alphabet or number
+    
+    Use Builtin(CHECKSTRING) With_Args(#ZWKVAR #ZSTRING1) To_Get(#ZWKRES)
+    If Cond('#ZWKRES = ''N''')
+    Change Field(#LW3VALERR) To(Y)
+    Goto Label(END)
+    Endif
+    
+    Change Field(#ZWKPOS) To('#ZRETPOS - 1')
+    * Get the value before @
+    If Cond('#ZWKPOS *GT 0')
+    Substring Field(#LW3CEMAIL #ZWKPOS 1) Into_Field(#ZWKVAR)
+    Use Builtin(CHECKSTRING) With_Args(#ZWKVAR #ZSTRING1) To_Get(#ZWKRES)
+    If Cond('#ZWKVAR = *BLANKS')
+    Change Field(#LW3VALERR) To(Y)
+    Goto Label(END)
+    Endif
+    * check for alphabet or number
+    
+    If Cond('#ZWKRES = ''N''')
+    Change Field(#LW3VALERR) To(Y)
+    Goto Label(END)
+    Endif
+    * Scan for the '.' in email id
+    Use Builtin(SCANSTRING) With_Args(#LW3CEMAIL #ZDOT #ZRETPOS) To_Get(#ZRETPOS1)
+    
+    If Cond('#ZRETPOS1  *GT 0')
+    Change Field(#ZRETPOS1) To('#ZRETPOS1 + 1')
+    * Get the value after the zdot
+    Substring Field(#LW3CEMAIL #ZRETPOS1 1) Into_Field(#ZWKVAR)
+    If Cond('#ZWKVAR = *BLANKS')
+    Change Field(#LW3VALERR) To(Y)
+    Goto Label(END)
+    Endif
+    * Check the character after '.' is alphabet or not
+    Use Builtin(CHECKSTRING) With_Args(#ZWKVAR #ZSTRING2) To_Get(#ZWKRES)
+    
+    If Cond('#ZWKRES = ''N''')
+    Change Field(#LW3VALERR) To(Y)
+    Goto Label(END)
+    Endif
+    
+    Change Field(#ZRETPOS1) To('#ZRETPOS1 - 1')
+    * Get the character before '.'
+    Substring Field(#LW3CEMAIL #ZRETPOS1 1) Into_Field(#ZWKVAR)
+    If Cond('#ZWKVAR = *BLANKS')
+    Change Field(#LW3VALERR) To(Y)
+    Goto Label(END)
+    Endif
+    /* zdot(.) is not present in the email passed */
+    Else
+    
+    Change Field(#LW3VALERR) To(Y)
+    Endif
+    /* @ is not presend in the email passed */
+    Else
+    
+    Change Field(#LW3VALERR) To(Y)
+    Endif
+    END: Exchange Fields(#LW3VALERR)
+    Return
+    

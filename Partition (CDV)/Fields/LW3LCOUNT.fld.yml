@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3LCOUNT
+  Type:               Signed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "count"
+      Label:              "count"
+      Heading1:           "count"
+      Heading2:           " "
+      Heading3:           " "

@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               LW3CATITM
+  Type:               Alpha
+  Length:             15
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Catalog Item Number"
+      Label:              "Catalog Item Nu"
+      Heading1:           "Catalog"
+      Heading2:           "Item"
+      Heading3:           "Number"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(187) Usepicklist(False) Width(453)
+    
+    End_Com
+    
+    End_Com

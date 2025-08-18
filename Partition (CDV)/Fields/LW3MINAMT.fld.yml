@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3MINAMT
+  Type:               Signed
+  Length:             15
+  Decimals:           2
+  Default Value:      "*ZEROS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Minimum Order Amount"
+      Label:              "Min Order Amt"
+      Heading1:           "Minimum"
+      Heading2:           "Order"
+      Heading3:           "Amount"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(293)
+    
+    End_Com
+    
+    End_Com

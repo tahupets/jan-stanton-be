@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3CATPRD
+  Type:               Signed
+  Length:             7
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          Z
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Category id"
+      Label:              "Category id"
+      Heading1:           "Category"
+      Heading2:           "Id"
+      Heading3:           " "

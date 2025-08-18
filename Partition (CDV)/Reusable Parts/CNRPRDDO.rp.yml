@@ -1,0 +1,38 @@
+﻿Reusable Part:
+  Name:               CNRPRDDO
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Products Data Object"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Stanton Design 2025
+    * Type            : Reusable Part
+    * Platform        : REST APIs
+    * Name            : CNRPRDDO
+    * Identifier      : CNRPRDDO
+    * Ancestor        : PRIM_SRVM
+    * Written By      : Jan Metica
+    * Written On      : 18th August 2025
+    * Description     : Products Data Object
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT *ListFields #LS_PRODUCTDETAILS)
+    
+    * =======================================================
+    * List Definitions
+    * =======================================================
+    
+    Def_List Name(#LS_PRODUCTDETAILS) Fields(#LW3ROWTYP #L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN #P010RPRC #P010CPRC #P010UOM #P010SMPRC #P010SHPRC #F55ROLL #F55DLOT #F55WTHF #F55WTHI #F55LTHF #F55LTHI #F55UPRICE #LW3ROLCNT #LW3SLDOUT) Type(*WORKING) Entrys(*MAX)
+    
+    End_Com

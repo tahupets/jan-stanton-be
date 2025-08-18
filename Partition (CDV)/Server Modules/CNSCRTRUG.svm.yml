@@ -1,0 +1,713 @@
+﻿ServerModule:
+  Name:               CNSCRTRUG
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Create a Rug API"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Stanton Design 2025
+    * Type            : Server Module
+    * Platform        : REST APIs
+    * Name            : CNSCRTRUG
+    * Identifier      : CNSCRTRUG
+    * Ancestor        : PRIM_SRVM
+    * Written By      : Jan Metica
+    * Written On      : 18th August 2025
+    * Description     : Create a Rug API
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Begin_Com Role(*EXTENDS #PRIM_SRVM)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CNRCODES) Name(#Utility_Codes) Desc('Code Table Utility') Help('Code Table Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERMLUTL) Name(#Utility_Multilinguals) Desc('Multilingual Utility') Help('Multilinguals Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    Define_Com Class(#CNRAPILG) Name(#Processor_ApiLog) Desc('API Log Processor') Scope(*APPLICATION)
+    Define_Com Class(#CNRPRDPR) Name(#Processor_Products) Desc('Products Processor') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Collections
+    * =======================================================
+    
+    Define_Com Class(#PRIM_LCOL<#CNRPRDDO>) Name(#Collection_Products) Desc('Collection of Products') Help('Collection of Products')
+    
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    
+    Define_Com Class(#PRIM_BOLN) Name(#L_AuthSuccess)
+    
+    * =======================================================
+    * Srvroutine Definitions
+    * =======================================================
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSCRTRUG/select
+    * Operation: GetSelect
+    *
+    * Request
+    *    Parameter: none
+    *    Schema   : none
+    *
+    * Response
+    *    Schema   : (OK) markupValuesArray
+    *                      code - LW3CODE
+    *                      description - LW3PRFDSC
+    *                      value - LW3PRFN
+    *             : (ER) httpResponseObject
+    *
+    * Action  : Return the details for the selected carpet as well as its allowed finish options
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetSelectCarpet) Response(*HTTP #uContext) Desc('Select Carpet') Help('Return the details for the selected carpet as well as its allowed finish options')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetSelect) Name(#Operation)
+    Define_Com Class(#Com_Home.GetSelect.Response.ContentJson.Object) Name(#Object_Response) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetSelect.Response.Resp400.Object) Name(#Object_Resp400) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetSelect.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If_Ref Com(#uContext.Request.Headers<'Authorization'>) Is(*NULL)
+    * No authorization passed so get Storefront Details from the passed in domain
+    #Global_DataModel.umGetStorefrontDetails Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    If Cond(#LW3RETCOD = 'OK')
+    #L_AuthSuccess := True
+    Endif
+    
+    Else
+    * Authorization has been passed so authenticate the access token
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #uContext.Request.Headers<'Authorization'>.Value #LW3GUID ))
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    If Cond(#LW3RETCOD = 'OK')
+    #L_AuthSuccess := True
+    Endif
+    Endif
+    
+    Endif
+    
+    If Cond(#L_AuthSuccess)
+    
+    Set_Ref Com(#Object_Response) To(*CREATE_AS #Com_Home.GetSelect.Response.ContentJson.Object)
+    
+    #COM_OWNER.umGetProductDetails Irequestobject(#Operation.Request) Oreturncode(#LW3RETCOD)
+    If Cond(#LW3RETCOD = 'OK')
+    #COM_OWNER.umGetAllowedFinishOptions Iproductlist(#Collection_Products) Oenablestandardtapebinding(#Object_Response.finishOptions.enableStandardTapeBinding) Oenablehandserging(#Object_Response.finishOptions.enableHandSerging) Oenablemachineserging(#Object_Response.finishOptions.enableMachineSerging) Oenablemodernedge(#Object_Response.finishOptions.enableModernEdge) Oenablebindingoptions(#Object_Response.finishOptions.enableBindingOptions) Oreturncode(#LW3RETCOD)
+    If Cond(#LW3RETCOD = 'OK')
+    
+    Set Com(#Object_Response) Com_Fields(*ALL)
+    
+    * Set the copy of the response object as the content returned by this endpoint
+    #Operation.Response.SetContentJson Content(#Object_Response)
+    
+    Endif
+    
+    Endif
+    
+    If Cond(#LW3RETCOD <> 'OK')
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSomethingWentWrong') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Product information or finish options could not be retrieved')
+    Set_Ref Com(#Object_Resp400) To(*CREATE_AS #Com_Home.GetSelect.Response.Resp400.Object)
+    Set Com(#Object_Resp400) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp400 Content(#Object_Resp400)
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session Id is not valid.')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetSelect.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    
+    * * * * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    * * * If (#Operation.TryBind( #uContext ))
+    * * *
+    * * * If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    * * *
+    * * * #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    * * *
+    * * * If Cond(#LW3RETCOD = 'OK')
+    * * *
+    * * * #COM_OWNER.umGetProductDetails Oreturncode(#LW3RETCOD)
+    * * * If Cond(#LW3RETCOD = 'OK')
+    * * * #COM_OWNER.umGetAllowedFinishOptions Iproductlist(#Collection_Products)
+    * * * Endif
+    * * *
+    * * * Else
+    * * * #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session Id is not valid.')
+    * * * Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetMarkups.Response.Resp401.Object)
+    * * * Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    * * * #Operation.Response.SetResp401 Content(#Object_Resp401)
+    * * *
+    * * * Endif
+    * * *
+    * * * Else
+    * * * #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed.')
+    * * * Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetMarkups.Response.Resp401.Object)
+    * * * Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    * * * #Operation.Response.SetResp401 Content(#Object_Resp401)
+    * * *
+    * * * Endif
+    * * *
+    * * * Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umGetProductDetails
+    * Description....: Get Product Details
+    * =======================================================
+    Mthroutine Name(umGetProductDetails) Desc('Call Products Function LW3STPR') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#COM_HOME.GetSelect.Request) Name(#iRequestObject) Pass(*BY_REFERENCE)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    #Processor_Products.umGetProductDetails Iproductlist(#Collection_Products) Istylecode(#iRequestObject.style) Icolorcode(#iRequestObject.color) Isizecode(#iRequestObject.size) Ibackingcode(#iRequestObject.back) Istorefrontindicator(#Global_DataModel.upStorefrontIndicator) Istorefrontid(#Global_DataModel.upStorefrontId) Oreturncode(#LW3RETCOD)
+    
+    * * * * Return Dealer and Retail Price separately - for Rug Configurator Usage
+    * * * #W_DLRPRC := #P010CPRC
+    * * * #W_RTLPRC := ((#LW3MSRPCR / 100) * #P010CPRC) + #P010CPRC
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umGetAllowedFinishOptions
+    * Description....: Get Product Details
+    * =======================================================
+    Mthroutine Name(umGetAllowedFinishOptions) Desc('Get Allowed Finish Options') Help('Call the CAMS API LRUR0050L to retrieve the allowable finish options for the selected product') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#PRIM_LCOL<#CNRPRDDO>) Name(#iProductList) Pass(*BY_REFERENCE)
+    
+    Define_Map For(*OUTPUT) Class(#PRIM_BOLN) Name(#oEnableStandardTapeBinding) Mandatory(False)
+    Define_Map For(*OUTPUT) Class(#PRIM_BOLN) Name(#oEnableHandSerging) Mandatory(False)
+    Define_Map For(*OUTPUT) Class(#PRIM_BOLN) Name(#oEnableMachineSerging) Mandatory(False)
+    Define_Map For(*OUTPUT) Class(#PRIM_BOLN) Name(#oEnableModernEdge) Mandatory(False)
+    Define_Map For(*OUTPUT) Class(#PRIM_BOLN) Name(#oEnableBindingOptions) Mandatory(False)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    #oReturnCode := 'ER'
+    
+    * !NC! - 08/18/2025 - Jan - Consider adding session id to the data model
+    Fetch Fields(#LW3SESSID) From_File(CNTSESSN) With_Key(#Global_DataModel.upGUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    * #iProductList returns the fields used below
+    Get_Entry Number(1) From_List(#iProductList)
+    If_Status Is(*OKAY)
+    
+    #R050SID# := #LW3SESSID
+    Call Pgm(LRUR0050L) Parm(#R050SID# #L00STYLE #L00SIZE #L00BACK #L00COLOR) Num_Len(*DEFINED) If_Error(*NEXT)
+    
+    #LW3QSEL := "SELECT R050FCODE FROM LRUP0050L WHERE R050SID# = " + #LW3SESSID.asString + " AND R050STYL = '" + #L00STYLE.Trim + "'"
+    
+    Select_Sql Fields(#R010FCODE) Io_Error(*NEXT) Using(#LW3QSEL)
+    
+    Case Of_Field(#R010FCODE)
+    When Value_Is(= 'TAP')
+    #oEnableStandardTapeBinding := True
+    When Value_Is(= 'SERUD')
+    #oEnableHandSerging := True
+    When Value_Is(= 'SER' = 'SERGA')
+    * G#37 - added CAV for SER/SERGA Finish
+    If Cond((((#L00DVBR = 'ATR') Or (#L00DVBR = 'CAV')) And (#R010FCODE = 'SERGA')) Or (((#L00DVBR <> 'ATR') Or (#L00DVBR <> 'CAV')) And (#R010FCODE = 'SER')))
+    #oEnableMachineSerging := True
+    Endif
+    When Value_Is(= 'MEDGE')
+    #oEnableModernEdge := True
+    When Value_Is(= *BLANKS)
+    Continue
+    Otherwise
+    #oEnableBindingOptions := True
+    Endcase
+    Endselect
+    
+    Endif
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSetHttpResponseMessages
+    * Description....: Set Http Response Messages
+    * =======================================================
+    Mthroutine Name(umSetHttpResponseMessages) Desc('Set Http Response Messages') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3VARNAM) Name(#iVariableName)
+    Define_Map For(*INPUT) Class(#LW3MSGTYP) Name(#iMessageType)
+    Define_Map For(*INPUT) Class(#LW3FLDNAM) Name(#iFieldName) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iMessageDetails) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iSubstitutionVariable1) Mandatory('')
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Add_Entry To_List(#iArray_HttpResponse)
+    #iArray_HttpResponse.CurrentItem.code := #iVariableName
+    #iArray_HttpResponse.CurrentItem.type := #iMessageType
+    #iArray_HttpResponse.CurrentItem.message := #Utility_Multilinguals.umGetMultilingualText( #iVariableName #Global_DataModel.upCurrentLanguage )
+    
+    If Cond(#iFieldName <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.field := #iFieldName
+    Endif
+    If Cond(#iMessageDetails <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.detail := #iMessageDetails
+    Endif
+    If Cond(#iSubstitutionVariable1 <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.substitutions.Add Value(#iSubstitutionVariable1)
+    Endif
+    
+    Endroutine
+    
+    End_Com
+
+  API Definition:
+    Language Handling:       NoAction
+    Partition Handling:      PathVariable
+    Publish as Swagger V2:   Yes
+    Publish as OpenAPI V3:   Yes
+    ServicePath:             /CNSCRTRUG
+
+    Paths:
+    - /select:
+
+        Operations:
+        - GetSelect:
+            Verb:               Get
+            Server Routine:     usGetSelectCarpet
+            Deprecated:         No
+
+            Parameters:
+            - style:
+                Location:           Query
+                Style:              Default
+                Required:           Yes
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Style Code
+                  Type:               Field
+                  Field Name:         LW3STYLE
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            - color:
+                Location:           Query
+                Style:              Default
+                Required:           Yes
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Color Code
+                  Type:               Field
+                  Field Name:         LW3COLOR
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            - size:
+                Location:           Query
+                Style:              Default
+                Required:           Yes
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Size Code
+                  Type:               Field
+                  Field Name:         LW3SIZE
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            - back:
+                Location:           Query
+                Style:              Default
+                Required:           Yes
+                Explode:            No
+                Deprecated:         No
+                Allow Reserved:     No
+                Allow Empty Value:  No
+
+                Schema Object:
+                  Description:        Backing Code
+                  Type:               Field
+                  Field Name:         LW3BACK
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - productInfo:
+                          Description:        Product Information
+                          Type:               Object
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Properties:
+                          - productImage:
+                              Description:        Product Image
+                              Type:               Field
+                              Field Name:         L00IMGFLA
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - widthFeet:
+                              Description:        Width Feet
+                              Type:               Field
+                              Field Name:         L00WTHFT
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - widthInches:
+                              Description:        Width Inches
+                              Type:               Field
+                              Field Name:         L00WTHIN
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - promoApplyFlag:
+                              Description:        Promo Apply Flag
+                              Type:               Boolean
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - cutPrice:
+                              Description:        Cut Price
+                              Type:               Field
+                              Field Name:         P010CPRC
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - displayedPrice:
+                              Description:        Displayed Price
+                              Type:               Field
+                              Field Name:         D_LPRICE
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                      - finishOptions:
+                          Description:        Finish Options
+                          Type:               Object
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+                          Properties:
+                          - enableStandardTapeBinding:
+                              Description:        Enable Standard Tape Binding
+                              Type:               Boolean
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - enableHandSerging:
+                              Description:        Enable Hand Serging
+                              Type:               Boolean
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - enableMachineSerging:
+                              Description:        Enable Machine Serging
+                              Type:               Boolean
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - enableModernEdge:
+                              Description:        Enable Modern Edge
+                              Type:               Boolean
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                          - enableBindingOptions:
+                              Description:        Enable Binding Options
+                              Type:               Boolean
+                              Format:             Unspecified
+                              Required:           Yes
+                              Nullable:           No
+                              ReadOnly:           No
+                              WriteOnly:          No
+
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Bad Request:
+                Status Code:        400
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp400
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Forbidden:
+                Status Code:        403
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp403
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    Components:
+      Schema:
+        Types:
+        - httpResponseArray:
+            Description:        Http Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        Http Response Object
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - code:
+                  Description:        Multilingual Variable Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - message:
+                  Description:        Multilingual Variable Unicode Text
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - type:
+                  Description:        Message Type
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - field:
+                  Description:        Field Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - detail:
+                  Description:        Message Detail
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - substitutions:
+                  Description:        Substitution Variables
+                  Type:               Array
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+                  Items:
+                  - Description:        values
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No

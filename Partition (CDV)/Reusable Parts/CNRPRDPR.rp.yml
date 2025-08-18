@@ -41,11 +41,405 @@
     * =======================================================
     
     Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
     Define_Com Class(#CNRCODES) Name(#Utility_Codes) Desc('Code Table Utility') Help('Code Table Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    
+    Define_Com Class(#LW3WEBC01) Name(#L_CustomerIdForQuery)
+    Define_Com Class(#PRIM_ALPH) Name(#L_ActivePriceFileLibrary)
     
     * =======================================================
     * Method Definitions
     * =======================================================
+    * =======================================================
+    * Mthroutine  : umGetProductDetails
+    * Description : Read LFIP100 to get Product Information for the passed in parameters
+    * =======================================================
+    Mthroutine Name(umGetProductDetails) Desc('Get Product Details') Help('Read LFIP100 to get Product Information for the passed in parameters')
+    
+    Define_Map For(*INPUT) Class(#PRIM_LCOL<#CNRPRDDO>) Name(#iProductList) Pass(*BY_REFERENCE)
+    Define_Map For(*INPUT) Class(#LW3SFID) Name(#iStorefrontId)
+    Define_Map For(*INPUT) Class(#LW3B2BIND) Name(#iStorefrontIndicator)
+    Define_Map For(*INPUT) Class(#LW3STYLE) Name(#iStyleCode) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3COLOR) Name(#iColorCode) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3SIZE) Name(#iSizeCode) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3BACK) Name(#iBackingCode) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3SDESC) Name(#iStyleDescription) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3CDESC) Name(#iColorDescription) Mandatory('')
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iSwatchSearch) Mandatory(False)
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iNewItemIndicator) Mandatory(False)
+    
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    * Set the format for Customer Id to be used in the query. Stanton Customer Ids are 6 digit characters with leading zeroes
+    If Cond(#Global_DataModel.upCustomerId = *BLANKS)
+    #L_CustomerIdForQuery := '0'
+    Else
+    #L_CustomerIdForQuery := #Global_DataModel.upCustomerId.RightAdjust( 6 '0' ).Trim
+    Endif
+    
+    * Get Active Pricing File
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('ACTIVE_PRICING_FILE') Ilanguage('') Oalphavalue(#L_ActivePriceFileLibrary)
+    
+    If Cond(#iStorefrontIndicator = 'B')
+    
+    * If New Item, use a different query
+    If Cond(#iNewItemIndicator)
+    
+    #COM_OWNER.umGetDetailsForNewItemB2B Iproductlist(#iProductList) Istorefrontid(#iStorefrontId) Istorefrontindicator(#iStorefrontIndicator) Inewitemindicator(#iNewItemIndicator)
+    Else
+    
+    #COM_OWNER.umGetDetailsForB2BProduct Iproductlist(#iProductList) Istorefrontid(#iStorefrontId) Istorefrontindicator(#iStorefrontIndicator) Istylecode(#iStyleCode) Icolorcode(#iColorCode) Isizecode(#iSizeCode) Ibackingcode(#iBackingCode)
+    
+    Endif
+    
+    Else
+    
+    #COM_OWNER.umGetDetailsForB2CProduct Iproductlist(#iProductList) Istorefrontid(#iStorefrontId) Istorefrontindicator(#iStorefrontIndicator) Istylecode(#iStyleCode) Icolorcode(#iColorCode) Isizecode(#iSizeCode) Ibackingcode(#iBackingCode)
+    
+    Endif
+    
+    If Cond(#iProductList.ItemCount = 0)
+    #oReturnCode := 'ER'
+    Else
+    #oReturnCode := 'OK'
+    Endif
+    
+    * !NC! - Continue logic here later
+    
+    * * * #W_PRODUCTTYPE := #L00PTYP
+    * * *
+    * * * * Only retrieve coordinates/available colors if product details were found
+    * * * If Cond((#FXDTARCD = 'ALL') And (#LISTCOUNT > 0))
+    * * * #W_STYLECODE := #L00STYLE
+    * * * #W_COLORCODE := #L00COLOR
+    * * * #W_SIZECODE := #L00SIZE
+    * * * #W_BACKINGCODE := #L00BACK
+    * * * * Pass in the previously retrieved product key fields
+    * * *
+    * * * * Check_For In_File(LW3CODL4) With_Key('HSBRND' *LANGUAGE #L00DVBR) Io_Error(*NEXT)
+    * * * * If_Status Is(*EQUALKEY)
+    * * * If Cond((#L00DVBR = 'SHS') Or (#L00DVBR = 'SST'))
+    * * * * 04/08/2020 - If getting product details for a Hard surface product, get coordinating broadlooms
+    * * * #COM_OWNER.umGetCoordinatingBroadloom Igetpricedproducts((#FXCUSIND = 'B') And (#LW3NITMF <> 'Y')) Istylecode(#W_STYLECODE) Icolorcode(#W_COLORCODE)
+    * * * Else
+    * * * #COM_OWNER.umGetCoordinates Igetpricedproducts((#FXCUSIND = 'B') And (#LW3NITMF <> 'Y')) Istylecode(#W_STYLECODE) Icolorcode(#W_COLORCODE) Isizecode(#W_SIZECODE) Ibackingcode(#W_BACKINGCODE) Iproductcollection(#L00CNAME) Iproducttype(#L00PTYP)
+    * * * Endif
+    * * *
+    * * * * #134
+    * * * * Modified by Jan - 4th Nov 2022 - GitLab Issue #227
+    * * * * If Cond((#W_PRODUCTTYPE = 'H') Or (#W_PRODUCTTYPE = 'I') Or (#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_Porcelain) Or (#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_Laminate))
+    * * * * G#151
+    * * * If Cond((#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_HardSurfacePlank) Or (#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_HardSurfaceTile) Or (#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_Porcelain) Or (#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_Laminate) Or (#W_PRODUCTTYPE = #Global_Constants.upPrdTyp_FineHardwood))
+    * * * #COM_OWNER.umGetCoordinatingTrims Istylecode(#W_STYLECODE) Icolorcode(#W_COLORCODE)
+    * * * Endif
+    * * *
+    * * * * #134
+    * * * * Modified by Jan - 4th Nov 2022 - GitLab Issue #254
+    * * * * If Cond(#W_PRODUCTTYPE = 'M')
+    * * * If Cond(#Global_Constants.umIsCoordinatingProduct( #W_PRODUCTTYPE ))
+    * * * * For Molding Trim, get Available Styles instead of Available Colors
+    * * * #COM_OWNER.umGetAvailableStyles Igetpricedproducts((#FXCUSIND = 'B') And (#LW3NITMF <> 'Y')) Istylecode(#W_STYLECODE) Icolorcode(#W_COLORCODE) Isizecode(#W_SIZECODE) Ibackingcode(#W_BACKINGCODE)
+    * * * Else
+    * * * #COM_OWNER.umGetAvailableColors Igetpricedproducts((#FXCUSIND = 'B') And (#LW3NITMF <> 'Y')) Istylecode(#W_STYLECODE) Icolorcode(#W_COLORCODE) Isizecode(#W_SIZECODE) Ibackingcode(#W_BACKINGCODE)
+    * * * Endif
+    * * *
+    * * * Endif
+    * * *
+    * * * * If Premade Rugs, retrieve the available lengths - retrieve only if product details were found
+    * * * If Cond((#W_PRODUCTTYPE = 'R') And (#LISTCOUNT > 0))
+    * * *
+    * * * #LW3ROWTYP := 'ALN'
+    * * *
+    * * * * Retrieve Available Lengths
+    * * * If Cond(#FXCUSIND = 'B')
+    * * * * G#35
+    * * * * #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00PTYP, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00WDTIN, ATTR.L00LTHIN, ATTR.L00FLAG5, PRICE.P010RPRC, PRICE.P010CPRC FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "' AND PRICE.P010CPRC > 0 AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " ORDER BY PRICE.P010CPRC"
+    * * * #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00PTYP, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00WDTIN, ATTR.L00LTHIN, ATTR.L00FLAG5, PRICE.P010RPRC, PRICE.P010CPRC FROM LFIP100 ATTR JOIN " + #LW3ACTFIL + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "' AND PRICE.P010CST# = " + #FXCUSID.Trim + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " ORDER BY PRICE.P010CPRC"
+    * * *
+    * * * * * !NC! - Premade Rug B2B
+    * * * * #COM_OWNER.umSQLDebugMessage Iheadermessage('Premade Rug B2B') Iquerystring(#LW3QSEL)
+    * * *
+    * * * Select_Sql Fields(#L00DVBR #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WDTIN #L00LTHIN #L00FLAG5 #P010RPRC #P010CPRC) Io_Error(*NEXT) Using(#LW3QSEL)
+    * * * If Cond(#LW3MSRPPF = 'Y')
+    * * * * G#35
+    * * * #Utility_API.umGetPrice( #FXCUSID #L00STYLE #L00COLOR #L00SIZE #L00BACK 'Y' #P010CPRC #P010RPRC #P010SMPRC #P010SHPRC #OPPEDATE #OPPAPLY #FXCUSIND )
+    * * *
+    * * * #P010CPRC := ((#LW3MSRPPR / 100) * #P010CPRC) + #P010CPRC
+    * * * Endif
+    * * * Add_Entry To_List(#WL_PRDLST)
+    * * * Endselect
+    * * *
+    * * * Else
+    * * * * #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00PTYP, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00WDTIN, ATTR.L00LTHIN FROM LFIP100 AS ATTR WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "'" + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    * * *
+    * * * * AppTracker Issue #12615 - Do not include dropped colors for Premade Rugs
+    * * * #LW3QSEL := "SELECT ATTR.L00DVBR, ATTR.L00STYLE, ATTR.L00COLOR, ATTR.L00SIZE, ATTR.L00BACK, ATTR.L00PTYP, ATTR.L00SDESC, ATTR.L00CDESC, ATTR.L00WDTIN, ATTR.L00LTHIN FROM LFIP100 AS ATTR WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "'" + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary + " AND ((ATTR.L00PTYP <> 'R') Or (ATTR.L00PTYP = 'R' AND L00DROP <> 'Y'))"
+    * * *
+    * * * * * !NC! - Premade Rug B2C
+    * * * * #COM_OWNER.umSQLDebugMessage Iheadermessage('Premade Rug B2C') Iquerystring(#LW3QSEL)
+    * * *
+    * * * Select_Sql Fields(#L00DVBR #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    * * * Add_Entry To_List(#WL_PRDLST)
+    * * * Endselect
+    * * *
+    * * * Endif
+    * * *
+    * * * Endif
+    * * *
+    * * * * check value of field #LW3CRDVIS
+    * * * If Cond(#LW3CRDVIS *EQ 'Y')
+    * * * #F55UPRICE #F55UPRCCA #P010SHPRC #P010SMPRC #P010CPRC #P010RPRC := 0
+    * * * Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine  : umGetDetailsForNewItemB2B
+    * Description : Read LFIP100 to get Product Information only for New Items in B2B
+    * =======================================================
+    Mthroutine Name(umGetDetailsForNewItemB2B) Desc('Get Product Details') Help('Read LFIP100 to get Product Information only for New Items in B2B')
+    
+    Define_Map For(*INPUT) Class(#PRIM_LCOL<#CNRPRDDO>) Name(#iProductList) Pass(*BY_REFERENCE)
+    Define_Map For(*INPUT) Class(#LW3SFID) Name(#iStorefrontId)
+    Define_Map For(*INPUT) Class(#LW3B2BIND) Name(#iStorefrontIndicator)
+    Define_Map For(*INPUT) Class(#LW3SDESC) Name(#iStyleDescription) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3CDESC) Name(#iColorDescription) Mandatory('')
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iSwatchSearch) Mandatory(False)
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iNewItemIndicator) Mandatory(False)
+    
+    #LW3QSEL := "SELECT DISTINCT ATTR.*, CASE WHEN ATTR.L00PTYP In ('W', 'S') Then 1 Else 0 End As PRDTYPSORT FROM LFIP100 AS ATTR"
+    * #134
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    #LW3QSEL += " JOIN CIP500 AS CUSTBRAND ON CUSTBRAND.C5CUST = " + #L_CustomerIdForQuery + " AND CUSTBRAND.C5DVBR = ATTR.L00DVBR"
+    
+    * !NC! - 2025/08/18 - Jan - Check the difference between #FXSWONLY and #LW3SWSRF later. Maybe these can be made into just one parameter
+    * If Cond(#FXSWONLY = 'Y')
+    If Cond(#iSwatchSearch)
+    * Use color code
+    #LW3QSEL += " WHERE ATTR.L00SDESC = '" + #iStyleDescription + "' AND ATTR.L00COLOR = '" + #iColorDescription + "'"
+    Else
+    * Use color desc
+    #LW3QSEL += " WHERE ATTR.L00SDESC = '" + #iStyleDescription + "' AND ATTR.L00CDESC = '" + #iColorDescription + "'"
+    Endif
+    
+    * #152
+    If Cond(*Not #iSwatchSearch)
+    #LW3QSEL += " AND (ATTR.L00PTYP <> 'W' AND ATTR.L00PTYP <> 'S')"
+    Endif
+    
+    #LW3QSEL += " ORDER BY PRDTYPSORT"
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN #LW3SORTOR) Io_Error(*NEXT) Using(#LW3QSEL)
+    
+    Continue If((#L00PROPRI = 'Y') And (#L00PROPCU <> #FXCUSID.AsNumber))
+    
+    * Retrieve Pricing
+    #LW3QSEL := ''
+    Select_Sql Fields(#P010RPRC #P010CPRC #P010UOM) Using("SELECT P010RPRC, P010CPRC, P010UOM FROM " + #LW3ACTFIL + " WHERE P010SID# = 0 AND P010CST# = " + #FXCUSID.Trim + " AND P010STYL = '" + #L00STYLE + "' AND P010SIZE = '" + #L00SIZE + "' AND P010BACK = '" + #L00BACK + "'")
+    * !NC! - Apply Pricing Later
+    * * * * G#35 - Use new API to get pricing
+    * * * #COM_OWNER.umGetPrice( #FXCUSID #L00STYLE #L00COLOR #L00SIZE #L00BACK 'Y' #P010CPRC #P010RPRC #P010SMPRC #P010SHPRC #OPPEDATE #OPPAPLY #FXCUSIND )
+    
+    If Cond(#FXOLNTYP = 'RG')
+    #LW3VARTXT := 'CUSTOMRUG'
+    Else
+    #LW3VARTXT := 'PRODUCTTYPE'
+    Endif
+    
+    * !NC! - Apply Markups Later
+    * * * #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype(#LW3VARTXT) Iorderlinetype(#FXOLNTYP) Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcustomrug(#LW3MSRPCR) Imarkupcarpettile(#LW3MSRPTL) Imarkuphardsurface(#LW3MSRPHS) Iproducttype(#L00PTYP) Bcalculatedprice(#P010CPRC)
+    
+    Leave
+    Endselect
+    
+    Add_Entry To_List(#iProductList)
+    
+    * This should only retrieve one entry
+    Leave
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine  : umGetDetailsForB2BProduct
+    * Description : Read LFIP100 and LPRP0010 to get Product Information for items in B2B
+    * =======================================================
+    Mthroutine Name(umGetDetailsForB2BProduct) Desc('Get Product Details') Help('Read LFIP100 and LPRP0010 to get Product Information for items in B2B') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#PRIM_LCOL<#CNRPRDDO>) Name(#iProductList) Pass(*BY_REFERENCE)
+    Define_Map For(*INPUT) Class(#LW3SFID) Name(#iStorefrontId)
+    Define_Map For(*INPUT) Class(#LW3B2BIND) Name(#iStorefrontIndicator)
+    Define_Map For(*INPUT) Class(#LW3STYLE) Name(#iStyleCode) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3COLOR) Name(#iColorCode) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3SIZE) Name(#iSizeCode) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3BACK) Name(#iBackingCode) Mandatory('')
+    
+    Define_Map For(*INPUT) Class(#LW3SDESC) Name(#iStyleDescription) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3CDESC) Name(#iColorDescription) Mandatory('')
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iSwatchSearch) Mandatory(False)
+    Define_Map For(*INPUT) Class(#LW3OLNTYP) Name(#iOrderLineType) Mandatory('')
+    
+    * * * * If product detail keys supplied is style and color description (from friendly URL), use them to get product information
+    * * * If Cond(#FXFNDURL = 'Y')
+    
+    * !NC! - Only difference between the query in #iSwatchSearch is that L00COLOR = #iColorDescription which seems incorrect. Analyze the existing code for whether this is used or not
+    * * * If Cond(#iSwatchSearch)
+    * * * * #134
+    * * * * G#35 DISTINCT
+    * * * #LW3QSEL := "SELECT DISTINCT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC FROM LFIP100 ATTR"
+    * * * #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    * * * * G#35
+    * * * #LW3QSEL += " JOIN " + #L_ActivePriceFileLibrary + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00SDESC = '" + #iStyleDescription + "' AND ATTR.L00COLOR = '" + #iColorDescription + "' AND PRICE.P010CST# = " + #L_CustomerIdForQuery + #COM_OWNER.umCheckProprietary
+    * * *
+    * * * Else
+    * Use color description
+    * #134
+    * G#35 DISTINCT
+    #LW3QSEL := "SELECT DISTINCT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC FROM LFIP100 ATTR"
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    * G#35
+    #LW3QSEL += " JOIN " + #L_ActivePriceFileLibrary + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00SDESC = '" + #iStyleDescription + "' AND ATTR.L00CDESC = '" + #iColorDescription + "' AND PRICE.P010CST# = " + #L_CustomerIdForQuery + #COM_OWNER.umCheckProprietary
+    
+    * * * Endif
+    
+    * * * Else
+    * Is already using color code
+    * #134
+    * G#35 DISTINCT
+    #LW3QSEL := "SELECT DISTINCT ATTR.*, PRICE.P010RPRC, PRICE.P010CPRC, PRICE.P010UOM, PRICE.P010SMPRC, PRICE.P010SHPRC FROM LFIP100 ATTR"
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    * G#35
+    #LW3QSEL += " JOIN " + #L_ActivePriceFileLibrary + " PRICE ON ATTR.L00STYLE = PRICE.P010STYL AND ATTR.L00SIZE = PRICE.P010SIZE AND ATTR.L00BACK = PRICE.P010BACK WHERE PRICE.P010SID# = 0 AND ATTR.L00STYLE = '" + #iStyleCode + "' AND ATTR.L00COLOR = '" + #iColorCode + "' AND ATTR.L00SIZE = '" + #iSizeCode + "' AND ATTR.L00BACK = '" + #iBackingCode + "' AND PRICE.P010CST# = " + #L_CustomerIdForQuery + #COM_OWNER.umCheckProprietary
+    * * * Endif
+    
+    * Exclude swatches from selection
+    If Cond(*Not #iSwatchSearch)
+    #LW3QSEL += " AND ATTR.L00PTYP NOT IN ('W', 'S')"
+    Endif
+    
+    * !NC! - 08/18/2025 - Jan - Not sure why there is logic to ignore dropped products and assuming that the select query below will return more than one record
+    * * * * 2021/08/05 - Gitlab#31 - Initialize indicator to True
+    * * * #wCompletelyDroppedFlag := True
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN #P010RPRC #P010CPRC #P010UOM #P010SMPRC #P010SHPRC) Io_Error(*NEXT) Using(#LW3QSEL)
+    
+    * !NC! - Apply Pricing Later
+    * * * * G#35 - Use the API to get the pricing field values
+    * * * #Utility_API.umGetPrice( #FXCUSID #L00STYLE #L00COLOR #L00SIZE #L00BACK 'Y' #P010CPRC #P010RPRC #P010SMPRC #P010SHPRC #OPPEDATE #OPPAPLY #FXCUSIND )
+    
+    If Cond(#iOrderLineType = 'RG')
+    #FXVARTXT := 'CUSTOMRUG'
+    Else
+    #FXVARTXT := 'PRODUCTTYPE'
+    Endif
+    
+    * Apply markups later
+    * * * #MarkupUtility.umApplyMarkup Iretailpricingflag(#LW3MSRPPF) Imarkupapplicationtype(#FXVARTXT) Iorderlinetype(#FXOLNTYP) Imarkupcarpet(#LW3MSRPCP) Imarkuppremaderug(#LW3MSRPPR) Imarkupcustomrug(#LW3MSRPCR) Imarkupcarpettile(#LW3MSRPTL) Imarkuphardsurface(#LW3MSRPHS) Iproducttype(#L00PTYP) Bcalculatedprice(#P010CPRC)
+    
+    * !NC! - 08/18/2025 - Jan - Not sure why there is logic to ignore dropped products and assuming that the select query below will return more than one record
+    * * * * 2021/08/05 - Gitlab#31 - Previously, just load the very first product, but if a product has multiple records and the first one loaded is dropped, check for the next first not-dropped product, but support data if all products are dropped
+    * * * If Cond(#L00DROP <> 'Y')
+    * * * #wCompletelyDroppedFlag := False
+    * * * Endif
+    
+    Add_Entry To_List(#iProductList)
+    
+    * !NC! - 08/18/2025 - Jan - Not sure why there is logic to ignore dropped products and assuming that the select query below will return more than one record
+    * * * * 2021/08/05 - Gitlab#31 - This should only retrieve one entry, unless the first record is dropped, keep looking for the next undropped item. If all products are dropped, load all of them
+    * * * If Cond(#L00DROP <> 'Y')
+    * * * Leave
+    * * * Endif
+    Endselect
+    
+    * !NC! - 08/18/2025 - Jan - Not sure why there is logic to ignore dropped products and assuming that the select query below will return more than one record
+    * * * If Cond(#LISTCOUNT > 0)
+    * * * * 2021/08/05 - Gitlab#31 - If every product is dropped, keep only the first record and delete the rest
+    * * * If Cond(#wCompletelyDroppedFlag And (#LISTCOUNT > 1))
+    * * * #wFirstRecord := True
+    * * *
+    * * * Selectlist Named(#WL_PRDLST)
+    * * * If Cond(#wFirstRecord)
+    * * * #wFirstRecord := False
+    * * * Else
+    * * * Dlt_Entry From_List(#WL_PRDLST)
+    * * * Endif
+    * * * Endselect
+    * * * Else
+    * * * * 2021/08/05 - Gitlab#31 - If not all records are dropped, delete the dropped records to load just one record, specifically the only undropped record
+    * * * If Cond(*Not #wCompletelyDroppedFlag)
+    * * * Selectlist Named(#WL_PRDLST) Where(#L00DROP = Y)
+    * * * Dlt_Entry From_List(#WL_PRDLST)
+    * * * Endselect
+    * * * Endif
+    * * * Endif
+    * * * Endif
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine  : umGetDetailsForB2CProduct
+    * Description : Read LFIP100to get Product Information for items in B2C
+    * =======================================================
+    Mthroutine Name(umGetDetailsForB2CProduct) Desc('Get Product Details') Help('Read LFIP100to get Product Information for items in B2C') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#PRIM_LCOL<#CNRPRDDO>) Name(#iProductList) Pass(*BY_REFERENCE)
+    Define_Map For(*INPUT) Class(#LW3SFID) Name(#iStorefrontId)
+    Define_Map For(*INPUT) Class(#LW3B2BIND) Name(#iStorefrontIndicator)
+    Define_Map For(*INPUT) Class(#LW3STYLE) Name(#iStyleCode) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3COLOR) Name(#iColorCode) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3SIZE) Name(#iSizeCode) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3BACK) Name(#iBackingCode) Mandatory('')
+    
+    Define_Map For(*INPUT) Class(#LW3SDESC) Name(#iStyleDescription) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3CDESC) Name(#iColorDescription) Mandatory('')
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iSwatchSearch) Mandatory(False)
+    
+    * * * * No Pricing
+    * * *
+    * * * * If product detail keys supplied is style and color description (from friendly URL), use them to get product information
+    * * * If Cond(#FXFNDURL = 'Y')
+    * * *
+    * * * If Cond(#FXSWONLY = 'Y')
+    * * * * Use color code
+    * * * * #134
+    * * * #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR"
+    * * * #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    * * * #LW3QSEL += " WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00COLOR = '" + #FXCOLRCD + "' " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    * * * Else
+    * * * * Use color description
+    * * * * #134
+    * * * #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR"
+    * * * #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    * * * #LW3QSEL += " WHERE ATTR.L00SDESC = '" + #FXSTYLDS + "' AND ATTR.L00CDESC = '" + #FXCOLRDS + "' " + #COM_OWNER.umAttachFiltersToQuery( True ) + #COM_OWNER.umCheckProprietary
+    * * * Endif
+    * * *
+    * * * Else
+    * #134
+    #LW3QSEL := "SELECT * FROM LFIP100 AS ATTR"
+    #LW3QSEL += " Left Join LFIP100A ATR2 ON ATR2.L0ADVBR = ATTR.L00DVBR And ATR2.L0APCAT = ATTR.L00PCAT And ATR2.L0ACNAME = ATTR.L00CNAME And ATR2.L0ASTYLE = ATTR.L00STYLE And ATR2.L0ACOLOR = ATTR.L00COLOR And ATR2.L0ASIZE = ATTR.L00SIZE And ATR2.L0ABACK = ATTR.L00BACK"
+    #LW3QSEL += " WHERE ATTR.L00STYLE = '" + #iStyleCode + "' AND ATTR.L00COLOR = '" + #iColorCode + "' AND ATTR.L00SIZE = '" + #iSizeCode + "' AND ATTR.L00BACK = '" + #iBackingCode + "' " + #COM_OWNER.umCheckProprietary
+    * * * Endif
+    
+    * Exclude swatches from selection
+    If Cond(*Not #iSwatchSearch)
+    #LW3QSEL += " AND ATTR.L00PTYP NOT IN ('W', 'S')"
+    Endif
+    
+    * AppTracker Issue #12615 - Do not include dropped colors for Premade Rugs
+    #LW3QSEL += " AND ((ATTR.L00PTYP <> 'R') Or (ATTR.L00PTYP = 'R' AND L00DROP <> 'Y'))"
+    
+    Select_Sql Fields(#L00DVBR #L00PCAT #L00CNAME #L00STYLE #L00COLOR #L00SIZE #L00BACK #L00PTYP #L00SDESC #L00CDESC #L00WTHFT #L00WTHIN #L00BDESC #L00STDLTH #L00PRDG #L00F2F #L00DROP #L00DROPDT #L00PROPRI #L00PROPCU #L00PROPB2 #L00CLR1 #L00CLR2 #L00PATRNR #L00CONSTR #L00LOOK #L00USAGE #L00FIBER1 #L00FIBER2 #L00FIBER3 #L00PATERN #L00PAT001 #L00FIBRLB #L00CPYRGT #L00MXWTHF #L00MXWTHI #L00SKUSEQ #L00INTROD #L00IMGFLA #L00IMGPRO #L00RMSCEN #L00RMS001 #L00RMS002 #L00IMGGRO #L00FLATCL #L00FLATRN #L00PROFCL #L00PROFRN #L00RM1CLR #L00RM1RNK #L00RM2CLR #L00RM2RNK #L00RM3CLR #L00RM3RNK #L00GROPCL #L00GROPRN #L00ROLONL #L00RPC #L00PATPRD #L00CHAR1 #L00CHAR2 #L00CHAR3 #L00CHAR4 #L00CHAR5 #L00FLAG1 #L00FLAG2 #L00FLAG3 #L00FLAG4 #L00FLAG5 #L00INT1 #L00INT2 #L00INT3 #L00INT4 #L00INT5 #L00DEC1 #L00DEC2 #L00DEC3 #L00DEC4 #L00DEC5 #L00COLCD #L00ROOMTY #L00ROO001 #L00ROO002 #L00WDTIN #L00LTHIN) Io_Error(*NEXT) Using(#LW3QSEL)
+    
+    Add_Entry To_List(#iProductList)
+    
+    Endselect
+    
+    Endroutine
+    
     
     * =======================================================
     * Mthroutine  : umGetProductMainImage
@@ -79,7 +473,7 @@
     Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rString)
     
     If Cond(#Global_DataModel.upStorefrontIndicator = 'B')
-    #rString += " AND ((ATTR.L00PROPRI <> 'Y') Or ((ATTR.L00PROPRI = 'Y') AND (ATTR.L00PROPCUS IN (" + #FXCUSID + ", " + #iCustomerGroupNumber.asString + "))))"
+    #rString += " AND ((ATTR.L00PROPRI <> 'Y') Or ((ATTR.L00PROPRI = 'Y') AND (ATTR.L00PROPCUS IN (" + #L_CustomerIdForQuery + ", " + #iCustomerGroupNumber.asString + "))))"
     Else
     #rString += " AND ((ATTR.L00PROPRI <> 'Y') Or ((ATTR.L00PROPRI = 'Y') AND ((ATTR.L00PROPB2C = 'Y') OR ((ATTR.L00PTYP IN ('S', 'W')) AND (ATTR.L00PROPCUS = " + #Global_DataModel.umGetCustomerIdForQuery + ")))))"
     Endif

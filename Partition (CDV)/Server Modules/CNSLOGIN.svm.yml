@@ -111,6 +111,7 @@
     #Global_DataModel.upUserIndicator := #LW3CUSIND
     #Global_DataModel.upUserFirstName := #LW3CHFNME
     #Global_DataModel.upUserLastName := #LW3CHLNME
+    #Global_DataModel.upSelectedPricingMode := 'Retail'
     
     * Create a new session record that will produce a unique GUID for the user
     #Processor_Session.umProcessSession Iwebuser(#LW3WEBUSR) Bguid(#LW3GUID) Ijsondata(#Global_DataModel.umBuildSessionPayload( #uContext.Request.Headers )) Oreturncode(#LW3RETCOD)
@@ -206,7 +207,7 @@
     Fetch Fields(#LW3WEBUSR #LW3CEMAIL #LW3EASTAT #LW3CUSVAL #LW3TMPUSR #LW3CUSIND #LW3WEBC01 #LW3PWDSLT #LW3CHPASF #LW3ALLDLR #LW3ARSVF #LW3ORDMOD #LW3CRDVIS) From_File(LW3WUSER) With_Key(#iUsername) Io_Error(*NEXT) Val_Error(*NEXT)
     
     Else
-    Fetch Fields(#LW3WEBUSR #LW3CEMAIL #LW3EASTAT #LW3CUSVAL #LW3TMPUSR #LW3CUSIND #LW3WEBC01 #LW3PWDSLT #LW3CHPASF #LW3ALLDLR #LW3ARSVF #LW3ORDMOD) From_File(LW3USRL5) With_Key(#Global_DataModel.upStorefrontId #iEmail) Io_Error(*NEXT) Val_Error(*NEXT)
+    Fetch Fields(#LW3WEBUSR #LW3CEMAIL #LW3EASTAT #LW3CUSVAL #LW3TMPUSR #LW3CUSIND #LW3WEBC01 #LW3PWDSLT #LW3CHPASF #LW3ALLDLR #LW3ARSVF #LW3ORDMOD #LW3CRDVIS) From_File(LW3USRL5) With_Key(#Global_DataModel.upStorefrontId #iEmail) Io_Error(*NEXT) Val_Error(*NEXT)
     
     Endif
     

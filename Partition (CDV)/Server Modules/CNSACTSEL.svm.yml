@@ -259,9 +259,6 @@
     #COM_OWNER.umGetUserInit Iobject_Userinit(#Object_UserInit) Oreturncode(#LW3RETCOD)
     
     If Cond(#LW3RETCOD = 'OK')
-    #Utility_General.umDebugLog( 'CNSACTSEL' #Object_UserInit.canadianDPPFlag )
-    
-    #Utility_General.umDebugLog( 'CNSACTSEL' 'LW3RETCOD OK' )
     #Operation.Response.SetContentJson Content(#Object_UserInit)
     
     Endif
@@ -563,20 +560,43 @@
     Define_Map For(*INPUT) Class(#COM_HOME.userInitObject) Name(#iObject_UserInit) Pass(*BY_REFERENCE)
     Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
     
+    Define_Com Class(#PRIM_BOLN) Name(#L_MarkUpFlag)
+    
     * Check for Canadian DDP account
     #C1PFG0 := *NULL
+    #oReturnCode := 'OK'
     
     Fetch Fields(#C1PFG0) From_File(CIP010) With_Key(#Global_DataModel.upCustomerId.AsNumber) Io_Error(*NEXT) Val_Error(*NEXT)
     If_Status Is(*OKAY)
-    #oReturnCode := 'OK'
-    #iObject_UserInit.canadianDPPFlag := #C1PFG0
     
+    #iObject_UserInit.canadianDPPFlag := (#C1PFG0 = True)
     Else
-    #oReturnCode := 'ER'
     
+    #oReturnCode := 'ER'
+    Endif
+    
+    If Cond(#Global_DataModel.upRetailOnly = 'Y')
+    #L_MarkUpFlag := False
+    Else
+    * #Utility_General.umDebugLog( 'CNSACTSEL' (#Global_DataModel.upCustomerId + " : #Global_DataModel.upCustomerId") )
+    * Check for MSRP Pricing has been set
+    #L_MarkUpFlag := False
+    Select Fields(#LW3CODE #LW3PRFN) From_File(LW3MARKUP) With_Key(#Global_DataModel.upStorefrontId #Global_DataModel.upCustomerId) Io_Error(*NEXT) Val_Error(*NEXT)
+    * If the preference is not MSRP, skip it
+    Continue If((*Not (#LW3CODE.Substring( 1 4 ) = 'MSRP')) Or (#LW3CODE = 'MSRP_PROMOTIONS'))
+    
+    * If MSRP Pricing is provided
+    If Cond(#LW3PRFN <> 0)
+    #L_MarkUpFlag := True
+    Leave
+    Endif
+    Endselect
     Endif
     
     
+    #iObject_UserInit.showPricingModes := #L_MarkUpFlag
+    
+    #iObject_UserInit.selectedPricingMode := #Global_DataModel.upSelectedPricingMode
     
     Endroutine
     
@@ -1202,17 +1222,26 @@
             WriteOnly:          No
 
             Properties:
-            - dealerOrRetailPricingFlag:
-                Description:        Dealer or Retail Pricing Flag
-                Type:               String
+            - canadianDPPFlag:
+                Description:        Canadian DPP Flag
+                Type:               Boolean
                 Format:             Unspecified
                 Required:           Yes
                 Nullable:           No
                 ReadOnly:           No
                 WriteOnly:          No
 
-            - canadianDPPFlag:
-                Description:        Canadian DPP Flag
+            - showPricingModes:
+                Description:        Show Pricing Modes
+                Type:               Boolean
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - selectedPricingMode:
+                Description:        Selected Pricing Mode
                 Type:               String
                 Format:             Unspecified
                 Required:           Yes

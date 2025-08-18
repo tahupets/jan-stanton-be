@@ -1,0 +1,69 @@
+﻿File:
+  Name:                           CNTPSLTO
+  File Type:                      LANSA File
+  Library:                        CDVDTALIB
+  Record Format Name:             CNTPSLTO
+  Module Library:                 Partition Module Library
+  File Uses SQL on IBM i:         No
+  Enabled For RDMLX:              Yes
+  Enabled For Long Names:         Yes
+  Share Data Path:                No
+  Secure From File Overrides:     Yes
+  Strip Debug On Compile:         Yes
+  Suppress IOM0034 Message:       No
+  Ignore Decimal Data Error:      No
+  Create I/O Module:              Yes
+  Create Batch Control:           No
+  IBM i High Speed Table:         No
+  Auto RRN Generation:            Yes
+  Create RRNO Column:             Yes
+  Auto RRNO Is Fixed:             Yes
+  Convert Special Characters:     No
+  Enable Commitment Control:      No
+  Auto Commit:                    No
+  Parameters:                     SIZE( *NOMAX) LVLCHK(*YES)
+  Read-only Access:               No
+  Enable Database Triggers:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Password Link Timeout"
+
+  Real Fields:
+  - LW3CEMAIL:
+      Type:               Alphanumeric
+      Length:             50
+      Decimals:           0
+
+  - PASLINK:
+      Type:               String
+      Length:             512
+      Decimals:           0
+
+  - LW3PWDSLT:
+      Type:               Alphanumeric
+      Length:             32
+      Decimals:           0
+
+  - TIMSNT:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - EXPTIM:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - LW3CDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  - LW3UDSTMP:
+      Type:               Date Time
+      Length:             26
+      Decimals:           0
+
+  Primary Keys:
+  - LW3CEMAIL

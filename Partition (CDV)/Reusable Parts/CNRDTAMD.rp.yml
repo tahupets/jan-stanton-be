@@ -66,6 +66,7 @@
     Define_Com Class(#LW3ARSVF) Name(#L_AllowReservations)
     Define_Com Class(#LW3ORDMOD) Name(#L_AllowOrders)
     Define_Com Class(#LW3CRDVIS) Name(#L_RetailOnly)
+    Define_Com Class(#PRIM_ALPH) Name(#L_SelectedPricingMode)
     
     * Cart Information
     Define_Com Class(#LW3CARTID) Name(#L_CartId)
@@ -108,6 +109,7 @@
     Define_Pty Name(upAllowReservations) Get(*AUTO #L_AllowReservations) Set(*AUTO #L_AllowReservations)
     Define_Pty Name(upAllowOrders) Get(*AUTO #L_AllowOrders) Set(*AUTO #L_AllowOrders)
     Define_Pty Name(upRetailOnly) Get(*AUTO #L_RetailOnly) Set(*AUTO #L_RetailOnly)
+    Define_Pty Name(upSelectedPricingMode) Get(*AUTO #L_SelectedPricingMode) Set(*AUTO #L_SelectedPricingMode)
     
     * Cart Information
     Define_Pty Name(upCartId) Get(*AUTO #L_CartId) Set(*AUTO #L_CartId)
@@ -256,6 +258,7 @@
     #L_UserLastName := #JsonValueNode.Item<'lastName'>.asString
     #L_UserIndicator := #JsonValueNode.Item<'customerIndicator'>.asString
     #L_CustomerId := #JsonValueNode.Item<'selectedCustomer'>.asString
+    #L_SelectedPricingMode := #JsonValueNode.Item<'selectedPricingMode'>.asString
     
     * Retrieve Cart Information
     Set_Ref Com(#JsonValueNode) To(#JsonDocument.RootNode.Item<'cart'>)
@@ -329,6 +332,7 @@
     #Object_JSON_User.InsertString Key('lastName') String(#L_UserLastName)
     #Object_JSON_User.InsertString Key('customerIndicator') String(#L_UserIndicator)
     #Object_JSON_User.InsertString Key('selectedCustomer') String(#L_CustomerId)
+    #Object_JSON_User.InsertString Key('selectedPricingMode') String('Retail')
     
     * Create Cart Header Object
     #Object_JSON_Cart <= #Object_JSON_Root.InsertObject( 'cart' )

@@ -30,6 +30,12 @@
     Begin_Com Role(*EXTENDS #PRIM_OBJT)
     
     * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRSRCST) Name(#Global_SharedConstants) Desc('Shared Constant') Help('Shared Constant') Scope(*APPLICATION)
+    
+    * =======================================================
     * Utilities
     * =======================================================
     
@@ -332,7 +338,7 @@
     #Object_JSON_User.InsertString Key('lastName') String(#L_UserLastName)
     #Object_JSON_User.InsertString Key('customerIndicator') String(#L_UserIndicator)
     #Object_JSON_User.InsertString Key('selectedCustomer') String(#L_CustomerId)
-    #Object_JSON_User.InsertString Key('selectedPricingMode') String('Retail')
+    #Object_JSON_User.InsertString Key('selectedPricingMode') String(#Global_SharedConstants.upInitialPricingMode)
     
     * Create Cart Header Object
     #Object_JSON_Cart <= #Object_JSON_Root.InsertObject( 'cart' )

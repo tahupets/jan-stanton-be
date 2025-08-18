@@ -1,0 +1,98 @@
+﻿Reusable Part:
+  Name:               CNRSRCST
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Shared Constants"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Reusable Part
+    * Platform        : REST APIs
+    * Name            : CNRSRCST
+    * Identifier      : CNRSRCST
+    * Ancestor        : PRIM_OBJT
+    * Written By      : Jerson Dela Cruz
+    * Written On      : 18th August 2025
+    * Description     : Shared Constant
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Local Variable Definitions
+    * =======================================================
+    
+    * * * Define_Com Class(#LW3VARTXT) Name(#L_bToBIndicator)
+    * * * Define_Com Class(#LW3VARTXT) Name(#L_bToCIndicator)
+    Define_Com Class(#PRIM_ALPH) Name(#L_initialPricingMode)
+    
+    * =======================================================
+    * Property Definitions
+    * =======================================================
+    
+    * * * Define_Pty Name(upBToBIndicator) Get(getBToBIndicator) Set(*AUTO #L_bToBIndicator)
+    * * * Define_Pty Name(upBToCIndicator) Get(getBToBIndicator) Set(*AUTO #L_bToCIndicator)
+    Define_Pty Name(upInitialPricingMode) Get(getInitialPricingMode) Set(*AUTO #L_initialPricingMode)
+    
+    * =======================================================
+    * Property Routine Definitions
+    * =======================================================
+    
+    * * * * TAG: Ptyroutine: Get B to B Indicator
+    * * * Ptyroutine Name(getBToBIndicator)
+    * * * Define_Map For(*OUTPUT) Class(#LW3VARTXT) Name(#oBToBIndicator)
+    * * *
+    * * * If Cond(#L_bToBIndicator = *BLANKS)
+    * * * #oBToBIndicator := 'B'
+    * * * Else
+    * * * #oBToBIndicator := #L_bToBIndicator
+    * * * Endif
+    * * * Endroutine
+    * * *
+    * * * * TAG: Ptyroutine: Get B to C Indicator
+    * * * Ptyroutine Name(getBToCIndicator)
+    * * * Define_Map For(*OUTPUT) Class(#LW3VARTXT) Name(#oBToCIndicator)
+    * * *
+    * * * If Cond(#L_bToCIndicator = *BLANKS)
+    * * * #oBToCIndicator := 'C'
+    * * * Else
+    * * * #oBToCIndicator := #L_bToCIndicator
+    * * * Endif
+    * * * Endroutine
+    
+    * TAG: Ptyroutine: Get initial Pricing Mode
+    Ptyroutine Name(getInitialPricingMode)
+    Define_Map For(*OUTPUT) Class(#PRIM_ALPH) Name(#oInitialPricingMode)
+    
+    If Cond(#oInitialPricingMode = *BLANKS)
+    #oInitialPricingMode := 'retail'
+    Else
+    #oInitialPricingMode := #L_initialPricingMode
+    Endif
+    Endroutine
+    
+    End_Com

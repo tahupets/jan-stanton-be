@@ -578,7 +578,7 @@
     If Cond(#Global_DataModel.upRetailOnly = 'Y')
     #L_MarkUpFlag := False
     Else
-    * #Utility_General.umDebugLog( 'CNSACTSEL' (#Global_DataModel.upCustomerId + " : #Global_DataModel.upCustomerId") )
+    
     * Check for MSRP Pricing has been set
     #L_MarkUpFlag := False
     Select Fields(#LW3CODE #LW3PRFN) From_File(LW3MARKUP) With_Key(#Global_DataModel.upStorefrontId #Global_DataModel.upCustomerId) Io_Error(*NEXT) Val_Error(*NEXT)

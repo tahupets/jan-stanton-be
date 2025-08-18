@@ -1,0 +1,14 @@
+﻿Field:
+  Name:               C1APFX
+  Type:               Packed
+  Length:             10
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "AP FAX W/ AREA CODE"
+      Label:              "AP FAX W/ AREA"
+      Heading1:           "AP FAX W/ AREA CODE"

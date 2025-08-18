@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1ADTP
+  Type:               Packed
+  Length:             4
+  Decimals:           1
+  Default Value:      "*ZERO"
+  Edit Mask:          L
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "AVERAGE DAYS TO PAY"
+      Label:              "AVERAGE DAYS TO"
+      Heading1:           "AVERAGE DAYS"
+      Heading2:           "TO PAY"

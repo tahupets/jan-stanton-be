@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1ZIP
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "ZIP CODE"
+      Label:              "ZIP CODE"
+      Heading1:           "ZIP"
+      Heading2:           "CODE"

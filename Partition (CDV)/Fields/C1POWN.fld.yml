@@ -1,0 +1,17 @@
+﻿Field:
+  Name:               C1POWN
+  Type:               Alpha
+  Length:             30
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PRINCIPAL OWNER NAME"
+      Label:              "PRINCIPAL OWNER"
+      Heading1:           "PRINCIPAL OWNER NAME"

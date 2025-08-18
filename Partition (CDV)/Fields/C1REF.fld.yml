@@ -1,0 +1,17 @@
+﻿Field:
+  Name:               C1REF
+  Type:               Alpha
+  Length:             15
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "REFERENCE FIELD"
+      Label:              "REFERENCE FIELD"
+      Heading1:           "REFERENCE FIELD"

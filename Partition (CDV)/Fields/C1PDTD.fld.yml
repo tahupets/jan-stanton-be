@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1PDTD
+  Type:               Packed
+  Length:             4
+  Decimals:           1
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PRIOR YEAR AVG DAYS TO PAY"
+      Label:              "PRIOR YEAR AVG"
+      Heading1:           "PR"
+      Heading2:           "YR AVG DAYS"
+      Heading3:           "TO PAY"

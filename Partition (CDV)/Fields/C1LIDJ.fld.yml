@@ -1,0 +1,14 @@
+﻿Field:
+  Name:               C1LIDJ
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "LAST INVOICE DATE"
+      Label:              "LAST INVOICE DA"
+      Heading1:           "LAST INVOICE DATE"

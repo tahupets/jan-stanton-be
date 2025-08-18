@@ -1,0 +1,15 @@
+﻿Field:
+  Name:               C1UOVL
+  Type:               Packed
+  Length:             9
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "UN-APPROVED ORDER VALUATION"
+      Label:              "UN-APPROVED ORD"
+      Heading1:           "UN-APPR ORDER"
+      Heading2:           "VALUE"

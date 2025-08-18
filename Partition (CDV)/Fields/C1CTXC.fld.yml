@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1CTXC
+  Type:               Alpha
+  Length:             6
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CITY TAX CODE"
+      Label:              "CITY TAX CODE"
+      Heading1:           "CITY"
+      Heading2:           "TAX CD"

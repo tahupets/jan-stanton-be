@@ -1,0 +1,107 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * =======================================================
+    * Process Name - LW3GEN
+    
+    * Function Name - LW3BCUS
+    * Function Description - Customer master and ship-to API CE
+    
+    * EXCHANGE FIELDS(In)
+    
+    * #FXACTION  - Action code - C = Check_for, G = Get item master
+    * #LW3WEBC01 or #FXCUSID - Customer code
+    * #LW3SHIPID or #FXSHIPID - Ship-to code (optional here)
+    
+    
+    * EXCHANGE FIELDS(Out)
+    
+    * #LW3CUSNAM - Customer name
+    * #FXDESC  - Customer name
+    * #FXRETCD  - Return code - OK or NR
+    * Address fields:
+    
+    
+    * =======================================================
+    * Summary of Changes
+    * =======================================================
+    * CR #  !  Date   ! Description
+    * -------------------------------------------------------
+    *       |         |
+    * =======================================================
+    Function Options(*DIRECT)
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    
+    
+    Group_By Name(#LW3BSHIP) Fields(#LW3SHIPID #LW3CSNAME #LW3SADDR1 #LW3SADDR2 #LW3SADDR3 #LW3SCNTRY #LW3ADDRC2 #LW3CSCITY #LW3SSTATE #LW3SPSTAL)
+    Group_By Name(#LW3CUSM) Fields(#LW3WEBC01 #LW3CUSNAM #LW3ADDRS1 #LW3ADDRS2 #LW3CTY1 #LW3ADDS #LW3ADDZ #LW3HCNTRY)
+    
+    
+    Group_By Name(#MAPGRP) Fields(#LW3ADDRS1 #LW3ADDRS2 #LW3ADDRS3 #LW3CTY1 #LW3ADDS #LW3ADDZ #LW3HCNTRY #LW3CSNAME #LW3SADDR1 #LW3SADDR2 #LW3SADDR3 #LW3SCNTRY #LW3ADDRC2 #LW3CSCITY #LW3SSTATE #LW3SPSTAL #CMPNBR)
+    * =======================================================
+    * Program main line
+    * =======================================================
+    
+    Change Field(#LW3CUSNAM #FXDESC #LW3BSHIP #LW3CUSM #MAPGRP) To(*NULL)
+    Change Field(#FXRETCD) To(NR)
+    Exchange Fields(#LW3CUSNAM #FXDESC #FXRETCD) Option(*ALWAYS)
+    Exchange Fields(#MAPGRP) Option(*ALWAYS)
+    
+    If_Null Field(#FXCUSID)
+    Change Field(#FXCUSID) To(#LW3WEBC01)
+    Endif
+    
+    Case Of_Field(#FXACTION)
+    
+    When Value_Is('*EQ ''G''')
+    
+    If Cond(#FXCUSID.ISNUMBER)
+    #C1CST# := #FXCUSID.AsNumber
+    
+    If Cond(#FXSHIPID.ISNUMBER)
+    #C1CSFX := #FXSHIPID.ASNUMBER
+    
+    Fetch Fields(#C1NAME #C1ADR1 #C1ADR2 #C1ADR3 #C1CITY #C1ZIP #C1STCD #C1CTRY) From_File(CIP010) Where((#C1ACT = 'Y') And (#C1SELL = 'Y')) With_Key(#C1CST# #C1CSFX) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If_Status Is(*OKAY)
+    #LW3CUSNAM #FXDESC := #C1NAME
+    #LW3ADDRS1 := #C1ADR1
+    #LW3ADDRS2 := #C1ADR2
+    #LW3ADDRS3 := #C1ADR3
+    #LW3CTY1 := #C1CITY
+    #LW3ADDZ := #C1ZIP
+    #LW3ADDS := #C1STCD
+    #LW3SCNTRY := #C1CTRY
+    #FXRETCD := OK
+    Endif
+    
+    Endif
+    Endif
+    Otherwise
+    
+    If Cond(#FXCUSID.ISNUMBER)
+    #C1CST# := #FXCUSID.AsNumber
+    
+    If Cond(#FXSHIPID.ISNUMBER)
+    #C1CSFX := #FXSHIPID.ASNUMBER
+    
+    
+    Check_For In_File(CIP010) With_Key(#C1CST# #C1CSFX) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    Change Field(#FXRETCD) To(OK)
+    Endif
+    
+    Endif
+    Endif
+    
+    * Check_For In_File(LW3CUSM) With_Key(#FXCUSID) Io_Error(*NEXT) Val_Error(*NEXT)
+    * If_Status Is(*EQUALKEY)
+    * Change Field(#FXRETCD) To(OK)
+    * Endif
+    Endcase
+    
+    Return
+    

@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1DBRT
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DUNN AND BRADSTREET CREDIT STATUS CODE"
+      Label:              "DUNN AND BRADST"
+      Heading1:           "D & B"
+      Heading2:           "RATING"

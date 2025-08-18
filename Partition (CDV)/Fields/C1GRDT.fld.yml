@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1GRDT
+  Type:               Packed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          4
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "GUIDE/REVISE DATE"
+      Label:              "GUIDE/REVISE DA"
+      Heading1:           "GUIDE/REVISE"
+      Heading2:           "DATE"

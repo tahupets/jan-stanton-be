@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1CLMT
+  Type:               Packed
+  Length:             11
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Edit Mask:          L
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CREDIT LIMIT"
+      Label:              "CREDIT LIMIT"
+      Heading1:           "CREDIT"
+      Heading2:           "LIMIT"

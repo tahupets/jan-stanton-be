@@ -1,0 +1,15 @@
+﻿Field:
+  Name:               C1LBDT
+  Type:               Packed
+  Length:             6
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "LABEL PRINT DATE"
+      Label:              "LABEL PRINT DAT"
+      Heading1:           "LABEL PRINT"
+      Heading2:           "DATE"

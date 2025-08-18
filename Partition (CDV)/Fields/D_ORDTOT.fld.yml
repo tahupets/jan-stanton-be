@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               D_ORDTOT
+  Type:               Alpha
+  Length:             30
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Reference Field:    STD_DESC
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Display Sub-Total"
+      Label:              "Display Sub-Tot"
+      Heading1:           "Display"
+      Heading2:           "Sub-Total"
+      Heading3:           " "

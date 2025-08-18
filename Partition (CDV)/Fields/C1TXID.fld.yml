@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1TXID
+  Type:               Alpha
+  Length:             15
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "TAX I.D."
+      Label:              "TAX I.D."
+      Heading1:           "TAX"
+      Heading2:           "I.D."

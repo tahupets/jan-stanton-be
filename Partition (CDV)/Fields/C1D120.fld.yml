@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1D120
+  Type:               Packed
+  Length:             11
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Edit Mask:          L
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PAST DUE  90-OVER DAYS"
+      Label:              "PAST DUE  90-OV"
+      Heading1:           "PAST DUE DAYS"
+      Heading2:           "90-OVER"

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1D30
+  Type:               Packed
+  Length:             11
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Edit Mask:          L
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PAST DUE 0-29 DAYS"
+      Label:              "PAST DUE 0-29 D"
+      Heading1:           "PAST DUE DAYS"
+      Heading2:           "0-29"

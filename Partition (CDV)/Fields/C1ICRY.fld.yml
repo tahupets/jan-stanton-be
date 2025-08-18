@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1ICRY
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "INT PHONE COUNTRY CODE"
+      Label:              "INT PHONE COUNT"
+      Heading1:           "INT PHONE"
+      Heading2:           "COUNTRY"
+      Heading3:           "CODE"

@@ -1,0 +1,15 @@
+﻿Field:
+  Name:               C1DSPT
+  Type:               Packed
+  Length:             9
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DISPUTE AMOUNT"
+      Label:              "DISPUTE AMOUNT"
+      Heading1:           "DISPUTE"
+      Heading2:           "AMT"

@@ -1,0 +1,16 @@
+﻿Field:
+  Name:               C1STNO
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Edit Mask:          4
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CHAIN STORE NUMBER"
+      Label:              "CHAIN STORE NUM"
+      Heading1:           "CHAIN"
+      Heading2:           "STORE#"

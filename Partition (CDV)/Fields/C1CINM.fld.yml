@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1CINM
+  Type:               Alpha
+  Length:             25
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CREDIT INSURER NAME"
+      Label:              "CREDIT INSURER"
+      Heading1:           "INSURER"
+      Heading2:           "NAME"

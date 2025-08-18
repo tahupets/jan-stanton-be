@@ -1,0 +1,24 @@
+﻿Reusable Part:
+  Name:               LW3ConfigReader
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Reader to obtain system config value"
+
+  Source: |
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Mthroutine Name(uGetValue) Help('Get Commerce Edition System Setting Value')
+    Define_Map For(*INPUT) Class(#LW3SVNAME) Name(#uiKey)
+    Define_Map For(*OUTPUT) Class(#LW3SVVNUM) Name(#uoNumericValue) Mandatory(*NO)
+    Define_Map For(*RESULT) Class(#LW3SVVALP) Name(#urValue)
+    
+    Fetch Fields(#LW3SVVALP #LW3SVVNUM) From_File(lw3sys) With_Key(#uiKey) Io_Error(*RETURN)
+    #uoNumericValue := #LW3SVVNUM
+    #urValue := #LW3SVVALP
+    Endroutine
+    End_Com
+    

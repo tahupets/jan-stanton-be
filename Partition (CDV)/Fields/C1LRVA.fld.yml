@@ -1,0 +1,15 @@
+﻿Field:
+  Name:               C1LRVA
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DATE LAST REVIEW"
+      Label:              "DATE LAST REVIE"
+      Heading1:           "DATE"
+      Heading2:           "LAST REVIEW"

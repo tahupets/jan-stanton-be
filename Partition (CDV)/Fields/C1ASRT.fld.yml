@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1ASRT
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "ALPHA SORT FIELD"
+      Label:              "ALPHA SORT FIEL"
+      Heading1:           "ALPHA"
+      Heading2:           "SORT"

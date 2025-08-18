@@ -1,0 +1,15 @@
+﻿Field:
+  Name:               C1SCR1
+  Type:               Packed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "UNAPPR CREDIT STATUS CODE"
+      Label:              "UNAPPR CREDIT S"
+      Heading1:           "UNAPPR CREDIT"
+      Heading2:           "STATUS"

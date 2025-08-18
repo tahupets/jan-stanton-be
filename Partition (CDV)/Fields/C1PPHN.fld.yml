@@ -1,0 +1,14 @@
+﻿Field:
+  Name:               C1PPHN
+  Type:               Packed
+  Length:             7
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PRINCIPAL OWNER PHONE"
+      Label:              "PRINCIPAL OWNER"
+      Heading1:           "PRINCIPAL OWNER PH"

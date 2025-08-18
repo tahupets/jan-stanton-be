@@ -1,0 +1,1257 @@
+﻿ServerModule:
+  Name:               CNSACTSEL
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Storefront Account Selection"
+
+  Source: |
+    * ========================================================
+    * Copyright       : © Lansa Commerce Edition 2024
+    * Type            : Server Module
+    * Platform        : REST APIs
+    * Name            : CNSACTSEL
+    * Identifier      : CNSACTSEL
+    * Ancestor        : PRIM_SRVM
+    * Written By      : Jerson Dela Cruz
+    * Written On      : 15th August 2025
+    * Description     : Storefront Account Selection
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc GitLab #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    
+    Begin_Com Role(*EXTENDS #PRIM_SRVM)
+    
+    * =======================================================
+    * Global Definitions
+    * =======================================================
+    
+    Define_Com Class(#CNRDTAMD) Name(#Global_DataModel) Desc('Global Data Model') Help('Global Data Model') Scope(*APPLICATION)
+    
+    Define_Com Class(#prim_srvm.HttpJsonWebToken) Name(#uJWTAccess)
+    Define_Com Class(#prim_srvm.HttpJsonWebToken) Name(#uJWTRefresh)
+    Define_Com Class(#prim_srvm.HttpJsonWebTokenSignatureHSnnn) Name(#HSnnn) Algorithm(HS384)
+    Define_Com Class(#prim_srvm.HttpJsonWebTokenSignatureRSnnn) Name(#RSnnn) Algorithm(RS256)
+    Define_Com Class(#prim_srvm.HttpJsonWebTokenSignatureESnnn) Name(#ESnnn) Algorithm(ES512)
+    Define_Com Class(#prim_srvm.HttpJsonWebTokenSignaturePSnnn) Name(#PSnnn) Algorithm(PS384)
+    
+    * =======================================================
+    * Utilities
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERSSUTL) Name(#Utility_SystemSettings) Desc('System Settings Utility') Help('System Settings Utility') Scope(*APPLICATION)
+    Define_Com Class(#CERMLUTL) Name(#Utility_Multilinguals) Desc('Multilingual Utility') Help('Multilinguals Utility') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CNRWSSPR) Name(#Processor_Session) Desc('Web Session Processor') Help('Web Session Processor') Scope(*APPLICATION)
+    Define_Com Class(#CNRAPILG) Name(#Processor_ApiLog) Desc('API Log Processor') Scope(*APPLICATION)
+    
+    * =======================================================
+    * Srvroutine Definitions
+    * =======================================================
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSACTSEL/accounts
+    * Operation: GetAccounts
+    *
+    * Request
+    *    Parameter: search
+    *    Schema   : None
+    
+    * Response
+    *    Schema   : (OK) accountsArray
+    *             : (ER)
+    *
+    * Action  : Retrieve the list of associated accounts for the logged in user.
+    *           If the search parameter is passed, do an SQL query to retrieve the associated accounts
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetAccounts) Response(*HTTP #uContext) Desc('Storefront Get Accounts') Help('Build the user associated account list')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetAccounts) Name(#Operation)
+    Define_Com Class(#Com_Home.accountsArray) Name(#Array_AccountsResponse)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetAccounts.Response.NoContent.Object) Name(#Object_NoContent) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetAccounts.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umGetAssociatedAccountsList Iwebuser(#Global_DataModel.upUserId) Iarray_Accounts(#Array_AccountsResponse) Isearch(#Operation.Request.search)
+    
+    If Cond(#Array_AccountsResponse.Count > 0)
+    #Operation.Response.SetContentJson Content(#Array_AccountsResponse)
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgNoAssocAccountsFound') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('No associated accounts were found')
+    Set_Ref Com(#Object_NoContent) To(*CREATE_AS #Com_Home.GetAccounts.Response.NoContent.Object)
+    Set Com(#Object_NoContent) Messages(#Array_HttpResponse)
+    #Operation.Response.SetNoContent Content(#Object_NoContent)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session id is not valid')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetAccounts.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetAccounts.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSACTSEL/accounts/{account}
+    * Operation: GetAccounts
+    *
+    * Request
+    *    Parameter: account (LW3JDEC01)
+    *    Schema   : none
+    *
+    * Response
+    *    Schema   : (OK) accountObject
+    *             : (ER)
+    *
+    * Action  : Set the passed account as the selected one for this session
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetAccount) Response(*HTTP #uContext) Desc('Storefront Get Account Information') Help('Retrieve details for the selected customer account')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetAccount) Name(#Operation)
+    Define_Com Class(#Com_Home.accountObject) Name(#Object_Account)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetAccount.Response.Resp400.Object) Name(#Object_Resp400) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetAccount.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umSelectCustomerAccount Icontext(#uContext) Iuserid(#Global_DataModel.upUserId) Iuserindicator(#Global_DataModel.upUserIndicator) Icustomerid(#Operation.Request.customerId) Iguid(#LW3GUID) Iarray_Httpresponse(#Array_HttpResponse) Ocustomerid(#LW3JDEC01) Ocustomername(#LW3CUSNAM) Oaddress1(#LW3ADDRS1) Oaddress2(#LW3ADDRS2) Ocity(#LW3CTY1) Ostate(#LW3ADDS) Ozip(#LW3ADDZ) Ocountry(#LW3SCNTRY) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    Set Com(#Object_Account) Com_Fields(*ALL)
+    #Operation.Response.SetContentJson Content(#Object_Account)
+    
+    Else
+    Set_Ref Com(#Object_Resp400) To(*CREATE_AS #Com_Home.GetAccount.Response.Resp400.Object)
+    Set Com(#Object_Resp400) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp400 Content(#Object_Resp400)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session id is not valid')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetAccount.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetAccount.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    
+    
+    * =================================== API SUMMARY ==========================================
+    *
+    * Path     : /CNSACTSEL/accounts/{account}
+    * Operation: GetAccounts
+    *
+    * Request
+    *    Parameter: account (LW3JDEC01)
+    *    Schema   : none
+    *
+    * Response
+    *    Schema   : (OK) accountObject
+    *             : (ER)
+    *
+    * Action  : Set the passed account as the selected one for this session
+    *
+    * -------------------------------- MODIFICATION LOG ----------------------------------------
+    *
+    * ------------------------------------------------------------------------------------------
+    * ==========================================================================================
+    Srvroutine Name(usGetUserInit) Response(*HTTP #uContext) Desc('Storefront Get Account Information') Help('Retrieve details for the selected customer account')
+    
+    * API Definition
+    Define_Com Class(#Com_Home.GetUserInit) Name(#Operation)
+    Define_Com Class(#Com_Home.userInitObject) Name(#Object_UserInit)
+    Define_Com Class(#Com_Home.httpResponseArray) Name(#Array_HttpResponse)
+    Define_Com Class(#Com_Home.GetUserInit.Response.Resp400.Object) Name(#Object_Resp400) Reference(*DYNAMIC)
+    Define_Com Class(#Com_Home.GetUserInit.Response.Resp401.Object) Name(#Object_Resp401) Reference(*DYNAMIC)
+    
+    #Processor_ApiLog.umWriteLog Icontext(#uContext) Iobjectname(#COM_OWNER.Name)
+    
+    #uContext.Response.HttpStatus := 500
+    
+    
+    * Bind the Request and Response (#Operation) to the supplied Http Context (#uContext)
+    If (#Operation.TryBind( #uContext ))
+    
+    If Cond(#Processor_Session.umVerifyUserTokens( #uContext #Operation.Request.Security.HTTPBearer.Value #LW3GUID ))
+    
+    #Global_DataModel.umGetSessionInformation Iguid(#LW3GUID) Ihttpheaders(#uContext.Request.Headers) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    
+    #COM_OWNER.umGetUserInit Iobject_Userinit(#Object_UserInit) Oreturncode(#LW3RETCOD)
+    
+    If Cond(#LW3RETCOD = 'OK')
+    #Operation.Response.SetContentJson Content(#Object_UserInit)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgSessionIsExpired') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Session id is not valid')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetUserInit.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Else
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgUnauthorizedAccess') Imessagetype('error') Iarray_Httpresponse(#Array_HttpResponse) Imessagedetails('Access Token verification failed')
+    Set_Ref Com(#Object_Resp401) To(*CREATE_AS #Com_Home.GetUserInit.Response.Resp401.Object)
+    Set Com(#Object_Resp401) Messages(#Array_HttpResponse)
+    #Operation.Response.SetResp401 Content(#Object_Resp401)
+    
+    Endif
+    
+    Endif
+    
+    #Processor_ApiLog.umUpdateLog Iresponse(#uContext.Response.ContentStringUnicode) Iresponsestatus(#uContext.Response.HttpStatus)
+    
+    Endroutine
+    
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine : umGetAssociatedAccountsList
+    * Description: Get Associated Accounts List
+    * =======================================================
+    Mthroutine Name(umGetAssociatedAccountsList) Desc('Get Associated Accounts List') Access(*PRIVATE)
+    Define_Map For(*INPUT) Class(#LW3WEBUSR) Name(#iWebUser)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iSearch)
+    Define_Map For(*INPUT) Class(#COM_HOME.accountsArray) Name(#iArray_Accounts) Pass(*BY_REFERENCE)
+    
+    Define_Com Class(#LW3WEBUSR) Name(#L_WebUser)
+    
+    * Get user details
+    #LW3INHA #LW3USRTYP #LW3SUPUSR := *DEFAULT
+    Fetch Fields(#LW3INHA #LW3USRTYP #LW3SUPUSR #LW3ALLDLR) From_File(LW3WUSER) With_Key(#iWebUser) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * if account is all dealer
+    If Cond(#LW3ALLDLR = 'Y')
+    
+    If Cond(#iSearch <> *BLANKS)
+    
+    Select_Sql Fields(#C1CST# #C1NAME) Using("SELECT C1CST#, C1NAME FROM CIP010 WHERE (UPPER(C1NAME) LIKE '%" + #iSearch + "%' OR C1CST# LIKE '%" + #iSearch + "%') AND C1CSFX = 0 ORDER BY C1CST#, C1NAME LIMIT 9999")
+    
+    #LW3ASSC01 := #C1CST#.asString.RightAdjust( 6 '0' )
+    
+    #LW3WEBUSR #LW3ASCSTS #LW3CUSTYP := *NULL
+    Fetch Fields(#LW3WEBUSR #LW3ASCSTS #LW3CUSTYP #LW3ASSC01 #LW3SUID) From_File(LW3USRA2) With_Key(#LW3ASSC01) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Continue If(#LW3ASCSTS *NE 'A')
+    
+    * Get customer Name
+    Case Of_Field(#LW3CUSTYP)
+    
+    When Value_Is('= CUS' '= *BLANK')
+    #COM_OWNER.umGetCustomerAccountDetails Icustomerid(#LW3ASSC01) Iarray_Accounts(#iArray_Accounts)
+    
+    When Value_Is(= GRP)
+    #COM_OWNER.umGetCustomerGroupDetails Icustomerid(#LW3ASSC01) Iarray_Accounts(#iArray_Accounts)
+    Endcase
+    
+    Endselect
+    
+    Endif
+    
+    
+    Else
+    * If user is sub user, test Inheritance Flag
+    #L_WebUser := #iWebUser
+    If Cond((#LW3USRTYP = 'U') *And (#LW3INHA = 'Y'))
+    #L_WebUser := #LW3SUPUSR
+    Endif
+    
+    * Read associated accounts
+    Select Fields(#LW3ASCSTS #LW3CUSTYP #LW3ASSC01 #LW3SUID) From_File(LW3USRA1) With_Key(#L_WebUser) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * Ignore not Active records
+    Continue If(#LW3ASCSTS *NE 'A')
+    
+    * Get customer Name
+    Case Of_Field(#LW3CUSTYP)
+    
+    When Value_Is('= CUS' '= *BLANK')
+    #COM_OWNER.umGetCustomerAccountDetails Icustomerid(#LW3ASSC01) Iarray_Accounts(#iArray_Accounts)
+    
+    * When Value_Is('= SUP')
+    * #COM_OWNER.umSuppAccount( #LW3SUID )
+    
+    When Value_Is(= GRP)
+    #COM_OWNER.umGetCustomerGroupDetails Icustomerid(#LW3ASSC01) Iarray_Accounts(#iArray_Accounts)
+    Endcase
+    Endselect
+    
+    Endif
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine : umGetCustomerAccountDetails
+    * Description: Get Customer Account Details
+    * =======================================================
+    Mthroutine Name(umGetCustomerAccountDetails) Desc('Get Customer Account Details') Access(*PRIVATE)
+    Define_Map For(*INPUT) Class(#LW3ASSC01) Name(#iCustomerId)
+    
+    Define_Map For(*INPUT) Class(#COM_HOME.accountsArray) Name(#iArray_Accounts) Pass(*BY_REFERENCE)
+    
+    #FXCUSID := #iCustomerId
+    #FXACTION := 'G'
+    
+    Exchange Fields(#FXACTION #FXCUSID)
+    * Returns name and address fields
+    Call Process(*DIRECT) Function(LW3ACUS) Exit_Used(*NEXT) Menu_Used(*NEXT) If_Error(*NEXT)
+    
+    If Cond(#FXRETCD = OK)
+    
+    Loc_Entry In_List(#iArray_Accounts) Where(#LW3JDEC01 = #iCustomerId)
+    If_Status Is_Not(*OKAY)
+    #LW3JDEC01 := #LW3ASSC01
+    
+    
+    Add_Entry To_List(#iArray_Accounts)
+    Endif
+    Endif
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine : umGetCustomerGroupDetails
+    * Description: Get Customer Group Details
+    * =======================================================
+    Mthroutine Name(umGetCustomerGroupDetails) Desc('Get Customer Group Details') Access(*PRIVATE)
+    Define_Map For(*INPUT) Class(#LW3ASSC01) Name(#iCustomerId)
+    
+    Define_Map For(*INPUT) Class(#COM_HOME.accountsArray) Name(#iArray_Accounts) Pass(*BY_REFERENCE)
+    
+    Select Fields(#LW3WEBC01) From_File(LW3CGRPA) With_Key(#iCustomerId) Io_Error(*NEXT) Val_Error(*NEXT)
+    #FXCUSID := #LW3WEBC01
+    #FXACTION := 'G'
+    
+    Exchange Fields(#FXACTION #FXCUSID)
+    * Returns name and address fields
+    Call Process(*DIRECT) Function(LW3ACUS) Exit_Used(*NEXT) Menu_Used(*NEXT) If_Error(*NEXT)
+    
+    Loc_Entry In_List(#iArray_Accounts) Where(#LW3JDEC01 = #iCustomerId)
+    If_Status Is_Not(*OKAY)
+    #LW3JDEC01 := #LW3ASSC01
+    Add_Entry To_List(#iArray_Accounts)
+    Endif
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine : umSelectCustomerAccount
+    * Description: Select Customer Account
+    * =======================================================
+    Mthroutine Name(umSelectCustomerAccount) Desc('Select Customer Account') Access(*PRIVATE)
+    Define_Map For(*INPUT) Class(#PRIM_SRVM.HttpContext) Name(#iContext) Pass(*BY_REFERENCE)
+    
+    Define_Map For(*INPUT) Class(#LW3WEBUSR) Name(#iUserId)
+    Define_Map For(*INPUT) Class(#LW3CUSIND) Name(#iUserIndicator)
+    * Define_Map For(*INPUT) Class(#LW3SUID) Name(#iSupplierId)
+    Define_Map For(*INPUT) Class(#LW3JDEC01) Name(#iCustomerId)
+    Define_Map For(*INPUT) Class(#LW3GUID) Name(#iGUID)
+    
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Define_Map For(*OUTPUT) Class(#LW3JDEC01) Name(#oCustomerId)
+    Define_Map For(*OUTPUT) Class(#LW3CUSNAM) Name(#oCustomerName)
+    Define_Map For(*OUTPUT) Class(#LW3ADDRS1) Name(#oAddress1)
+    Define_Map For(*OUTPUT) Class(#LW3ADDRS2) Name(#oAddress2)
+    Define_Map For(*OUTPUT) Class(#LW3CTY1) Name(#oCity)
+    Define_Map For(*OUTPUT) Class(#LW3ADDS) Name(#oState)
+    Define_Map For(*OUTPUT) Class(#LW3ADDZ) Name(#oZip)
+    Define_Map For(*OUTPUT) Class(#LW3SCNTRY) Name(#oCountry)
+    
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    Define_Com Class(#PRIM_ALPH) Name(#L_SecureCookieName)
+    Define_Com Class(#PRIM_ALPH) Name(#L_PendingCartExistsFlag)
+    
+    #LW3ORDNUM := *null
+    
+    * Validate that the selected customer is correctly associated with the logged in user
+    Fetch Fields(#LW3WEBUSR) From_File(LW3USRA1) With_Key(#Global_DataModel.upUserId #iCustomerId) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    * Check if the customer id is active
+    #C1ACT #C1CST# := *NULL
+    If Cond(#iCustomerId.IsNumber)
+    #C1CST# := #iCustomerId.asNumber
+    
+    Fetch Fields(#C1ACT) From_File(CIP010) With_Key(#C1CST#) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    
+    If Cond(#C1ACT <> 'N')
+    #FXCUSID := #iCustomerId
+    #FXACTION := 'G'
+    
+    If Cond(#iUserIndicator = 'S')
+    * #FXSUID := #iSupplierId
+    * Exchange Fields(#FXACTION #FXSUID)
+    * Call Process(*DIRECT) Function(LW3ASUP) Exit_Used(*NEXT) Menu_Used(*NEXT) If_Error(*NEXT)
+    
+    Else
+    Exchange Fields(#FXACTION #FXCUSID)
+    Call Process(*DIRECT) Function(LW3ACUS) Exit_Used(*NEXT) Menu_Used(*NEXT) If_Error(*NEXT)
+    
+    Endif
+    
+    If Cond(#FXRETCD = 'OK')
+    
+    #LW3CARTID #Global_DataModel.upCartId := 0
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('ENABLE_PENDING_CART') Ilanguage('') Oalphavalue(#L_PendingCartExistsFlag)
+    
+    If Cond(#L_PendingCartExistsFlag = 'Y')
+    * Get the Cart Id from the last active unplaced cart for the user and customer combination
+    Select Fields(#LW3CARTID) From_File(CNTHDRL13) With_Key(#iUserId #iCustomerId) Io_Error(*NEXT) Val_Error(*NEXT)
+    #Global_DataModel.upCartId := #LW3CARTID
+    Leave
+    Endselect
+    Endif
+    
+    #Global_DataModel.upCustomerId := #iCustomerId
+    
+    Fetch Fields(#LW3GUID) From_File(CNTSESSNL2) With_Key(#LW3GUID #Global_DataModel.upUserId) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    * Update the existing session
+    #LW3ASSC01 := #iCustomerId
+    #LW3JSDTA := #Global_DataModel.umBuildSessionPayload( #iContext.Request.Headers )
+    
+    Update Fields(#LW3ASSC01 #LW3CARTID #LW3JSDTA) In_File(CNTSESSNL2) With_Key(#iGUID #iUserId) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * Update the refresh token
+    #LW3GUID := #iGUID
+    If_Ref Com(#iContext.Request.Headers.Item<'Cookie'>) Is_Not(*NULL)
+    #LW3RFSTKN := #Processor_Session.umGetRefreshTokenFromCookie( #iContext.Request.Headers.Item<'Cookie'>.Value )
+    
+    Update Fields(#LW3GUID) In_File(CNTAUTKNL1) With_Key(#LW3RFSTKN) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #oReturnCode := 'OK'
+    Else
+    #oReturnCode := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgRequestNotProcessed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Failed to update the refresh token in CNTAUTKN')
+    Endif
+    Else
+    #oReturnCode := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgRequestNotProcessed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Header cookie is null and could not be read')
+    Endif
+    
+    Else
+    #oReturnCode := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgRequestNotProcessed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Session record could not be retrieved from file.')
+    
+    Endif
+    
+    #oCustomerId := #iCustomerId
+    #oCustomerName := #LW3CUSNAM
+    #oAddress1 := #LW3ADDRS1
+    #oAddress2 := #LW3ADDRS2
+    #oCity := #LW3CTY1
+    #oState := #LW3ADDS
+    #oZip := #LW3ADDZ
+    #oCountry := #LW3SCNTRY
+    
+    Else
+    #oReturnCode := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgRequestNotProcessed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('Account number selected is invalid.')
+    
+    Endif
+    
+    Else
+    #oReturnCode := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgRequestNotProcessed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('User is not associated with this account.')
+    
+    Endif
+    
+    Else
+    #oReturnCode := 'ER'
+    #COM_OWNER.umSetHttpResponseMessages Ivariablename('MsgRequestNotProcessed') Imessagetype('error') Iarray_Httpresponse(#iArray_HttpResponse) Imessagedetails('User is not associated with this account.')
+    
+    Endif
+    
+    Endroutine
+    
+    
+    * =======================================================
+    * Mthroutine : umGetUserInit
+    * Description: Get User Init
+    * =======================================================
+    Mthroutine Name(umGetUserInit) Desc('Get User Init') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#COM_HOME.userInitObject) Name(#iObject_UserInit) Pass(*BY_REFERENCE)
+    Define_Map For(*OUTPUT) Class(#LW3RETCOD) Name(#oReturnCode)
+    
+    Define_Com Class(#PRIM_BOLN) Name(#L_MarkUpFlag)
+    
+    * Check for Canadian DDP account
+    #C1PFG0 := *NULL
+    #oReturnCode := 'OK'
+    
+    Fetch Fields(#C1PFG0) From_File(CIP010) With_Key(#Global_DataModel.upCustomerId.AsNumber) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    
+    #iObject_UserInit.canadianDPPFlag := (#C1PFG0 = True)
+    Else
+    
+    #oReturnCode := 'ER'
+    Endif
+    
+    If Cond(#Global_DataModel.upRetailOnly = 'Y')
+    #L_MarkUpFlag := False
+    Else
+    
+    * Check for MSRP Pricing has been set
+    #L_MarkUpFlag := False
+    Select Fields(#LW3CODE #LW3PRFN) From_File(LW3MARKUP) With_Key(#Global_DataModel.upStorefrontId #Global_DataModel.upCustomerId) Io_Error(*NEXT) Val_Error(*NEXT)
+    * If the preference is not MSRP, skip it
+    Continue If((*Not (#LW3CODE.Substring( 1 4 ) = 'MSRP')) Or (#LW3CODE = 'MSRP_PROMOTIONS'))
+    
+    * If MSRP Pricing is provided
+    If Cond(#LW3PRFN <> 0)
+    #L_MarkUpFlag := True
+    Leave
+    Endif
+    Endselect
+    Endif
+    
+    
+    #iObject_UserInit.showPricingModes := #L_MarkUpFlag
+    
+    #iObject_UserInit.selectedPricingMode := #Global_DataModel.upSelectedPricingMode
+    
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umSetHttpResponseMessages
+    * Description....: Set Http Response Messages
+    * =======================================================
+    Mthroutine Name(umSetHttpResponseMessages) Desc('Set Http Response Messages') Access(*PRIVATE)
+    
+    Define_Map For(*INPUT) Class(#LW3VARNAM) Name(#iVariableName)
+    Define_Map For(*INPUT) Class(#LW3MSGTYP) Name(#iMessageType)
+    Define_Map For(*INPUT) Class(#LW3FLDNAM) Name(#iFieldName) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iMessageDetails) Mandatory('')
+    Define_Map For(*INPUT) Class(#LW3VARUTX) Name(#iSubstitutionVariable1) Mandatory('')
+    Define_Map For(*INPUT) Class(#Com_Home.httpResponseArray) Name(#iArray_HttpResponse) Pass(*BY_REFERENCE)
+    
+    Add_Entry To_List(#iArray_HttpResponse)
+    #iArray_HttpResponse.CurrentItem.code := #iVariableName
+    #iArray_HttpResponse.CurrentItem.type := #iMessageType
+    #iArray_HttpResponse.CurrentItem.message := #Utility_Multilinguals.umGetMultilingualText( #iVariableName #Global_DataModel.upCurrentLanguage )
+    
+    If Cond(#iFieldName <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.field := #iFieldName
+    Endif
+    If Cond(#iMessageDetails <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.detail := #iMessageDetails
+    Endif
+    If Cond(#iSubstitutionVariable1 <> *BLANKS)
+    #iArray_HttpResponse.CurrentItem.substitutions.Add Value(#iSubstitutionVariable1)
+    Endif
+    
+    Endroutine
+    
+    End_Com
+
+  API Definition:
+    Language Handling:       NoAction
+    Partition Handling:      PathVariable
+    Publish as Swagger V2:   Yes
+    Publish as OpenAPI V3:   Yes
+    ServicePath:             /CNSACTSEL
+
+    Security Requirements:
+    - Security:
+
+        Security Schemes:
+        - HTTPBearer:
+
+    Paths:
+    - /accounts:
+        Description:        Account List
+
+        Parameters:
+        - search:
+            Location:           Query
+            Style:              Default
+            Required:           No
+            Explode:            No
+            Deprecated:         No
+            Allow Reserved:     No
+            Allow Empty Value:  No
+
+            Schema Object:
+              Title:              search
+              Description:        Search
+              Type:               Field
+              Field Name:         LW3SEARCH
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        Operations:
+        - GetAccounts:
+            Verb:               Get
+            Server Routine:     usGetAccounts
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     accountsArray
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Bad Request:
+                Status Code:        400
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp400
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Forbidden:
+                Status Code:        403
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp403
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - httpResponseArray:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Success (No Content):
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      NoContent
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    - /accounts/{customerId}:
+
+        Parameters:
+        - customerId:
+            Id:                 customerId
+            Location:           Path
+            Style:              Default
+            Required:           Yes
+            Explode:            No
+            Deprecated:         No
+            Allow Reserved:     No
+            Allow Empty Value:  No
+
+            Schema Object:
+              Title:              LW3JDEC01
+              Description:        Selected Customer Number
+              Type:               Field
+              Field Name:         LW3JDEC01
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        Operations:
+        - GetAccount:
+            Verb:               Get
+            Server Routine:     usGetAccount
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - Success:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     accountObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Success (No Content):
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      NoContent
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Bad Request:
+                Status Code:        400
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp400
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    - /user/init:
+
+        Operations:
+        - GetUserInit:
+            Verb:               Get
+            Server Routine:     usGetUserInit
+            Deprecated:         No
+
+            Request:
+              Required:           No
+
+            Responses:
+            - OK:
+                Status Code:        200
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      ContentJson
+
+                    Schema Object:
+                      Type:               Reference
+                      Reference Name:     userInitObject
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+            - Unauthorized:
+                Status Code:        401
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp401
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+            - Bad Request:
+                Status Code:        400
+
+                Media Types:
+                - application/json:
+                    Media Type Id:      Resp400
+
+                    Schema Object:
+                      Description:        Http Response Object
+                      Type:               Object
+                      Format:             Unspecified
+                      Required:           No
+                      Nullable:           No
+                      ReadOnly:           No
+                      WriteOnly:          No
+
+                      Properties:
+                      - messages:
+                          Type:               Reference
+                          Reference Name:     httpResponseArray
+                          Format:             Unspecified
+                          Required:           Yes
+                          Nullable:           No
+                          ReadOnly:           No
+                          WriteOnly:          No
+
+    Components:
+      Schema:
+        Types:
+        - accountObject:
+            Description:        Accounts Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - customerId:
+                Description:        Customer Id
+                Type:               Field
+                Field Name:         LW3JDEC01
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - customerName:
+                Description:        Customer Name
+                Type:               Field
+                Field Name:         LW3CUSNAM
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - address1:
+                Description:        Address Line 1
+                Type:               Field
+                Field Name:         LW3ADDRS1
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - address2:
+                Description:        Address Line 2
+                Type:               Field
+                Field Name:         LW3ADDRS2
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - city:
+                Description:        City
+                Type:               Field
+                Field Name:         LW3CTY1
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - state:
+                Description:        State
+                Type:               Field
+                Field Name:         LW3ADDS
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - zip:
+                Description:        Zip Code
+                Type:               Field
+                Field Name:         LW3ADDZ
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - country:
+                Description:        Country
+                Type:               Field
+                Field Name:         LW3SCNTRY
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - cartId:
+                Description:        Cart Id
+                Type:               Field
+                Field Name:         LW3CARTID
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+        - accountsArray:
+            Description:        List of Associated Accounts
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Type:               Reference
+              Reference Name:     accountObject
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+        - httpResponseArray:
+            Title:              message
+            Description:        Http Response Array
+            Type:               Array
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Items:
+            - Description:        Http Response Array
+              Type:               Object
+              Format:             Unspecified
+              Required:           No
+              Nullable:           No
+              ReadOnly:           No
+              WriteOnly:          No
+
+              Properties:
+              - code:
+                  Description:        Multilingual Variable Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - message:
+                  Description:        Multilingual Variable Unicode Text
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - type:
+                  Description:        Message Type
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - field:
+                  Description:        Field Name
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - detail:
+                  Description:        Message Detail
+                  Type:               String
+                  Format:             Unspecified
+                  Required:           No
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+              - substitutions:
+                  Description:        Substitution Variables
+                  Type:               Array
+                  Format:             Unspecified
+                  Required:           Yes
+                  Nullable:           No
+                  ReadOnly:           No
+                  WriteOnly:          No
+
+                  Items:
+                  - Description:        values
+                    Type:               String
+                    Format:             Unspecified
+                    Required:           No
+                    Nullable:           No
+                    ReadOnly:           No
+                    WriteOnly:          No
+
+        - userInitObject:
+            Description:        User Init Object
+            Type:               Object
+            Format:             Unspecified
+            Required:           No
+            Nullable:           No
+            ReadOnly:           No
+            WriteOnly:          No
+
+            Properties:
+            - canadianDPPFlag:
+                Description:        Canadian DPP Flag
+                Type:               Boolean
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - showPricingModes:
+                Description:        Show Pricing Modes
+                Type:               Boolean
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - selectedPricingMode:
+                Description:        Selected Pricing Mode
+                Type:               String
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+      Security Schemes:
+      - HTTPBearer:
+          Type:                   HTTP
+          In:                     Unspecified
+          HTTP Scheme:            Bearer
+          HTTP Bearer Format:     JWT

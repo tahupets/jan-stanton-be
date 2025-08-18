@@ -1,0 +1,71 @@
+﻿Reusable Part:
+  Name:               LW3MultilingualReader
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Multilingual Variable Reader"
+
+  Source: |
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Mthroutine ....: umGetMultilingualText
+    * Description....: Get Commerce Edition System Multilingual Text
+    * =======================================================
+    Mthroutine Name(umGetMultilingualText) Help('Get Commerce Edition System Multilingual Text')
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iVariable)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iLanguage)
+    Define_Map For(*RESULT) Class(#PRIM_ALPH) Name(#rText)
+    
+    Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key(#iVariable #iLanguage) Io_Error(*NEXT) Val_Error(*NEXT)
+    #rText := #LW3VARTXT
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umDisplayMultilingualMessage
+    * Description....: Display Multilingual Message
+    * =======================================================
+    Mthroutine Name(umDisplayMultilingualMessage) Help('Display Multilingual Message')
+    Define_Map For(*INPUT) Class(#LW3VARNAM) Name(#iVariableName) Desc('Variable Name')
+    Define_Map For(*INPUT) Class(#LW3LNGID) Name(#iLanguage) Desc('Language')
+    Define_Map For(*INPUT) Class(#LW3MSGSUB) Name(#iSubstitutionVariable) Mandatory('') Desc('Variable Name')
+    
+    #LW3VARNAM := #iVariableName
+    #LW3LNGID := #iLanguage
+    #LW3MSGSUB := #iSubstitutionVariable
+    
+    Exchange Fields(#LW3VARNAM #LW3LNGID #LW3MSGSUB)
+    Call Process(*DIRECT) Function(LW3MSG) If_Error(*NEXT)
+    Endroutine
+    
+    * =======================================================
+    * Mthroutine ....: umDisplayCustomMessage
+    * Description....: Display Multilingual Message
+    * =======================================================
+    Mthroutine Name(umDisplayCustomMessage) Desc('Display Custom Message') Help('Display Custom Message')
+    
+    Define_Map For(*INPUT) Class(#STD_STRNG) Name(#iMessageText) Desc('Message Text') Help('This is a 512 string field that will be used as the messages text')
+    
+    Define_Com Class(#PRIM_NMBR) Name(#L_Index) Desc('Index')
+    
+    Dowhile Cond(#iMessageText.CurChars > 80)
+    #L_Index := #iMessageText.Substring( 1 80 ).LastPositionOf( ' ' )
+    If Cond(#L_Index = 0)
+    Message Msgtxt(#iMessageText.Substring( 1 80 ))
+    #iMessageText := #iMessageText.Substring( 81 )
+    Else
+    Message Msgtxt(#iMessageText.Substring( 1 #L_Index ))
+    #iMessageText := #iMessageText.Substring( (#L_Index + 1) )
+    Endif
+    Endwhile
+    
+    If Cond(#iMessageText *NE *blank)
+    Message Msgtxt(#iMessageText)
+    Endif
+    
+    Endroutine
+    
+    End_Com

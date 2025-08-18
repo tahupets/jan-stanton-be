@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3REFDOM
+  Type:               Alpha
+  Length:             100
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Referer Domain"
+      Label:              "Referer Domain"
+      Heading1:           "Referer"
+      Heading2:           "Domain"
+      Heading3:           " "

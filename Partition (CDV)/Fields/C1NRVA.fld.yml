@@ -1,0 +1,15 @@
+﻿Field:
+  Name:               C1NRVA
+  Type:               Packed
+  Length:             5
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "DATE NEXT REVIEW"
+      Label:              "DATE NEXT REVIE"
+      Heading1:           "DATE"
+      Heading2:           "NEXT REVIEW"

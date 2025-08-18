@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1CTRY
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "COUNTRY CODE"
+      Label:              "COUNTRY CODE"
+      Heading1:           "COUNTRY"
+      Heading2:           "CODE"

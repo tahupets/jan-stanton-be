@@ -1,0 +1,14 @@
+﻿Field:
+  Name:               C1APAC
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "AP CONTACT AREA CODE"
+      Label:              "AP CONTACT AREA"
+      Heading1:           "AP CONTACT AREA CODE"

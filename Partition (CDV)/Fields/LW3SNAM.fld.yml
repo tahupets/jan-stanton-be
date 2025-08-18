@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3SNAM
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Short Name"
+      Label:              "Short Name"
+      Heading1:           "Short"
+      Heading2:           "Name"
+      Heading3:           " "

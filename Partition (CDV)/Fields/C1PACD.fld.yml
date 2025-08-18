@@ -1,0 +1,14 @@
+﻿Field:
+  Name:               C1PACD
+  Type:               Packed
+  Length:             3
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PRINCIPAL OWNER AREA CODE"
+      Label:              "PRINCIPAL OWNER"
+      Heading1:           "PRINCIPAL OWNER A/C"

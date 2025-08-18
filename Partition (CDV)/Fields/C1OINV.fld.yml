@@ -1,0 +1,15 @@
+﻿Field:
+  Name:               C1OINV
+  Type:               Packed
+  Length:             9
+  Decimals:           2
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "ORDERS INVOICED NOT IN AR"
+      Label:              "ORDERS INVOICED"
+      Heading1:           "ORDERS"
+      Heading2:           "INVOICED"

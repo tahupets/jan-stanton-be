@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1CTCD
+  Type:               Alpha
+  Length:             4
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CITY CODE"
+      Label:              "CITY CODE"
+      Heading1:           "CITY"
+      Heading2:           "CODE"

@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1GSA
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "GSA CUSTOMER?"
+      Label:              "GSA CUSTOMER?"
+      Heading1:           "GSA"
+      Heading2:           "CUSTOMER?"

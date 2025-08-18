@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1ADR1
+  Type:               Alpha
+  Length:             30
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "ADDRESS LINE #1"
+      Label:              "ADDRESS LINE #1"
+      Heading1:           "ADDRESS"
+      Heading2:           "LINE #1"

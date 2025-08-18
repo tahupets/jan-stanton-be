@@ -1,0 +1,17 @@
+﻿Field:
+  Name:               C1SXCD
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SOUND X CODE"
+      Label:              "SOUND X CODE"
+      Heading1:           "SOUND X CODE"

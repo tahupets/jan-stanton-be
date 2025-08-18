@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1CNT2
+  Type:               Alpha
+  Length:             25
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CUSTOMER CONTACT FOR A/R"
+      Label:              "CUSTOMER CONTAC"
+      Heading1:           "A/R"
+      Heading2:           "CONTACT"

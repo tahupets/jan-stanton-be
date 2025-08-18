@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1TXIS
+  Type:               Alpha
+  Length:             15
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "SAMPLE TAX ID"
+      Label:              "SAMPLE TAX ID"
+      Heading1:           "SAMPLE"
+      Heading2:           "TAX ID"

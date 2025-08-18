@@ -1,0 +1,101 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * =======================================================
+    * Process Name - LW3API
+    * Process Description - Back Office file API's
+    
+    * Function Name - LW3ACUS
+    * Function Description - Customer master and ship-to API
+    
+    * EXCHANGE FIELDS(In)
+    
+    * #FXACTION  - Action code - C = Check_for, G = Get item master
+    * #LW3WEBC01 or #FXCUSID - Customer code
+    * #LW3SHIPID or #FXSHIPID - Ship-to code (optional here)
+    
+    
+    * EXCHANGE FIELDS(Out)
+    
+    * #LW3CUSNAM - Customer name
+    * #FXDESC  - Customer name
+    * #FXRETCD  - Return code - OK or NR
+    * #MAPGRP  - Address fields:
+    
+    
+    * =======================================================
+    * Summary of Changes
+    * =======================================================
+    * CR #  !  Date   ! Description
+    * -------------------------------------------------------
+    *       |         |
+    * =======================================================
+    Function Options(*DIRECT)
+    * =======================================================
+    
+    Define_Com Class(#CERGNUTL) Name(#Utility_General) Desc('CE General Utility') Help('CE General Utility') Scope(*APPLICATION)
+    
+    
+    Define Field(#W_BO) Type(*CHAR) Length(10)
+    
+    Group_By Name(#MAPGRP) Fields(#LW3ADDRS1 #LW3ADDRS2 #LW3ADDRS3 #LW3CTY1 #LW3ADDS #LW3ADDZ #LW3HCNTRY #LW3CSNAME #LW3SADDR1 #LW3SADDR2 #LW3SCNTRY #LW3ADDRC2 #LW3CSCITY #LW3SSTATE #LW3SPSTAL #CMPNBR)
+    
+    * =======================================================
+    * Program main line
+    * =======================================================
+    
+    Execute Subroutine(INIT)
+    
+    * Continue depending on which back office we interface with
+    Case Of_Field(#W_BO)
+    
+    When Value_Is('*EQ ''ERPF''')
+    Exchange Fields(#FXACTION #FXCUSID #FXSHIPID)
+    Call Process(*DIRECT) Function(LW3ACUE) If_Error(*NEXT)
+    
+    When Value_Is('*EQ ''CE''')
+    Exchange Fields(#FXACTION #FXCUSID #FXSHIPID)
+    Call Process(*DIRECT) Function(LW3BCUS) If_Error(*NEXT)
+    
+    When Value_Is('*EQ ''JDE''')
+    Exchange Fields(#FXACTION #FXCUSID #FXSHIPID)
+    Call Process(*DIRECT) Function(LW3ACUJ) If_Error(*NEXT)
+    
+    When Value_Is('*EQ ''BPCS''')
+    Exchange Fields(#FXACTION #FXCUSID #FXSHIPID)
+    Call Process(*DIRECT) Function(LW3ACUB) If_Error(*NEXT)
+    
+    Otherwise
+    
+    Change Field(#LW3CUSNAM #FXDESC #MAPGRP) To(*NULL)
+    Endcase
+    
+    
+    Exchange Fields(#LW3CUSNAM #FXDESC #FXRETCD)
+    Exchange Fields(#MAPGRP)
+    
+    Return
+    
+    
+    * =======================================================
+    Subroutine Name(INIT)
+    
+    Change Field(#FXRETCD) To(NR)
+    
+    * Get back office ID from system file
+    Change Field(#LW3SVNAME) To(BACK_OFFICE)
+    Change Field(#LW3SVLANG) To(*BLANK)
+    Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key(#LW3SVNAME #LW3SVLANG) Io_Error(*NEXT)
+    If_Status Is(*OKAY)
+    Change Field(#W_BO) To(#LW3SVVALP)
+    Else
+    * Default to CE
+    Change Field(#W_BO) To(CE)
+    Endif
+    
+    If Cond('#FXACTION *EQ *BLANK')
+    Change Field(#FXACTION) To(G)
+    Endif
+    
+    Endroutine

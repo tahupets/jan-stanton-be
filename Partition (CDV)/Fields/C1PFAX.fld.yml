@@ -1,0 +1,14 @@
+﻿Field:
+  Name:               C1PFAX
+  Type:               Packed
+  Length:             10
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "PRINCIPAL OWNER FAX"
+      Label:              "PRINCIPAL OWNER"
+      Heading1:           "PRINCIPAL OWNER FAX"

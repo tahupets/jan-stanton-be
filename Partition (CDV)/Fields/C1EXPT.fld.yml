@@ -1,0 +1,18 @@
+﻿Field:
+  Name:               C1EXPT
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANK"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "IS THIS AN EXPORT CUSTOMER (DEFAULT IS N"
+      Label:              "IS THIS AN EXPO"
+      Heading1:           "EXPORT"
+      Heading2:           "CUSTOMER?"

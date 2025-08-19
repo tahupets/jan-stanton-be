@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3STCSZ
+  Type:               Alpha
+  Length:             100
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Ship To City State Zip"
+      Label:              "Ship To City St"
+      Heading1:           "Ship"
+      Heading2:           "To"
+      Heading3:           "City"

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               W_A010DTE
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Date Work Field"
+      Label:              "Date Work Field"
+      Heading1:           "Date"
+      Heading2:           "Work"
+      Heading3:           "Field"

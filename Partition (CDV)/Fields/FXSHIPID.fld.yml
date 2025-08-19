@@ -1,0 +1,34 @@
+﻿Field:
+  Name:               FXSHIPID
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Ship ID"
+      Label:              "Ship-to"
+      Heading1:           "Ship"
+      Heading2:           "To"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(201)
+    
+    End_Com
+    
+    End_Com
+
+  Repository Help:
+  - ENG: |
+      $$USER
+      %$$title CUSTOMER SHIP-TO ID
+      
+      This is the assigned ship-to identifier for a specific customer, up to
+      4 characters in length.

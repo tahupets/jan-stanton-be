@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3ADDRS2
+  Type:               Alpha
+  Length:             60
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Keyboard Shift:     SbcsAndDbcs
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Customer Ship-To Address Line 2"
+      Label:              "Customer"
+      Heading1:           "Customer"
+      Heading2:           "Ship-To"
+      Heading3:           "Address"

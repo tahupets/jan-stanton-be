@@ -1,0 +1,26 @@
+﻿Field:
+  Name:               O010INVN
+  Type:               Packed
+  Length:             7
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Invoice#"
+      Label:              "Invoice#"
+      Heading1:           "Invoice#"
+      Heading2:           " "
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Usepicklist(False) Componentversion(1) Height(19) Width(261)
+    
+    End_Com
+    
+    End_Com

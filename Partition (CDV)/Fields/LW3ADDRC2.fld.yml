@@ -1,0 +1,21 @@
+﻿Field:
+  Name:               LW3ADDRC2
+  Type:               Alpha
+  Length:             60
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Keyboard Shift:     SbcsAndDbcs
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Consignee Address Line 2"
+      Label:              "Consignee"
+      Heading1:           "Consignee"
+      Heading2:           "Address"
+      Heading3:           "Line"

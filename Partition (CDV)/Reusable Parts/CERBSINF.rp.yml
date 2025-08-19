@@ -1,0 +1,153 @@
+﻿Reusable Part:
+  Name:               CERBSINF
+  Enabled For RDMLX:  Yes
+  Target Platform:    Windows/IBM i/Linux
+
+  Multilingual Details:
+  - ENG:
+      Description:        "CE Bill To Ship To Information"
+
+  Source: |
+    * ========================================================
+    * Copyright       : (C) Lansa Commerce Edition, 2018
+    * Type            : Reusable Part
+    * Platform        : Web Application (Visual LANSA)
+    * Name            : CERBSINF
+    * Identifier      : CERBSINF
+    * Ancestor        : PRIM_OBJT
+    * Written By      : Jan Metica
+    * Written On      : 27th September 2018
+    * Description     : CE Multilingual Utility
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc App Trkr #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    Function Options(*DIRECT)
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    * =======================================================
+    * Group Definitions
+    * =======================================================
+    
+    * LW3WCUST File Group
+    Group_By Name(#XG_WCUST) Fields(#LW3CHNAME #LW3HADDR1 #LW3HADDR2 #LW3CHCITY #LW3HSTATE #LW3HPSTAL #LW3HCNTRY #LW3CHCPNY)
+    
+    * =======================================================
+    * Method Definitions
+    * =======================================================
+    * =======================================================
+    * Mthroutine ....: umGetBillToShipToInfo
+    * Description....: Get Bill To Ship To Info
+    * =======================================================
+    Mthroutine Name(umGetBillToShipToInfo) Desc('Get Bill To Ship To Info') Help('Get Bill To Ship To Info')
+    
+    Define_Map For(*INPUT) Class(#STDWEBUSR) Name(#iWebUser) Desc('Web User')
+    Define_Map For(*INPUT) Class(#LW3CUSIND) Name(#iCustomerIndicator) Desc('Customer Indicator') Help('Used to determine if customer is for B2B or B2C')
+    Define_Map For(*INPUT) Class(#LW3WEBC01) Name(#iCustomerNumber) Desc('Customer Number') Help('Customer Number')
+    Define_Map For(*INPUT) Class(#LW3SHIPID) Name(#iShipToId) Mandatory('') Desc('Ship To Id') Help('Ship To Id')
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iGetBillToInfo) Mandatory(True) Desc('Get Bill To Info') Help('Set this to True if getting the Bill To Info')
+    Define_Map For(*INPUT) Class(#PRIM_BOLN) Name(#iGetShipToInfo) Mandatory(True) Desc('Get Ship To Info') Help('Set this to True if getting the Ship To Info')
+    
+    Define_Map For(*OUTPUT) Class(#LW3CHNAME) Name(#oBillToName) Mandatory('') Desc('Bill To Name')
+    Define_Map For(*OUTPUT) Class(#LW3CHCPNY) Name(#oBillToCompany) Mandatory('') Desc('Bill To Company')
+    Define_Map For(*OUTPUT) Class(#LW3HADDR1) Name(#oBillToAddress1) Mandatory('') Desc('Bill To Address 1')
+    Define_Map For(*OUTPUT) Class(#LW3HADDR2) Name(#oBillToAddress2) Mandatory('') Desc('Bill To Address 2')
+    Define_Map For(*OUTPUT) Class(#LW3CHCITY) Name(#oBillToCity) Mandatory('') Desc('Bill To City')
+    Define_Map For(*OUTPUT) Class(#LW3HSTATE) Name(#oBillToState) Mandatory('') Desc('Bill To State')
+    Define_Map For(*OUTPUT) Class(#LW3HPSTAL) Name(#oBillToZip) Mandatory('') Desc('Bill To Zip')
+    Define_Map For(*OUTPUT) Class(#LW3BTCSZ) Name(#oBillToCityStateZip) Mandatory('') Desc('Bill To City State Zip')
+    Define_Map For(*OUTPUT) Class(#LW3HCNTRY) Name(#oBillToCountry) Mandatory('') Desc('Bill To Country')
+    
+    Define_Map For(*OUTPUT) Class(#LW3CSNAME) Name(#oShipToName) Mandatory('') Desc('Ship To Name')
+    Define_Map For(*OUTPUT) Class(#LW3CSCPNY) Name(#oShipToCompany) Mandatory('') Desc('Ship To Company')
+    Define_Map For(*OUTPUT) Class(#LW3SADDR1) Name(#oShipToAddress1) Mandatory('') Desc('Ship To Address 1')
+    Define_Map For(*OUTPUT) Class(#LW3SADDR2) Name(#oShipToAddress2) Mandatory('') Desc('Ship To Address 2')
+    Define_Map For(*OUTPUT) Class(#LW3CSCITY) Name(#oShipToCity) Mandatory('') Desc('Ship To City')
+    Define_Map For(*OUTPUT) Class(#LW3SSTATE) Name(#oShipToState) Mandatory('') Desc('Ship To State')
+    Define_Map For(*OUTPUT) Class(#LW3SPSTAL) Name(#oShipToZip) Mandatory('') Desc('Ship To Zip')
+    Define_Map For(*OUTPUT) Class(#LW3STCSZ) Name(#oShipToCityStateZip) Mandatory('') Desc('Ship To City State Zip')
+    Define_Map For(*OUTPUT) Class(#LW3SCNTRY) Name(#oShipToCountry) Mandatory('') Desc('Ship To Country')
+    
+    If Cond(#iGetBillToInfo)
+    
+    If Cond(#iCustomerIndicator = 'B')
+    
+    #FXCUSID := #iCustomerNumber
+    #FXACTION := 'G'
+    
+    Exchange Fields(#FXACTION #FXCUSID)
+    Call Process(*DIRECT) Function(LW3ACUS) If_Error(*NEXT)
+    
+    #oBillToName := #LW3CUSNAM
+    #oBillToAddress1 := #LW3ADDRS1
+    #oBillToAddress2 := #LW3ADDRS2
+    #oBillToCity := #LW3CTY1
+    #oBillToState := #LW3ADDS
+    #oBillToZip := #LW3ADDZ
+    
+    #oBillToCountry := #LW3SCNTRY
+    
+    Else
+    
+    #LW3WEBB2C := #iWebUser
+    
+    Fetch Fields(#XG_WCUST) From_File(LW3WCUST) With_Key(#iCustomerIndicator #LW3WEBB2C #iWebUser) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #oBillToName := #LW3CHNAME
+    #oBilltoCompany := #LW3CHCPNY
+    #oBillToAddress1 := #LW3HADDR1
+    #oBillToAddress2 := #LW3HADDR2
+    #oBillToCity := #LW3CHCITY
+    #oBillToState := #LW3HSTATE
+    #oBillToZip := #LW3HPSTAL
+    #oBillToCountry := #LW3HCNTRY
+    Endif
+    
+    Endif
+    
+    #oBillToCityStateZip := #oBillToCity + ' ' + #oBillToState + '  ' + #oBillToZip
+    
+    Endif
+    
+    If Cond(#iGetShipToInfo)
+    
+    #FXCUSID := #iCustomerNumber
+    #FXSHIPID := #iShipToId
+    #FXACTION := 'G'
+    
+    Exchange Fields(#FXACTION #FXCUSID #FXSHIPID)
+    Call Process(*DIRECT) Function(LW3ACUS) If_Error(*NEXT)
+    
+    * If a different ship to was selected and its details were retrieved, use it as the Ship To display instead
+    If Cond((#FXSHIPID <> '') And (#LW3CSNAME <> *BLANKS) And (#LW3SADDR1 <> *BLANKS) And (#LW3SCNTRY <> *BLANKS) And (#LW3ADDRC2 <> *BLANKS))
+    #oShipToName := #LW3CSNAME
+    #oShipToAddress1 := #LW3SADDR1
+    #oShipToAddress2 := #LW3SADDR2
+    #oShipToCity := #LW3CSCITY
+    #oShipToState := #LW3SSTATE
+    #oShipToZip := #LW3SPSTAL
+    #oShipToCityStateZip := #LW3ADDRC2
+    #oShipToCountry := #LW3SCNTRY
+    
+    Else
+    #oShipToName := #LW3CUSNAM
+    #oShipToAddress1 := #LW3ADDRS1
+    #oShipToAddress2 := #LW3ADDRS2
+    #oShipToCity := #LW3CTY1
+    #oShipToState := #LW3ADDS
+    #oShipToZip := #LW3ADDZ
+    #oShipToCityStateZip := #oShipToCity + ' ' + #oShipToState + '  ' + #oShipToZip
+    #oShipToCountry := #LW3SCNTRY
+    
+    Endif
+    
+    Endif
+    
+    Endroutine
+    
+    
+    
+    End_Com

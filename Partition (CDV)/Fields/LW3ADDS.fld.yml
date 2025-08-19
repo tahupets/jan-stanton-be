@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3ADDS
+  Type:               Alpha
+  Length:             3
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "State"
+      Label:              "State"
+      Heading1:           "State"
+      Heading2:           " "
+      Heading3:           " "

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3ADDZ
+  Type:               Alpha
+  Length:             12
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Postal Code"
+      Label:              "Postal Code"
+      Heading1:           "Postal"
+      Heading2:           "Code"
+      Heading3:           " "

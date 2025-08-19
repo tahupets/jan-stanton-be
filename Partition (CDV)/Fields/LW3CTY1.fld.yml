@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3CTY1
+  Type:               Alpha
+  Length:             25
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "City"
+      Label:              "City"
+      Heading1:           "City"
+      Heading2:           " "
+      Heading3:           " "

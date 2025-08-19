@@ -1,7 +1,7 @@
 ﻿Field:
   Name:               LW3RFSTKN
   Type:               String
-  Length:             2000
+  Length:             512
   Decimals:           0
   Default Value:      "*NULL"
   Enabled For RDMLX:  Yes

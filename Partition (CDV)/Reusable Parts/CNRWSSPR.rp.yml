@@ -180,9 +180,10 @@
     Define_Com Class(#LW3SVVALP) Name(#L_JWT_SecretKey)
     
     #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_ACCESS_KEY') Ilanguage('') Oalphavalue(#L_JWT_SecretKey)
-    
+    #Utility_General.umDebugLog( 'CNRWSSR' 'Before TryVerifyToken' )
     * Validate the Access Token
     If (#HSnnn.TryVerifyToken( #iAccessToken #uJWT #L_JWT_SecretKey ))
+    #Utility_General.umDebugLog( 'CNRWSSR' 'AFter TryVerifyToken' )
     
     If (#uJWT.Claims<"ceGUID"> *IsNot *Null)
     

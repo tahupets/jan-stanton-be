@@ -575,10 +575,6 @@
     #oReturnCode := 'ER'
     Endif
     
-    If Cond(#Global_DataModel.upRetailOnly = 'Y')
-    #L_MarkUpFlag := False
-    Else
-    
     * Check for MSRP Pricing has been set
     #L_MarkUpFlag := False
     Select Fields(#LW3CODE #LW3PRFN) From_File(LW3MARKUP) With_Key(#Global_DataModel.upStorefrontId #Global_DataModel.upCustomerId) Io_Error(*NEXT) Val_Error(*NEXT)
@@ -591,12 +587,31 @@
     Leave
     Endif
     Endselect
+    
+    * Check if the Dealer and Retail Pricing link will be shown
+    #iObject_UserInit.dealerOnly := (#Global_DataModel.upRetailOnly = 'N')
+    
+    * Check weather product pricing will be shown
+    #iObject_UserInit.showPricingModes := ((#L_MarkUpFlag) *Or (#iObject_UserInit.dealerOnly))
+    
+    * Check the user view in the product (in preperation for the saved pending cart)
+    If Cond(#Global_DataModel.upRetailOnly = 'Y')
+    
+    #iObject_UserInit.selectedPricingMode := 'retail'
+    Else
+    
+    If Cond(#iObject_UserInit.dealerOnly)
+    
+    #iObject_UserInit.selectedPricingMode := 'dealer'
+    Else
+    
+    #iObject_UserInit.selectedPricingMode := 'none'
+    Endif
+    
     Endif
     
     
-    #iObject_UserInit.showPricingModes := #L_MarkUpFlag
-    
-    #iObject_UserInit.selectedPricingMode := #Global_DataModel.upSelectedPricingMode
+    * #iObject_UserInit.selectedPricingMode := #Global_DataModel.upSelectedPricingMode
     
     Endroutine
     
@@ -1233,6 +1248,15 @@
 
             - showPricingModes:
                 Description:        Show Pricing Modes
+                Type:               Boolean
+                Format:             Unspecified
+                Required:           Yes
+                Nullable:           No
+                ReadOnly:           No
+                WriteOnly:          No
+
+            - dealerOnly:
+                Description:        Dealer Only
                 Type:               Boolean
                 Format:             Unspecified
                 Required:           Yes

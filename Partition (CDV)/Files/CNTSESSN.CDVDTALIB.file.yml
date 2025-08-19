@@ -60,6 +60,11 @@
       Length:             64
       Decimals:           0
 
+  - LW3SESSID:
+      Type:               Signed
+      Length:             15
+      Decimals:           0
+
   - LW3JSDTA:
       Type:               String
       Length:             10000
@@ -124,3 +129,52 @@
       - LW3ASSC01:
           Key Order:          Ascending
           Numeric Ordering:   Unsigned
+
+  - CNTSESSNL4:
+      Identifier:         CNTSESSNL4
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CNTSESSNL4
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By Session Id"
+
+      Keys:
+      - LW3SESSID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+  - CNTSESSNL3:
+      Identifier:         CNTSESSNL3
+      Unique Key:         No
+      Access Path:        Immediate
+      Record Format:      CNTSESSNL3
+      Dynamic Select:     No
+      Parameters:         LVLCHK(*YES)
+
+      Multilingual Details:
+      - ENG:
+          Description:        "By User, Customer, Cart Id / Omi Sts"
+
+      Keys:
+      - LW3WEBUSR:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3ASSC01:
+          Key Order:          Ascending
+          Numeric Ordering:   Unsigned
+
+      - LW3CARTID:
+          Key Order:          Ascending
+          Numeric Ordering:   Signed
+
+      Select/Omit Criteria:
+      - Action:             Omit
+        Type:               Compare
+        Field Name:         LW3SESTAT
+        Operator:           Equal
+        Value:              "'C'"

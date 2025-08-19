@@ -62,6 +62,10 @@
     Define_Com Class(#LW3CHLNME) Name(#L_UserLastName)
     Define_Com Class(#LW3CUSIND) Name(#L_UserIndicator)
     Define_Com Class(#LW3WEBC01) Name(#L_CustomerId)
+    Define_Com Class(#LW3ALLDLR) Name(#L_AllDealers)
+    Define_Com Class(#LW3ARSVF) Name(#L_AllowReservations)
+    Define_Com Class(#LW3ORDMOD) Name(#L_AllowOrders)
+    Define_Com Class(#LW3CRDVIS) Name(#L_RetailOnly)
     
     * Cart Information
     Define_Com Class(#LW3CARTID) Name(#L_CartId)
@@ -100,6 +104,10 @@
     Define_Pty Name(upUserLastName) Get(*AUTO #L_UserLastName) Set(*AUTO #L_UserLastName)
     Define_Pty Name(upUserIndicator) Get(*AUTO #L_UserIndicator) Set(*AUTO #L_UserIndicator)
     Define_Pty Name(upCustomerId) Get(*AUTO #L_CustomerId) Set(*AUTO #L_CustomerId)
+    Define_Pty Name(upAllDealers) Get(*AUTO #L_AllDealers) Set(*AUTO #L_AllDealers)
+    Define_Pty Name(upAllowReservations) Get(*AUTO #L_AllowReservations) Set(*AUTO #L_AllowReservations)
+    Define_Pty Name(upAllowOrders) Get(*AUTO #L_AllowOrders) Set(*AUTO #L_AllowOrders)
+    Define_Pty Name(upRetailOnly) Get(*AUTO #L_RetailOnly) Set(*AUTO #L_RetailOnly)
     
     * Cart Information
     Define_Pty Name(upCartId) Get(*AUTO #L_CartId) Set(*AUTO #L_CartId)
@@ -261,6 +269,15 @@
     Set_Ref Com(#JsonValueNode) To(#JsonDocument.RootNode.Item<'system'>)
     * #L_CurrentLanguage := #JsonValueNode.Item<'language'>.asString
     #L_DataLibrary := #JsonValueNode.Item<'datalibrary'>.asString
+    
+    * Retrieve permissions again as these may change while the sessions are still active
+    Fetch Fields(#LW3ALLDLR #LW3ORDMOD #LW3ARSVF #LW3CRDVIS) From_File(LW3WUSER) With_Key(#L_UserId) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    #L_AllDealers := #LW3ALLDLR
+    #L_AllowOrders := #LW3ORDMOD
+    #L_AllowReservations := #LW3ARSVF
+    #L_RetailOnly := #LW3CRDVIS
+    Endif
     
     Endif
     

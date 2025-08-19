@@ -1,0 +1,111 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * ========================================================
+    * Copyright       : (C) Stanton 2025
+    * Type            : Function
+    * Platform        : Web Application (Visual LANSA)
+    * Name            : LW3GN12
+    * Identifier      : LW3GN12
+    * Process         : LW3GEN
+    * Function        : LW3GN12
+    * Written By      : Jan Metica
+    * Written On      : 8th August 2025
+    * Description     : Maintain Session Id for LCC
+    * =======================================================
+    * Modification Log
+    * -------------------------------------------------------
+    * User       : Date       : Description (Inc App Trkr #)
+    * -------------------------------------------------------
+    *
+    * =======================================================
+    Function Options(*DIRECT)
+    Define Field(#LW3MSGD) Type(*CHAR) Length(30)
+    Define Field(#LW3TEXT2) Type(*CHAR) Length(20) Decimals(0)
+    Group_By Name(#EXCHANGE) Fields(#STDSESSID #STDWEBUSR #LW3SHOWME #LW3SESSID #LW3SITCNT #LW3SITTOT #LW3SESDAT #LW3SESTAT #LW3SESORD #LW3PRDREF #LW3VNDNME #LW3ASSC01 #LW3ASSC02 #LW3ASSC03 #LW3ASSC04 #LW3ASSC05 #LW3REGCUS #LW3WEBUSR)
+    * This is used only for unregistered customers.
+    * Some fields needs to be cleared after placing order.
+    Group_By Name(#EXCHANGES) Fields(#STDSESSID #STDWEBUSR #LW3SHOWME #LW3SESSID #LW3SESDAT #LW3SESTAT #LW3SESORD #LW3PRDREF #LW3VNDNME #LW3ASSC01 #LW3ASSC02 #LW3ASSC03 #LW3ASSC04 #LW3ASSC05 #LW3REGCUS #LW3WEBUSR #LW3SITTOT #LW3SITCNT #STDWEBC01 #STDWEBC02 #STDWEBC03 #STDWEBC04 #STDWEBC05)
+    * If set create just a new session for same user
+    Define Field(#LW3NEWSES) Type(*CHAR) Length(1)
+    * =======================================================
+    * Program mainline
+    * =======================================================
+    
+    Execute Subroutine(CREATE_REC)
+    Exchange Fields(#LW3SESSID)
+    
+    Return
+    * =======================================================
+    * SET ALL NECESSARY FIELDS
+    * =======================================================
+    Subroutine Name(CREATE_REC)
+    Execute Subroutine(GET_SESID)
+    
+    Change Field(#LW3WEBUSR) To(#STDWEBUSR)
+    Change Field(#LW3SESDAT) To(*YYYYMMDDC)
+    Change Field(#LW3SITCNT) To(*ZERO)
+    Change Field(#LW3SITTOT) To(*ZERO)
+    Change Field(#LW3SESORD) To(*NULL)
+    Change Field(#LW3SESTIM) To(#TIME)
+    Change Field(#LW3SESTAT) To(D)
+    If_Null Field(#STDWEBUSR)
+    Else
+    Change Field(#LW3REGCUS) To(Y)
+    Endif
+    * Convert date into a diffrent format...
+    Use Builtin(CONVERTDATE) With_Args(#YYYYMMDDC J P) To_Get(#LW3TEXT2)
+    * Concatinate two fields...
+    Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key(CE00001 *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    Change Field(#LW3MSGD) To(#LW3VARTXT)
+    
+    * USE BUILTIN(GET_MESSAGE_DESC) WITH_ARGS(CE00001 LW3CEMSGF) TO_GET(#LW3MSGD)
+    Use Builtin(BCONCAT) With_Args(#LW3MSGD #LW3TEXT2) To_Get(#LW3CARDES)
+    
+    * Check if the user is set to be able to view retail prices only
+    Change Field(#LW3CRDVIS) To(*BLANKS)
+    Fetch Fields(#LW3CRDVIS) From_File(LW3WUSER) With_Key(#LW3WEBUSR) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond('#LW3CRDVIS = ''Y''')
+    * If showing retail price only, set the MSRP Flag to show it
+    Change Field(#LW3MSRPPF) To(Y)
+    Endif
+    
+    Insert Fields(*ALL) To_File(LW3SES02) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endroutine
+    
+    * =======================================================
+    * ASSIGN SESSION ID FOR THIS CUSTOMER
+    * =======================================================
+    Subroutine Name(GET_SESID)
+    
+    Define Field(#CENOW) Type(*DEC) Length(6) Decimals(0)
+    Define Field(#CEPACK60) Type(*DEC) Length(6) Decimals(0)
+    
+    Dountil Cond('#IO$STS *NE EQ')
+    
+    Change Field(#CENOW) To(#TIME)
+    Change Field(#CENOW) To('(#CENOW + 123456) * 28')
+    Substring Field(#CENOW 5 2) Into_Field(#DCTNUM02)
+    Change Field(#DCTNUM02) To('#DCTNUM02 + 43')
+    
+    Change Field(#CEPACK60) To(*LW3_NEXT_SESS_NUM)
+    Change Field(#CEPACK60) To('#CEPACK60 * #DCTNUM02')
+    * Generate the session id ...
+    Substring Field(#JOBNBR 1 3) Into_Field(#LW3SESSID 1 3)
+    If Cond('#DCTNUM02 *GE 10')
+    Substring Field(#DCTNUM02) Into_Field(#LW3SESSID 1 2)
+    Endif
+    Substring Field(#CENOW 3 2) Into_Field(#LW3SESSID 4 2)
+    Substring Field(#CEPACK60 5 2) Into_Field(#LW3SESSID 6 2)
+    Substring Field(#JOBNBR 4 3) Into_Field(#LW3SESSID 8 3)
+    Substring Field(#CEPACK60 3 2) Into_Field(#LW3SESSID 11 2)
+    Substring Field(#CENOW 5 2) Into_Field(#LW3SESSID 13 2)
+    Substring Field(#CENOW 2 1) Into_Field(#LW3SESSID 15 1)
+    
+    * Make sure the Session ID is unique.
+    Check_For In_File(CNTSESSNL4) With_Key(#LW3SESSID) Io_Error(*NEXT) Val_Error(*NEXT)
+    Enduntil
+    
+    Endroutine
+    

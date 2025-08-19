@@ -53,7 +53,7 @@
     * Group Definitions
     * =======================================================
     
-    Group_By Name(#XG_CNTSESSN) Fields(#LW3GUID #LW3SESTAT #LW3WEBUSR #LW3ASSC01 #LW3PGUID #LW3JSDTA #LW3CDSTMP #LW3UDSTMP)
+    Group_By Name(#XG_CNTSESSN) Fields(#LW3GUID #LW3SESTAT #LW3WEBUSR #LW3ASSC01 #LW3PGUID #LW3SESSID #LW3JSDTA #LW3CDSTMP #LW3UDSTMP)
     
     * =======================================================
     * Method Definitions
@@ -150,6 +150,13 @@
     If_Status Is(*EQUALKEY)
     #COM_OWNER.umCreateSessionRecord Iwebuser(#iWebUser) Ijsondata(#iJSONData) Ipreviousguid(#iPreviousGUID) Irecursivecounter(#iRecursiveCounter) Oreturncode(#oReturnCode)
     Else
+    * Generate the legacy session id using function LW3GN12
+    If (*SSERVER_CONNECTED = 'Y')
+    Use Builtin(CALL_SERVER_FUNCTION) With_Args(*sserver_ssn LW3GN12 Y Y) To_Get(#LW3RETCOD)
+    Else
+    Call Process(*DIRECT) Function(LW3GN12) Menu_Used(*NEXT) If_Error(*NEXT)
+    Endif
+    
     Insert Fields(#XG_CNTSESSN *EXCLUDING #LW3UDSTMP) To_File(CNTSESSN) Io_Error(*NEXT) Val_Error(*NEXT)
     #oReturnCode := 'OK'
     Endif
@@ -203,6 +210,11 @@
     Define_Map For(*INPUT) Class(#LW3CHFNME) Name(#iUserFirstName)
     Define_Map For(*INPUT) Class(#LW3CHFNME) Name(#iUserLastName)
     
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iAllDealers)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iAllowOrders)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iAllowReservations)
+    Define_Map For(*INPUT) Class(#PRIM_ALPH) Name(#iRetailOnly)
+    
     Define_Map For(*OUTPUT) Class(#LW3ACSTKN) Name(#oAccessToken)
     Define_Map For(*OUTPUT) Class(#LW3RFSTKN) Name(#oRefreshToken)
     Define_Map For(*OUTPUT) Class(#LW3RFSTKN) Name(#oCSRFToken)
@@ -216,12 +228,23 @@
     Define_Com Class(#LW3SVVALP) Name(#L_JWT_SecretKey)
     Define_Com Class(#LW3SVVNUM) Name(#L_JWT_TokenTimeSpan)
     
+    Define_Com Class(#PRIM_JSON.Member) Name(#uJsonMember) Reference(*DYNAMIC)
+    
     * Set Access Token Claims
     #iJWTAccess.Claims.AddStringMember( 'ceGUID' #iGUID )
     #iJWTAccess.Claims.AddStringMember( 'ceUserName' #iUsername )
     #iJWTAccess.Claims.AddStringMember( 'ceEmail' #iUserEmail )
     #iJWTAccess.Claims.AddStringMember( 'ceFirstName' #iUserFirstName )
     #iJWTAccess.Claims.AddStringMember( 'ceLastName' #iUserLastName )
+    
+    * Add user permissions
+    #iJWTAccess.Claims.AddObjectMember Name('permissions') Result(#uJsonMember)
+    If Cond(#uJsonMember.IsObject)
+    #uJsonMember.AsObject.AddBooleanMember Name("allDealers") Value((#iAllDealers = 'Y'))
+    #uJsonMember.AsObject.AddBooleanMember Name("allowOrders") Value((#iAllowOrders <> 'Y'))
+    #uJsonMember.AsObject.AddBooleanMember Name("allowReservations") Value((#iAllowReservations = 'Y'))
+    #uJsonMember.AsObject.AddBooleanMember Name("retailOnly") Value((#iRetailOnly = 'Y'))
+    Endif
     
     #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_ACCESS_KEY') Ilanguage('') Oalphavalue(#L_JWT_SecretKey)
     #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('JWT_ACCESS_TIMEOUT') Ilanguage('') Onumericvalue(#L_JWT_TokenTimeSpan)
@@ -244,7 +267,7 @@
     * #uCryptoKey.FromRandomBytes Bytecount(16)
     * #LW3PWDSLT := #uCryptoKey.AsHexString
     
-    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('CSRF_TOKEN_SECRET_KEY') Ilanguage('') Oalphavalue(#L_JWT_SecretKey)
+    #Utility_SystemSettings.umRetrieveSystemVariable Ivariable('CSRF_TKN_SECRET_KEY') Ilanguage('') Oalphavalue(#L_JWT_SecretKey)
     #uPasswordBytes.FromStringUsingUTF8 String(#L_JWT_SecretKey + (*YYYYMMDDC + *TIMEC))
     * #uSaltBytes.FromStringUsingUTF8 String(#LW3PWDSLT)
     

@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3OCTL05
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Option Access Control 05"
+      Label:              "Opt Access 05"
+      Heading1:           "Option"
+      Heading2:           "Access"
+      Heading3:           "Control 05"

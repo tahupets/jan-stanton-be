@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3LEVEL
+  Type:               Signed
+  Length:             4
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Indent level"
+      Label:              "Indent level"
+      Heading1:           "Indent"
+      Heading2:           "level"
+      Heading3:           " "

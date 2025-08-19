@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3SEARCH
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Search Text"
+      Label:              "Search Text"
+      Heading1:           "Search"
+      Heading2:           "Text"
+      Heading3:           " "

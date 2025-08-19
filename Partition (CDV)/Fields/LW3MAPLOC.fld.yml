@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3MAPLOC
+  Type:               Alpha
+  Length:             250
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "XML site map location"
+      Label:              "XML site map lo"
+      Heading1:           "XML"
+      Heading2:           "site"
+      Heading3:           "map"

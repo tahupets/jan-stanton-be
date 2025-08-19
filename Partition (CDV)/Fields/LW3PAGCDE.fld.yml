@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3PAGCDE
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Page code"
+      Label:              "Page code"
+      Heading1:           "Page"
+      Heading2:           "code"
+      Heading3:           " "

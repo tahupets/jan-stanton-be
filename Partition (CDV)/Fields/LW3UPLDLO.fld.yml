@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3UPLDLOGOF
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Can Upload a Logo for an Account"
+      Label:              "Can Upload a Lo"
+      Heading1:           "Can"
+      Heading2:           "Upload"
+      Heading3:           "a"

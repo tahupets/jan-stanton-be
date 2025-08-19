@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3THNAM
+  Type:               Alpha
+  Length:             25
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Theme Name"
+      Label:              "Theme Name"
+      Heading1:           "Theme"
+      Heading2:           "Name"
+      Heading3:           " "

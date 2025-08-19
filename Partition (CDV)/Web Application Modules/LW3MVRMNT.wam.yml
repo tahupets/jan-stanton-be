@@ -88,6 +88,28 @@
     Web_Map For(*OUTPUT) Fields(#ls_vars #ls_varh #LS_WAMTYP)
     Web_Map For(*INPUT) Fields(#stdrentry)
     
+    * ========= Copy Multilinguals ==========
+    * !NC!
+    #LW3QSEL := "Select B.LW3WAMNAM, B.LW3WRTNAM, B.LW3VARNAM, A.LW3LNGCOD, A.LW3VARTXT  From CEDDTALIB.LW3MLNVAR A"
+    #LW3QSEL += " Join CEDDTALIB.LW3MVRLUP B On B.LW3VARNAM = A.LW3VARNAM"
+    #LW3QSEL += " Where A.LW3LNGCOD = 'ENG' And B.LW3WAMNAM = 'LW3MVRMNT' "
+    
+    #LW3VARSEQ := 1
+    Select_Sql Fields(#LW3WAMNAM #LW3WRTNAM #LW3VARNAM #LW3LNGCOD #LW3VARTXT) Io_Error(*NEXT) Using(#LW3QSEL)
+    
+    Check_For In_File(LW3MVRLUP) With_Key(#LW3WAMNAM #LW3WRTNAM #LW3VARNAM) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*EQUALKEY)
+    Insert Fields(#LW3WAMNAM #LW3WRTNAM #LW3VARNAM) To_File(LW3MVRLUP)
+    Endif
+    
+    Check_For In_File(LW3MLNVAR) With_Key(#LW3VARNAM #LW3LNGCOD) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*EQUALKEY)
+    Insert Fields(#LW3VARNAM #LW3LNGCOD #LW3VARTXT) To_File(LW3MLNVAR)
+    Endif
+    
+    Endselect
+    * ========= Copy Multilinguals ==========
+    
     Execute Subroutine(init_sf)
     
     Call Webroutine(#ADMDYNMNU.bldmenu)
@@ -3367,799 +3389,49 @@
         <!-- WAM       : LW3MVRMNT - Multilingual Variable Maintenance
              Webroutine: editmvars - Edit Multilingual Variables
              Timestamp : 2014-09-23T09:37:31-05:00 -->
-        
         <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
-        
-        <lxml:server-instructions>
-        <lxml:client-charset></lxml:client-charset>
-        <lxml:cookies><lxml:cookie name="STDSESSID"><lxml:value field-name="STDSESSID"></lxml:value>
-        <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
-        <lxml:domain></lxml:domain>
-        <lxml:path>/; HttpOnly</lxml:path>
-        <lxml:secure></lxml:secure>
-        </lxml:cookie>
-        <lxml:cookie name="STDWEBUSR"><lxml:value field-name="STDWEBUSR"></lxml:value>
-        <lxml:expires field-name=""></lxml:expires>
-        <lxml:domain field-name=""></lxml:domain>
-        <lxml:path field-name=""></lxml:path>
-        <lxml:secure field-name=""></lxml:secure>
-        </lxml:cookie>
-        </lxml:cookies>
-        <lxml:ssi></lxml:ssi>
-        </lxml:server-instructions>
-        
-        <lxml:context>
-        <lxml:user-id>          </lxml:user-id>
-        <lxml:webapplication>LW3MVRMNT</lxml:webapplication>
-        <lxml:webapplication-title>Multilingual Variable Maintenance</lxml:webapplication-title>
-        <lxml:webroutine>editmvars</lxml:webroutine>
-        <lxml:webroutine-title>Edit Multilingual Variables</lxml:webroutine-title>
-        <lxml:service-name></lxml:service-name>
-        <lxml:partition>CML</lxml:partition>
-        <lxml:language iso-lang="">ENG</lxml:language>
-        <lxml:dec-separator>.</lxml:dec-separator>
-        <lxml:images-path>/images</lxml:images-path>
-        <lxml:action-request>/cgi-bin/lansaweb</lxml:action-request>
-        </lxml:context>
-        
-        <lxml:options>
-        <lxml:option name="DBCS">false</lxml:option>
-        <lxml:option name="align-right">true</lxml:option>
-        <lxml:option name="check-numeric">false</lxml:option>
-        <lxml:option name="debug" />
-        <lxml:option name="trace" />
-        <lxml:option name="task" />
-        </lxml:options>
-        
-        <lxml:variables />
-        
-        <lxml:messages></lxml:messages>
-        
-        <lxml:fields>
-        <lxml:field name="SFSELFLG">
-        <lxml:caption>
-        <lxml:label>Store Front Sel</lxml:label>
-        <lxml:description>Store Front Selection Flag</lxml:description>
-        <lxml:heading-1>Store</lxml:heading-1>
-        <lxml:heading-2>Front</lxml:heading-2>
-        <lxml:heading-3>Selection</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="WRNAME">
-        <lxml:caption>
-        <lxml:label>Webroutine Name</lxml:label>
-        <lxml:description>Webroutine Name</lxml:description>
-        <lxml:heading-1>Webroutine</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="W_SFID">
-        <lxml:caption>
-        <lxml:label>Store Front</lxml:label>
-        <lxml:description>Store Front</lxml:description>
-        <lxml:heading-1>Store</lxml:heading-1>
-        <lxml:heading-2>Front</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="W_LOADRTE">
-        <lxml:caption>
-        <lxml:label>Load RTE - Rich</lxml:label>
-        <lxml:description>Load RTE - Rich Text Editor</lxml:description>
-        <lxml:heading-1>Load</lxml:heading-1>
-        <lxml:heading-2>RTE</lxml:heading-2>
-        <lxml:heading-3>-</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="LADAID">
-        <lxml:caption>
-        <lxml:label>Administration</lxml:label>
-        <lxml:description>Administration Application ID</lxml:description>
-        <lxml:heading-1>Administration</lxml:heading-1>
-        <lxml:heading-2>Application</lxml:heading-2>
-        <lxml:heading-3>ID</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="LW3MHTML">
-        <lxml:caption>
-        <lxml:label>Menu Html</lxml:label>
-        <lxml:description>Menu Html</lxml:description>
-        <lxml:heading-1>Menu</lxml:heading-1>
-        <lxml:heading-2>Html</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="LW3WEBUSR">
-        <lxml:caption>
-        <lxml:label>User Id</lxml:label>
-        <lxml:description>Web User Name</lxml:description>
-        <lxml:heading-1>Web</lxml:heading-1>
-        <lxml:heading-2>User</lxml:heading-2>
-        <lxml:heading-3>Name</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="LW3SFID">
-        <lxml:caption>
-        <lxml:label>Store Front ID</lxml:label>
-        <lxml:description>Store Front ID</lxml:description>
-        <lxml:heading-1>Store</lxml:heading-1>
-        <lxml:heading-2>Front</lxml:heading-2>
-        <lxml:heading-3>ID</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="LW3SFCUR">
-        <lxml:caption>
-        <lxml:label>Current Store F</lxml:label>
-        <lxml:description>Current Store Front</lxml:description>
-        <lxml:heading-1>Current</lxml:heading-1>
-        <lxml:heading-2>Store</lxml:heading-2>
-        <lxml:heading-3>Front</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="S_PARAG">
-        <lxml:caption>
-        <lxml:label>S_PARAG</lxml:label>
-        <lxml:description>Intro Paragraph</lxml:description>
-        <lxml:heading-1>S_PARAG</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="LW3NAME">
-        <lxml:caption>
-        <lxml:label>Store Front Nam</lxml:label>
-        <lxml:description>Store Front Name</lxml:description>
-        <lxml:heading-1>Store</lxml:heading-1>
-        <lxml:heading-2>Front</lxml:heading-2>
-        <lxml:heading-3>Name</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="W_LNGCOD">
-        <lxml:caption>
-        <lxml:label>Language ID</lxml:label>
-        <lxml:description>Selected Language Code</lxml:description>
-        <lxml:heading-1>Language ID</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="W_PAGSEQ">
-        <lxml:caption>
-        <lxml:label>Page Sequence N</lxml:label>
-        <lxml:description>Selected Page Sequence Number</lxml:description>
-        <lxml:heading-1>Page</lxml:heading-1>
-        <lxml:heading-2>Sequence</lxml:heading-2>
-        <lxml:heading-3>Number</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="S_WAMTYP">
-        <lxml:caption>
-        <lxml:label>S_WAMTYP</lxml:label>
-        <lxml:description>S_WAMTYP</lxml:description>
-        <lxml:heading-1>S_WAMTYP</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="LW3WAMCAT">
-        <lxml:caption>
-        <lxml:label>Wam Category</lxml:label>
-        <lxml:description>Wam Category</lxml:description>
-        <lxml:heading-1>Wam</lxml:heading-1>
-        <lxml:heading-2>Category</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="W_SRCHTXT">
-        <lxml:caption>
-        <lxml:label>W_SRCHTXT</lxml:label>
-        <lxml:description>Search Text field</lxml:description>
-        <lxml:heading-1>W_SRCHTXT</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="W_LNGTCD">
-        <lxml:caption>
-        <lxml:label>Translator code</lxml:label>
-        <lxml:description>Selected Language Code for translation</lxml:description>
-        <lxml:heading-1>Language</lxml:heading-1>
-        <lxml:heading-2>Translator</lxml:heading-2>
-        <lxml:heading-3>  code</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        </lxml:fields>
-        
-        <lxml:lists>
-        <lxml:list name="LS_MLNVAR" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="LW3VARNAM">
-        <lxml:heading-1>Variable</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3VARTXT">
-        <lxml:heading-1>Variable</lxml:heading-1>
-        <lxml:heading-2>Text</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="LW3VARNAM" id="LS_MLNVAR.0001.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="LW3VARTXT" id="LS_MLNVAR.0001.LW3VARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3VARNAM" id="LS_MLNVAR.0002.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="LW3VARTXT" id="LS_MLNVAR.0002.LW3VARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3VARNAM" id="LS_MLNVAR.0003.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="LW3VARTXT" id="LS_MLNVAR.0003.LW3VARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3VARNAM" id="LS_MLNVAR.0004.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="LW3VARTXT" id="LS_MLNVAR.0004.LW3VARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3VARNAM" id="LS_MLNVAR.0005.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="LW3VARTXT" id="LS_MLNVAR.0005.LW3VARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="LS_SLNGS" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="WL_LNGCOD">
-        <lxml:heading-1>Language ID</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3LNGSEQ">
-        <lxml:heading-1>Sequence</lxml:heading-1>
-        <lxml:heading-2>number</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3LNGTCD">
-        <lxml:heading-1>Language</lxml:heading-1>
-        <lxml:heading-2>Translator</lxml:heading-2>
-        <lxml:heading-3>  code</lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3LNGDSC">
-        <lxml:heading-1>Language Description</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="W_LNGMDS">
-        <lxml:heading-1>Variable</lxml:heading-1>
-        <lxml:heading-2>Text</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="W_LNGSEL">
-        <lxml:heading-1>Flag</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="WL_LNGCOD" id="LS_SLNGS.0001.WL_LNGCOD">ABCD</lxml:column>
-        <lxml:column name="LW3LNGSEQ" id="LS_SLNGS.0001.LW3LNGSEQ">123</lxml:column>
-        <lxml:column name="LW3LNGTCD" id="LS_SLNGS.0001.LW3LNGTCD">aAbB</lxml:column>
-        <lxml:column name="LW3LNGDSC" id="LS_SLNGS.0001.LW3LNGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="W_LNGMDS" id="LS_SLNGS.0001.W_LNGMDS">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        <lxml:column name="W_LNGSEL" id="LS_SLNGS.0001.W_LNGSEL">A</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="WL_LNGCOD" id="LS_SLNGS.0002.WL_LNGCOD">ABCD</lxml:column>
-        <lxml:column name="LW3LNGSEQ" id="LS_SLNGS.0002.LW3LNGSEQ">123</lxml:column>
-        <lxml:column name="LW3LNGTCD" id="LS_SLNGS.0002.LW3LNGTCD">aAbB</lxml:column>
-        <lxml:column name="LW3LNGDSC" id="LS_SLNGS.0002.LW3LNGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="W_LNGMDS" id="LS_SLNGS.0002.W_LNGMDS">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        <lxml:column name="W_LNGSEL" id="LS_SLNGS.0002.W_LNGSEL">A</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="WL_LNGCOD" id="LS_SLNGS.0003.WL_LNGCOD">ABCD</lxml:column>
-        <lxml:column name="LW3LNGSEQ" id="LS_SLNGS.0003.LW3LNGSEQ">123</lxml:column>
-        <lxml:column name="LW3LNGTCD" id="LS_SLNGS.0003.LW3LNGTCD">aAbB</lxml:column>
-        <lxml:column name="LW3LNGDSC" id="LS_SLNGS.0003.LW3LNGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="W_LNGMDS" id="LS_SLNGS.0003.W_LNGMDS">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        <lxml:column name="W_LNGSEL" id="LS_SLNGS.0003.W_LNGSEL">A</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="WL_LNGCOD" id="LS_SLNGS.0004.WL_LNGCOD">ABCD</lxml:column>
-        <lxml:column name="LW3LNGSEQ" id="LS_SLNGS.0004.LW3LNGSEQ">123</lxml:column>
-        <lxml:column name="LW3LNGTCD" id="LS_SLNGS.0004.LW3LNGTCD">aAbB</lxml:column>
-        <lxml:column name="LW3LNGDSC" id="LS_SLNGS.0004.LW3LNGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="W_LNGMDS" id="LS_SLNGS.0004.W_LNGMDS">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        <lxml:column name="W_LNGSEL" id="LS_SLNGS.0004.W_LNGSEL">A</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="WL_LNGCOD" id="LS_SLNGS.0005.WL_LNGCOD">ABCD</lxml:column>
-        <lxml:column name="LW3LNGSEQ" id="LS_SLNGS.0005.LW3LNGSEQ">123</lxml:column>
-        <lxml:column name="LW3LNGTCD" id="LS_SLNGS.0005.LW3LNGTCD">aAbB</lxml:column>
-        <lxml:column name="LW3LNGDSC" id="LS_SLNGS.0005.LW3LNGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="W_LNGMDS" id="LS_SLNGS.0005.W_LNGMDS">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        <lxml:column name="W_LNGSEL" id="LS_SLNGS.0005.W_LNGSEL">A</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="LI_WAMTYP" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="W_WAMCAT">
-        <lxml:heading-1>W_WAMCAT</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="D_WAMCAT">
-        <lxml:heading-1>D_WAMCAT</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="W_WAMCAT" id="LI_WAMTYP.0001.W_WAMCAT">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="D_WAMCAT" id="LI_WAMTYP.0001.D_WAMCAT">ABCDEFGHIJ</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_WAMCAT" id="LI_WAMTYP.0002.W_WAMCAT">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="D_WAMCAT" id="LI_WAMTYP.0002.D_WAMCAT">ABCDEFGHIJ</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_WAMCAT" id="LI_WAMTYP.0003.W_WAMCAT">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="D_WAMCAT" id="LI_WAMTYP.0003.D_WAMCAT">ABCDEFGHIJ</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_WAMCAT" id="LI_WAMTYP.0004.W_WAMCAT">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="D_WAMCAT" id="LI_WAMTYP.0004.D_WAMCAT">ABCDEFGHIJ</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_WAMCAT" id="LI_WAMTYP.0005.W_WAMCAT">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="D_WAMCAT" id="LI_WAMTYP.0005.D_WAMCAT">ABCDEFGHIJ</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="LS_LNGS" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="LW3LNGID">
-        <lxml:heading-1>Language ID</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3LNGSEQ">
-        <lxml:heading-1>Sequence</lxml:heading-1>
-        <lxml:heading-2>number</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3LNGTCD">
-        <lxml:heading-1>Language</lxml:heading-1>
-        <lxml:heading-2>Translator</lxml:heading-2>
-        <lxml:heading-3>  code</lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3LNGDSC">
-        <lxml:heading-1>Language Description</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="W_LNGMDS">
-        <lxml:heading-1>Variable</lxml:heading-1>
-        <lxml:heading-2>Text</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="LW3LNGID" id="LS_LNGS.0001.LW3LNGID">ABCD</lxml:column>
-        <lxml:column name="LW3LNGSEQ" id="LS_LNGS.0001.LW3LNGSEQ">123</lxml:column>
-        <lxml:column name="LW3LNGTCD" id="LS_LNGS.0001.LW3LNGTCD">aAbB</lxml:column>
-        <lxml:column name="LW3LNGDSC" id="LS_LNGS.0001.LW3LNGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="W_LNGMDS" id="LS_LNGS.0001.W_LNGMDS">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3LNGID" id="LS_LNGS.0002.LW3LNGID">ABCD</lxml:column>
-        <lxml:column name="LW3LNGSEQ" id="LS_LNGS.0002.LW3LNGSEQ">123</lxml:column>
-        <lxml:column name="LW3LNGTCD" id="LS_LNGS.0002.LW3LNGTCD">aAbB</lxml:column>
-        <lxml:column name="LW3LNGDSC" id="LS_LNGS.0002.LW3LNGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="W_LNGMDS" id="LS_LNGS.0002.W_LNGMDS">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3LNGID" id="LS_LNGS.0003.LW3LNGID">ABCD</lxml:column>
-        <lxml:column name="LW3LNGSEQ" id="LS_LNGS.0003.LW3LNGSEQ">123</lxml:column>
-        <lxml:column name="LW3LNGTCD" id="LS_LNGS.0003.LW3LNGTCD">aAbB</lxml:column>
-        <lxml:column name="LW3LNGDSC" id="LS_LNGS.0003.LW3LNGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="W_LNGMDS" id="LS_LNGS.0003.W_LNGMDS">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3LNGID" id="LS_LNGS.0004.LW3LNGID">ABCD</lxml:column>
-        <lxml:column name="LW3LNGSEQ" id="LS_LNGS.0004.LW3LNGSEQ">123</lxml:column>
-        <lxml:column name="LW3LNGTCD" id="LS_LNGS.0004.LW3LNGTCD">aAbB</lxml:column>
-        <lxml:column name="LW3LNGDSC" id="LS_LNGS.0004.LW3LNGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="W_LNGMDS" id="LS_LNGS.0004.W_LNGMDS">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3LNGID" id="LS_LNGS.0005.LW3LNGID">ABCD</lxml:column>
-        <lxml:column name="LW3LNGSEQ" id="LS_LNGS.0005.LW3LNGSEQ">123</lxml:column>
-        <lxml:column name="LW3LNGTCD" id="LS_LNGS.0005.LW3LNGTCD">aAbB</lxml:column>
-        <lxml:column name="LW3LNGDSC" id="LS_LNGS.0005.LW3LNGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="W_LNGMDS" id="LS_LNGS.0005.W_LNGMDS">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="LS_PAGS" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="LW3PAGSEQ">
-        <lxml:heading-1>Page</lxml:heading-1>
-        <lxml:heading-2>Sequence</lxml:heading-2>
-        <lxml:heading-3>Number</lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3WAMNAM">
-        <lxml:heading-1>Wam</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3WRTNAM">
-        <lxml:heading-1>Webroutine</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3PAGDSC">
-        <lxml:heading-1>Page</lxml:heading-1>
-        <lxml:heading-2>Description</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS.0001.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS.0001.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS.0001.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS.0001.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS.0002.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS.0002.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS.0002.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS.0002.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS.0003.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS.0003.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS.0003.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS.0003.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS.0004.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS.0004.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS.0004.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS.0004.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS.0005.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS.0005.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS.0005.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS.0005.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="LS_PAGS1" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="LW3PAGSEQ">
-        <lxml:heading-1>Page</lxml:heading-1>
-        <lxml:heading-2>Sequence</lxml:heading-2>
-        <lxml:heading-3>Number</lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3WAMNAM">
-        <lxml:heading-1>Wam</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3WRTNAM">
-        <lxml:heading-1>Webroutine</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3PAGDSC">
-        <lxml:heading-1>Page</lxml:heading-1>
-        <lxml:heading-2>Description</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS1.0001.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS1.0001.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS1.0001.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS1.0001.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS1.0002.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS1.0002.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS1.0002.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS1.0002.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS1.0003.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS1.0003.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS1.0003.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS1.0003.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS1.0004.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS1.0004.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS1.0004.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS1.0004.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS1.0005.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS1.0005.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS1.0005.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS1.0005.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="LS_PAGS2" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="LW3PAGSEQ">
-        <lxml:heading-1>Page</lxml:heading-1>
-        <lxml:heading-2>Sequence</lxml:heading-2>
-        <lxml:heading-3>Number</lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3WAMNAM">
-        <lxml:heading-1>Wam</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3WRTNAM">
-        <lxml:heading-1>Webroutine</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3PAGDSC">
-        <lxml:heading-1>Page</lxml:heading-1>
-        <lxml:heading-2>Description</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS2.0001.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS2.0001.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS2.0001.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS2.0001.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS2.0002.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS2.0002.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS2.0002.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS2.0002.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS2.0003.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS2.0003.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS2.0003.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS2.0003.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS2.0004.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS2.0004.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS2.0004.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS2.0004.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS2.0005.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS2.0005.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS2.0005.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS2.0005.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="LS_PAGS3" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="LW3PAGSEQ">
-        <lxml:heading-1>Page</lxml:heading-1>
-        <lxml:heading-2>Sequence</lxml:heading-2>
-        <lxml:heading-3>Number</lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3WAMNAM">
-        <lxml:heading-1>Wam</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3WRTNAM">
-        <lxml:heading-1>Webroutine</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3PAGDSC">
-        <lxml:heading-1>Page</lxml:heading-1>
-        <lxml:heading-2>Description</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS3.0001.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS3.0001.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS3.0001.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS3.0001.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS3.0002.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS3.0002.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS3.0002.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS3.0002.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS3.0003.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS3.0003.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS3.0003.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS3.0003.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS3.0004.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS3.0004.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS3.0004.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS3.0004.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3PAGSEQ" id="LS_PAGS3.0005.LW3PAGSEQ">1234567</lxml:column>
-        <lxml:column name="LW3WAMNAM" id="LS_PAGS3.0005.LW3WAMNAM">ABCDEFGHIJ</lxml:column>
-        <lxml:column name="LW3WRTNAM" id="LS_PAGS3.0005.LW3WRTNAM">ABCDEFGHIJKLMNOPQRST</lxml:column>
-        <lxml:column name="LW3PAGDSC" id="LS_PAGS3.0005.LW3PAGDSC">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="LS_VARS" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="W_VARID">
-        <lxml:heading-1>Text</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3VARNAM">
-        <lxml:heading-1>Variable</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3LNGID">
-        <lxml:heading-1>Language ID</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3VARTXT">
-        <lxml:heading-1>Variable</lxml:heading-1>
-        <lxml:heading-2>Text</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="W_VARID" id="LS_VARS.0001.W_VARID">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3VARNAM" id="LS_VARS.0001.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="LW3LNGID" id="LS_VARS.0001.LW3LNGID">ABCD</lxml:column>
-        <lxml:column name="LW3VARTXT" id="LS_VARS.0001.LW3VARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_VARID" id="LS_VARS.0002.W_VARID">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3VARNAM" id="LS_VARS.0002.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="LW3LNGID" id="LS_VARS.0002.LW3LNGID">ABCD</lxml:column>
-        <lxml:column name="LW3VARTXT" id="LS_VARS.0002.LW3VARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_VARID" id="LS_VARS.0003.W_VARID">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3VARNAM" id="LS_VARS.0003.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="LW3LNGID" id="LS_VARS.0003.LW3LNGID">ABCD</lxml:column>
-        <lxml:column name="LW3VARTXT" id="LS_VARS.0003.LW3VARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_VARID" id="LS_VARS.0004.W_VARID">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3VARNAM" id="LS_VARS.0004.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="LW3LNGID" id="LS_VARS.0004.LW3LNGID">ABCD</lxml:column>
-        <lxml:column name="LW3VARTXT" id="LS_VARS.0004.LW3VARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_VARID" id="LS_VARS.0005.W_VARID">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3VARNAM" id="LS_VARS.0005.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="LW3LNGID" id="LS_VARS.0005.LW3LNGID">ABCD</lxml:column>
-        <lxml:column name="LW3VARTXT" id="LS_VARS.0005.LW3VARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="LS_VARH" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="W_VARID">
-        <lxml:heading-1>Text</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3VARNAM">
-        <lxml:heading-1>Variable</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="W_VARID" id="LS_VARH.0001.W_VARID">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3VARNAM" id="LS_VARH.0001.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_VARID" id="LS_VARH.0002.W_VARID">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3VARNAM" id="LS_VARH.0002.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_VARID" id="LS_VARH.0003.W_VARID">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3VARNAM" id="LS_VARH.0003.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_VARID" id="LS_VARH.0004.W_VARID">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3VARNAM" id="LS_VARH.0004.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_VARID" id="LS_VARH.0005.W_VARID">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3VARNAM" id="LS_VARH.0005.LW3VARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="LS_WAMTYP" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="W_WAMCAT">
-        <lxml:heading-1>W_WAMCAT</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="W_WAMCAT" id="LS_WAMTYP.0001.W_WAMCAT">ABCDEFGHIJ</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_WAMCAT" id="LS_WAMTYP.0002.W_WAMCAT">ABCDEFGHIJ</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_WAMCAT" id="LS_WAMTYP.0003.W_WAMCAT">ABCDEFGHIJ</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_WAMCAT" id="LS_WAMTYP.0004.W_WAMCAT">ABCDEFGHIJ</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="W_WAMCAT" id="LS_WAMTYP.0005.W_WAMCAT">ABCDEFGHIJ</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        </lxml:lists>
-        
-        </lxml:data>
-        
+           <lxml:server-instructions>
+              <lxml:client-charset></lxml:client-charset>
+              <lxml:cookies><lxml:cookie name="STDSESSID"><lxml:value field-name="STDSESSID"></lxml:value>
+                    <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
+                    <lxml:domain></lxml:domain>
+                    <lxml:path>/; HttpOnly</lxml:path>
+                    <lxml:secure></lxml:secure>
+                 </lxml:cookie>
+                 <lxml:cookie name="STDWEBUSR"><lxml:value field-name="STDWEBUSR"></lxml:value>
+                    <lxml:expires field-name=""></lxml:expires>
+                    <lxml:domain field-name=""></lxml:domain>
+                    <lxml:path field-name=""></lxml:path>
+                    <lxml:secure field-name=""></lxml:secure>
+                 </lxml:cookie>
+              </lxml:cookies>
+              <lxml:ssi></lxml:ssi>
+           </lxml:server-instructions>
+           <lxml:context>
+              <lxml:user-id>
+              </lxml:user-id>
+              <lxml:webapplication>LW3MVRMNT</lxml:webapplication>
+              <lxml:webapplication-title>Multilingual Variable Maintenance</lxml:webapplication-title>
+              <lxml:webroutine>editmvars</lxml:webroutine>
+              <lxml:webroutine-title>Edit Multilingual Variables</lxml:webroutine-title>
+              <lxml:service-name></lxml:service-name>
+              <lxml:partition>CML</lxml:partition>
+              <lxml:language iso-lang="en">ENG</lxml:language>
+              <lxml:dec-separator>.</lxml:dec-separator>
+              <lxml:images-path>/images</lxml:images-path>
+              <lxml:action-request>/cgi-bin/lansaweb</lxml:action-request>
+              <lxml:dev-resources-path>file://C:/PROGRA~2/STANTO~1/LANSA/WAMEditor/Resources</lxml:dev-resources-path></lxml:context>
+           <lxml:options>
+              <lxml:option name="DBCS">false</lxml:option>
+              <lxml:option name="align-right">true</lxml:option>
+              <lxml:option name="check-numeric">false</lxml:option>
+              <lxml:option name="debug"/>
+              <lxml:option name="trace"/>
+              <lxml:option name="task"/>
+           </lxml:options>
+           <lxml:variables/>
+           <lxml:messages></lxml:messages>
+           </lxml:data>
 
       Designs:
       - Language:           ENG
@@ -4798,28 +4070,22 @@
 
         XSL: |
           <?xml version="1.0"?>
+          
           <!-- Web application : LW3MVRMNT           Multilingual Variable Maintenance       -->
           <!-- Web routine     : editmvars           Edit Multilingual Variables             -->
           <!-- Timestamp       : 2011-01-13T12:31:27-05:00                                   -->
-          <xsl:transform version="1.0" exclude-result-prefixes="lxml wd"
-                         xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data"
-                         xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design"
-                         xmlns="http://www.w3.org/1999/xhtml"
-                         xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-             <xsl:import href="std_keys.xsl" />
-             <xsl:import href="std_variables.xsl" />
-             <xsl:import href="lweb_dropdown.xsl" />
-             <xsl:import href="desc_lookup.xsl" />
-             <xsl:import href="wadmlgn1_layout.xsl" />
-             <xsl:import href="std_button.xsl" />
-             <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8"
-                         indent="no" />
-          
+          <xsl:transform version="1.0" exclude-result-prefixes="lxml wd" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+             <xsl:import href="std_keys.xsl"/>
+             <xsl:import href="std_variables.xsl"/>
+             <xsl:import href="lweb_dropdown.xsl"/>
+             <xsl:import href="desc_lookup.xsl"/>
+             <xsl:import href="wadmlgn1_layout.xsl"/>
+             <xsl:import href="std_button.xsl"/>
+             <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8" indent="no"/>
              <xsl:template match="/">
                 <xsl:call-template name="layout">
-                   <xsl:with-param name="css_files" select="'lweb.css'" />
-                   <xsl:with-param name="additional_script_files"
-                                   select="'lweb.js,jquery.blockUI.js'" />
+                   <xsl:with-param name="css_files" select="'lweb.css'"/>
+                   <xsl:with-param name="additional_script_files" select="'lweb.js,jquery.blockUI.js'"/>
                    <!-- <xsl:with-param name="title_text" select="?" /> -->
                    <!-- <xsl:with-param name="show_left_menu" select="?" /> -->
                    <!-- <xsl:with-param name="show_top_menu" select="?" /> -->
@@ -4841,7 +4107,6 @@
                    <!-- <xsl:with-param name="trap_script_errors" select="?" /> -->
                 </xsl:call-template>
              </xsl:template>
-          
              <xsl:template match="/lxml:data">
                 <script type="text/javascript" src="/js/stickytooltips.js">
           /***********************************************
@@ -4851,17 +4116,13 @@
           ***********************************************/
                 </script>
                 <div class="hidden">
-                   <input id="LW3SFID" name="LW3SFID"
-                          value="{key('field-value', 'LW3SFID')}" />
-                   <input id="W_LNGTCD" type="hidden" name="W_LNGTCD"
-                          value="{key('field-value', 'W_LNGTCD')}" />
-                                   <input type="hidden" name="LW3SFCUR"
-                          value="{key('field-value', 'LW3SFCUR')}" />
-          
+                   <input id="LW3SFID" name="LW3SFID" value="{key('field-value', 'LW3SFID')}"/>
+                   <input id="W_LNGTCD" type="hidden" name="W_LNGTCD" value="{key('field-value', 'W_LNGTCD')}"/>
+                   <input type="hidden" name="LW3SFCUR" value="{key('field-value', 'LW3SFCUR')}"/>
                    <ul id="message_text">
                       <li id="MSG_CONFIRM_DELETE">
                          <xsl:call-template name="desc_lookup">
-                            <xsl:with-param name="name" select="'MSG_CONFIRM_DELETE'" />
+                            <xsl:with-param name="name" select="'MSG_CONFIRM_DELETE'"/>
                             <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                             <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                          </xsl:call-template>
@@ -4912,7 +4173,7 @@
                          <tr>
                             <td>
                                <span data-tooltip="sticky1">
-                                  <img src="/img/QmarkHelp.gif" width="20" height="20" />
+                                  <img src="/img/QmarkHelp.gif" width="20" height="20"/>
                                </span>
                                <!--HTML for the tooltips-->
                                <div id="mystickytooltip" class="stickytooltip">
@@ -4920,38 +4181,30 @@
                                      <div id="sticky1" class="atip" style="width:300px">
                                         <h1>
                                            <xsl:call-template name="desc_lookup">
-                                              <xsl:with-param name="name"
-                                                              select="'TXT_MLVARHELP_HDR'" />
+                                              <xsl:with-param name="name" select="'TXT_MLVARHELP_HDR'"/>
                                            </xsl:call-template>
                                         </h1>
                                         <p>
                                            <xsl:call-template name="desc_lookup">
-                                              <xsl:with-param name="name"
-                                                              select="'TXT_MLVARHELP_1'" />
+                                              <xsl:with-param name="name" select="'TXT_MLVARHELP_1'"/>
                                            </xsl:call-template>
                                            <xsl:call-template name="desc_lookup">
-                                              <xsl:with-param name="name"
-                                                              select="'TXT_MLVARHELP_2'" />
+                                              <xsl:with-param name="name" select="'TXT_MLVARHELP_2'"/>
                                            </xsl:call-template>
                                            <xsl:call-template name="desc_lookup">
-                                              <xsl:with-param name="name"
-                                                              select="'TXT_MLVARHELP_3'" />
+                                              <xsl:with-param name="name" select="'TXT_MLVARHELP_3'"/>
                                            </xsl:call-template>
                                            <xsl:call-template name="desc_lookup">
-                                              <xsl:with-param name="name"
-                                                              select="'TXT_MLVARHELP_4'" />
+                                              <xsl:with-param name="name" select="'TXT_MLVARHELP_4'"/>
                                            </xsl:call-template>
                                            <xsl:call-template name="desc_lookup">
-                                              <xsl:with-param name="name"
-                                                              select="'TXT_MLVARHELP_5'" />
+                                              <xsl:with-param name="name" select="'TXT_MLVARHELP_5'"/>
                                            </xsl:call-template>
                                            <xsl:call-template name="desc_lookup">
-                                              <xsl:with-param name="name"
-                                                              select="'TXT_MLVARHELP_6'" />
+                                              <xsl:with-param name="name" select="'TXT_MLVARHELP_6'"/>
                                            </xsl:call-template>
                                            <xsl:call-template name="desc_lookup">
-                                              <xsl:with-param name="name"
-                                                              select="'TXT_MLVARHELP_7'" />
+                                              <xsl:with-param name="name" select="'TXT_MLVARHELP_7'"/>
                                            </xsl:call-template>
                                         </p>
                                      </div>
@@ -4966,32 +4219,29 @@
                 <fieldset style="width: 100%; ">
                    <legend class="bold">
                       <xsl:call-template name="desc_lookup">
-                         <xsl:with-param name="name" select="'LBL_MULTI_VAR_DTLS'" />
+                         <xsl:with-param name="name" select="'LBL_MULTI_VAR_DTLS'"/>
                       </xsl:call-template>
                    </legend>
-                   <br />
+                   <br/>
                    <table cellspacing="3" cellpadding="3">
                       <tbody>
                          <tr>
                             <td>
                                <xsl:call-template name="desc_lookup">
-                                  <xsl:with-param name="name" select="'BASE_LANGUAGE'" />
+                                  <xsl:with-param name="name" select="'BASE_LANGUAGE'"/>
                                   <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                   <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                </xsl:call-template>
                             </td>
                             <td>
                                <xsl:call-template name="lweb_dropdown">
-                                  <xsl:with-param name="presubmit_js"
-                                                  select="'$$(&quot;input[name=_LANGUAGE]&quot;).val(($$.language=g_lxmlLang=this.value));'" />
-                                  <xsl:with-param name="on_change_wrname"
-                                                  select="'editmvars'" />
-                                  <xsl:with-param name="captionfield" select="'LW3LNGDSC'" />
-                                  <xsl:with-param name="codefield" select="'LW3LNGID'" />
-                                  <xsl:with-param name="listname" select="'LS_LNGS'" />
-                                  <xsl:with-param name="value"
-                                                  select="key('field-value', 'W_LNGCOD')" />
-                                  <xsl:with-param name="name" select="'W_LNGCOD'" />
+                                  <xsl:with-param name="presubmit_js" select="'$$(&quot;input[name=_LANGUAGE]&quot;).val(($$.language=g_lxmlLang=this.value));'"/>
+                                  <xsl:with-param name="on_change_wrname" select="'editmvars'"/>
+                                  <xsl:with-param name="captionfield" select="'LW3LNGDSC'"/>
+                                  <xsl:with-param name="codefield" select="'LW3LNGID'"/>
+                                  <xsl:with-param name="listname" select="'LS_LNGS'"/>
+                                  <xsl:with-param name="value" select="key('field-value', 'W_LNGCOD')"/>
+                                  <xsl:with-param name="name" select="'W_LNGCOD'"/>
                                   <!-- <xsl:with-param name="id" select="?" /> -->
                                   <!-- <xsl:with-param name="display_mode" select="?" /> -->
                                   <!-- <xsl:with-param name="items" select="?" /> -->
@@ -5020,12 +4270,9 @@
                                   <!--       Also provide other parameter values, if any. -->
                                   <!---->
                                </xsl:call-template>
-                               <xsl:text />
-                               <button onclick="addLanguage();return false;"
-                                       title="{key('desc-lookup', 'ADD_NEW_LANGUAGE')}"
-                                       class="lang_button">
-                                  <img class="lang_img"
-                                       src="{$lweb_images_path}/std_add.gif" />
+                               <xsl:text/>
+                               <button onclick="addLanguage();return false;" title="{key('desc-lookup', 'ADD_NEW_LANGUAGE')}" class="lang_button">
+                                  <img class="lang_img" src="{$lweb_images_path}/std_add.gif"/>
                                </button>
                                <div id="div_NewLanguage" style="display: none;">
                                   <table class="popup" width="100%">
@@ -5033,67 +4280,52 @@
                                         <tr>
                                            <td>
                                               <xsl:call-template name="desc_lookup">
-                                                 <xsl:with-param name="name"
-                                                                 select="'LANGUAGE_ID'" />
+                                                 <xsl:with-param name="name" select="'LANGUAGE_ID'"/>
                                                  <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                                  <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                               </xsl:call-template>
                                            </td>
                                            <td>
-                                              <input id="WX_LNGID" class="utext"
-                                                     maxlength="4" size="4"
-                                                     name="WX_LNGID" />
+                                              <input id="WX_LNGID" class="utext" maxlength="4" size="4" name="WX_LNGID" value=""/>
                                            </td>
                                         </tr>
                                         <tr>
                                            <td>
                                               <xsl:call-template name="desc_lookup">
-                                                 <xsl:with-param name="name"
-                                                                 select="'LANGUAGE_DESCRIPTION'" />
+                                                 <xsl:with-param name="name" select="'LANGUAGE_DESCRIPTION'"/>
                                                  <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                                  <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                               </xsl:call-template>
                                            </td>
                                            <td>
-                                              <input id="WX_LNGDSC" class="text"
-                                                     maxlength="50" size="30"
-                                                     name="WX_LNGDSC" />
+                                              <input id="WX_LNGDSC" class="text" maxlength="50" size="30" name="WX_LNGDSC" value=""/>
                                            </td>
                                         </tr>
                                         <tr>
                                            <td>
                                               <xsl:call-template name="desc_lookup">
-                                                 <xsl:with-param name="name"
-                                                                 select="'TRANSLATION_CODE'" />
+                                                 <xsl:with-param name="name" select="'TRANSLATION_CODE'"/>
                                                  <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                                  <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                               </xsl:call-template>
                                            </td>
                                            <td>
-                                              <input id="WX_LNGTCD" class="text"
-                                                     maxlength="2" size="2"
-                                                     name="WX_LNGTCD" />
+                                              <input id="WX_LNGTCD" class="text" maxlength="2" size="2" name="WX_LNGTCD" value=""/>
                                            </td>
                                         </tr>
                                         <tr>
                                            <td style="text-align: center;" colspan="2">
-                                              <button onclick="submitLanguage();return false;"
-                                                      title="{key('desc-lookup', 'ADD')}"
-                                                      class="lang_button">
+                                              <button onclick="submitLanguage();return false;" title="{key('desc-lookup', 'ADD')}" class="lang_button">
                                                  <xsl:call-template name="desc_lookup">
-                                                    <xsl:with-param name="name"
-                                                                    select="'ADD'" />
+                                                    <xsl:with-param name="name" select="'ADD'"/>
                                                     <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                                     <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                                  </xsl:call-template>
                                               </button>
-                                              <xsl:text />
-                                              <button onclick="$.unblockUI();return false;"
-                                                      title="{key('desc-lookup', 'CANCEL')}"
-                                                      class="lang_button">
+                                              <xsl:text/>
+                                              <button onclick="$.unblockUI();return false;" title="{key('desc-lookup', 'CANCEL')}" class="lang_button">
                                                  <xsl:call-template name="desc_lookup">
-                                                    <xsl:with-param name="name"
-                                                                    select="'CANCEL'" />
+                                                    <xsl:with-param name="name" select="'CANCEL'"/>
                                                     <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                                     <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                                  </xsl:call-template>
@@ -5108,31 +4340,22 @@
                          <tr>
                             <td>
                                <xsl:call-template name="desc_lookup">
-                                  <xsl:with-param name="name" select="'LBL_SRCHTXT'" />
+                                  <xsl:with-param name="name" select="'LBL_SRCHTXT'"/>
                                   <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                   <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                </xsl:call-template>
                             </td>
                             <td>
-                               <input onchange="return isValidText(this, ' ')"
-                                      id="W_SRCHTXT" class="text" maxlength="256"
-                                      size="60" name="W_SRCHTXT"
-                                      value="{key('field-value', 'W_SRCHTXT')}" />
-                               <input onchange="return isValidText(this, ' ')"
-                                      id="STDRENTRY" class="hidden" maxlength="1"
-                                      size="1" name="STDRENTRY"
-                                      value="{key('field-value', 'STDRENTRY')}" />
-                               <xsl:variable name="lblSearch"
-                                             select="key('desc-lookup','LBL_SEARCH')" />
+                               <input onchange="return isValidText(this, ' ')" id="W_SRCHTXT" class="text" maxlength="256" size="60" name="W_SRCHTXT" value="{key('field-value', 'W_SRCHTXT')}"/>
+                               <input onchange="return isValidText(this, ' ')" id="STDRENTRY" class="hidden" maxlength="1" size="1" name="STDRENTRY" value="{key('field-value', 'STDRENTRY')}"/>
+                               <xsl:variable name="lblSearch" select="key('desc-lookup','LBL_SEARCH')"/>
                                <xsl:call-template name="std_button">
-                                  <xsl:with-param name="caption" select="$lblSearch" />
-                                  <xsl:with-param name="mouseover_class"
-                                                  select="'multi_button2'" />
-                                  <xsl:with-param name="class" select="'multi_button2'" />
-                                  <xsl:with-param name="on_click_wrname"
-                                                  select="'editmvars'" />
-                                  <xsl:with-param name="reentryvalue" select="'S'" />
-                                  <xsl:with-param name="name" select="'btnSearchText'" />
+                                  <xsl:with-param name="caption" select="$lblSearch"/>
+                                  <xsl:with-param name="mouseover_class" select="'multi_button2'"/>
+                                  <xsl:with-param name="class" select="'multi_button2'"/>
+                                  <xsl:with-param name="on_click_wrname" select="'editmvars'"/>
+                                  <xsl:with-param name="reentryvalue" select="'S'"/>
+                                  <xsl:with-param name="name" select="'btnSearchText'"/>
                                   <!-- <xsl:with-param name="currentrowhfield" select="?" /> -->
                                   <!-- <xsl:with-param name="currentrownumval" select="?" /> -->
                                   <!-- <xsl:with-param name="reentryfield" select="?" /> -->
@@ -5156,7 +4379,7 @@
                          <tr>
                             <td>
                                <xsl:call-template name="desc_lookup">
-                                  <xsl:with-param name="name" select="'PAGE'" />
+                                  <xsl:with-param name="name" select="'PAGE'"/>
                                   <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                   <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                </xsl:call-template>
@@ -5164,92 +4387,64 @@
                             <td>
                                <xsl:if test="1=2">
                                   <xsl:call-template name="lweb_dropdown">
-                                     <xsl:with-param name="presubmit_js"
-                                                     select="'set_dd(document.LANSA.S_WAMTYP.value)'" />
+                                     <xsl:with-param name="presubmit_js" select="'set_dd(document.LANSA.S_WAMTYP.value)'"/>
                                      <!-- <xsl:with-param name="on_change_wrname" select="?" /> -->
-                                     <xsl:with-param name="captionfield"
-                                                     select="'W_WAMCAT'" />
-                                     <xsl:with-param name="codefield" select="'W_WAMCAT'" />
-                                     <xsl:with-param name="listname" select="'LS_WAMTYP'" />
-                                     <xsl:with-param name="value"
-                                                     select="key('field-value', 'S_WAMTYP')" />
-                                     <xsl:with-param name="name" select="'S_WAMTYP'" />
+                                     <xsl:with-param name="captionfield" select="'W_WAMCAT'"/>
+                                     <xsl:with-param name="codefield" select="'W_WAMCAT'"/>
+                                     <xsl:with-param name="listname" select="'LS_WAMTYP'"/>
+                                     <xsl:with-param name="value" select="key('field-value', 'S_WAMTYP')"/>
+                                     <xsl:with-param name="name" select="'S_WAMTYP'"/>
                                   </xsl:call-template>
                                </xsl:if>
                                <span id="wamall">
                                   <xsl:call-template name="lweb_dropdown">
-                                     <xsl:with-param name="presubmit_js"
-                                                     select="'set_dd_val(document.LANSA.W_PAGSEQ.value)'" />
-                                     <xsl:with-param name="on_change_wrname"
-                                                     select="'editmvars'" />
-                                     <xsl:with-param name="captionfield"
-                                                     select="'LW3PAGDSC'" />
-                                     <xsl:with-param name="codefield" select="'LW3PAGSEQ'" />
-                                     <xsl:with-param name="listname" select="'LS_PAGS'" />
-                                     <xsl:with-param name="value"
-                                                     select="key('field-value', 'W_PAGSEQ')" />
-                                     <xsl:with-param name="name" select="'W_PAGSEQ'" />
+                                     <xsl:with-param name="presubmit_js" select="'set_dd_val(document.LANSA.W_PAGSEQ.value)'"/>
+                                     <xsl:with-param name="on_change_wrname" select="'editmvars'"/>
+                                     <xsl:with-param name="captionfield" select="'LW3PAGDSC'"/>
+                                     <xsl:with-param name="codefield" select="'LW3PAGSEQ'"/>
+                                     <xsl:with-param name="listname" select="'LS_PAGS'"/>
+                                     <xsl:with-param name="value" select="key('field-value', 'W_PAGSEQ')"/>
+                                     <xsl:with-param name="name" select="'W_PAGSEQ'"/>
                                   </xsl:call-template>
                                </span>
                                <xsl:if test="1=2">
                                   <span id="wamadmin">
                                      <xsl:call-template name="lweb_dropdown">
-                                        <xsl:with-param name="presubmit_js"
-                                                        select="'set_dd_val(document.LANSA.W_PAGSEQ1.value)'" />
-                                        <xsl:with-param name="on_change_wrname"
-                                                        select="'editmvars'" />
-                                        <xsl:with-param name="captionfield"
-                                                        select="'LW3PAGDSC'" />
-                                        <xsl:with-param name="codefield"
-                                                        select="'LW3PAGSEQ'" />
-                                        <xsl:with-param name="listname"
-                                                        select="'LS_PAGS1'" />
-                                        <xsl:with-param name="value"
-                                                        select="key('field-value', 'W_PAGSEQ')" />
-                                        <xsl:with-param name="name" select="'W_PAGSEQ1'" />
+                                        <xsl:with-param name="presubmit_js" select="'set_dd_val(document.LANSA.W_PAGSEQ1.value)'"/>
+                                        <xsl:with-param name="on_change_wrname" select="'editmvars'"/>
+                                        <xsl:with-param name="captionfield" select="'LW3PAGDSC'"/>
+                                        <xsl:with-param name="codefield" select="'LW3PAGSEQ'"/>
+                                        <xsl:with-param name="listname" select="'LS_PAGS1'"/>
+                                        <xsl:with-param name="value" select="key('field-value', 'W_PAGSEQ')"/>
+                                        <xsl:with-param name="name" select="'W_PAGSEQ1'"/>
                                      </xsl:call-template>
                                   </span>
                                   <span id="wamb2b">
                                      <xsl:call-template name="lweb_dropdown">
-                                        <xsl:with-param name="presubmit_js"
-                                                        select="'set_dd_val(document.LANSA.W_PAGSEQ2.value)'" />
-                                        <xsl:with-param name="on_change_wrname"
-                                                        select="'editmvars'" />
-                                        <xsl:with-param name="captionfield"
-                                                        select="'LW3PAGDSC'" />
-                                        <xsl:with-param name="codefield"
-                                                        select="'LW3PAGSEQ'" />
-                                        <xsl:with-param name="listname"
-                                                        select="'LS_PAGS2'" />
-                                        <xsl:with-param name="value"
-                                                        select="key('field-value', 'W_PAGSEQ')" />
-                                        <xsl:with-param name="name" select="'W_PAGSEQ2'" />
+                                        <xsl:with-param name="presubmit_js" select="'set_dd_val(document.LANSA.W_PAGSEQ2.value)'"/>
+                                        <xsl:with-param name="on_change_wrname" select="'editmvars'"/>
+                                        <xsl:with-param name="captionfield" select="'LW3PAGDSC'"/>
+                                        <xsl:with-param name="codefield" select="'LW3PAGSEQ'"/>
+                                        <xsl:with-param name="listname" select="'LS_PAGS2'"/>
+                                        <xsl:with-param name="value" select="key('field-value', 'W_PAGSEQ')"/>
+                                        <xsl:with-param name="name" select="'W_PAGSEQ2'"/>
                                      </xsl:call-template>
                                   </span>
                                   <span id="wamb2c">
                                      <xsl:call-template name="lweb_dropdown">
-                                        <xsl:with-param name="presubmit_js"
-                                                        select="'set_dd_val(document.LANSA.W_PAGSEQ3.value)'" />
-                                        <xsl:with-param name="on_change_wrname"
-                                                        select="'editmvars'" />
-                                        <xsl:with-param name="captionfield"
-                                                        select="'LW3PAGDSC'" />
-                                        <xsl:with-param name="codefield"
-                                                        select="'LW3PAGSEQ'" />
-                                        <xsl:with-param name="listname"
-                                                        select="'LS_PAGS3'" />
-                                        <xsl:with-param name="value"
-                                                        select="key('field-value', 'W_PAGSEQ')" />
-                                        <xsl:with-param name="name" select="'W_PAGSEQ3'" />
+                                        <xsl:with-param name="presubmit_js" select="'set_dd_val(document.LANSA.W_PAGSEQ3.value)'"/>
+                                        <xsl:with-param name="on_change_wrname" select="'editmvars'"/>
+                                        <xsl:with-param name="captionfield" select="'LW3PAGDSC'"/>
+                                        <xsl:with-param name="codefield" select="'LW3PAGSEQ'"/>
+                                        <xsl:with-param name="listname" select="'LS_PAGS3'"/>
+                                        <xsl:with-param name="value" select="key('field-value', 'W_PAGSEQ')"/>
+                                        <xsl:with-param name="name" select="'W_PAGSEQ3'"/>
                                      </xsl:call-template>
                                   </span>
                                </xsl:if>
-                               <xsl:text />
-                               <button onclick="addWAMPage();return false;"
-                                       title="{key('desc-lookup', 'ADD_NEW_WAM_PAGE')}"
-                                       class="lang_button">
-                                  <img class="lang_img"
-                                       src="{$lweb_images_path}/std_add.gif" />
+                               <xsl:text/>
+                               <button onclick="addWAMPage();return false;" title="{key('desc-lookup', 'ADD_NEW_WAM_PAGE')}" class="lang_button">
+                                  <img class="lang_img" src="{$lweb_images_path}/std_add.gif"/>
                                </button>
                                <div id="div_NewWAMPage" style="display: none;">
                                   <table class="popup" width="100%">
@@ -5257,93 +4452,73 @@
                                         <tr>
                                            <td>
                                               <xsl:call-template name="desc_lookup">
-                                                 <xsl:with-param name="name"
-                                                                 select="'WAM_NAME'" />
+                                                 <xsl:with-param name="name" select="'WAM_NAME'"/>
                                                  <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                                  <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                               </xsl:call-template>
                                            </td>
                                            <td>
-                                              <input id="WX_WAMNAM" class="utext"
-                                                     maxlength="10" size="10"
-                                                     name="WX_WAMNAM" />
+                                              <input id="WX_WAMNAM" class="utext" maxlength="10" size="10" name="WX_WAMNAM" value=""/>
                                            </td>
                                         </tr>
                                         <tr>
                                            <td>
                                               <xsl:call-template name="desc_lookup">
-                                                 <xsl:with-param name="name"
-                                                                 select="'WEBROUTINE_NAME'" />
+                                                 <xsl:with-param name="name" select="'WEBROUTINE_NAME'"/>
                                                  <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                                  <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                               </xsl:call-template>
                                            </td>
                                            <td>
-                                              <input id="WX_WRTNAM" class="utext"
-                                                     maxlength="20" name="WX_WRTNAM" />
+                                              <input id="WX_WRTNAM" class="utext" maxlength="20" name="WX_WRTNAM" value=""/>
                                            </td>
                                         </tr>
                                         <tr>
                                            <td>
                                               <xsl:call-template name="desc_lookup">
-                                                 <xsl:with-param name="name"
-                                                                 select="'PAGE_DESCRIPTION'" />
+                                                 <xsl:with-param name="name" select="'PAGE_DESCRIPTION'"/>
                                                  <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                                  <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                               </xsl:call-template>
                                            </td>
                                            <td>
-                                              <input id="WX_PAGDSC" class="text"
-                                                     maxlength="100" size="35"
-                                                     name="WX_PAGDSC" />
+                                              <input id="WX_PAGDSC" class="text" maxlength="100" size="35" name="WX_PAGDSC" value=""/>
                                            </td>
                                         </tr>
                                         <tr>
                                            <td>
                                               <xsl:call-template name="desc_lookup">
-                                                 <xsl:with-param name="name"
-                                                                 select="'TXT_WAMCAT'" />
+                                                 <xsl:with-param name="name" select="'TXT_WAMCAT'"/>
                                                  <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                                  <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                               </xsl:call-template>
                                            </td>
                                            <td>
                                               <xsl:call-template name="lweb_dropdown">
-                                                 <xsl:with-param name="width_design"
-                                                                 select="'146px'" />
+                                                 <xsl:with-param name="width_design" select="'146px'"/>
                                                  <!-- <xsl:with-param name="value" select="?" /> -->
                                                  <!-- <xsl:with-param name="presubmit_js" select="?" /> -->
                                                  <!-- <xsl:with-param name="on_change_wrname" select="?" /> -->
-                                                 <xsl:with-param name="captionfield"
-                                                                 select="'D_WAMCAT'" />
-                                                 <xsl:with-param name="codefield"
-                                                                 select="'W_WAMCAT'" />
-                                                 <xsl:with-param name="listname"
-                                                                 select="'LI_WAMTYP'" />
-                                                 <xsl:with-param name="name"
-                                                                 select="'L_WAMCAT'" />
+                                                 <xsl:with-param name="captionfield" select="'D_WAMCAT'"/>
+                                                 <xsl:with-param name="codefield" select="'W_WAMCAT'"/>
+                                                 <xsl:with-param name="listname" select="'LI_WAMTYP'"/>
+                                                 <xsl:with-param name="name" select="'L_WAMCAT'"/>
                                               </xsl:call-template>
                                            </td>
                                         </tr>
                                         <tr>
                                            <td style="text-align: center;" colspan="2">
-                                              <button onclick="submitWAMPage();return false;"
-                                                      title="{key('desc-lookup', 'ADD')}"
-                                                      class="lang_button">
+                                              <button onclick="submitWAMPage();return false;" title="{key('desc-lookup', 'ADD')}" class="lang_button">
                                                  <xsl:call-template name="desc_lookup">
-                                                    <xsl:with-param name="name"
-                                                                    select="'ADD'" />
+                                                    <xsl:with-param name="name" select="'ADD'"/>
                                                     <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                                     <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                                  </xsl:call-template>
                                               </button>
-                                              <xsl:text />
-                                              <button onclick="$.unblockUI();return false;"
-                                                      title="{key('desc-lookup', 'CANCEL')}"
-                                                      class="lang_button">
+                                              <xsl:text/>
+                                              <button onclick="$.unblockUI();return false;" title="{key('desc-lookup', 'CANCEL')}" class="lang_button">
                                                  <xsl:call-template name="desc_lookup">
-                                                    <xsl:with-param name="name"
-                                                                    select="'CANCEL'" />
+                                                    <xsl:with-param name="name" select="'CANCEL'"/>
                                                     <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                                     <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                                  </xsl:call-template>
@@ -5358,46 +4533,41 @@
                          <tr>
                             <td>
                                <xsl:call-template name="desc_lookup">
-                                  <xsl:with-param name="name" select="'NEW_VARIABLE'" />
+                                  <xsl:with-param name="name" select="'NEW_VARIABLE'"/>
                                   <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                   <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                </xsl:call-template>
                             </td>
                             <td>
-                               <input id="WP_VARNAM" class="utext" maxlength="30"
-                                      size="30" name="WP_VARNAM" />
-                               <button onclick="addVar($('#WP_VARNAM').val());return false;"
-                                       title="{key('desc-lookup', 'ADD_NEW_VARIABLE')}"
-                                       class="lang_button">
-                                  <img class="lang_img"
-                                       src="{$lweb_images_path}/std_add.gif" />
+                               <input id="WP_VARNAM" class="utext" maxlength="30" size="30" name="WP_VARNAM" value=""/>
+                               <button onclick="addVar($('#WP_VARNAM').val());return false;" title="{key('desc-lookup', 'ADD_NEW_VARIABLE')}" class="lang_button">
+                                  <img class="lang_img" src="{$lweb_images_path}/std_add.gif"/>
                                </button>
                             </td>
                          </tr>
                          <tr>
                             <td colspan="2">
-                               <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='LS_SLNGS']" />
+                               <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='LS_SLNGS']" wd:listname="LS_SLNGS"/>
                             </td>
                          </tr>
                       </tbody>
                    </table>
-                   <br />
+                   <br/>
                 </fieldset>
-                <br />
-                <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='LS_VARH']" />
-                <br />
-                <button onclick="$$.HandleEvent('LW3MVRMNT', 'saveMVars');"
-                        title="{key('desc-lookup', 'SAVE_CHANGES')}">
+                <br/>
+                <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='LS_VARH']" wd:listname="LS_VARH"/>
+                <br/>
+                <button onclick="$$.HandleEvent('LW3MVRMNT', 'saveMVars');" title="{key('desc-lookup', 'SAVE_CHANGES')}">
                    <xsl:call-template name="desc_lookup">
-                      <xsl:with-param name="name" select="'SAVE'" />
+                      <xsl:with-param name="name" select="'SAVE'"/>
                       <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                       <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                    </xsl:call-template>
                 </button>
-                <br />
-                <xsl:value-of select="key('desc-lookup', 'NEW_MESSAGE')" />
-                <br />
-                <br />
+                <br/>
+                <xsl:value-of select="key('desc-lookup', 'NEW_MESSAGE')"/>
+                <br/>
+                <br/>
                 <script language="JavaScript" type="text/JavaScript">
           //<xsl:text disable-output-escaping="yes">&lt;</xsl:text>![CDATA[
           
@@ -5407,7 +4577,6 @@
                    </xsl:text>
                 </script>
              </xsl:template>
-          
              <xsl:template name="script.override">
              function iTran($f){
                  if($$.translate){
@@ -5476,9 +4645,8 @@
                    $$.translate =  google.language.translate;
                  });
                }
-                <xsl:text />
+                <xsl:text/>
              </xsl:template>
-          
              <xsl:template name="css_style.override">
                 td.varname, td.lang_vartxt, th.lang_header, td.WL_LNGCOD{
                   white-space: nowrap;
@@ -5558,31 +4726,24 @@
             text-align: left;
           }
           
-                <xsl:text />
+                <xsl:text/>
              </xsl:template>
-          
              <xsl:template name="header_content.override">
                 <xsl:if test="not($lweb_design_mode)">
-                   <script language="javascript" type="text/javascript"
-                           src="https://www.google.com/jsapi?key=ABQIAAAAuzs9CIu2IwfGZGrBYbl9ShTmBbuRDOfolgqHY_DVczhAIbHo3hRvfFw6adIk-UzSVlD_x8rRAmJSdQ">
-                      <xsl:text />
-                   </script>
+                   <script language="javascript" type="text/javascript" src="https://www.google.com/jsapi?key=ABQIAAAAuzs9CIu2IwfGZGrBYbl9ShTmBbuRDOfolgqHY_DVczhAIbHo3hRvfFw6adIk-UzSVlD_x8rRAmJSdQ"></script>
                 </xsl:if>
-                <xsl:text />
+                <xsl:text/>
              </xsl:template>
-          
              <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='LS_SLNGS']">
-                <xsl:variable name="thelist"
-                              select="/lxml:data/lxml:lists/lxml:list[@name='LS_SLNGS']" />
-                <input type="hidden" name="LS_SLNGS.."
-                       value="{count(lxml:list-entries/lxml:entry[1])}" />
+                <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='LS_SLNGS']"/>
+                <input type="hidden" name="LS_SLNGS.." value="{count(lxml:list-entries/lxml:entry[1])}"/>
                 <div id="LS_SLNGS_wrap" class="std_grid_wrapper">
                    <table id="LS_SLNGS" class="std_grid">
                       <thead>
                          <tr class="list-h">
                             <th class="WL_LNGCOD">
                                <xsl:call-template name="desc_lookup">
-                                  <xsl:with-param name="name" select="'SELECT_LANGUAGES'" />
+                                  <xsl:with-param name="name" select="'SELECT_LANGUAGES'"/>
                                   <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                   <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                </xsl:call-template>
@@ -5591,12 +4752,12 @@
                       </thead>
                       <tbody>
                          <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
-                            <xsl:variable name="WL_LNGCOD" select="lxml:column[1]" />
-                            <xsl:variable name="LW3LNGSEQ" select="lxml:column[2]" />
-                            <xsl:variable name="LW3LNGTCD" select="lxml:column[3]" />
-                            <xsl:variable name="LW3LNGDSC" select="lxml:column[4]" />
-                            <xsl:variable name="W_LNGMDS" select="lxml:column[5]" />
-                            <xsl:variable name="W_LNGSEL" select="lxml:column[6]" />
+                            <xsl:variable name="WL_LNGCOD" select="lxml:column[1]"/>
+                            <xsl:variable name="LW3LNGSEQ" select="lxml:column[2]"/>
+                            <xsl:variable name="LW3LNGTCD" select="lxml:column[3]"/>
+                            <xsl:variable name="LW3LNGDSC" select="lxml:column[4]"/>
+                            <xsl:variable name="W_LNGMDS" select="lxml:column[5]"/>
+                            <xsl:variable name="W_LNGSEL" select="lxml:column[6]"/>
                             <tr>
                                <xsl:attribute name="class">
                                   <xsl:choose>
@@ -5605,68 +4766,54 @@
                                   </xsl:choose>
                                </xsl:attribute>
                                <td class="WL_LNGCOD">
-                                  <input id="{$W_LNGSEL/@id}" type="checkbox"
-                                         name="{$W_LNGSEL/@id}" value="Y">
+                                  <input id="{$W_LNGSEL/@id}" type="checkbox" name="{$W_LNGSEL/@id}" value="Y">
                                      <xsl:if test="$W_LNGSEL = 'Y'">
                                         <xsl:attribute name="checked">true</xsl:attribute>
                                      </xsl:if>
                                   </input>
-                                     <xsl:text />
-                                     <label for="{$W_LNGSEL/@id}">
-                                        <xsl:value-of select="$W_LNGMDS" />
-                                     </label>
-                                     <input type="hidden" name="{$W_LNGMDS/@id}"
-                                            value="{$W_LNGMDS}" />
-                                     <input type="hidden" name="{$LW3LNGDSC/@id}"
-                                            value="{$LW3LNGDSC}" />
-                                     <input type="hidden" name="{$WL_LNGCOD/@id}"
-                                            value="{$WL_LNGCOD}" />
-                                     <input type="hidden" name="{$LW3LNGSEQ/@id}"
-                                            value="{$LW3LNGSEQ}" />
-                                     <input type="hidden" name="{$LW3LNGTCD/@id}"
-                                            value="{$LW3LNGTCD}" />
+                                  <xsl:text/>
+                                  <label for="{$W_LNGSEL/@id}">
+                                     <xsl:value-of select="$W_LNGMDS"/>
+                                  </label>
+                                  <input type="hidden" name="{$W_LNGMDS/@id}" value="{$W_LNGMDS}"/>
+                                  <input type="hidden" name="{$LW3LNGDSC/@id}" value="{$LW3LNGDSC}"/>
+                                  <input type="hidden" name="{$WL_LNGCOD/@id}" value="{$WL_LNGCOD}"/>
+                                  <input type="hidden" name="{$LW3LNGSEQ/@id}" value="{$LW3LNGSEQ}"/>
+                                  <input type="hidden" name="{$LW3LNGTCD/@id}" value="{$LW3LNGTCD}"/>
                                </td>
                             </tr>
                          </xsl:for-each>
-                            <tr>
-                               <td>
-                                  <button onclick="$$.HandleEvent('LW3MVRMNT', 'saveMVars');"
-                                          title="{key('desc-lookup', 'TIP_APPLY_FILTER')}">
-                                     <xsl:call-template name="desc_lookup">
-                                        <xsl:with-param name="name"
-                                                        select="'APPLY_FILTER'" />
-                                        <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
-                                        <!-- <xsl:with-param name="lookup_list" select="?" /> -->
-                                     </xsl:call-template>
-                                  </button>
-                               </td>
-                            </tr>
+                         <tr>
+                            <td>
+                               <button onclick="$$.HandleEvent('LW3MVRMNT', 'saveMVars');" title="{key('desc-lookup', 'TIP_APPLY_FILTER')}">
+                                  <xsl:call-template name="desc_lookup">
+                                     <xsl:with-param name="name" select="'APPLY_FILTER'"/>
+                                     <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
+                                     <!-- <xsl:with-param name="lookup_list" select="?" /> -->
+                                  </xsl:call-template>
+                               </button>
+                            </td>
+                         </tr>
                       </tbody>
                    </table>
                 </div>
              </xsl:template>
-          
              <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='LS_VARH']">
-                <xsl:variable name="LS_VARH"
-                              select="/lxml:data/lxml:lists/lxml:list[@name='LS_VARH']" />
-                <xsl:variable name="LS_LNGS"
-                              select="/lxml:data/lxml:lists/lxml:list[@name='LS_LNGS']" />
-                <xsl:variable name="LS_VARS"
-                              select="/lxml:data/lxml:lists/lxml:list[@name='LS_VARS']" />
-                <xsl:variable name="W_LNGCOD" select="key('field-value', 'W_LNGCOD')" />
-                <xsl:variable name="OTH_LNGS"
-                              select="/lxml:data/lxml:lists/lxml:list[@name='LS_SLNGS']/lxml:list-entries/lxml:entry[lxml:column[6]='Y']" />
-                <input type="hidden" name="LS_VARS.."
-                       value="{count($LS_VARS/lxml:list-entries/lxml:entry[1])}" />
-                <br />
-                <br />
+                <xsl:variable name="LS_VARH" select="/lxml:data/lxml:lists/lxml:list[@name='LS_VARH']"/>
+                <xsl:variable name="LS_LNGS" select="/lxml:data/lxml:lists/lxml:list[@name='LS_LNGS']"/>
+                <xsl:variable name="LS_VARS" select="/lxml:data/lxml:lists/lxml:list[@name='LS_VARS']"/>
+                <xsl:variable name="W_LNGCOD" select="key('field-value', 'W_LNGCOD')"/>
+                <xsl:variable name="OTH_LNGS" select="/lxml:data/lxml:lists/lxml:list[@name='LS_SLNGS']/lxml:list-entries/lxml:entry[lxml:column[6]='Y']"/>
+                <input type="hidden" name="LS_VARS.." value="{count($LS_VARS/lxml:list-entries/lxml:entry[1])}"/>
+                <br/>
+                <br/>
                 <fieldset style="width: 100%; ">
                    <legend class="bold">
                       <xsl:call-template name="desc_lookup">
-                         <xsl:with-param name="name" select="'LBL_MULTI_VAR_LIST'" />
+                         <xsl:with-param name="name" select="'LBL_MULTI_VAR_LIST'"/>
                       </xsl:call-template>
                    </legend>
-                   <br />
+                   <br/>
                    <div id="LS_VARS_wrap" class="std_grid_wrapper">
                       <table id="LS_VARS" class="std_grid" cellspacing="2">
                          <thead>
@@ -5674,22 +4821,19 @@
                                <th></th>
                                <th class="varname_header">
                                   <xsl:call-template name="desc_lookup">
-                                     <xsl:with-param name="name" select="'VARIABLE_NAME'" />
+                                     <xsl:with-param name="name" select="'VARIABLE_NAME'"/>
                                      <!-- <xsl:with-param name="disable_output_escaping" select="?" /> -->
                                      <!-- <xsl:with-param name="lookup_list" select="?" /> -->
                                   </xsl:call-template>
                                </th>
                                <th class="base_lang_header">
-                                  <xsl:value-of select="$LS_LNGS/lxml:list-entries/lxml:entry[lxml:column[1]=$W_LNGCOD]/lxml:column[5]" />
+                                  <xsl:value-of select="$LS_LNGS/lxml:list-entries/lxml:entry[lxml:column[1]=$W_LNGCOD]/lxml:column[5]"/>
                                </th>
                                <xsl:for-each select="$OTH_LNGS">
                                   <th class="lang_header">
-                                     <xsl:value-of select="lxml:column[5]" />
-                                     <button title="{key('desc-lookup', 'TRANSLATE_ALL')}"
-                                             class="lang_button"
-                                             onclick="tranAll($('input.{lxml:column[1]}_TXT'));return false;">
-                                        <img class="lang_img"
-                                             src="{$lweb_images_path}/root.gif" />
+                                     <xsl:value-of select="lxml:column[5]"/>
+                                     <button title="{key('desc-lookup', 'TRANSLATE_ALL')}" class="lang_button" onclick="tranAll($('input.{lxml:column[1]}_TXT'));return false;">
+                                        <img class="lang_img" src="{$lweb_images_path}/root.gif"/>
                                      </button>
                                   </th>
                                </xsl:for-each>
@@ -5697,8 +4841,8 @@
                          </thead>
                          <tbody>
                             <xsl:for-each select="$LS_VARH/lxml:list-entries/lxml:entry">
-                               <xsl:variable name="H_VARID" select="lxml:column[1]" />
-                               <xsl:variable name="H_VARNAM" select="lxml:column[2]" />
+                               <xsl:variable name="H_VARID" select="lxml:column[1]"/>
+                               <xsl:variable name="H_VARNAM" select="lxml:column[2]"/>
                                <tr>
                                   <xsl:attribute name="class">
                                      <xsl:choose>
@@ -5707,78 +4851,41 @@
                                      </xsl:choose>
                                   </xsl:attribute>
                                   <td>
-                                     <button onclick="deleteVar('{$H_VARNAM}');return false;"
-                                             title="{key('desc-lookup', 'REMOVE_VARIABLE')}"
-                                             class="lang_button">
-                                        <img class="lang_img"
-                                             src="{$lweb_images_path}/wizcross.gif" />
+                                     <button onclick="deleteVar('{$H_VARNAM}');return false;" title="{key('desc-lookup', 'REMOVE_VARIABLE')}" class="lang_button">
+                                        <img class="lang_img" src="{$lweb_images_path}/wizcross.gif"/>
                                      </button>
                                   </td>
                                   <td class="varname">
-                                     <xsl:value-of select="$H_VARNAM" />
+                                     <xsl:value-of select="$H_VARNAM"/>
                                   </td>
                                   <td class="base_lang_vartxt">
-                                     <xsl:variable name="theEntry"
-                                                   select="$LS_VARS/lxml:list-entries/lxml:entry[lxml:column[1]=$H_VARID]" />
-                                     <xsl:variable name="BW_VARID"
-                                                   select="$theEntry/lxml:column[1]" />
-                                     <xsl:variable name="BLWMVRNAM"
-                                                   select="$theEntry/lxml:column[2]" />
-                                     <xsl:variable name="BLWLNGCOD"
-                                                   select="$theEntry/lxml:column[3]" />
-                                     <xsl:variable name="BLWMVRTXT"
-                                                   select="$theEntry/lxml:column[4]" />
-                                     <xsl:variable name="W_LNGTCD"
-                                                   select="key('field-value', 'W_LNGTCD')" />
-                                     <input id="{$BW_VARID}"
-                                            class="base_lang_vartxt {$BLWLNGCOD}_TXT"
-                                            maxlength="256" size="60"
-                                            name="{$BLWMVRTXT/@id}"
-                                            value="{normalize-space($BLWMVRTXT)}"
-                                            _langcode="{$W_LNGTCD}" />
-                                     <input id="{$BW_VARID/@id}" type="hidden"
-                                            name="{$BW_VARID/@id}" value="{$BW_VARID}" />
-                                     <input id="{$BLWMVRNAM/@id}" type="hidden"
-                                            name="{$BLWMVRNAM/@id}" value="{$BLWMVRNAM}" />
-                                     <input id="{$BLWLNGCOD/@id}" type="hidden"
-                                            name="{$BLWLNGCOD/@id}" value="{$BLWLNGCOD}" />
+                                     <xsl:variable name="theEntry" select="$LS_VARS/lxml:list-entries/lxml:entry[lxml:column[1]=$H_VARID]"/>
+                                     <xsl:variable name="BW_VARID" select="$theEntry/lxml:column[1]"/>
+                                     <xsl:variable name="BLWMVRNAM" select="$theEntry/lxml:column[2]"/>
+                                     <xsl:variable name="BLWLNGCOD" select="$theEntry/lxml:column[3]"/>
+                                     <xsl:variable name="BLWMVRTXT" select="$theEntry/lxml:column[4]"/>
+                                     <xsl:variable name="W_LNGTCD" select="key('field-value', 'W_LNGTCD')"/>
+                                     <input id="{$BW_VARID}" class="base_lang_vartxt {$BLWLNGCOD}_TXT" maxlength="256" size="60" name="{$BLWMVRTXT/@id}" value="{normalize-space($BLWMVRTXT)}" _langcode="{$W_LNGTCD}"/>
+                                     <input id="{$BW_VARID/@id}" type="hidden" name="{$BW_VARID/@id}" value="{$BW_VARID}"/>
+                                     <input id="{$BLWMVRNAM/@id}" type="hidden" name="{$BLWMVRNAM/@id}" value="{$BLWMVRNAM}"/>
+                                     <input id="{$BLWLNGCOD/@id}" type="hidden" name="{$BLWLNGCOD/@id}" value="{$BLWLNGCOD}"/>
                                   </td>
                                   <xsl:for-each select="$OTH_LNGS">
-                                     <xsl:variable name="I_LNGCOD" select="lxml:column[1]" />
-                                     <xsl:variable name="LW3LNGTCD"
-                                                   select="lxml:column[3]" />
-                                     <xsl:variable name="othEntry"
-                                                   select="$LS_VARS/lxml:list-entries/lxml:entry[(lxml:column[2]=$H_VARNAM) and (lxml:column[3]=$I_LNGCOD)]" />
-                                     <xsl:variable name="W_VARID"
-                                                   select="$othEntry/lxml:column[1]" />
-                                     <xsl:variable name="LW3VARNAM"
-                                                   select="$othEntry/lxml:column[2]" />
-                                     <xsl:variable name="LW3LNGID"
-                                                   select="$othEntry/lxml:column[3]" />
-                                     <xsl:variable name="LW3VARTXT"
-                                                   select="$othEntry/lxml:column[4]" />
+                                     <xsl:variable name="I_LNGCOD" select="lxml:column[1]"/>
+                                     <xsl:variable name="LW3LNGTCD" select="lxml:column[3]"/>
+                                     <xsl:variable name="othEntry" select="$LS_VARS/lxml:list-entries/lxml:entry[(lxml:column[2]=$H_VARNAM) and (lxml:column[3]=$I_LNGCOD)]"/>
+                                     <xsl:variable name="W_VARID" select="$othEntry/lxml:column[1]"/>
+                                     <xsl:variable name="LW3VARNAM" select="$othEntry/lxml:column[2]"/>
+                                     <xsl:variable name="LW3LNGID" select="$othEntry/lxml:column[3]"/>
+                                     <xsl:variable name="LW3VARTXT" select="$othEntry/lxml:column[4]"/>
                                      <td class="lang_vartxt">
-                                        <button title="{key('desc-lookup', 'TRANSLATE')}"
-                                                class="vartxt_button"
-                                                onclick="iTran($('#{$W_VARID}'));return false;">
-                                           <img class="vartxt_img"
-                                                src="{$lweb_images_path}/std_navright.gif"
-                                                id="{$W_VARID}_IMG" />
+                                        <button title="{key('desc-lookup', 'TRANSLATE')}" class="vartxt_button" onclick="iTran($('#{$W_VARID}'));return false;">
+                                           <img class="vartxt_img" src="{$lweb_images_path}/std_navright.gif" id="{$W_VARID}_IMG"/>
                                         </button>
-                                        <input id="{$W_VARID}"
-                                               class="lang_vartxt {$LW3LNGID}_TXT"
-                                               maxlength="256" size="60"
-                                               _langcode="{$LW3LNGTCD}"
-                                               _basefieldid="{$H_VARID}"
-                                               name="{$LW3VARTXT/@id}"
-                                               value="{normalize-space($LW3VARTXT)}" />
-                                        <input id="{$W_VARID/@id}" type="hidden"
-                                               name="{$W_VARID/@id}" value="{$W_VARID}" />
-                                        <input id="{$LW3VARNAM/@id}" type="hidden"
-                                               name="{$LW3VARNAM/@id}"
-                                               value="{$LW3VARNAM}" />
-                                        <input id="{$LW3LNGID/@id}" type="hidden"
-                                               name="{$LW3LNGID/@id}" value="{$LW3LNGID}" />
+                                        <input id="{$W_VARID}" class="lang_vartxt {$LW3LNGID}_TXT" maxlength="256" size="60" _langcode="{$LW3LNGTCD}" _basefieldid="{$H_VARID}" name="{$LW3VARTXT/@id}" value="{normalize-space($LW3VARTXT)}"/>
+                                        <input id="{$W_VARID/@id}" type="hidden" name="{$W_VARID/@id}" value="{$W_VARID}"/>
+                                        <input id="{$LW3VARNAM/@id}" type="hidden" name="{$LW3VARNAM/@id}" value="{$LW3VARNAM}"/>
+                                        <input id="{$LW3LNGID/@id}" type="hidden" name="{$LW3LNGID/@id}" value="{$LW3LNGID}"/>
                                      </td>
                                   </xsl:for-each>
                                </tr>
@@ -5786,7 +4893,7 @@
                          </tbody>
                       </table>
                    </div>
-                   <br />
+                   <br/>
                 </fieldset>
              </xsl:template>
           </xsl:transform>

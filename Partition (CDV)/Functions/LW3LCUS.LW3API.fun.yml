@@ -1,0 +1,89 @@
+﻿Function:
+  Enabled For RDMLX:  No
+
+  Source: |
+    * =======================================================
+    * Process Name - LW3API
+    * Process Description - Back Office file API's
+    
+    * Function Name - LW3LCUS
+    * Function Description - B2B Customer master list API caller
+    
+    * EXCHANGE FIELDS(In)
+    * #FXDESC - Search parameter
+    
+    * EXCHANGE FIELDS(Out)
+    * #FXRETCD  - Return code - OK or NR
+    
+    * Passed list
+    * #LW3CUSL  - List of customer numbers, names/addresses
+    
+    * =======================================================
+    * Summary of Changes
+    * =======================================================
+    * CR #  !  Date   ! Description
+    * -------------------------------------------------------
+    *       |         |
+    * =======================================================
+    Function Options(*DIRECT) Rcv_List(#LW3CUSL)
+    * =======================================================
+    
+    Define Field(#W_BO) Type(*CHAR) Length(10)
+    
+    * customer list
+    Def_List Name(#LW3CUSL) Fields(#LW3WEBC01 #LW3CUSNAM #LW3HADDR1 #LW3HADDR2 #LW3CHCITY #LW3HSTATE #LW3HPSTAL #LW3HCNTRY) Type(*WORKING) Entrys(200)
+    
+    * =======================================================
+    * Program main line
+    * =======================================================
+    
+    Execute Subroutine(INIT)
+    
+    * Continue depending on which back office we interface with
+    Case Of_Field(#W_BO)
+    
+    When Value_Is('*EQ ''ERPF''')
+    Exchange Fields(#FXDESC)
+    Call Process(*DIRECT) Function(LW3LCUE) If_Error(*NEXT) Pass_Lst(#LW3CUSL)
+    
+    When Value_Is('*EQ ''CE''')
+    Exchange Fields(#FXDESC)
+    Call Process(*DIRECT) Function(LW3LCUC) If_Error(*NEXT) Pass_Lst(#LW3CUSL)
+    
+    When Value_Is('*EQ ''JDE''')
+    Exchange Fields(#FXDESC)
+    Call Process(*DIRECT) Function(LW3LCUJ) If_Error(*NEXT) Pass_Lst(#LW3CUSL)
+    
+    When Value_Is('*EQ ''BPCS''')
+    Exchange Fields(#FXDESC)
+    Call Process(*DIRECT) Function(LW3LCUB) If_Error(*NEXT) Pass_Lst(#LW3CUSL)
+    
+    
+    Otherwise
+    
+    Endcase
+    
+    
+    Exchange Fields(#FXRETCD)
+    
+    Return
+    
+    
+    * =======================================================
+    Subroutine Name(INIT)
+    
+    Change Field(#FXRETCD) To(NR)
+    Clr_List Named(#LW3CUSL)
+    
+    * Get back office ID from system file
+    Change Field(#LW3SVNAME) To(BACK_OFFICE)
+    Change Field(#LW3SVLANG) To(*BLANK)
+    Fetch Fields(#LW3SVVALP) From_File(LW3SYS) With_Key(#LW3SVNAME #LW3SVLANG) Io_Error(*NEXT)
+    If_Status Is(*OKAY)
+    Change Field(#W_BO) To(#LW3SVVALP)
+    Else
+    * Default to CE
+    Change Field(#W_BO) To(CE)
+    Endif
+    Endroutine
+    

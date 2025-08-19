@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3STSREQ
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Web User Status  (Drop Down List)"
+      Label:              "Web User Status"
+      Heading1:           "Web"
+      Heading2:           "User"
+      Heading3:           "Status"

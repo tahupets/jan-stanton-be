@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3THJS
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Theme JavaScript path"
+      Label:              "Theme JavaScrip"
+      Heading1:           "Theme"
+      Heading2:           "JavaScript"
+      Heading3:           "path"

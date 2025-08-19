@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               LW3JQVERS
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "jQuery Version"
+      Label:              "jQuery Version"
+      Heading1:           "jQuery"
+      Heading2:           "Version"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(363)
+    
+    End_Com
+    
+    End_Com

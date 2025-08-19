@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3VALERR
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Validation Error Flag"
+      Label:              "Error Flag"
+      Heading1:           "Error"
+      Heading2:           "Flag"
+      Heading3:           " "

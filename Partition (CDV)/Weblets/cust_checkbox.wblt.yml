@@ -1,0 +1,222 @@
+﻿Weblet:
+  Name:               cust_checkbox
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Custom Checkbox"
+
+  XML: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+       <lxml:context>
+          <lxml:images-path>/images</lxml:images-path>
+       </lxml:context>
+    </lxml:data>
+
+  Designs:
+  - Language:           ENG
+    Technology Service: LANSA XHTML
+
+    XSL: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!-- (c) 2003 LANSA                            -->
+      <!-- XHTML Standard checkbox                   -->
+      <!-- $Workfile::   std_checkbox.xsl          $ -->
+      <!-- $Revision::   1.24                      $ -->
+      <xsl:transform version="1.0" exclude-result-prefixes="lxml wd"
+                     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                     xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data"
+                     xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design"
+                     xmlns="http://www.w3.org/1999/xhtml">
+         <xsl:import href="std_keys.xsl" />
+         <xsl:import href="std_util.xsl" />
+         <xsl:import href="std_types.xsl" />
+         <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8"
+                     indent="yes" />
+         <wd:definition>
+            <wd:group name="Custom Weblets" />
+         </wd:definition>
+         <wd:template name="cust_checkbox">
+            <wd:description icon="icons/std_checkbox.ico">
+               <wd:name lang="ENG">Checkbox</wd:name>
+            </wd:description>
+            <wd:param name="caption">
+               <wd:tip lang="ENG">Text to display next to checkbox.</wd:tip>
+            </wd:param>
+            <wd:param name="oncode">
+               <wd:tip lang="ENG">The value to place in the field, if checked.</wd:tip>
+            </wd:param>
+            <wd:param name="offcode">
+               <wd:tip lang="ENG">The value to place in the field, if unchecked.</wd:tip>
+            </wd:param>
+            <wd:param name="alignment">
+               <wd:tip lang="ENG">Determines whether checkbox caption appears to the left or right of the checkbox.</wd:tip>
+            </wd:param>
+         </wd:template>
+      
+         <xsl:template name="cust_checkbox">
+            <xsl:param name="name" select="''" wd:tip_id="" />
+            <xsl:param name="value" select="''" wd:tip_id="" />
+            <xsl:param name="display_mode" wd:tip_id="" wd:type="std:display_mode"
+                       wd:role="std:display_mode" />
+            <xsl:param name="caption" select="''" wd:type="std:mtxt_variable" />
+            <xsl:param name="oncode" select="'Y'" />
+            <xsl:param name="offcode" select="'N'" />
+            <xsl:param name="reentryfield" select="'STDRENTRY'" wd:tip_id=""
+                       wd:type="std:field_name_in[wam=$on_click_wamname][webrtn=$on_click_wrname]" />
+            <xsl:param name="reentryvalue" select="'M'" wd:tip_id="" />
+            <xsl:param name="hide_if" select="false()" wd:tip_id=""
+                       wd:type="std:boolean" />
+            <xsl:param name="formname" select="'LANSA'" wd:tip_id=""
+                       wd:type="std:html_formname" />
+            <xsl:param name="on_click_js" select="''" />
+            <xsl:param name="on_click_wamname"
+                       select="/lxml:data/lxml:context/lxml:webapplication"
+                       wd:tip_id="" wd:type="std:wam" />
+            <xsl:param name="on_click_wrname" wd:tip_id=""
+                       wd:type="std:webroutine[wam=$on_click_wamname]" />
+            <xsl:param name="protocol" wd:tip_id="" wd:type="std:protocol" />
+            <xsl:param name="target_window_name" wd:tip_id=""
+                       wd:type="std:target_window" />
+            <xsl:param name="disabled" wd:tip_id="" wd:type="std:boolean" />
+            <xsl:param name="alignment" select="'right'" wd:type="std:horz_alignment" />
+            <xsl:param name="pos_absolute" select="'left:0pt;top:0pt'"
+                       wd:tip_id="pos_absolute_design"
+                       wd:role="std:pos_absolute_design" />
+            <xsl:param name="class" select="'std_checkbox'" wd:tip_id=""
+                       wd:type="std:css_style_class[tagName='input']" />
+            <xsl:param name="mouseover_class" wd:tip_id=""
+                       wd:type="std:css_style_class[tagName='input']" />
+            <xsl:param name="text_class" select="'std_checkbox_text'" wd:tip_id=""
+                       wd:type="std:css_style_class[tagName='label']" />
+            <xsl:param name="tab_index" wd:tip_id="" />
+            <xsl:if test="not($hide_if) or $lweb_design_mode">
+               <xsl:call-template name="std_script_reference.private" />
+               <span>
+                  <xsl:attribute name="style">
+                     <xsl:text>white-space:nowrap;</xsl:text>
+                     <xsl:call-template name="make_pos_style.private">
+                        <xsl:with-param name="in_attribute" select="false()" />
+                        <xsl:with-param name="caller_name" select="'std_checkbox.xsl'" />
+                        <xsl:with-param name="pos_absolute" select="$pos_absolute" />
+                     </xsl:call-template>
+                  </xsl:attribute>
+                  <xsl:if test="$display_mode != 'hidden' or $lweb_design_mode">
+                     <xsl:if test="$alignment != 'right'">
+                        <xsl:choose>
+                           <xsl:when test="$text_class != ''">
+                              <label class="{$text_class}" for="__{$name}_PROXY">
+                                 <xsl:value-of select="$caption" />
+                              </label>
+                           </xsl:when>
+                           <xsl:otherwise>
+                              <xsl:value-of select="$caption" />
+                           </xsl:otherwise>
+                        </xsl:choose>
+                     </xsl:if>
+                  </xsl:if>
+                  <xsl:variable name="onclick">
+                     <xsl:text>SetState(this, '</xsl:text>
+                     <xsl:value-of select="$name" />
+                     <xsl:text>','</xsl:text>
+                     <xsl:value-of select="$oncode" />
+                     <xsl:text>', '</xsl:text>
+                     <xsl:value-of select="$offcode" />
+                     <xsl:text>');</xsl:text>
+                     <xsl:if test="$on_click_js != ''">
+                        <xsl:value-of select="$on_click_js" />
+                     </xsl:if>
+                     <xsl:if test="$on_click_wrname != ''">
+                        <xsl:if test="$reentryfield != ''">
+                           <xsl:text>InsertHidden(document.</xsl:text>
+                           <xsl:value-of select="$formname" />
+                           <xsl:text>, '</xsl:text>
+                           <xsl:value-of select="$reentryfield" />
+                           <xsl:text>', '</xsl:text>
+                           <xsl:value-of select="key('field-value', $reentryfield)" />
+                           <xsl:text>');</xsl:text>
+                           <xsl:text>document.</xsl:text>
+                           <xsl:value-of select="$formname" />.<xsl:value-of select="$reentryfield" />.value = '<xsl:text />
+                           <xsl:value-of select="$reentryvalue" />';<xsl:text />
+                        </xsl:if>
+                        <xsl:text>HandleEvent('</xsl:text>
+                        <xsl:value-of select="$on_click_wamname" />', '<xsl:value-of select="$on_click_wrname" />', document.<xsl:value-of select="$formname" />
+                        <xsl:choose>
+                           <xsl:when test="$target_window_name !=''">, '<xsl:value-of select="$target_window_name" />'</xsl:when>
+                           <xsl:otherwise>, null</xsl:otherwise>
+                        </xsl:choose>
+                        <xsl:if test="$protocol!=''">, '<xsl:value-of select="$protocol" />'</xsl:if>);<xsl:text />
+                     </xsl:if>
+                  </xsl:variable>
+                  <xsl:variable name="checked">
+                     <xsl:if test="$value = $oncode">
+                        <xsl:text>checked</xsl:text>
+                     </xsl:if>
+                  </xsl:variable>
+                  <xsl:if test="$display_mode != 'output' and (not($lweb_design_mode) or key('design_doc_name', 'std_checkbox.xsl'))">
+                     <input type="hidden" name="{$name}" value="{$value}" />
+                  </xsl:if>
+                  <xsl:if test="$display_mode != 'hidden' or $lweb_design_mode">
+                     <xsl:choose>
+                        <xsl:when test="$checked != ''">
+                           <input class="{$class}" onclick="{$onclick}"
+                                  type="checkbox" checked="{$checked}"
+                                  name="__{$name}_PROXY" value="{$value}"
+                                  onmouseenter="if( '{$mouseover_class}' != '' ) {{ this.className='{$mouseover_class}' }}"
+                                  onmouseleave="this.className='{$class}'"
+                                  id="__{$name}_PROXY">
+                              <xsl:if test="$display_mode = 'output'">
+                                 <xsl:attribute name="disabled">disabled</xsl:attribute>
+                              </xsl:if>
+                              <xsl:if test="$tab_index != ''">
+                                 <xsl:attribute name="tabindex">
+                                    <xsl:value-of select="$tab_index" />
+                                 </xsl:attribute>
+                              </xsl:if>
+                              <xsl:if test="boolean($disabled)">
+                                 <xsl:attribute name="disabled">
+                                    <xsl:text>disabled</xsl:text>
+                                 </xsl:attribute>
+                              </xsl:if>
+                           </input>
+                        </xsl:when>
+                        <xsl:otherwise>
+                           <input class="{$class}" id="__{$name}_PROXY"
+                                  onmouseleave="this.className='{$class}'"
+                                  onclick="{$onclick}"
+                                  onmouseenter="if( '{$mouseover_class}' != '' ) {{ this.className='{$mouseover_class}' }}"
+                                  type="checkbox" name="__{$name}_PROXY"
+                                  value="{$value}">
+                              <xsl:if test="$display_mode = 'output'">
+                                 <xsl:attribute name="disabled">disabled</xsl:attribute>
+                              </xsl:if>
+                              <xsl:if test="$tab_index != ''">
+                                 <xsl:attribute name="tabindex">
+                                    <xsl:value-of select="$tab_index" />
+                                 </xsl:attribute>
+                              </xsl:if>
+                              <xsl:if test="boolean($disabled)">
+                                 <xsl:attribute name="disabled">
+                                    <xsl:text>disabled</xsl:text>
+                                 </xsl:attribute>
+                              </xsl:if>
+                           </input>
+                        </xsl:otherwise>
+                     </xsl:choose>
+                     <xsl:if test="$alignment = 'right'">
+                        <xsl:choose>
+                           <xsl:when test="$text_class != ''">
+                              <label class="{$text_class}" for="__{$name}_PROXY">
+                                 <xsl:value-of select="$caption" />
+                              </label>
+                           </xsl:when>
+                           <xsl:otherwise>
+                              <xsl:value-of select="$caption" />
+                           </xsl:otherwise>
+                        </xsl:choose>
+                     </xsl:if>
+                  </xsl:if>
+               </span>
+            </xsl:if>
+         </xsl:template>
+      </xsl:transform>

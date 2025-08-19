@@ -1,0 +1,9 @@
+﻿System Variable:
+  Name:               "*LW3_NEXT_SESS_NUM"
+  Description:        "L4Web Next Session ID (numeric)"
+  Derivation:         Dynamic
+  Data Type:          Numeric
+  Length:             15
+  Decimals:           0
+  Program Type:       Function
+  Program Name:       LW3GN10

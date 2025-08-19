@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3REQNUM
+  Type:               Packed
+  Length:             15
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Requested Record Number"
+      Label:              "Requested"
+      Heading1:           "Requested"
+      Heading2:           "Record"
+      Heading3:           "Number"

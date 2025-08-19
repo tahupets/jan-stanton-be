@@ -1,0 +1,374 @@
+﻿Wam:
+  Name:               ADMDYNMNU
+  Enabled For RDMLX:  Yes
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Dynamic Menu for Admin Site"
+
+  Source: |
+    * **************************************************
+    *
+    *  COMPONENT:  ADMDYNMNU
+    *
+    * **************************************************
+    Function Options(*DIRECT)
+    
+    Begin_Com Role(*EXTENDS #PRIM_WAM)
+    
+    Def_List Name(#menulst) Fields(#LW3MNUNME #LW3MNUID #LW3CINDT #w_dirty #lw3sfid) Counter(#listcount) Type(*WORKING) Entrys(*MAX)
+    
+    Define Field(#w_loopf) Type(*CHAR) Length(1)
+    Define Field(#w_dirty) Type(*CHAR) Length(1)
+    Define Field(#w_count) Reffld(#listcount)
+    
+    Define Field(#w_menuid) Reffld(#LW3MNUID)
+    
+    Define Field(#w_first) Type(*CHAR) Length(1)
+    Define Field(#w_webusr) Reffld(#lw3webusr)
+    
+    Define Field(#w_indt) Reffld(#LW3CINDT)
+    
+    
+    Webroutine Name(bldmenu)
+    Web_Map For(*INPUT) Fields(#stdadmusr #stdadmses)
+    Web_Map For(*BOTH) Fields(#lw3mhtml)
+    
+    #STDSESSID := #stdadmses
+    #STDWEBUSR := #stdadmusr
+    Exchange Fields(#STDSESSID #STDWEBUSR)
+    Call Process(*DIRECT) Function(LW3GN01) Menu_Used(*NEXT) If_Error(*NEXT)
+    If Cond(#lw3webusr = '')
+    Transfer Toroutine(#WADMLGN1.LWBOP01C1)
+    Endif
+    
+    Fetch Fields(#lw3rolea) From_File(lw3wuser) With_Key(#lw3webusr) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond((#lw3rolea = XXX) *Or (#lw3rolea = *blank))
+    * * * Fetch Fields(#LW3VARFLD) From_File(LW3SECURA) With_Key(#lw3webusr) Io_Error(*NEXT) Val_Error(*NEXT)
+    #w_webusr := #lw3webusr
+    Else
+    #w_sfid := 99
+    #w_webusr := #w_sfid.AsString + #lw3rolea
+    * * * Fetch Fields(#LW3VARFLD) From_File(LW3SECURA) With_Key(#w_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    
+    #lw3mhtml := '<div id="myslidemenu" class="jqueryslidemenu"><ul>'
+    
+    Execute Subroutine(bld_tree)
+    
+    #w_first := Y
+    #w_indt := 0
+    Selectlist Named(#menulst)
+    
+    If Cond(#w_first = Y)
+    #w_first := N
+    Else
+    If Cond(#w_indt = #lw3cindt)
+    #lw3mhtml += '</li>'
+    Else
+    If Cond(#w_indt < #lw3cindt)
+    #lw3mhtml += '<ul>'
+    Else
+    Dowhile Cond(#w_indt > #lw3cindt)
+    #lw3mhtml += '</li></ul>'
+    #w_indt -= 1
+    Endwhile
+    #lw3mhtml += '</li>'
+    Endif
+    Endif
+    Endif
+    
+    #lw3mhtml += '<li>'
+    Execute Subroutine(prc_type)
+    
+    #w_indt := #lw3cindt
+    Endselect
+    
+    Dowhile Cond(#w_indt > 0)
+    #lw3mhtml += '</li></ul>'
+    #w_indt -= 1
+    Endwhile
+    
+    #lw3mhtml += '</li></ul><br style="clear: left" /></div>'
+    Endroutine
+    
+    Subroutine Name(prc_type)
+    
+    Group_By Name(#xg_menu) Fields(#lw3mnuid #lw3lnktyp #lw3mnunme #lw3mnuurl #lw3mnupgm #lw3mnurtn #lw3lnknew #LW3RNTRYF #LW3RNTRYV #lw3http)
+    
+    #LW3LNGID := *LANGUAGE
+    Fetch Fields(#xg_menu) From_File(lw3menu01) With_Key(99 #lw3mnuid) Io_Error(*NEXT) Val_Error(*NEXT)
+    Fetch Fields(#lw3mnunme) From_File(lw3menuml) With_Key(99 #lw3mnuid #LW3LNGID) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Case Of_Field(#lw3lnktyp)
+    
+    When Value_Is(= TEXT)
+    #lw3mhtml += '<a href="javascript:void(0)">' + #lw3mnunme + '</a>'
+    
+    * #lw3mhtml += #lw3mnunme
+    
+    
+    When Value_Is(= URL)
+    #lw3mhtml += '<a href="' + #lw3mnuurl + '"'
+    If Cond(#lw3lnknew = Y)
+    #lw3mhtml += ' target="_blank"'
+    Endif
+    #lw3mhtml += '>' + #lw3mnunme + '</a>'
+    
+    When Value_Is(= LANSA)
+    
+    * HandleEvent('WAM', 'wr', document.LANSA, 'target', '')
+    * return stdAnchorClicked(event, this, 'WADMHOME', 'admhome', 'LANSA', 'protocol', 'target', 'LADAID', '01')
+    
+    #lw3mhtml += '<a href="javascript:void(0);" onclick="return stdAnchorClicked(event, this, ' + #quote + #lw3mnupgm + #quote + ', ' + #quote + #lw3mnurtn + #quote + ', ' + #quote + 'LANSA' + #quote + ', '
+    
+    If Cond(#lw3http *NE '')
+    #lw3mhtml += (#quote + #lw3http + #quote + ', ' + #quote)
+    Else
+    #lw3mhtml += (#quote + #quote + ', ' + #quote)
+    Endif
+    
+    If Cond(#lw3lnknew = Y)
+    #lw3mhtml += '_blank'
+    Endif
+    
+    #lw3mhtml += #quote + ', ' + #quote + #LW3RNTRYF + #quote + ', ' + #quote + #LW3RNTRYV + #quote + ');">' + #lw3mnunme + '</a>'
+    
+    When Value_Is(= PHP)
+    
+    
+    Otherwise
+    
+    Endcase
+    
+    
+    Endroutine
+    
+    
+    Subroutine Name(bld_tree)
+    
+    Clr_List Named(#menulst)
+    
+    #lw3sfid := 99
+    #LW3LNGID := *LANGUAGE
+    #w_loopf := N
+    #LW3CORD := 0
+    #LW3CINDT := 0
+    
+    Select Fields(#LW3MNUNME #LW3MNUID #LW3SECSEQ #lw3sfid) From_File(LW3MENU01A) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Continue If(#lw3sfid ^= 99)
+    
+    Fetch Fields(#lw3mnunme) From_File(lw3menuml) With_Key(99 #lw3mnuid #LW3LNGID) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * Adapt spaces for dhtml
+    #LW3MNUNME := #LW3MNUNME.ReplaceAll( ' ' '&nbsp;' )
+    
+    * Get the Menu Permission Flag
+    Fetch Fields(#LW3MNPRAF) From_File(LW3MNUPRM) With_Key(#LW3SFID #w_webusr #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * Only get Menu with Permission
+    Continue If(#LW3MNPRAF <> 'Y')
+    
+    Check_For In_File(LW3MENU02) With_Key(#lw3sfid #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If Cond(#io$sts = EQ)
+    #w_dirty := Y
+    #w_loopf := Y
+    Else
+    #w_dirty := N
+    Endif
+    
+    Add_Entry To_List(#menulst)
+    Endselect
+    
+    Dowhile Cond(#w_loopf = Y)
+    #w_loopf := N
+    #LW3CORD := 0
+    Selectlist Named(#menulst)
+    #LW3CORD += 1
+    If Cond(#w_dirty = Y)
+    #w_dirty := N
+    Upd_Entry In_List(#menulst)
+    #LW3CINDT += 1
+    #w_menuid := #lw3mnuid
+    #w_count := 0
+    Select Fields(#LW3SUBMNU) From_File(LW3MENU02A) With_Key(#LW3SFID #w_menuid) Io_Error(*NEXT) Val_Error(*NEXT)
+    #lw3mnuid := #lw3submnu
+    Fetch Fields(#LW3MNUNME #LW3SECSEQ) From_File(LW3MENU01) With_Key(#LW3SFID #LW3SUBMNU) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#io$sts ¬= OK)
+    Continue
+    Endif
+    
+    Fetch Fields(#lw3mnunme) From_File(lw3menuml) With_Key(99 #LW3SUBMNU #LW3LNGID) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * Adapt spaces for dhtml
+    #LW3MNUNME := #LW3MNUNME.ReplaceAll( ' ' '&nbsp;' )
+    
+    * Get the Menu Permission Flag
+    Fetch Fields(#LW3MNPRAF) From_File(LW3MNUPRM) With_Key(#LW3SFID #w_webusr #LW3SUBMNU) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * Only get Menu with Permission
+    Continue If(#LW3MNPRAF <> 'Y')
+    
+    Check_For In_File(LW3MENU02) With_Key(#lw3sfid #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#io$sts = EQ)
+    #w_dirty := Y
+    #w_loopf := Y
+    Else
+    #w_dirty := N
+    Endif
+    
+    Add_Entry To_List(#menulst) After(#LW3CORD)
+    #LW3CORD += 1
+    #w_count += 1
+    Endselect
+    #LW3CINDT -= 1
+    #LW3CORD -= #w_count
+    
+    Endif
+    
+    Endselect
+    Endwhile
+    
+    Endroutine
+    
+    End_Com
+    
+
+  Web Routines:
+  - BLDMENU:
+      XML: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        
+        <!-- WAM       : ADMDYNMNU - Dynamic Menu for Admin Site
+             Webroutine: bldmenu - 
+             Timestamp : 2025-08-19T09:40:37 -->
+        
+        <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+        
+        <lxml:server-instructions>
+        <lxml:client-charset></lxml:client-charset>
+        <lxml:cookies>
+                 <lxml:cookie name="STDSESSID">
+                    <lxml:value field-name="STDSESSID"></lxml:value>
+        <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
+        <lxml:domain></lxml:domain>
+        <lxml:path>/; HttpOnly</lxml:path>
+        <lxml:secure></lxml:secure>
+        </lxml:cookie>
+        <lxml:cookie name="STDWEBUSR">
+                    <lxml:value field-name="STDWEBUSR"></lxml:value>
+        <lxml:expires field-name=""></lxml:expires>
+        <lxml:domain field-name=""></lxml:domain>
+        <lxml:path field-name=""></lxml:path>
+        <lxml:secure field-name=""></lxml:secure>
+        </lxml:cookie>
+        </lxml:cookies>
+        <lxml:ssi></lxml:ssi>
+        </lxml:server-instructions>
+        
+        <lxml:context>
+        <lxml:user-id>          </lxml:user-id>
+        <lxml:webapplication>ADMDYNMNU</lxml:webapplication>
+        <lxml:webapplication-title>Dynamic Menu for Admin Site</lxml:webapplication-title>
+        <lxml:webroutine>bldmenu</lxml:webroutine>
+        <lxml:webroutine-title></lxml:webroutine-title>
+        <lxml:service-name></lxml:service-name>
+        <lxml:partition>CDV</lxml:partition>
+        <lxml:language iso-lang="en">ENG</lxml:language>
+        <lxml:dec-separator>.</lxml:dec-separator>
+        <lxml:images-path>/images</lxml:images-path>
+        <lxml:action-request>/cgi-bin/lansaweb</lxml:action-request>
+        </lxml:context>
+        
+        <lxml:options>
+        <lxml:option name="DBCS" shift-chars="true">false</lxml:option>
+        <lxml:option name="align-right">true</lxml:option>
+        <lxml:option name="check-numeric">false</lxml:option>
+        <lxml:option name="debug" />
+        <lxml:option name="trace" />
+        <lxml:option name="task" />
+        </lxml:options>
+        
+        <lxml:variables />
+        
+        <lxml:messages></lxml:messages>
+        
+        <lxml:fields>
+        <lxml:field name="LW3MHTML">
+        <lxml:caption>
+        <lxml:label>Menu Html</lxml:label>
+        <lxml:description>Menu Html</lxml:description>
+        <lxml:heading-1>Menu</lxml:heading-1>
+        <lxml:heading-2>Html</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        </lxml:fields>
+        
+        <lxml:lists></lxml:lists>
+        
+        </lxml:data>
+        
+
+      Designs:
+      - Language:           ENG
+        Technology Service: LANSA JQMOBILE
+
+        XSL: |
+          <?xml version="1.0" encoding="UTF-8"?>
+          
+          <!-- WAM       : ADMDYNMNU - Dynamic Menu for Admin Site
+               Webroutine: bldmenu - 
+               Timestamp : 2014-09-23T09:15:57-05:00 -->
+          
+          <xsl:transform version="1.0" exclude-result-prefixes="lxml wd" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+          
+          <xsl:import href="std_keys.xsl" />
+          <xsl:import href="std_variables.xsl" />
+          <xsl:import href="std_hidden.xsl" />
+          <xsl:import href="admdynmnu_layout.xsl" />
+          
+          <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8" indent="no" />
+          
+          <xsl:template match="/">
+          <xsl:call-template name="layout" />
+          </xsl:template>
+          
+          <xsl:template match="/lxml:data">
+          <input type="text" id="{$lweb_WRName}_LW3MHTML" name="LW3MHTML" value="{key('field-value', 'LW3MHTML')}" size="60" maxlength="65535" class="lstd_Field text" data-lstddatatype="varchar| |65535" wd:caption="{key('field-caption', 'LW3MHTML')/lxml:description}" />
+          <br />
+          </xsl:template>
+          
+          <xsl:template match="/lxml:data" mode="content.hidden">
+          <xsl:apply-imports />
+          
+          
+          
+          </xsl:template>
+          </xsl:transform>
+
+      - Language:           ENG
+        Technology Service: LANSA XHTML
+
+        XSL: |
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!-- Web application : ADMDYNMNU           Dynamic Menu for Admin Site             -->
+          <!-- Web routine     : bldmenu                                                     -->
+          <!-- Timestamp       : 2010-09-08T16:10:15-05:00                                   -->
+          <xsl:transform version="1.0" exclude-result-prefixes="lxml wd"
+                         xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data"
+                         xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design"
+                         xmlns="http://www.w3.org/1999/xhtml"
+                         xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+             <xsl:import href="std_keys.xsl" />
+             <xsl:import href="std_variables.xsl" />
+             <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8"
+                         indent="no" />
+          
+             <xsl:template match="/">
+                <xsl:value-of select="key('field-value', 'LW3MHTML')" />
+             </xsl:template>
+          </xsl:transform>

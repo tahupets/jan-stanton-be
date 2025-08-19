@@ -1,0 +1,22 @@
+﻿Field:
+  Name:               LW3USRPS2
+  Type:               Alpha
+  Length:             10
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Reference Field:    LW3USRPAS
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - ND
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Verify Password"
+      Label:              "Verify Password"
+      Heading1:           "Verify"
+      Heading2:           "Password"
+      Heading3:           " "

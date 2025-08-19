@@ -1,0 +1,108 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * =======================================================
+    * Process Name - LW3GEN
+    
+    * Function Name - LW3LCUC
+    * Function Description - B2B Customer master list API CE
+    
+    * EXCHANGE FIELDS(In)
+    * #FXDESC - Search parameter
+    
+    * EXCHANGE FIELDS(Out)
+    * #FXRETCD  - Return code - OK or NR
+    
+    * Passed list
+    * #LW3CUSL  - List of customer numbers, names/addresses
+    
+    * =======================================================
+    * Summary of Changes
+    * =======================================================
+    * CR #  !  Date   ! Description
+    * -------------------------------------------------------
+    *       |         |
+    * =======================================================
+    Function Options(*DIRECT) Rcv_List(#LW3CUSL)
+    
+    * Define Field(#W_POS) Type(*DEC) Length(3) Decimals(0)
+    * Define Field(#W_POS1) Type(*DEC) Length(3) Decimals(0)
+    
+    * Group for all fields in customer file (for this install: LW3CUSM)
+    Group_By Name(#LW3CUSM) Fields(#C1CST# #C1NAME #C1ADR1 #C1ADR2 #C1CITY #C1STCD #C1ZIP #C1CYCD)
+    
+    * Customer list
+    Def_List Name(#LW3CUSL) Fields(#LW3WEBC01 #LW3CUSNAM #LW3HADDR1 #LW3HADDR2 #LW3CHCITY #LW3HSTATE #LW3HPSTAL #LW3HCNTRY) Type(*WORKING) Entrys(200)
+    
+    * =======================================================
+    * Program main line
+    * =======================================================
+    
+    Execute Subroutine(INIT)
+    
+    Exchange Fields(#FXRETCD) Option(*ALWAYS)
+    
+    * Get the customer list
+    Execute Subroutine(MULTIPLE)
+    
+    Return
+    
+    * =======================================================
+    Subroutine Name(MULTIPLE)
+    
+    * Select customers based on search parameter received
+    Use Builtin(UPPERCASE) With_Args(#FXDESC) To_Get(#FXDESC)
+    
+    #LW3QSEL := '(C1ACT = ''Y'') AND (C1SELL = ''Y'') AND (C1CSFX = 0)'
+    
+    If Cond(#FXDESC *NE BLANK)
+    #LW3QSEL := #LW3QSEL + ' AND (C1CST# LIKE ' + "'%" + #FXDESC + "%'" + ' OR ' + 'C1NAME LIKE ' + "'%" + #FXDESC + '%' + "'" + ')'
+    Endif
+    
+    
+    Select_Sql Fields(#C1CST# #C1NAME #C1ADR1 #C1ADR2 #C1CITY #C1STCD #C1ZIP #C1CYCD) From_Files((CIP010)) Where(#LW3QSEL) Io_Error(*NEXT)
+    
+    Execute Subroutine(ADDENTRY)
+    Change Field(#LISTCOUNT) To('#LISTCOUNT + 1')
+    If Cond('#LISTCOUNT *GE 200')
+    Message Msgtxt('More than 200 records were retrieved. Please refine your search')
+    Leave
+    Endif
+    
+    Endselect
+    
+    Endroutine
+    
+    * =======================================================
+    Subroutine Name(ADDENTRY)
+    
+    Change Field(#LW3WEBC01) To(*NULL)
+    
+    If_Status Is(*OKAY)
+    
+    * Move into the browselist fields
+    Substring Field(#C1CST#) Into_Field(#LW3WEBC01)
+    Change Field(#LW3CUSNAM) To(#C1NAME)
+    Change Field(#LW3HADDR1) To(#C1ADR1)
+    Change Field(#LW3HADDR2) To(#C1ADR2)
+    Change Field(#LW3CHCITY) To(#C1CITY)
+    Change Field(#LW3HSTATE) To(#C1STCD)
+    Change Field(#LW3HPSTAL) To(#C1ZIP)
+    Change Field(#LW3HCNTRY) To(#C1CYCD)
+    
+    Add_Entry To_List(#LW3CUSL)
+    Change Field(#FXRETCD) To(OK)
+    
+    Endif
+    
+    Endroutine
+    
+    * =======================================================
+    Subroutine Name(INIT)
+    
+    Change Field(#LW3WEBC01 #LW3NAME #C1CST# #C1NAME #C1ADR1 #C1ADR2 #C1CITY #C1STCD #C1ZIP #C1CYCD #LISTCOUNT) To(*NULL)
+    Change Field(#FXRETCD) To(NR)
+    Clr_List Named(#LW3CUSL)
+    
+    Endroutine

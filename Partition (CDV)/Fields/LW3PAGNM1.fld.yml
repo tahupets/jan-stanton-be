@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3PAGNM1
+  Type:               Alpha
+  Length:             35
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Page name"
+      Label:              "Page name"
+      Heading1:           "Page"
+      Heading2:           "name"
+      Heading3:           " "
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(19) Usepicklist(False) Width(440)
+    
+    End_Com
+    
+    End_Com

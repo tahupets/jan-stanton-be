@@ -83,6 +83,28 @@
     Web_Map For(*BOTH) Fields(#LW3GN03D3 #LW3GN03L1)
     Web_Map For(*OUTPUT) Fields(#S_PARAG #lw3name)
     
+    * ========= Copy Multilinguals ==========
+    * !NC!
+    #LW3QSEL := "Select B.LW3WAMNAM, B.LW3WRTNAM, B.LW3VARNAM, A.LW3LNGCOD, A.LW3VARTXT  From CEDDTALIB.LW3MLNVAR A"
+    #LW3QSEL += " Join CEDDTALIB.LW3MVRLUP B On B.LW3VARNAM = A.LW3VARNAM"
+    #LW3QSEL += " Where A.LW3LNGCOD = 'ENG' And B.LW3WAMNAM = 'WMNTADM2' "
+    
+    #LW3VARSEQ := 1
+    Select_Sql Fields(#LW3WAMNAM #LW3WRTNAM #LW3VARNAM #LW3LNGCOD #LW3VARTXT) Io_Error(*NEXT) Using(#LW3QSEL)
+    
+    Check_For In_File(LW3MVRLUP) With_Key(#LW3WAMNAM #LW3WRTNAM #LW3VARNAM) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*EQUALKEY)
+    Insert Fields(#LW3WAMNAM #LW3WRTNAM #LW3VARNAM) To_File(LW3MVRLUP)
+    Endif
+    
+    Check_For In_File(LW3MLNVAR) With_Key(#LW3VARNAM #LW3LNGCOD) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*EQUALKEY)
+    Insert Fields(#LW3VARNAM #LW3LNGCOD #LW3VARTXT) To_File(LW3MLNVAR)
+    Endif
+    
+    Endselect
+    * ========= Copy Multilinguals ==========
+    
     * get multi-lingual info
     #FXWAMNAM := WMNTADM2
     #FXWRTNAM := LSTSCAT

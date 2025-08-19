@@ -1,0 +1,405 @@
+﻿Weblet:
+  Name:               std_dropdown_js
+
+  Multilingual Details:
+  - ENG:
+      Description:        "std_dropdown_js"
+
+  XML: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+       <lxml:context>
+          <lxml:images-path>/images</lxml:images-path>
+       </lxml:context>
+    </lxml:data>
+
+  Designs:
+  - Language:           ENG
+    Technology Service: LANSA XHTML
+
+    XSL: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!-- (c) 2003 LANSA                            -->
+      <!-- XHTML Standard dropdown                   -->
+      <!-- $Workfile::   std_dropdown.xsl          $ -->
+      <!-- $Revision::   1.28                      $ -->
+      <xsl:transform version="1.0" exclude-result-prefixes="lxml wd msxsl xalan exslt"
+                     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                     xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data"
+                     xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design"
+                     xmlns:msxsl="urn:schemas-microsoft-com:xslt"
+                     xmlns:xalan="http://xml.apache.org/xalan"
+                     xmlns:exslt="http://exslt.org/common"
+                     xmlns="http://www.w3.org/1999/xhtml">
+         <xsl:import href="std_keys.xsl" />
+         <xsl:import href="std_variables.xsl" />
+         <xsl:import href="std_types.xsl" />
+         <xsl:import href="std_select_list.xsl" />
+         <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8"
+                     indent="yes" />
+         <lxml:data>
+            <lxml:dropdown>
+               <lxml:item>
+                  <lxml:caption>Item 1</lxml:caption>
+                  <lxml:value>Item 1</lxml:value>
+               </lxml:item>
+               <lxml:item>
+                  <lxml:caption>Item 2</lxml:caption>
+                  <lxml:value>Item 2</lxml:value>
+               </lxml:item>
+            </lxml:dropdown>
+         </lxml:data>
+         <wd:definition>
+            <wd:group name="Custom Weblets" />
+         </wd:definition>
+         <wd:template name="std_dropdown">
+            <wd:description icon="icons/std_dropdown.ico">
+               <wd:name lang="ENG">Combo box</wd:name>
+            </wd:description>
+            <wd:param name="items">
+               <wd:tip lang="ENG">An XML nodeset specifying the items to appear in the dropdown. Leave blank if items are populated from a list specified by listname property.</wd:tip>
+            </wd:param>
+            <wd:param name="listname">
+               <wd:tip lang="ENG">The name of the list to use to populate the items in the dropdown list.</wd:tip>
+            </wd:param>
+            <wd:param name="selector_field">
+               <wd:tip lang="ENG">The name of the field in the list, specified in listname property, that may contain selector value to allow a subset of items from the list, matching it, to be used to populate the items.</wd:tip>
+            </wd:param>
+            <wd:param name="selector_value_eq">
+               <wd:tip lang="ENG">The value that selector field value must be equal to in order to allow the row from the list to be added to the dropdown items.</wd:tip>
+            </wd:param>
+            <wd:param name="codefield">
+               <wd:tip lang="ENG">The name of the field in the list, specified in listname property, that contains the value of the item to be placed in the dropdown.</wd:tip>
+            </wd:param>
+            <wd:param name="captionfield">
+               <wd:tip lang="ENG">The name of the field in the list, specified in listname property, that contains the name (or caption) of the item to be placed in the dropdown.</wd:tip>
+            </wd:param>
+            <wd:param name="tagfield1">
+               <wd:tip lang="ENG">The name of the field in the list, specified in listname property, that contains additional data (tagged onto the item) of the item to be placed in the dropdown. This value is added as an attribute with the name of the field prefixed with 'tag_'. For example, if you specify STD_CODE as a tagfield, and if the name of your std_dropdown is MY_DROPDOWN, it can be accessed in javascript with document.getElementsByName('MY_DROPDOWN').options[index].getAttribute('tag_STD_CODE').</wd:tip>
+            </wd:param>
+            <wd:param name="submit_tagfields">
+               <wd:tip lang="ENG">If true any specified tagfield values will also be submitted when submitting the form.</wd:tip>
+            </wd:param>
+         </wd:template>
+      
+         <xsl:template name="std_dropdown_js">
+            <xsl:param name="name" wd:tip_id="" />
+            <xsl:param name="id" wd:tip_id="" />
+            <xsl:param name="value" wd:tip_id="" />
+            <xsl:param name="display_mode" wd:tip_id=""
+                       wd:role="std:display_mode_not_hidden"
+                       wd:type="std:display_mode_not_hidden" select="'input'" />
+            <xsl:param name="items" wd:role="std:picklist" wd:type="std:cv_items"
+                       select="document('')/*/lxml:data/lxml:dropdown" />
+            <xsl:param name="listname" wd:type="std:list_name_out" />
+            <xsl:param name="selector_field"
+                       wd:type="std:list_field_name[list=$listname]" />
+            <xsl:param name="selector_value_eq" />
+            <xsl:param name="codefield" wd:type="std:list_field_name[list=$listname]" />
+            <xsl:param name="captionfield"
+                       wd:type="std:list_field_name[list=$listname]" />
+            <xsl:param name="tagfield1" wd:tip_id=""
+                       wd:type="std:list_field_name[list=$listname]" />
+            <xsl:param name="tagfield2" wd:tip_id="tagfield1"
+                       wd:type="std:list_field_name[list=$listname]" />
+            <xsl:param name="tagfield3" wd:tip_id="tagfield1"
+                       wd:type="std:list_field_name[list=$listname]" />
+            <xsl:param name="submit_tagfields" wd:type="std:boolean" select="true()" />
+            <!--
+            <xsl:param name="reentryfield" wd:tip_id="" select="'STDRENTRY'"
+                       wd:type="std:field_name_in[wam=$on_change_wamname][webrtn=$on_change_wrname]" />
+            <xsl:param name="reentryvalue" wd:tip_id="" />
+            -->
+            <xsl:param name="hide_if" wd:tip_id="" wd:type="std:boolean"
+                       select="false()" />
+            <xsl:param name="formname" wd:tip_id="" wd:type="std:html_formname"
+                       select="'LANSA'" />
+            <xsl:param name="pos_absolute" wd:tip_id="pos_absolute_design"
+                       wd:role="std:pos_absolute_design" />
+            <xsl:param name="width_design" wd:tip_id="" wd:role="std:width_design" />
+            <xsl:param name="on_change_js" wd:tip_id="" />
+            <!--
+            <xsl:param name="on_change_wamname" select="$lweb_WAMName"
+                       wd:type="std:wam" />
+            <xsl:param name="on_change_wrname"
+                       wd:type="std:webroutine[wam=$on_change_wamname]" />
+                       -->
+            <xsl:param name="protocol" wd:tip_id="" wd:type="std:protocol" />
+            <xsl:param name="target_window_name" wd:tip_id=""
+                       wd:type="std:target_window" />
+            <xsl:param name="disabled" wd:tip_id="" wd:type="std:boolean" />
+            <xsl:param name="class" wd:tip_id=""
+                       wd:type="std:css_style_class[tagName='select']"
+                       select="'std_dropdown'" />
+            <xsl:param name="mouseover_class" wd:tip_id=""
+                       wd:type="std:css_style_class[tagName='select']" />
+            <xsl:param name="tab_index" wd:tip_id="" />
+            <xsl:if test="not($hide_if) or $lweb_design_mode">
+               <xsl:if test="$lweb_design_or_preview">
+                  <xsl:call-template name="std_script_reference.private" />
+                  <xsl:call-template name="std_style_reference.private">
+                     <xsl:with-param name="caller_name" select="'std_dropdown.xsl'" />
+                  </xsl:call-template>
+               </xsl:if>
+               <xsl:variable name="bSubmitTags"
+                             select="$submit_tagfields and ($tagfield1!='' or $tagfield2!='' or $tagfield3!='')" />
+               <xsl:choose>
+                  <xsl:when test="$display_mode = 'output'">
+                     <span class="{$class}">
+                        <xsl:attribute name="style">
+                           <xsl:text>white-space:nowrap;</xsl:text>
+                           <xsl:if test="$pos_absolute or $width_design">
+                              <xsl:call-template name="make_size_and_pos_style_v2.private">
+                                 <xsl:with-param name="caller_name"
+                                                 select="'std_dropdown.xsl'" />
+                                 <xsl:with-param name="pos_absolute"
+                                                 select="$pos_absolute" />
+                                 <xsl:with-param name="width" select="$width_design" />
+                              </xsl:call-template>
+                           </xsl:if>
+                        </xsl:attribute>
+                        <xsl:if test="$mouseover_class != ''">
+                           <xsl:attribute name="onmouseover">
+                              <xsl:text>this.className = '</xsl:text>
+                              <xsl:value-of select="$mouseover_class" />
+                              <xsl:text>';</xsl:text>
+                           </xsl:attribute>
+                           <xsl:attribute name="onmouseout">
+                              <xsl:text>this.className = '</xsl:text>
+                              <xsl:value-of select="$class" />
+                              <xsl:text>';</xsl:text>
+                           </xsl:attribute>
+                        </xsl:if>
+                        <xsl:variable name="list_xml">
+                           <xsl:if test="$listname = ''">
+                              <xsl:call-template name="expand_mtxt_in_xml_items.private">
+                                 <xsl:with-param name="items" select="$items" />
+                              </xsl:call-template>
+                           </xsl:if>
+                        </xsl:variable>
+                        <xsl:variable name="display_value">
+                           <xsl:choose>
+                              <xsl:when test="$listname">
+                                 <xsl:value-of select="key('list',$listname)/lxml:list-entries/lxml:entry[(not($selector_field) or (boolean($selector_field) and ./lxml:column[@name=$selector_field] = $selector_value_eq)) and ./lxml:column[@name=$codefield] = $value]/lxml:column[@name=$captionfield]" />
+                              </xsl:when>
+                              <xsl:when test="$lweb_is_msxsl_nodeset">
+                                 <xsl:value-of select="msxsl:node-set($list_xml)/*/lxml:item[($selector_value_eq='' or not(@selector_value) or @selector_value=$selector_value_eq) and lxml:value = $value]/lxml:caption" />
+                              </xsl:when>
+                              <xsl:when test="$lweb_is_exslt_nodeset">
+                                 <xsl:value-of select="exslt:node-set($list_xml)/*/lxml:item[($selector_value_eq='' or not(@selector_value) or @selector_value=$selector_value_eq) and lxml:value = $value]/lxml:caption" />
+                              </xsl:when>
+                              <xsl:otherwise>
+                                 <xsl:value-of select="xalan:node-set($list_xml)/*/lxml:item[($selector_value_eq='' or not(@selector_value) or @selector_value=$selector_value_eq) and lxml:value = $value]/lxml:caption" />
+                              </xsl:otherwise>
+                           </xsl:choose>
+                        </xsl:variable>
+                        <xsl:choose>
+                           <xsl:when test="$display_value='' and $lweb_design_mode">
+                              <xsl:choose>
+                                 <xsl:when test="$value != ''">
+                                    <xsl:value-of select="$value" />
+                                 </xsl:when>
+                                 <xsl:otherwise>Value of <xsl:value-of select="$name" />
+                                 </xsl:otherwise>
+                              </xsl:choose>
+                           </xsl:when>
+                           <xsl:otherwise>
+                              <xsl:value-of select="$display_value" />
+                           </xsl:otherwise>
+                        </xsl:choose>
+                     </span>
+                  </xsl:when>
+                  <xsl:otherwise>
+                     <select class="{$class}"
+                             onkeydown="std_DD_ListBoxOnKeyDown(document.LANSA);"
+                             size="1" name="{$name}">
+                        <xsl:if test="$on_change_js != ''">
+                           <xsl:attribute name="onchange">
+                              <xsl:text />
+                              <xsl:value-of select="$on_change_js" />
+                              <xsl:text />
+                           </xsl:attribute>
+                        </xsl:if>
+                        <xsl:choose>
+                        <xsl:when test="$id != ''">
+                           <xsl:attribute name="id">
+                              <xsl:text />
+                              <xsl:value-of select="$id" />
+                              <xsl:text />
+                           </xsl:attribute>
+                        </xsl:when>
+                        <xsl:otherwise>
+                           <xsl:attribute name="id">
+                              <xsl:text />
+                              <xsl:value-of select="$name" />
+                              <xsl:text />
+                           </xsl:attribute>                 
+                        </xsl:otherwise>                  
+                        </xsl:choose>
+                        <xsl:attribute name="onkeydown">
+                           <xsl:text>std_DD_ListBoxOnKeyDown(document.</xsl:text>
+                           <xsl:value-of select="$formname" />
+                           <xsl:text>);</xsl:text>
+                        </xsl:attribute>
+                        <xsl:if test="$pos_absolute or $width_design">
+                           <xsl:attribute name="style">
+                              <xsl:call-template name="make_size_and_pos_style_v2.private">
+                                 <xsl:with-param name="caller_name"
+                                                 select="'std_select_list.xsl'" />
+                                 <xsl:with-param name="pos_absolute"
+                                                 select="$pos_absolute" />
+                                 <xsl:with-param name="width" select="$width_design" />
+                              </xsl:call-template>
+                           </xsl:attribute>
+                        </xsl:if>
+                        <xsl:if test="$mouseover_class != ''">
+                           <xsl:attribute name="onmouseover">
+                              <xsl:text>this.className = '</xsl:text>
+                              <xsl:value-of select="$mouseover_class" />
+                              <xsl:text>'</xsl:text>
+                           </xsl:attribute>
+                           <xsl:attribute name="onmouseout">
+                              <xsl:text>this.className = '</xsl:text>
+                              <xsl:value-of select="$class" />
+                              <xsl:text>'</xsl:text>
+                           </xsl:attribute>
+                        </xsl:if>
+                        <xsl:if test="$tab_index != ''">
+                           <xsl:attribute name="tabindex">
+                              <xsl:value-of select="$tab_index" />
+                           </xsl:attribute>
+                        </xsl:if>
+                        <xsl:if test="boolean($disabled)">
+                           <xsl:attribute name="disabled">
+                              <xsl:text>disabled</xsl:text>
+                           </xsl:attribute>
+                        </xsl:if>
+                        <xsl:choose>
+                           <xsl:when test="not($listname)">
+                              <xsl:variable name="list_xml">
+                                 <xsl:call-template name="expand_mtxt_in_xml_items.private">
+                                    <xsl:with-param name="items" select="$items" />
+                                 </xsl:call-template>
+                              </xsl:variable>
+                              <xsl:choose>
+                                 <xsl:when test="$lweb_is_msxsl_nodeset">
+                                    <xsl:call-template name="options_from_xml.private">
+                                       <xsl:with-param name="list_xml"
+                                                       select="msxsl:node-set($list_xml)/*" />
+                                       <xsl:with-param name="selector_value_eq"
+                                                       select="$selector_value_eq" />
+                                       <xsl:with-param name="value" select="$value" />
+                                    </xsl:call-template>
+                                 </xsl:when>
+                                 <xsl:when test="$lweb_is_exslt_nodeset">
+                                    <xsl:call-template name="options_from_xml.private">
+                                       <xsl:with-param name="list_xml"
+                                                       select="exslt:node-set($list_xml)/*" />
+                                       <xsl:with-param name="selector_value_eq"
+                                                       select="$selector_value_eq" />
+                                       <xsl:with-param name="value" select="$value" />
+                                    </xsl:call-template>
+                                 </xsl:when>
+                                 <xsl:otherwise>
+                                    <xsl:call-template name="options_from_xml.private">
+                                       <xsl:with-param name="list_xml"
+                                                       select="xalan:node-set($list_xml)/*" />
+                                       <xsl:with-param name="selector_value_eq"
+                                                       select="$selector_value_eq" />
+                                       <xsl:with-param name="value" select="$value" />
+                                    </xsl:call-template>
+                                 </xsl:otherwise>
+                              </xsl:choose>
+                           </xsl:when>
+                           <xsl:otherwise>
+                              <xsl:variable name="listItems"
+                                            select="key('list',$listname)/lxml:list-entries/lxml:entry[not($selector_field) or (boolean($selector_field) and ./lxml:column[@name=$selector_field] = $selector_value_eq)]" />
+                              <xsl:variable name="valueCol"
+                                            select="count($listItems[1]/lxml:column[@name=$codefield]/preceding-sibling::*) + 1" />
+                              <xsl:variable name="captionCol"
+                                            select="count($listItems[1]/lxml:column[@name=$captionfield]/preceding-sibling::*) + 1" />
+                              <xsl:variable name="t1">
+                                 <xsl:for-each select="$listItems[1]/lxml:column[@name=$tagfield1]">
+                                    <xsl:value-of select="count(preceding-sibling::*) + 1" />
+                                 </xsl:for-each>
+                              </xsl:variable>
+                              <xsl:variable name="t2">
+                                 <xsl:for-each select="$listItems[1]/lxml:column[@name=$tagfield2]">
+                                    <xsl:value-of select="count(preceding-sibling::*) + 1" />
+                                 </xsl:for-each>
+                              </xsl:variable>
+                              <xsl:variable name="t3">
+                                 <xsl:for-each select="$listItems[1]/lxml:column[@name=$tagfield3]">
+                                    <xsl:value-of select="count(preceding-sibling::*) + 1" />
+                                 </xsl:for-each>
+                              </xsl:variable>
+                              <xsl:for-each select="$listItems">
+                                 <option value="{lxml:column[$valueCol]}">
+                                    <xsl:if test="$tagfield1 and $t1 != ''">
+                                       <xsl:attribute name="tag_{$tagfield1}">
+                                          <xsl:value-of select="lxml:column[number($t1)]" />
+                                       </xsl:attribute>
+                                    </xsl:if>
+                                    <xsl:if test="$tagfield2 and $t2 != ''">
+                                       <xsl:attribute name="tag_{$tagfield2}">
+                                          <xsl:value-of select="lxml:column[number($t2)]" />
+                                       </xsl:attribute>
+                                    </xsl:if>
+                                    <xsl:if test="$tagfield3 and $t3 != ''">
+                                       <xsl:attribute name="tag_{$tagfield3}">
+                                          <xsl:value-of select="lxml:column[number($t3)]" />
+                                       </xsl:attribute>
+                                    </xsl:if>
+                                    <xsl:if test="lxml:column[$valueCol] = $value">
+                                       <xsl:attribute name="selected">selected</xsl:attribute>
+                                    </xsl:if>
+                                    <xsl:variable name="caption">
+                                       <xsl:value-of select="lxml:column[$captionCol]" />
+                                    </xsl:variable>
+                                    <xsl:choose>
+                                       <xsl:when test="$caption">
+                                          <xsl:value-of select="$caption" />
+                                       </xsl:when>
+                                       <xsl:otherwise>
+                                          <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                                       </xsl:otherwise>
+                                    </xsl:choose>
+                                 </option>
+                              </xsl:for-each>
+                           </xsl:otherwise>
+                        </xsl:choose>
+                     </select>
+                  </xsl:otherwise>
+               </xsl:choose>
+            </xsl:if>
+         </xsl:template>
+      
+         <xsl:template name="options_from_xml.private">
+            <xsl:param name="list_xml" />
+            <xsl:param name="selector_value_eq" />
+            <xsl:param name="value" />
+            <xsl:for-each select="$list_xml/lxml:item[$selector_value_eq='' or not(@selector_value) or @selector_value=$selector_value_eq]">
+               <xsl:element name="option">
+                  <xsl:attribute name="value">
+                     <xsl:value-of select="lxml:value" />
+                  </xsl:attribute>
+                  <xsl:if test="lxml:value = $value">
+                     <xsl:attribute name="selected">selected</xsl:attribute>
+                  </xsl:if>
+                  <xsl:for-each select="lxml:value/@*[starts-with(name(.), 'tag_')]">
+                     <xsl:attribute name="{name(.)}">
+                        <xsl:value-of select="." />
+                     </xsl:attribute>
+                  </xsl:for-each>
+                  <xsl:choose>
+                     <xsl:when test="lxml:caption != ''">
+                        <xsl:value-of select="lxml:caption" />
+                     </xsl:when>
+                     <xsl:otherwise>
+                        <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                     </xsl:otherwise>
+                  </xsl:choose>
+               </xsl:element>
+            </xsl:for-each>
+         </xsl:template>
+      </xsl:transform>

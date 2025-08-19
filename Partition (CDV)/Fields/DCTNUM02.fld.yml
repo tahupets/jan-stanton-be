@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               DCTNUM02
+  Type:               Signed
+  Length:             2
+  Decimals:           0
+  Default Value:      "*ZERO"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - RB
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Numeric work field 2"
+      Label:              "Numeric work fi"
+      Heading1:           "Numeric"
+      Heading2:           "work"
+      Heading3:           "field"

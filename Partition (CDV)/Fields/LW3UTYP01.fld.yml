@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3UTYP01
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "B-to-B User Type (Radio Button)"
+      Label:              "User Typ(Radio)"
+      Heading1:           "B-to-B"
+      Heading2:           "User"
+      Heading3:           "Type"

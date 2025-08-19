@@ -1,0 +1,47 @@
+﻿Weblet:
+  Name:               basic_ajax
+
+  Multilingual Details:
+  - ENG:
+      Description:        "basic_ajax"
+
+  XML: |
+    <?xml version="1.0"?>
+    <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+       <lxml:context>
+          <lxml:images-path>/images</lxml:images-path>
+          <lxml:webapplication-title>WAM Title</lxml:webapplication-title><lxml:webroutine-title>Webroutine Title</lxml:webroutine-title><lxml:language iso-lang="">ENG</lxml:language></lxml:context>
+       <lxml:lists/></lxml:data>
+
+  Designs:
+  - Language:           ENG
+    Technology Service: LANSA XHTML
+
+    XSL: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!--     LANSA for the Web                   -->
+      <!-- Basic AJAX Request Object Framework     -->
+      <!-- Author: Roc Chen                        -->
+      <!-- Version: v1.0                           -->
+      <xsl:transform version="1.0" exclude-result-prefixes="lxml wd tsml"
+                     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                     xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data"
+                     xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design"
+                     xmlns:tsml="http://www.lansa.com/2002/XML/Generation-Metadata"
+                     xmlns="http://www.w3.org/1999/xhtml">
+         <xsl:import href="std_types.xsl" />
+         <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8"
+                     indent="no" />
+         <wd:definition>
+            <wd:group name="Custom Weblets" />
+         </wd:definition>
+      
+         <xsl:template name="BasicAjax">
+            <xsl:if test="not($lweb_design_mode)">
+               <script language="javascript" src="{$lweb_scripts_path}/ajax.js"
+                       type="text/javascript">
+                  <xsl:comment />
+               </script>
+            </xsl:if>
+         </xsl:template>
+      </xsl:transform>

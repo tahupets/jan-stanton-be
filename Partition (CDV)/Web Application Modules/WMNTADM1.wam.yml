@@ -707,19 +707,22 @@
         
         <!-- WAM       : WMNTADM1 - Maintain Site Menus
              Webroutine: LSTCAT - Maintain Site Menus
-             Timestamp : 2014-09-23T09:40:45-05:00 -->
+             Timestamp : 2025-08-19T10:22:14 -->
         
         <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
         
         <lxml:server-instructions>
         <lxml:client-charset></lxml:client-charset>
-        <lxml:cookies><lxml:cookie name="STDSESSID"><lxml:value field-name="STDSESSID"></lxml:value>
+        <lxml:cookies>
+        <lxml:cookie name="STDSESSID">
+        <lxml:value field-name="STDSESSID"></lxml:value>
         <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
         <lxml:domain></lxml:domain>
         <lxml:path>/; HttpOnly</lxml:path>
         <lxml:secure></lxml:secure>
         </lxml:cookie>
-        <lxml:cookie name="STDWEBUSR"><lxml:value field-name="STDWEBUSR"></lxml:value>
+        <lxml:cookie name="STDWEBUSR">
+        <lxml:value field-name="STDWEBUSR"></lxml:value>
         <lxml:expires field-name=""></lxml:expires>
         <lxml:domain field-name=""></lxml:domain>
         <lxml:path field-name=""></lxml:path>
@@ -736,15 +739,15 @@
         <lxml:webroutine>LSTCAT</lxml:webroutine>
         <lxml:webroutine-title>Maintain Site Menus</lxml:webroutine-title>
         <lxml:service-name></lxml:service-name>
-        <lxml:partition>CML</lxml:partition>
-        <lxml:language iso-lang="">ENG</lxml:language>
+        <lxml:partition>CDV</lxml:partition>
+        <lxml:language iso-lang="en">ENG</lxml:language>
         <lxml:dec-separator>.</lxml:dec-separator>
         <lxml:images-path>/images</lxml:images-path>
         <lxml:action-request>/cgi-bin/lansaweb</lxml:action-request>
         </lxml:context>
         
         <lxml:options>
-        <lxml:option name="DBCS">false</lxml:option>
+        <lxml:option name="DBCS" shift-chars="true">false</lxml:option>
         <lxml:option name="align-right">true</lxml:option>
         <lxml:option name="check-numeric">false</lxml:option>
         <lxml:option name="debug" />
@@ -2753,19 +2756,22 @@
         
         <!-- WAM       : WMNTADM1 - Maintain Site Menus
              Webroutine: MNTCAT - Maintain Site Menu Entry
-             Timestamp : 2014-09-23T09:40:45-05:00 -->
+             Timestamp : 2025-08-19T10:22:14 -->
         
         <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
         
         <lxml:server-instructions>
         <lxml:client-charset></lxml:client-charset>
-        <lxml:cookies><lxml:cookie name="STDSESSID"><lxml:value field-name="STDSESSID"></lxml:value>
+        <lxml:cookies>
+        <lxml:cookie name="STDSESSID">
+        <lxml:value field-name="STDSESSID"></lxml:value>
         <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
         <lxml:domain></lxml:domain>
         <lxml:path>/; HttpOnly</lxml:path>
         <lxml:secure></lxml:secure>
         </lxml:cookie>
-        <lxml:cookie name="STDWEBUSR"><lxml:value field-name="STDWEBUSR"></lxml:value>
+        <lxml:cookie name="STDWEBUSR">
+        <lxml:value field-name="STDWEBUSR"></lxml:value>
         <lxml:expires field-name=""></lxml:expires>
         <lxml:domain field-name=""></lxml:domain>
         <lxml:path field-name=""></lxml:path>
@@ -2782,15 +2788,15 @@
         <lxml:webroutine>MNTCAT</lxml:webroutine>
         <lxml:webroutine-title>Maintain Site Menu Entry</lxml:webroutine-title>
         <lxml:service-name></lxml:service-name>
-        <lxml:partition>CML</lxml:partition>
-        <lxml:language iso-lang="">ENG</lxml:language>
+        <lxml:partition>CDV</lxml:partition>
+        <lxml:language iso-lang="en">ENG</lxml:language>
         <lxml:dec-separator>.</lxml:dec-separator>
         <lxml:images-path>/images</lxml:images-path>
         <lxml:action-request>/cgi-bin/lansaweb</lxml:action-request>
         </lxml:context>
         
         <lxml:options>
-        <lxml:option name="DBCS">false</lxml:option>
+        <lxml:option name="DBCS" shift-chars="true">false</lxml:option>
         <lxml:option name="align-right">true</lxml:option>
         <lxml:option name="check-numeric">false</lxml:option>
         <lxml:option name="debug" />

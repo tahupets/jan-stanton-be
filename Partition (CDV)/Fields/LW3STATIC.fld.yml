@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3STATIC
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Static page?"
+      Label:              "Static page?"
+      Heading1:           "Static"
+      Heading2:           "page?"
+      Heading3:           " "

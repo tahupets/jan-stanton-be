@@ -1,0 +1,20 @@
+﻿Field:
+  Name:               LW3TYPDES
+  Type:               Alpha
+  Length:             15
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Type of User"
+      Label:              "Type of User"
+      Heading1:           "Type"
+      Heading2:           "Of"
+      Heading3:           "User"

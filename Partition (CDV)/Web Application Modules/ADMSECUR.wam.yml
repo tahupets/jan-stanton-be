@@ -73,51 +73,42 @@
     
     When Value_Is(= U)
     
-    #LW3VARFLD := ''
-    #LW3VARFLD := #LW3VARFLD.repeat( 256 )
+    #LW3CNTID := #W_CNTID
     
-    If Cond(#W_SFID = 99)
+    * Check if user ID is a role
+    Execute Subroutine(SEC_TYPE) With_Parms(#W_ISROLE)
+    
+    * !NC!
+    #LW3OBJNME := #COM_OWNER.Name
+    #LW3DBGTXT := 'w_sfid: - ' + #w_sfid.asString + ' - ' + #rl_webusr
+    Insert Fields(#LW3SFID #LW3OBJNME #LW3DBGTXT) To_File(CNTDEBUG) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If Cond(#w_sfid *EQ 99)
     
     Selectlist Named(#amenulst)
-    If Cond(#w_flgval = Y)
-    Fetch Fields(#LW3SECSEQ) From_File(LW3MENU01) With_Key(#lw3sfid #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
-    #LW3VARFLD := #LW3VARFLD.ReplaceSubstring( #LW3SECSEQ 1 'Y' )
+    #LW3MNPRAF := #w_flgval
+    
+    Fetch Fields(#LW3MNUID) From_File(LW3MNUPRM) With_Key(#W_SFID #rl_webusr #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    Update Fields(#LW3MNPRAF) In_File(LW3MNUPRM) Io_Error(*NEXT) Val_Error(*NEXT)
+    Else
+    Insert Fields(#LW3SFID #LW3MNPRID #LW3MNUID #LW3MNPRAF #LW3CRTUSR #LW3CRTDAT #LW3CRTTIM) To_File(LW3MNUPRM) Io_Error(*NEXT) Val_Error(*NEXT)
     Endif
     Endselect
     
     Else
     
     Selectlist Named(#smenulst)
-    If Cond(#w_flgval = Y)
-    Fetch Fields(#LW3SECSEQ) From_File(LW3MENU01) With_Key(#lw3sfid #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
-    #LW3VARFLD := #LW3VARFLD.ReplaceSubstring( #LW3SECSEQ 1 'Y' )
+    #LW3MNPRAF := #w_flgval
+    
+    Fetch Fields(#LW3MNUID) From_File(LW3MNUPRM) With_Key(#W_SFID #rl_webusr #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*OKAY)
+    Update Fields(#LW3MNPRAF) In_File(LW3MNUPRM) Io_Error(*NEXT) Val_Error(*NEXT)
+    Else
+    Insert Fields(#LW3SFID #LW3MNPRID #LW3MNUID #LW3MNPRAF #LW3CRTUSR #LW3CRTDAT #LW3CRTTIM) To_File(LW3MNUPRM) Io_Error(*NEXT) Val_Error(*NEXT)
     Endif
     Endselect
-    Endif
     
-    #LW3CNTID := #W_CNTID
-    
-    * Check if user ID is a role
-    Execute Subroutine(SEC_TYPE) With_Parms(#W_ISROLE)
-    
-    If Cond(#w_sfid *EQ 99)
-    
-    Check_For In_File(LW3SECURA) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
-    If Cond(#io$sts = EQ)
-    Update Fields(#LW3VARFLD) In_File(LW3SECURA) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
-    Else
-    #lw3webusr := #rl_webusr
-    Insert Fields(#LW3VARFLD #lw3webusr) To_File(LW3SECURA) Io_Error(*NEXT) Val_Error(*NEXT)
-    Endif
-    Else
-    
-    Check_For In_File(LW3SECUR) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
-    If Cond(#io$sts = EQ)
-    Update Fields(#LW3VARFLD #LW3CNTID) In_File(LW3SECUR) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
-    Else
-    #lw3webusr := #rl_webusr
-    Insert Fields(#LW3WEBUSR #LW3VARFLD #LW3CNTID) To_File(LW3SECUR) Io_Error(*NEXT) Val_Error(*NEXT)
-    Endif
     Endif
     
     Otherwise
@@ -151,17 +142,10 @@
     * Check if user ID is a role
     Execute Subroutine(SEC_TYPE) With_Parms(#W_ISROLE)
     
-    #LW3CNTID := *NULL
-    If Cond(#w_sfid *EQ 99)
-    Fetch Fields(#LW3VARFLD) From_File(LW3SECURA) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
-    Else
-    Fetch Fields(#LW3VARFLD #LW3CNTID) From_File(LW3SECUR) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
-    Endif
-    
     If Cond(#LW3UCMNUF = 'Y')
     
-    #W_CNTID := #LW3CNTID
-    Execute Subroutine(bld_content_dd)
+    * * * #W_CNTID := #LW3CNTID
+    * * * Execute Subroutine(bld_content_dd)
     
     Else
     
@@ -263,7 +247,11 @@
     #w_dirty := N
     Endif
     
-    Execute Subroutine(set_check)
+    * Get the Menu Permission Flag
+    Fetch Fields(#LW3MNPRAF) From_File(LW3MNUPRM) With_Key(#LW3SFID #rl_webusr #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    #w_flgval := #LW3MNPRAF
+    
+    * Execute Subroutine(set_check)
     Add_Entry To_List(#menulst)
     Endselect
     
@@ -294,7 +282,12 @@
     #w_dirty := N
     Endif
     
-    Execute Subroutine(set_check)
+    * * * Execute Subroutine(set_check)
+    
+    * Get the Menu Permission Flag
+    Fetch Fields(#LW3MNPRAF) From_File(LW3MNUPRM) With_Key(#LW3SFID #rl_webusr #LW3SUBMNU) Io_Error(*NEXT) Val_Error(*NEXT)
+    #w_flgval := #LW3MNPRAF
+    
     Add_Entry To_List(#menulst) After(#LW3CORD)
     #LW3CORD += 1
     #w_count += 1
@@ -355,21 +348,21 @@
     Endif
     Endroutine
     
-    Subroutine Name(bld_content_dd)
-    
-    Clr_List Named(#WL_CONTENTLIST)
-    
-    #WL_CONTENTLIST := *NULL
-    Add_Entry To_List(#WL_CONTENTLIST)
-    
-    #LW3LNGID := *LANGUAGE
-    Select Fields(#WL_CONTENTLIST) From_File(LW3CNT01) With_Key(#LW3LNGID) Io_Error(*NEXT) Val_Error(*NEXT)
-    Add_Entry To_List(#WL_CONTENTLIST)
-    Endselect
-    
-    Sort_List Named(#WL_CONTENTLIST) By_Fields(#LW3CNTSDC)
-    
-    Endroutine
+    * * * Subroutine Name(bld_content_dd)
+    * * *
+    * * * Clr_List Named(#WL_CONTENTLIST)
+    * * *
+    * * * #WL_CONTENTLIST := *NULL
+    * * * Add_Entry To_List(#WL_CONTENTLIST)
+    * * *
+    * * * #LW3LNGID := *LANGUAGE
+    * * * Select Fields(#WL_CONTENTLIST) From_File(LW3CNT01) With_Key(#LW3LNGID) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * Add_Entry To_List(#WL_CONTENTLIST)
+    * * * Endselect
+    * * *
+    * * * Sort_List Named(#WL_CONTENTLIST) By_Fields(#LW3CNTSDC)
+    * * *
+    * * * Endroutine
     
     * get multilingual information
     Subroutine Name(multi)
@@ -406,21 +399,24 @@
       XML: |
         <?xml version="1.0" encoding="UTF-8"?>
         
-        <!-- WAM       : ADMSECUR - ?
+        <!-- WAM       : ADMSECUR - Security Administration
              Webroutine: get_roles - 
-             Timestamp : 2024-06-13T22:13:24-05:00 -->
+             Timestamp : 2025-08-19T10:31:58 -->
         
         <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
         
         <lxml:server-instructions>
         <lxml:client-charset></lxml:client-charset>
-        <lxml:cookies><lxml:cookie name="STDSESSID"><lxml:value field-name="STDSESSID"></lxml:value>
+        <lxml:cookies>
+        <lxml:cookie name="STDSESSID">
+        <lxml:value field-name="STDSESSID"></lxml:value>
         <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
         <lxml:domain></lxml:domain>
         <lxml:path>/; HttpOnly</lxml:path>
         <lxml:secure></lxml:secure>
         </lxml:cookie>
-        <lxml:cookie name="STDWEBUSR"><lxml:value field-name="STDWEBUSR"></lxml:value>
+        <lxml:cookie name="STDWEBUSR">
+        <lxml:value field-name="STDWEBUSR"></lxml:value>
         <lxml:expires field-name=""></lxml:expires>
         <lxml:domain field-name=""></lxml:domain>
         <lxml:path field-name=""></lxml:path>
@@ -431,13 +427,13 @@
         </lxml:server-instructions>
         
         <lxml:context>
-        <lxml:user-id>LANSAJAN</lxml:user-id>
+        <lxml:user-id>          </lxml:user-id>
         <lxml:webapplication>ADMSECUR</lxml:webapplication>
-        <lxml:webapplication-title>?</lxml:webapplication-title>
+        <lxml:webapplication-title>Security Administration</lxml:webapplication-title>
         <lxml:webroutine>get_roles</lxml:webroutine>
         <lxml:webroutine-title></lxml:webroutine-title>
         <lxml:service-name></lxml:service-name>
-        <lxml:partition>CED</lxml:partition>
+        <lxml:partition>CDV</lxml:partition>
         <lxml:language iso-lang="en">ENG</lxml:language>
         <lxml:dec-separator>.</lxml:dec-separator>
         <lxml:images-path>/images</lxml:images-path>
@@ -514,7 +510,7 @@
         <lxml:description>Wam Name</lxml:description>
         <lxml:heading-1>Wam</lxml:heading-1>
         <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
+        <lxml:heading-3></lxml:heading-3>
         </lxml:caption>
         <lxml:value />
         </lxml:field>
@@ -524,7 +520,7 @@
         <lxml:description>Webroutine Name</lxml:description>
         <lxml:heading-1>Webroutine</lxml:heading-1>
         <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
+        <lxml:heading-3></lxml:heading-3>
         </lxml:caption>
         <lxml:value />
         </lxml:field>
@@ -546,12 +542,12 @@
         <lxml:header name="FXVARNAM">
         <lxml:heading-1>Variable</lxml:heading-1>
         <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
+        <lxml:heading-3></lxml:heading-3>
         </lxml:header>
         <lxml:header name="FXVARTXT">
         <lxml:heading-1>Variable</lxml:heading-1>
         <lxml:heading-2>Text</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
+        <lxml:heading-3></lxml:heading-3>
         </lxml:header>
         </lxml:list-header>
         <lxml:list-entries>
@@ -582,13 +578,13 @@
         <lxml:list-header>
         <lxml:header name="LW3CODE">
         <lxml:heading-1>Code</lxml:heading-1>
-        <lxml:heading-2> </lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
+        <lxml:heading-2></lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
         </lxml:header>
         <lxml:header name="LW3CDES">
         <lxml:heading-1>Code</lxml:heading-1>
         <lxml:heading-2>Description</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
+        <lxml:heading-3></lxml:heading-3>
         </lxml:header>
         </lxml:list-header>
         <lxml:list-entries>
@@ -997,413 +993,55 @@
       XML: |
         <?xml version="1.0" encoding="UTF-8"?>
         
-        <!-- WAM       : ADMSECUR - ?
+        <!-- WAM       : ADMSECUR - Security Administration
              Webroutine: get_secur - 
-             Timestamp : 2024-06-13T22:13:24-05:00 -->
-        
+             Timestamp : 2025-08-19T10:31:58 -->
         <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
-        
-        <lxml:server-instructions>
-        <lxml:client-charset></lxml:client-charset>
-        <lxml:cookies><lxml:cookie name="STDSESSID"><lxml:value field-name="STDSESSID"></lxml:value>
-        <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
-        <lxml:domain></lxml:domain>
-        <lxml:path>/; HttpOnly</lxml:path>
-        <lxml:secure></lxml:secure>
-        </lxml:cookie>
-        <lxml:cookie name="STDWEBUSR"><lxml:value field-name="STDWEBUSR"></lxml:value>
-        <lxml:expires field-name=""></lxml:expires>
-        <lxml:domain field-name=""></lxml:domain>
-        <lxml:path field-name=""></lxml:path>
-        <lxml:secure field-name=""></lxml:secure>
-        </lxml:cookie>
-        </lxml:cookies>
-        <lxml:ssi></lxml:ssi>
-        </lxml:server-instructions>
-        
-        <lxml:context>
-        <lxml:user-id>LANSAJAN</lxml:user-id>
-        <lxml:webapplication>ADMSECUR</lxml:webapplication>
-        <lxml:webapplication-title>?</lxml:webapplication-title>
-        <lxml:webroutine>get_secur</lxml:webroutine>
-        <lxml:webroutine-title></lxml:webroutine-title>
-        <lxml:service-name></lxml:service-name>
-        <lxml:partition>CED</lxml:partition>
-        <lxml:language iso-lang="en">ENG</lxml:language>
-        <lxml:dec-separator>.</lxml:dec-separator>
-        <lxml:images-path>/images</lxml:images-path>
-        <lxml:action-request>/cgi-bin/lansaweb</lxml:action-request>
-        </lxml:context>
-        
-        <lxml:options>
-        <lxml:option name="DBCS" shift-chars="true">false</lxml:option>
-        <lxml:option name="align-right">true</lxml:option>
-        <lxml:option name="check-numeric">false</lxml:option>
-        <lxml:option name="debug" />
-        <lxml:option name="trace" />
-        <lxml:option name="task" />
-        </lxml:options>
-        
-        <lxml:variables />
-        
-        <lxml:messages></lxml:messages>
-        
-        <lxml:fields>
-        <lxml:field name="LW3WEBUSR">
-        <lxml:caption>
-        <lxml:label>User Id</lxml:label>
-        <lxml:description>Web User Name</lxml:description>
-        <lxml:heading-1>Web</lxml:heading-1>
-        <lxml:heading-2>User</lxml:heading-2>
-        <lxml:heading-3>Name</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="LW3SFID">
-        <lxml:caption>
-        <lxml:label>Store Front ID</lxml:label>
-        <lxml:description>Store Front ID</lxml:description>
-        <lxml:heading-1>Store</lxml:heading-1>
-        <lxml:heading-2>Front</lxml:heading-2>
-        <lxml:heading-3>ID</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="LW3SFCUR">
-        <lxml:caption>
-        <lxml:label>Current Store F</lxml:label>
-        <lxml:description>Current Store Front</lxml:description>
-        <lxml:heading-1>Current</lxml:heading-1>
-        <lxml:heading-2>Store</lxml:heading-2>
-        <lxml:heading-3>Front</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="S_PARAG">
-        <lxml:caption>
-        <lxml:label>S_PARAG</lxml:label>
-        <lxml:description>Intro Paragraph</lxml:description>
-        <lxml:heading-1>S_PARAG</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="LW3NAME">
-        <lxml:caption>
-        <lxml:label>Store Front Nam</lxml:label>
-        <lxml:description>Store Front Name</lxml:description>
-        <lxml:heading-1>Store</lxml:heading-1>
-        <lxml:heading-2>Front</lxml:heading-2>
-        <lxml:heading-3>Name</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="FXWAMNAM">
-        <lxml:caption>
-        <lxml:label>Wam Name</lxml:label>
-        <lxml:description>Wam Name</lxml:description>
-        <lxml:heading-1>Wam</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="FXWRTNAM">
-        <lxml:caption>
-        <lxml:label>Webroutine Name</lxml:label>
-        <lxml:description>Webroutine Name</lxml:description>
-        <lxml:heading-1>Webroutine</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="LW3VARFLD">
-        <lxml:caption>
-        <lxml:label>Alpha result</lxml:label>
-        <lxml:description>e-Biz Variable Alphanumeric Result</lxml:description>
-        <lxml:heading-1>System Variable</lxml:heading-1>
-        <lxml:heading-2>Alphanumeric</lxml:heading-2>
-        <lxml:heading-3>Result</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="W_ADMUSR">
-        <lxml:caption>
-        <lxml:label>w_admusr</lxml:label>
-        <lxml:description>w_admusr</lxml:description>
-        <lxml:heading-1>w_admusr</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="LW3UCMNUF">
-        <lxml:caption>
-        <lxml:label>Flag for Using</lxml:label>
-        <lxml:description>Flag for Using Content Menus</lxml:description>
-        <lxml:heading-1>Flag for</lxml:heading-1>
-        <lxml:heading-2>Using</lxml:heading-2>
-        <lxml:heading-3>Content Menus</lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        <lxml:field name="W_CNTID">
-        <lxml:caption>
-        <lxml:label>Content ID</lxml:label>
-        <lxml:description>Content ID</lxml:description>
-        <lxml:heading-1>Content ID</lxml:heading-1>
-        <lxml:heading-2> </lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:caption>
-        <lxml:value />
-        </lxml:field>
-        </lxml:fields>
-        
-        <lxml:lists>
-        <lxml:list name="LS_MLNVAR" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="FXVARNAM">
-        <lxml:heading-1>Variable</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="FXVARTXT">
-        <lxml:heading-1>Variable</lxml:heading-1>
-        <lxml:heading-2>Text</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0001.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0001.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0002.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0002.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0003.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0003.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0004.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0004.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0005.FXVARNAM">ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHI</lxml:column>
-        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0005.FXVARTXT">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="AMENULST" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="LW3MNUNME">
-        <lxml:heading-1>Menu</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3MNUID">
-        <lxml:heading-1>Menu</lxml:heading-1>
-        <lxml:heading-2>Id</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3CINDT">
-        <lxml:heading-1>Category</lxml:heading-1>
-        <lxml:heading-2>Indent</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="W_DIRTY">
-        <lxml:heading-1>w_dirty</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="W_FLGVAL">
-        <lxml:heading-1>w_flgval</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3SFID">
-        <lxml:heading-1>Store</lxml:heading-1>
-        <lxml:heading-2>Front</lxml:heading-2>
-        <lxml:heading-3>ID</lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="LW3MNUNME" id="AMENULST.0001.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3MNUID" id="AMENULST.0001.LW3MNUID">1234567890</lxml:column>
-        <lxml:column name="LW3CINDT" id="AMENULST.0001.LW3CINDT">12</lxml:column>
-        <lxml:column name="W_DIRTY" id="AMENULST.0001.W_DIRTY">A</lxml:column>
-        <lxml:column name="W_FLGVAL" id="AMENULST.0001.W_FLGVAL">A</lxml:column>
-        <lxml:column name="LW3SFID" id="AMENULST.0001.LW3SFID">12</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3MNUNME" id="AMENULST.0002.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3MNUID" id="AMENULST.0002.LW3MNUID">1234567890</lxml:column>
-        <lxml:column name="LW3CINDT" id="AMENULST.0002.LW3CINDT">12</lxml:column>
-        <lxml:column name="W_DIRTY" id="AMENULST.0002.W_DIRTY">A</lxml:column>
-        <lxml:column name="W_FLGVAL" id="AMENULST.0002.W_FLGVAL">A</lxml:column>
-        <lxml:column name="LW3SFID" id="AMENULST.0002.LW3SFID">12</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3MNUNME" id="AMENULST.0003.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3MNUID" id="AMENULST.0003.LW3MNUID">1234567890</lxml:column>
-        <lxml:column name="LW3CINDT" id="AMENULST.0003.LW3CINDT">12</lxml:column>
-        <lxml:column name="W_DIRTY" id="AMENULST.0003.W_DIRTY">A</lxml:column>
-        <lxml:column name="W_FLGVAL" id="AMENULST.0003.W_FLGVAL">A</lxml:column>
-        <lxml:column name="LW3SFID" id="AMENULST.0003.LW3SFID">12</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3MNUNME" id="AMENULST.0004.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3MNUID" id="AMENULST.0004.LW3MNUID">1234567890</lxml:column>
-        <lxml:column name="LW3CINDT" id="AMENULST.0004.LW3CINDT">12</lxml:column>
-        <lxml:column name="W_DIRTY" id="AMENULST.0004.W_DIRTY">A</lxml:column>
-        <lxml:column name="W_FLGVAL" id="AMENULST.0004.W_FLGVAL">A</lxml:column>
-        <lxml:column name="LW3SFID" id="AMENULST.0004.LW3SFID">12</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3MNUNME" id="AMENULST.0005.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3MNUID" id="AMENULST.0005.LW3MNUID">1234567890</lxml:column>
-        <lxml:column name="LW3CINDT" id="AMENULST.0005.LW3CINDT">12</lxml:column>
-        <lxml:column name="W_DIRTY" id="AMENULST.0005.W_DIRTY">A</lxml:column>
-        <lxml:column name="W_FLGVAL" id="AMENULST.0005.W_FLGVAL">A</lxml:column>
-        <lxml:column name="LW3SFID" id="AMENULST.0005.LW3SFID">12</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="SMENULST" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="LW3MNUNME">
-        <lxml:heading-1>Menu</lxml:heading-1>
-        <lxml:heading-2>Name</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3MNUID">
-        <lxml:heading-1>Menu</lxml:heading-1>
-        <lxml:heading-2>Id</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3CINDT">
-        <lxml:heading-1>Category</lxml:heading-1>
-        <lxml:heading-2>Indent</lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="W_DIRTY">
-        <lxml:heading-1>w_dirty</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="W_FLGVAL">
-        <lxml:heading-1>w_flgval</lxml:heading-1>
-        <lxml:heading-2></lxml:heading-2>
-        <lxml:heading-3></lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3SFID">
-        <lxml:heading-1>Store</lxml:heading-1>
-        <lxml:heading-2>Front</lxml:heading-2>
-        <lxml:heading-3>ID</lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="LW3MNUNME" id="SMENULST.0001.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3MNUID" id="SMENULST.0001.LW3MNUID">1234567890</lxml:column>
-        <lxml:column name="LW3CINDT" id="SMENULST.0001.LW3CINDT">12</lxml:column>
-        <lxml:column name="W_DIRTY" id="SMENULST.0001.W_DIRTY">A</lxml:column>
-        <lxml:column name="W_FLGVAL" id="SMENULST.0001.W_FLGVAL">A</lxml:column>
-        <lxml:column name="LW3SFID" id="SMENULST.0001.LW3SFID">12</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3MNUNME" id="SMENULST.0002.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3MNUID" id="SMENULST.0002.LW3MNUID">1234567890</lxml:column>
-        <lxml:column name="LW3CINDT" id="SMENULST.0002.LW3CINDT">12</lxml:column>
-        <lxml:column name="W_DIRTY" id="SMENULST.0002.W_DIRTY">A</lxml:column>
-        <lxml:column name="W_FLGVAL" id="SMENULST.0002.W_FLGVAL">A</lxml:column>
-        <lxml:column name="LW3SFID" id="SMENULST.0002.LW3SFID">12</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3MNUNME" id="SMENULST.0003.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3MNUID" id="SMENULST.0003.LW3MNUID">1234567890</lxml:column>
-        <lxml:column name="LW3CINDT" id="SMENULST.0003.LW3CINDT">12</lxml:column>
-        <lxml:column name="W_DIRTY" id="SMENULST.0003.W_DIRTY">A</lxml:column>
-        <lxml:column name="W_FLGVAL" id="SMENULST.0003.W_FLGVAL">A</lxml:column>
-        <lxml:column name="LW3SFID" id="SMENULST.0003.LW3SFID">12</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3MNUNME" id="SMENULST.0004.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3MNUID" id="SMENULST.0004.LW3MNUID">1234567890</lxml:column>
-        <lxml:column name="LW3CINDT" id="SMENULST.0004.LW3CINDT">12</lxml:column>
-        <lxml:column name="W_DIRTY" id="SMENULST.0004.W_DIRTY">A</lxml:column>
-        <lxml:column name="W_FLGVAL" id="SMENULST.0004.W_FLGVAL">A</lxml:column>
-        <lxml:column name="LW3SFID" id="SMENULST.0004.LW3SFID">12</lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3MNUNME" id="SMENULST.0005.LW3MNUNME">aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyY</lxml:column>
-        <lxml:column name="LW3MNUID" id="SMENULST.0005.LW3MNUID">1234567890</lxml:column>
-        <lxml:column name="LW3CINDT" id="SMENULST.0005.LW3CINDT">12</lxml:column>
-        <lxml:column name="W_DIRTY" id="SMENULST.0005.W_DIRTY">A</lxml:column>
-        <lxml:column name="W_FLGVAL" id="SMENULST.0005.W_FLGVAL">A</lxml:column>
-        <lxml:column name="LW3SFID" id="SMENULST.0005.LW3SFID">12</lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        <lxml:list name="WL_CONTENTLIST" row-count="5">
-        <lxml:list-header>
-        <lxml:header name="LW3CNTID">
-        <lxml:heading-1>Content ID</lxml:heading-1>
-        <lxml:heading-2> </lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3CNTSDC">
-        <lxml:heading-1>Content Short Dsc</lxml:heading-1>
-        <lxml:heading-2> </lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:header>
-        <lxml:header name="LW3CNTLDC">
-        <lxml:heading-1>Content Long Dsc</lxml:heading-1>
-        <lxml:heading-2> </lxml:heading-2>
-        <lxml:heading-3> </lxml:heading-3>
-        </lxml:header>
-        </lxml:list-header>
-        <lxml:list-entries>
-        <lxml:entry>
-        <lxml:column name="LW3CNTID" id="WL_CONTENTLIST.0001.LW3CNTID"></lxml:column>
-        <lxml:column name="LW3CNTSDC" id="WL_CONTENTLIST.0001.LW3CNTSDC"></lxml:column>
-        <lxml:column name="LW3CNTLDC" id="WL_CONTENTLIST.0001.LW3CNTLDC"></lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3CNTID" id="WL_CONTENTLIST.0002.LW3CNTID"></lxml:column>
-        <lxml:column name="LW3CNTSDC" id="WL_CONTENTLIST.0002.LW3CNTSDC"></lxml:column>
-        <lxml:column name="LW3CNTLDC" id="WL_CONTENTLIST.0002.LW3CNTLDC"></lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3CNTID" id="WL_CONTENTLIST.0003.LW3CNTID"></lxml:column>
-        <lxml:column name="LW3CNTSDC" id="WL_CONTENTLIST.0003.LW3CNTSDC"></lxml:column>
-        <lxml:column name="LW3CNTLDC" id="WL_CONTENTLIST.0003.LW3CNTLDC"></lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3CNTID" id="WL_CONTENTLIST.0004.LW3CNTID"></lxml:column>
-        <lxml:column name="LW3CNTSDC" id="WL_CONTENTLIST.0004.LW3CNTSDC"></lxml:column>
-        <lxml:column name="LW3CNTLDC" id="WL_CONTENTLIST.0004.LW3CNTLDC"></lxml:column>
-        </lxml:entry>
-        <lxml:entry>
-        <lxml:column name="LW3CNTID" id="WL_CONTENTLIST.0005.LW3CNTID"></lxml:column>
-        <lxml:column name="LW3CNTSDC" id="WL_CONTENTLIST.0005.LW3CNTSDC"></lxml:column>
-        <lxml:column name="LW3CNTLDC" id="WL_CONTENTLIST.0005.LW3CNTLDC"></lxml:column>
-        </lxml:entry>
-        </lxml:list-entries>
-        </lxml:list>
-        
-        </lxml:lists>
-        
-        </lxml:data>
-        
+           <lxml:server-instructions>
+              <lxml:client-charset></lxml:client-charset>
+              <lxml:cookies>
+                 <lxml:cookie name="STDSESSID">
+                    <lxml:value field-name="STDSESSID"></lxml:value>
+                    <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
+                    <lxml:domain></lxml:domain>
+                    <lxml:path>/; HttpOnly</lxml:path>
+                    <lxml:secure></lxml:secure>
+                 </lxml:cookie>
+                 <lxml:cookie name="STDWEBUSR">
+                    <lxml:value field-name="STDWEBUSR"></lxml:value>
+                    <lxml:expires field-name=""></lxml:expires>
+                    <lxml:domain field-name=""></lxml:domain>
+                    <lxml:path field-name=""></lxml:path>
+                    <lxml:secure field-name=""></lxml:secure>
+                 </lxml:cookie>
+              </lxml:cookies>
+              <lxml:ssi></lxml:ssi>
+           </lxml:server-instructions>
+           <lxml:context>
+              <lxml:user-id>
+              </lxml:user-id>
+              <lxml:webapplication>ADMSECUR</lxml:webapplication>
+              <lxml:webapplication-title>Security Administration</lxml:webapplication-title>
+              <lxml:webroutine>get_secur</lxml:webroutine>
+              <lxml:webroutine-title></lxml:webroutine-title>
+              <lxml:service-name></lxml:service-name>
+              <lxml:partition>CDV</lxml:partition>
+              <lxml:language iso-lang="en">ENG</lxml:language>
+              <lxml:dec-separator>.</lxml:dec-separator>
+              <lxml:images-path>/images</lxml:images-path>
+              <lxml:action-request>/cgi-bin/lansaweb</lxml:action-request>
+              <lxml:dev-resources-path>file://C:/PROGRA~2/STANTO~1/LANSA/WAMEditor/Resources</lxml:dev-resources-path></lxml:context>
+           <lxml:options>
+              <lxml:option name="DBCS" shift-chars="true">false</lxml:option>
+              <lxml:option name="align-right">true</lxml:option>
+              <lxml:option name="check-numeric">false</lxml:option>
+              <lxml:option name="debug"/>
+              <lxml:option name="trace"/>
+              <lxml:option name="task"/>
+           </lxml:options>
+           <lxml:variables/>
+           <lxml:messages></lxml:messages>
+           </lxml:data>
 
       Designs:
       - Language:           ENG
@@ -1964,29 +1602,28 @@
                                <xsl:attribute name="style">
                                   padding-left:<xsl:value-of select="$LW3CINDT"/>px;
                                </xsl:attribute>
-                               <xsl:call-template name="std_checkbox">
-                                  <xsl:with-param name="disabled" select="key('field-value', 'W_ADMUSR') = 'Y'"/>
-                                  <xsl:with-param name="offcode" select="''"/>
-                                  <xsl:with-param name="oncode" select="'Y'"/>
-                                  <xsl:with-param name="caption" select="$LW3MNUNME"/>
-                                  <xsl:with-param name="name" select="$W_FLGVAL/@id"/>
-                                  <xsl:with-param name="value" select="$W_FLGVAL"/>
-                                  <xsl:with-param name="display_mode" select="'input'"/>
-                                  <!-- <xsl:with-param name="reentryfield" select="?" /> -->
-                                  <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
-                                  <!-- <xsl:with-param name="hide_if" select="?" /> -->
-                                  <!-- <xsl:with-param name="formname" select="?" /> -->
-                                  <!-- <xsl:with-param name="on_click_wamname" select="?" /> -->
-                                  <!-- <xsl:with-param name="on_click_wrname" select="?" /> -->
-                                  <!-- <xsl:with-param name="protocol" select="?" /> -->
-                                  <!-- <xsl:with-param name="target_window_name" select="?" /> -->
-                                  <!-- <xsl:with-param name="alignment" select="?" /> -->
-                                  <!-- <xsl:with-param name="pos_absolute" select="?" /> -->
-                                  <!-- <xsl:with-param name="class" select="?" /> -->
-                                  <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
-                                  <!-- <xsl:with-param name="text_class" select="?" /> -->
-                                  <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                               <label>
+                                  <input type="checkbox" id="{$W_FLGVAL/@id}" value="Y" name="{$W_FLGVAL/@id}">
+                                     <xsl:if test="$W_FLGVAL = 'Y'">
+                                        <xsl:attribute name="checked">checked</xsl:attribute>
+                                     </xsl:if>
+                                     <xsl:if test="key('field-value', 'W_ADMUSR') = 'Y'">
+                                        <xsl:attribute name="disabled">disabled</xsl:attribute>
+                                     </xsl:if>
+                                  </input>
+                                  <xsl:value-of select="$LW3MNUNME"/>
+                               </label>
+                               <!-- <xsl:call-template name="std_checkbox">
+                                  <xsl:with-param name="disabled"
+                                                  select="key('field-value', 'W_ADMUSR') = 'Y'" />
+                                  <xsl:with-param name="offcode" select="''" />
+                                  <xsl:with-param name="oncode" select="'Y'" />
+                                  <xsl:with-param name="caption" select="$LW3MNUNME" />
+                                  <xsl:with-param name="name" select="$W_FLGVAL/@id" />
+                                  <xsl:with-param name="value" select="$W_FLGVAL" />
+                                  <xsl:with-param name="display_mode" select="'input'" />
                                </xsl:call-template>
+           -->
                                <input type="hidden" name="{$LW3MNUNME/@id}" value="{$LW3MNUNME}"/>
                                <input type="hidden" name="{$LW3MNUID/@id}" value="{$LW3MNUID}"/>
                                <input type="hidden" name="{$LW3CINDT/@id}" value="{$LW3CINDT}"/>
@@ -2015,29 +1652,27 @@
                                <xsl:attribute name="style">
                                   padding-left:<xsl:value-of select="$LW3CINDT"/>px;
                                </xsl:attribute>
-                               <xsl:call-template name="std_checkbox">
-                                  <xsl:with-param name="disabled" select="key('field-value', 'W_ADMUSR') = 'Y'"/>
-                                  <xsl:with-param name="offcode" select="''"/>
-                                  <xsl:with-param name="oncode" select="'Y'"/>
-                                  <xsl:with-param name="caption" select="$LW3MNUNME"/>
-                                  <xsl:with-param name="name" select="$W_FLGVAL/@id"/>
-                                  <xsl:with-param name="value" select="$W_FLGVAL"/>
-                                  <xsl:with-param name="display_mode" select="'input'"/>
-                                  <!-- <xsl:with-param name="reentryfield" select="?" /> -->
-                                  <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
-                                  <!-- <xsl:with-param name="hide_if" select="?" /> -->
-                                  <!-- <xsl:with-param name="formname" select="?" /> -->
-                                  <!-- <xsl:with-param name="on_click_wamname" select="?" /> -->
-                                  <!-- <xsl:with-param name="on_click_wrname" select="?" /> -->
-                                  <!-- <xsl:with-param name="protocol" select="?" /> -->
-                                  <!-- <xsl:with-param name="target_window_name" select="?" /> -->
-                                  <!-- <xsl:with-param name="alignment" select="?" /> -->
-                                  <!-- <xsl:with-param name="pos_absolute" select="?" /> -->
-                                  <!-- <xsl:with-param name="class" select="?" /> -->
-                                  <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
-                                  <!-- <xsl:with-param name="text_class" select="?" /> -->
-                                  <!-- <xsl:with-param name="tab_index" select="?" /> -->
-                               </xsl:call-template>
+                               <label>
+                                  <input type="checkbox" id="{$W_FLGVAL/@id}" value="Y" name="{$W_FLGVAL/@id}">
+                                     <xsl:if test="$W_FLGVAL = 'Y'">
+                                        <xsl:attribute name="checked">checked</xsl:attribute>
+                                     </xsl:if>
+                                     <xsl:if test="key('field-value', 'W_ADMUSR') = 'Y'">
+                                        <xsl:attribute name="disabled">disabled</xsl:attribute>
+                                     </xsl:if>
+                                  </input>
+                                  <xsl:value-of select="$LW3MNUNME"/>
+                               </label>
+                               <!-- <xsl:call-template name="std_checkbox">
+                                  <xsl:with-param name="disabled"
+                                                  select="key('field-value', 'W_ADMUSR') = 'Y'" />
+                                  <xsl:with-param name="offcode" select="''" />
+                                  <xsl:with-param name="oncode" select="'Y'" />
+                                  <xsl:with-param name="caption" select="$LW3MNUNME" />
+                                  <xsl:with-param name="name" select="$W_FLGVAL/@id" />
+                                  <xsl:with-param name="value" select="$W_FLGVAL" />
+                                  <xsl:with-param name="display_mode" select="'input'" />
+                               </xsl:call-template> -->
                                <input type="hidden" name="{$LW3MNUNME/@id}" value="{$LW3MNUNME}"/>
                                <input type="hidden" name="{$LW3MNUID/@id}" value="{$LW3MNUID}"/>
                                <input type="hidden" name="{$LW3CINDT/@id}" value="{$LW3CINDT}"/>
@@ -2057,17 +1692,20 @@
         
         <!-- WAM       : ADMSECUR - Security Administration
              Webroutine: wrmain - 
-             Timestamp : 2014-12-30T10:16:24-06:00 -->
+             Timestamp : 2025-08-19T10:31:58 -->
         <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
            <lxml:server-instructions>
               <lxml:client-charset></lxml:client-charset>
-              <lxml:cookies><lxml:cookie name="STDSESSID"><lxml:value field-name="STDSESSID"></lxml:value>
+              <lxml:cookies>
+                 <lxml:cookie name="STDSESSID">
+                    <lxml:value field-name="STDSESSID"></lxml:value>
                     <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
                     <lxml:domain></lxml:domain>
                     <lxml:path>/; HttpOnly</lxml:path>
                     <lxml:secure></lxml:secure>
                  </lxml:cookie>
-                 <lxml:cookie name="STDWEBUSR"><lxml:value field-name="STDWEBUSR"></lxml:value>
+                 <lxml:cookie name="STDWEBUSR">
+                    <lxml:value field-name="STDWEBUSR"></lxml:value>
                     <lxml:expires field-name=""></lxml:expires>
                     <lxml:domain field-name=""></lxml:domain>
                     <lxml:path field-name=""></lxml:path>
@@ -2084,14 +1722,14 @@
               <lxml:webroutine>wrmain</lxml:webroutine>
               <lxml:webroutine-title></lxml:webroutine-title>
               <lxml:service-name></lxml:service-name>
-              <lxml:partition>CML</lxml:partition>
+              <lxml:partition>CDV</lxml:partition>
               <lxml:language iso-lang="en">ENG</lxml:language>
               <lxml:dec-separator>.</lxml:dec-separator>
               <lxml:images-path>/images</lxml:images-path>
               <lxml:action-request>/cgi-bin/lansaweb</lxml:action-request>
-              <lxml:dev-resources-path>file://C:/PROGRA~2/LANSA/LANSA/WAMEditor/Resources</lxml:dev-resources-path></lxml:context>
+              <lxml:dev-resources-path>file://C:/PROGRA~2/STANTO~1/LANSA/WAMEditor/Resources</lxml:dev-resources-path></lxml:context>
            <lxml:options>
-              <lxml:option name="DBCS">false</lxml:option>
+              <lxml:option name="DBCS" shift-chars="true">false</lxml:option>
               <lxml:option name="align-right">true</lxml:option>
               <lxml:option name="check-numeric">false</lxml:option>
               <lxml:option name="debug"/>

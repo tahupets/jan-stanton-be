@@ -1,0 +1,301 @@
+﻿Function:
+  Enabled For RDMLX:  Yes
+
+  Source: |
+    * =======================================================
+    * Process .......: LW3INIT
+    * Function ......: SITEMPX
+    * Created by ....: CETMJS
+    * Created on ....: 02/12/2012 at 14:08:14
+    * Description ...: Generate XML or Online site map
+    * Exchange in....:
+    * ..Modes........: #LW3MAPMDE X = Generate XML site map
+    * ...............:            O = Generate online site map
+    * ..Store front..: #LW3SFID
+    * Exchange out...:
+    * ..XML location.: #LW3MAPLOC
+    * =======================================================
+    Function Options(*DIRECT) Rcv_List(#MAPURLS)
+    * =======================================================
+    * Working fields, lists and groups
+    * =======================================================
+    *
+    Override Field(#LW3CINDT) Length(5) Decimals(0)
+    Override Field(#LW3CORD) Length(5) Decimals(0)
+    
+    Define Field(#w_loopf) Type(*CHAR) Length(1)
+    Define Field(#w_dirty) Type(*CHAR) Length(1)
+    Define Field(#w_count) Reffld(#listcount)
+    Define Field(#w_switch) Type(*DEC) Length(1) Decimals(0)
+    
+    Define Field(#w_menuid) Reffld(#lw3catid)
+    Define Field(#w_first) Type(*CHAR) Length(1)
+    Define Field(#w_indt) Reffld(#LW3CINDT)
+    
+    Define Field(#W_INDENT) Type(*DEC) Length(4) Decimals(0)
+    Define Field(#W_CATPOS) Reffld(#LW3NSHOW)
+    Define Field(#W_CORD) Reffld(#LW3CORD)
+    
+    * lw3c01
+    Group_By Name(#XG_C01) Fields(#LW3CATID #LW3CATNAM #LW3CATPRI #LW3CATEND #LW3PCTYP #lw3caturl #LW3CATORD)
+    
+    Def_List Name(#MAPURLS) Fields((#LW3URL *HIDE) (#LW3PAGNM1 *OUT) (#W_INDENT *hide)) Type(*WORKING) Entrys(*MAX)
+    
+    Def_List Name(#catlist) Fields(#LW3SFID #LW3CATID #LW3CATNAM #LW3CINDT #LW3CATPRI #LW3CATEND #LW3PCTYP #LW3NSHOW #LW3URL #W_CATPOS #w_dirty) Type(*WORKING) Entrys(*MAX)
+    
+    * =======================================================
+    * Program Mainline : SITEMPX
+    * =======================================================
+    
+    * clear list
+    Clr_List Named(#MAPURLS)
+    #STD_FLAG := *NULL
+    #LW3LNGCOD := *LANGUAGE
+    
+    Fetch Fields(#LW3DOMAIN) From_File(LW3SFRNT) With_Key(#LW3SFID) Io_Error(*NEXT) Val_Error(*NEXT)
+    #hosturl := #LW3DOMAIN
+    
+    Select Fields(#LW3URL #LW3PAGNM1 #LW3LEVEL #LW3STATIC) From_File(LW3PAGMAP1) Where('#LW3LNGCOD *EQ *LANGUAGE') With_Key(#LW3SFID)
+    
+    If ('#LW3STATIC *EQ Y')
+    * Static pages are not associated with a WAM
+    #LW3URL := 'http://' + #hosturl.lowercase + '/' + 'images/' + *language + #LW3URL
+    Else
+    #LW3URL := 'http://' + #hosturl.lowercase + '/' + *language + #LW3URL
+    Endif
+    
+    * Indent the link based on level
+    If ('#LW3LEVEL *NE 0')
+    #W_INDENT := 25 * #LW3LEVEL
+    Else
+    #W_INDENT := 0
+    Endif
+    Add_Entry To_List(#MAPURLS)
+    
+    Endselect
+    
+    Fetch Fields(#LW3VARNAM) From_File(LW3MVRLUP) With_Key('LAYOUT' 'COMMON' 'LBL_CATEGORIES') Io_Error(*NEXT) Val_Error(*NEXT)
+    #LW3VARTXT := ''
+    Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key(#LW3VARNAM *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If ('#LW3VARTXT *NE *BLANK')
+    #LW3PAGNM1 := #LW3VARTXT
+    Else
+    #LW3PAGNM1 := 'CATEGORIES'
+    Endif
+    
+    #W_INDENT := 0
+    #LW3URL := 'HOME'
+    #LW3URL := 'http://' + #hosturl.lowercase + '/' + *language + '/' + #LW3URL
+    Add_Entry To_List(#MAPURLS)
+    
+    Execute Subroutine(bld_cats)
+    
+    * Build site map menu
+    Selectlist Named(#catlist)
+    * Indent the link based on level
+    If ('#LW3CATPRI *EQ Y')
+    #W_INDENT := 25
+    Else
+    #W_INDENT := 25 + (#LW3CINDT * 25)
+    Endif
+    #LW3PAGNM1 := #LW3CATNAM
+    Add_Entry To_List(#MAPURLS)
+    Endselect
+    
+    * Include items in site map if variable set to Yes
+    #lw3svvalp := *BLANK
+    Fetch Fields(#lw3svvalp) From_File(lw3sys) With_Key('SITEMAP_ITEMS' 'ENG') Io_Error(*NEXT) Val_Error(*NEXT)
+    If ('#lw3svvalp *EQ Y')
+    
+    Fetch Fields(#LW3VARNAM) From_File(LW3MVRLUP) With_Key('LAYOUT' 'COMMON' 'LBL_PRODUCTS') Io_Error(*NEXT) Val_Error(*NEXT)
+    #LW3VARTXT := ''
+    Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key(#LW3VARNAM *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    If ('#LW3VARTXT *NE *BLANK')
+    #LW3PAGNM1 := #LW3VARTXT
+    Else
+    #LW3PAGNM1 := 'PRODUCTS'
+    Endif
+    
+    #W_INDENT := 0
+    #LW3URL := 'HOME/'
+    #LW3URL := 'http://' + #hosturl.lowercase + '/' + *language + '/' + #LW3URL
+    Add_Entry To_List(#MAPURLS)
+    Execute Subroutine(bld_items)
+    Endif
+    
+    If ('#LW3MAPMDE *EQ X')
+    * Generate the XML site map
+    Execute Subroutine(xml_map)
+    Exchange Fields(#WKRETCDE #LW3MAPLOC)
+    Endif
+    
+    Return
+    
+    
+    * =================================================================================
+    * Build category links in site map
+    Subroutine Name(bld_cats)
+    
+    #w_loopf := N
+    #LW3LNGID := *LANGUAGE
+    #LW3CORD := 0
+    #LW3CINDT := 0
+    
+    Select Fields(#XG_C01) From_File(LW3C01L1) With_Key(#LW3SFID 'CAT') Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    * Get description in current language
+    #FXSFID := #LW3SFID
+    #FXCATID := #LW3CATID
+    Execute Subroutine(cat_trans)
+    
+    If Cond(#lw3catend *NE Y)
+    Execute Subroutine(rewrite1) With_Parms(CATEGORY)
+    Else
+    Execute Subroutine(rewrite1) With_Parms(PRODUCTLIST)
+    Endif
+    
+    Check_For In_File(LW3C02) With_Key(#LW3SFID #LW3CATID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    #w_dirty := Y
+    #w_loopf := Y
+    Else
+    #w_dirty := N
+    Endif
+    
+    Add_Entry To_List(#catlist)
+    Endselect
+    
+    Dowhile Cond(#w_loopf = Y)
+    #w_loopf := N
+    #LW3CORD := 0
+    
+    Selectlist Named(#catlist)
+    #LW3CORD += 1
+    If Cond(#w_dirty = Y)
+    #w_dirty := N
+    Upd_Entry In_List(#catlist)
+    #LW3CINDT += 1
+    #w_count := 0
+    
+    Select Fields(#LW3CATSUB) From_File(LW3C02L1) With_Key(#LW3SFID #lw3catid) Io_Error(*NEXT) Val_Error(*NEXT)
+    #lw3catid := #LW3CATSUB
+    
+    Fetch Fields(#LW3CATNAM #LW3CATEND #LW3CATPRI #LW3CATURL) From_File(LW3C01) With_Key(#LW3SFID #LW3CATSUB) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*OKAY)
+    Continue
+    Endif
+    
+    Check_For In_File(LW3C02) With_Key(#LW3SFID #LW3CATID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is(*EQUALKEY)
+    #w_dirty := Y
+    #w_loopf := Y
+    Else
+    #w_dirty := N
+    Endif
+    
+    Fetch Fields(#LW3CATNAM) From_File(LW3C01ML) With_Key(#LW3SFID #LW3CATID #LW3LNGID) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    If Cond(#lw3catend ¬= Y)
+    Execute Subroutine(rewrite1) With_Parms(CATEGORY)
+    Else
+    Execute Subroutine(rewrite1) With_Parms(PRODUCTLIST)
+    Endif
+    
+    Add_Entry To_List(#catlist) After(#LW3CORD)
+    #LW3CORD += 1
+    #w_count += 1
+    Endselect
+    
+    #LW3CINDT -= 1
+    #LW3CORD -= #w_count
+    Endif
+    Endselect
+    Endwhile
+    Endroutine
+    
+    * Build item links in site map
+    Subroutine Name(bld_items)
+    
+    #W_INDENT := 25
+    
+    Select Fields(#LW3ITEMCD) From_File(LW3C03) With_Key(#LW3SFID) Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    #LW3CATURL := #LW3ITEMCD
+    Execute Subroutine(rewrite1) With_Parms(PRODUCT)
+    #LW3PAGNM1 := #LW3ITEMCD
+    Add_Entry To_List(#MAPURLS)
+    Endselect
+    
+    Endroutine
+    
+    * Include language in url for rewrite rule
+    Subroutine Name(rewrite1) Parms(#RWURLKEY)
+    #LW3URL := 'http://' + #hosturl.lowercase + '/' + *language + '/' + #RWURLKEY.trim + '/' + #LW3CATURL.trim
+    Endroutine
+    
+    Subroutine Name(cat_trans)
+    
+    * In: #FXSFID #FXCATID
+    * Out: #LW3CATNAM #LW3CATIMG #LW3CATSNM
+    #LW3LNGCOD := *LANGUAGE
+    
+    If (#FXCATID *NE *zero)
+    Fetch Fields(#LW3CATNAM #LW3CATIMG #LW3CATSNM) From_File(LW3C01ML) With_Key(#FXSFID #FXCATID *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    Endif
+    Endroutine
+    
+    Subroutine Name(xml_map)
+    * Generate XML site map
+    
+    Define Field(#W_TODAY) Type(*DATE) Length(10)
+    
+    Fetch Fields(#lw3svvalp) From_File(lw3sys) With_Key('SITEMAP_XML' 'ENG') Io_Error(*NEXT) Val_Error(*NEXT)
+    
+    Use Builtin(STM_FILE_OPEN) With_Args(#LW3SVVALP WRITE A) To_Get(#FXSTMFNUM #WKRETCDE)
+    #LW3MAPLOC := #LW3SVVALP
+    If ('#WKRETCDE *NE OK')
+    Return
+    Endif
+    
+    #W_TODAY := #W_TODAY.Now
+    
+    * XML site map required declarations
+    #LW3VARTXT := '<?xml version="1.0" encoding="UTF-8" ?>'
+    Use Builtin(STM_FILE_WRITE) With_Args(#FXSTMFNUM #LW3VARTXT)
+    If ('#WKRETCDE *NE OK')
+    Return
+    Endif
+    
+    #LW3VARTXT := '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9'
+    
+    Use Builtin(STM_FILE_WRITE) With_Args(#FXSTMFNUM #LW3VARTXT)
+    If ('#WKRETCDE *NE OK')
+    Return
+    Endif
+    
+    #LW3VARTXT := ' http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">'
+    Use Builtin(STM_FILE_WRITE) With_Args(#FXSTMFNUM #LW3VARTXT)
+    If ('#WKRETCDE *NE OK')
+    Return
+    Endif
+    
+    Selectlist Named(#MAPURLS)
+    #LW3VARTXT := '<url><loc>' + #lw3url + '</loc>' + '<lastmod>' + #W_TODAY.asString + '</lastmod>'
+    #LW3VARTXT := #LW3VARTXT + '<changefreq>daily</changefreq><priority>0.5</priority></url>'
+    Use Builtin(STM_FILE_WRITE) With_Args(#FXSTMFNUM #LW3VARTXT) To_Get(#WKRETCDE)
+    If ('#WKRETCDE *NE OK')
+    Return
+    Endif
+    Endselect
+    
+    #LW3VARTXT := '</urlset>'
+    Use Builtin(STM_FILE_WRITE) With_Args(#FXSTMFNUM #LW3VARTXT) To_Get(#WKRETCDE)
+    
+    Use Builtin(STM_FILE_WRITE_CTL) With_Args(#FXSTMFNUM)
+    Use Builtin(STM_FILE_WRITE_CTL) With_Args(#FXSTMFNUM)
+    Use Builtin(STM_FILE_CLOSE) With_Args(#FXSTMFNUM)
+    
+    * Clear the list since this is not online.
+    Clr_List Named(#MAPURLS)
+    Endroutine
+    

@@ -170,8 +170,8 @@
     Define Field(#W_SFBTN) Reffld(#STDRENTRY) Desc('Hide/Show Maintain store front button')
     
     * get the security sequence for store front menu item
-    #LW3SECSEQ := *zero
-    Select Fields(#LW3SECSEQ) From_File(LW3MENU01) Where(#LW3MNUPGM *EQ 'WMANSF') With_Key(99) Io_Error(*NEXT) Val_Error(*NEXT)
+    #LW3SECSEQ #LW3MNUID := *zero
+    Select Fields(#LW3MNUID #LW3SECSEQ) From_File(LW3MENU01) Where(#LW3MNUPGM *EQ 'WMANSF') With_Key(99) Io_Error(*NEXT) Val_Error(*NEXT)
     Leave
     Endselect
     
@@ -189,11 +189,19 @@
     #rl_webusr := #lw3webusr
     Endif
     
-    Fetch Fields(#LW3VARFLD) From_File(LW3SECURA) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
-    If (#LW3VARFLD.Substring( #LW3SECSEQ 1 ) = Y)
+    #LW3MNPRAF := *BLANKS
+    
+    Fetch Fields(#LW3MNPRAF) From_File(LW3MNUPRM) With_Key(99 #rl_webusr #LW3MNUID) Io_Error(*NEXT) Val_Error(*NEXT)
+    If Cond(#LW3MNPRAF = 'Y')
     * show button
     #W_SFBTN := S
     Endif
+    
+    * * * Fetch Fields(#LW3VARFLD) From_File(LW3SECURA) With_Key(#rl_webusr) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * If (#LW3VARFLD.Substring( #LW3SECSEQ 1 ) = Y)
+    * * * * show button
+    * * * #W_SFBTN := S
+    * * * Endif
     Endif
     Endroutine
     
@@ -233,33 +241,38 @@
       XML: |
         <?xml version="1.0" encoding="UTF-8"?>
         
-        <!-- WAM       : WAAPPSEL - ?
+        <!-- WAM       : WAAPPSEL - Administration Application Selection
              Webroutine: appsel - LANSA Commerce Edition Admin Site
-             Timestamp : 2015-04-14T02:15:03-05:00 -->
+             Timestamp : 2025-08-19T09:25:15 -->
         
         <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
         
         <lxml:server-instructions>
         <lxml:client-charset></lxml:client-charset>
-        <lxml:cookies><lxml:cookie name="STDADMSES"><lxml:value field-name="STDADMSES"></lxml:value>
+        <lxml:cookies>
+        <lxml:cookie name="STDADMSES">
+        <lxml:value field-name="STDADMSES"></lxml:value>
         <lxml:expires field-name=""></lxml:expires>
         <lxml:domain></lxml:domain>
         <lxml:path></lxml:path>
         <lxml:secure></lxml:secure>
         </lxml:cookie>
-        <lxml:cookie name="STDADMUSR"><lxml:value field-name="STDADMUSR"></lxml:value>
+        <lxml:cookie name="STDADMUSR">
+        <lxml:value field-name="STDADMUSR"></lxml:value>
         <lxml:expires field-name=""></lxml:expires>
         <lxml:domain field-name=""></lxml:domain>
         <lxml:path field-name=""></lxml:path>
         <lxml:secure field-name=""></lxml:secure>
         </lxml:cookie>
-        <lxml:cookie name="STDSESSID"><lxml:value field-name="STDSESSID"></lxml:value>
+        <lxml:cookie name="STDSESSID">
+        <lxml:value field-name="STDSESSID"></lxml:value>
         <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
         <lxml:domain></lxml:domain>
         <lxml:path>/; HttpOnly</lxml:path>
         <lxml:secure></lxml:secure>
         </lxml:cookie>
-        <lxml:cookie name="STDWEBUSR"><lxml:value field-name="STDWEBUSR"></lxml:value>
+        <lxml:cookie name="STDWEBUSR">
+        <lxml:value field-name="STDWEBUSR"></lxml:value>
         <lxml:expires field-name=""></lxml:expires>
         <lxml:domain field-name=""></lxml:domain>
         <lxml:path field-name=""></lxml:path>
@@ -272,11 +285,11 @@
         <lxml:context>
         <lxml:user-id>          </lxml:user-id>
         <lxml:webapplication>WAAPPSEL</lxml:webapplication>
-        <lxml:webapplication-title>?</lxml:webapplication-title>
+        <lxml:webapplication-title>Administration Application Selection</lxml:webapplication-title>
         <lxml:webroutine>appsel</lxml:webroutine>
         <lxml:webroutine-title>LANSA Commerce Edition Admin Site</lxml:webroutine-title>
         <lxml:service-name></lxml:service-name>
-        <lxml:partition>CML</lxml:partition>
+        <lxml:partition>CDV</lxml:partition>
         <lxml:language iso-lang="en">ENG</lxml:language>
         <lxml:dec-separator>.</lxml:dec-separator>
         <lxml:images-path>/images</lxml:images-path>
@@ -284,7 +297,7 @@
         </lxml:context>
         
         <lxml:options>
-        <lxml:option name="DBCS">false</lxml:option>
+        <lxml:option name="DBCS" shift-chars="true">false</lxml:option>
         <lxml:option name="align-right">true</lxml:option>
         <lxml:option name="check-numeric">false</lxml:option>
         <lxml:option name="debug" />

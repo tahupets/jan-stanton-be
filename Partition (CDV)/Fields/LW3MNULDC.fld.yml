@@ -1,0 +1,30 @@
+﻿Field:
+  Name:               LW3MNULDC
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Menu Long Description"
+      Label:              "LONG DESC"
+      Heading1:           "Menu"
+      Heading2:           "Long"
+      Heading3:           "Description"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Height(23) Marginleft(187) Usepicklist(False) Width(693)
+    
+    End_Com
+    
+    End_Com

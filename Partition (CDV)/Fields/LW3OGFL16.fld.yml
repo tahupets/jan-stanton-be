@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3OGFL16
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "component"
+      Label:              "component"
+      Heading1:           "Component"
+      Heading2:           " "
+      Heading3:           " "

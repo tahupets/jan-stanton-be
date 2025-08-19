@@ -1,0 +1,1186 @@
+﻿Wam:
+  Name:               WSELCUS2
+  Enabled For RDMLX:  Yes
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Select Multiple Customers"
+
+  Source: |
+    * ==================================================
+    * WAM ........: WSELCUS2
+    * Created by..: LANSAOWNR
+    * Created on..: 03/07/2010
+    * Description : Select Multiple customers
+    * CE Version  : Version 4.0
+    * ==================================================
+    * ============= AMENDMENTS =========================
+    * Reference...: xxxxxxxxxx
+    * Changed by..: xxxxxxxxxx
+    * Changed on..: 99/99/99
+    * Description : xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    * .             xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    * ==================================================
+    Function Options(*DIRECT)
+    
+    Begin_Com Role(*EXTENDS #PRIM_WAM) Sessiongroupname('CEADM') Sessiontimeout(-1)
+    
+    Define Field(#S_SPNMDS) Reffld(#LW3CUSNAM)
+    Define Field(#FULLPERCT) Reffld(#LW3CUSNAM)
+    Define Field(#VDESC) Reffld(#LW3CUSNAM)
+    Define Field(#W_SEL) Type(*CHAR) Length(1)
+    Define Field(#WW3WEBUSR) Reffld(#LW3WEBUSR)
+    Define Field(#W_ASSC01) Reffld(#LW3ASSC01)
+    Define Field(#WK_WEBUSR) Reffld(#LW3WEBUSR)
+    Define Field(#WK_CODE) Type(*CHAR) Length(1) Desc('Insert has been made (Y). No insert(N)')
+    
+    Group_By Name(#gpInsert) Fields(#LW3WEBUSR #LW3ASSC01 #LW3ASCSTS #Lw3custyp)
+    
+    Def_List Name(#LST_CUST) Fields((#W_ASSC01 *hide) (#LW3WEBC01 *hide) (#LW3CUSNAM *hide) (#LW3CHCITY *hide) (#LW3HSTATE *hide) (#LW3HPSTAL *hide) (#LW3HCNTRY *hide) #W_SEL) Counter(#LW3COUNT) Type(*WORKING) Entrys(*MAX)
+    
+    * customer API list
+    Def_List Name(#LW3CUSL) Fields(#LW3WEBC01 #LW3CUSNAM #LW3HADDR1 #LW3HADDR2 #LW3CHCITY #LW3HSTATE #LW3HPSTAL #LW3HCNTRY) Type(*WORKING) Entrys(200)
+    
+    * Customer Type DD
+    Def_List Name(#lst_typ) Fields((#LW3CODE *hide) (#LW3CDES *hide)) Type(*WORKING)
+    
+    Web_Map For(*BOTH) Fields((#stdrentry *hide) (#STDROWNUM *hide) (#LW3WEBUSR *hide) #WW3WEBUSR)
+    * multilingual variable list
+    Def_List Name(#ls_mlnvar) Fields(#FXVARNAM #FXVARTXT) Type(*WORKING) Entrys(*MAX)
+    Web_Map For(*OUTPUT) Fields((#ls_mlnvar *private))
+    
+    Web_Map For(*BOTH) Fields(#LW3WEBUSR #LW3SFID)
+    
+    Web_Map For(*BOTH) Fields((#WK_CODE *HIDDEN))
+    
+    Webroutine Name(Get_Cust) Desc('Select Multiple Customers') Onentry(*SESSIONSTATUS_ACTIVE)
+    Web_Map For(*BOTH) Fields(#lw3custyp #S_SPNMDS)
+    Web_Map For(*BOTH) Fields(#LST_CUST (#lst_typ *private))
+    Web_Map For(*OUTPUT) Fields((#LW3CDES *out))
+    
+    Execute Subroutine(Init)
+    * get multi-lingual info
+    Execute Subroutine(multi) With_Parms('GET_CUST')
+    
+    Case Of_Field(#STDRENTRY)
+    
+    When Value_Is(= *BLANKS)
+    * First Time in
+    
+    When Value_Is(= S)
+    * Search
+    Execute Subroutine(bld_list)
+    
+    When Value_Is(= R)
+    * Reset
+    #S_SPNMDS := *blanks
+    Clr_List Named(#LST_CUST)
+    
+    When Value_Is(= X)
+    * Submit
+    
+    * Set to Active
+    #LW3ASCSTS := A
+    
+    Selectlist Named(#LST_CUST) Where('#W_SEL = Y')
+    #LW3ASSC01 := #W_ASSC01
+    Check_For In_File(LW3USRA1) With_Key(#lw3webusr #LW3ASSC01) Io_Error(*NEXT) Val_Error(*NEXT)
+    If_Status Is_Not(*EQUALKEY)
+    Insert Fields(#gpInsert) To_File(LW3USRA1) Io_Error(*NEXT) Val_Error(*NEXT)
+    #WK_CODE := 'Y'
+    * MESSAGE MSGTXT('Customer ' + #LW3ASSC01 + ' added successfully')
+    * multilingual message
+    Substring Field(#LW3ASSC01) Into_Field(#LW3MSGSUB)
+    Execute Subroutine(srMLMSG) With_Parms('MSG_LW32193')
+    Else
+    * MESSAGE MSGTXT('Customer ' + #LW3ASSC01 + ' already exists')
+    Substring Field(#LW3ASSC01) Into_Field(#LW3MSGSUB)
+    Execute Subroutine(srMLMSG) With_Parms('MSG_LW32194')
+    Endif
+    * Reset Selector
+    #W_SEL := *BLANKS
+    Upd_Entry In_List(#LST_CUST)
+    Endselect
+    Endcase
+    
+    #LW3WEBUSR := #WK_WEBUSR
+    Endroutine
+    
+    * =======================================================
+    * Subroutine ....: Init
+    * Description....: Init Subroutine
+    * =======================================================
+    Subroutine Name(Init)
+    #WK_WEBUSR := #LW3WEBUSR
+    #LW3WEBUSR := #WW3WEBUSR
+    
+    *  Load Customer Type DD
+    Execute Subroutine(bld_lstyp)
+    Endroutine
+    
+    * =======================================================
+    * Subroutine ....: bld_list
+    * Description....: Build List of customers
+    * =======================================================
+    Subroutine Name(bld_list)
+    Define Field(#w_sqlstr) Type(*STRING)
+    
+    * Check if search entered
+    If_Null Field(#S_SPNMDS)
+    * MESSAGE MSGTXT('Search criteria is required')
+    * multilingual message
+    Execute Subroutine(srMLMSG) With_Parms('MSG_LW32191')
+    Return
+    Endif
+    
+    Clr_List Named(#LST_CUST)
+    Clr_List Named(#LW3CUSL)
+    
+    If Cond(#LW3CUSTYP *NE GRP)
+    Change Field(#FXDESC) To(#S_SPNMDS)
+    Exchange Fields(#FXDESC)
+    Call Process(*DIRECT) Function(LW3LCUS) If_Error(*NEXT) Pass_Lst(#LW3CUSL)
+    
+    Selectlist Named(#LW3CUSL)
+    #W_ASSC01 := #LW3WEBC01
+    Add_Entry To_List(#LST_CUST)
+    Endselect
+    
+    Else
+    
+    #w_sqlstr := 'LW3LNGCOD = ''' + *LANGUAGE + ''' AND upper(LW3GRPDES) LIKE ''%' + #S_SPNMDS.UpperCase + '%'''
+    
+    * USE BUILTIN(UPPERCASE) WITH_ARGS(#s_spnmds) TO_GET(#s_spnmds)
+    * USE BUILTIN(TCONCAT) WITH_ARGS('%' #s_spnmds '%') TO_GET(#VDESC)
+    
+    * SELECT_SQL FIELDS(#lw3grpnm #lw3grpdes) FROM_FILES((lw3cgrph)) WHERE('upper(LW3GRPDES) LIKE :VDESC') IO_ERROR(*NEXT)
+    Select_Sql Fields(#lw3grpnm #lw3grpdes) From_Files((lw3cgrph)) Where(#w_sqlstr) Io_Error(*NEXT)
+    If Cond('#LW3COUNT *GE 200')
+    * MESSAGE MSGTXT('More than 200 records were retrieved. Please refine your search')
+    * multilingual message
+    Execute Subroutine(srMLMSG) With_Parms('MSG_LW32192')
+    Leave
+    Endif
+    #W_ASSC01 := #lw3grpnm
+    #LW3WEBC01 := *null
+    #LW3CHCITY #LW3HSTATE #LW3HPSTAL #LW3HCNTRY := *blank
+    #LW3CUSNAM := #lw3grpdes
+    
+    Add_Entry To_List(#LST_CUST)
+    Endselect
+    Endif
+    Endroutine
+    
+    * =======================================================
+    * Subroutine ....: bld_lstyp
+    * Description....: Build List of association types
+    * =======================================================
+    Subroutine Name(bld_lstyp)
+    Clr_List Named(#lst_typ)
+    * Add blank Entry
+    Add_Entry To_List(#lst_typ)
+    Select Fields(*ALL) From_File(LW3CODL4) With_Key('CUSTYP' *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    Continue If('#LW3CODE = #')
+    Add_Entry To_List(#lst_typ)
+    Endselect
+    Endroutine
+    
+    * get multilingual information
+    Subroutine Name(multi) Parms((#FXWRTNAM *RECEIVED))
+    #FXWAMNAM := #COM_SELF.Name
+    Exchange Fields(#FXWAMNAM #FXWRTNAM)
+    Call Process(*DIRECT) Function(LW3MLAD) If_Error(*NEXT) Pass_Lst(#ls_mlnvar)
+    Endroutine
+    
+    
+    * multilingual message
+    Subroutine Name(srMLMSG) Parms((#LW3VARNAM *RECEIVED))
+    *
+    #LW3LNGID := *LANGUAGE
+    * #LW3MSGSUB := <substitution data> OR *blank
+    Exchange Fields(#LW3VARNAM #LW3LNGID #LW3MSGSUB)
+    Call Process(*DIRECT) Function(LW3MSG) If_Error(*NEXT)
+    Endroutine
+    
+    End_Com
+
+  Web Routines:
+  - GET_CUST:
+      XML: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        
+        <!-- WAM       : WSELCUS2 - Select Multiple Customers
+             Webroutine: Get_Cust - Select Multiple Customers
+             Timestamp : 2025-08-19T14:11:06 -->
+        
+        <lxml:data xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data">
+        
+        <lxml:server-instructions>
+        <lxml:client-charset></lxml:client-charset>
+        <lxml:cookies>
+                 <lxml:cookie name="STDSESSID">
+                    <lxml:value field-name="STDSESSID"></lxml:value>
+        <lxml:expires field-name="LW3CEXPDT"></lxml:expires>
+        <lxml:domain></lxml:domain>
+        <lxml:path>/; HttpOnly</lxml:path>
+        <lxml:secure></lxml:secure>
+        </lxml:cookie>
+        <lxml:cookie name="STDWEBUSR">
+                    <lxml:value field-name="STDWEBUSR"></lxml:value>
+        <lxml:expires field-name=""></lxml:expires>
+        <lxml:domain field-name=""></lxml:domain>
+        <lxml:path field-name=""></lxml:path>
+        <lxml:secure field-name=""></lxml:secure>
+        </lxml:cookie>
+        </lxml:cookies>
+        <lxml:ssi></lxml:ssi>
+        </lxml:server-instructions>
+        
+        <lxml:context>
+        <lxml:user-id>          </lxml:user-id>
+        <lxml:webapplication>WSELCUS2</lxml:webapplication>
+        <lxml:webapplication-title>Select Multiple Customers</lxml:webapplication-title>
+        <lxml:webroutine>Get_Cust</lxml:webroutine>
+        <lxml:webroutine-title>Select Multiple Customers</lxml:webroutine-title>
+        <lxml:service-name></lxml:service-name>
+        <lxml:partition>CDV</lxml:partition>
+        <lxml:language iso-lang="en">ENG</lxml:language>
+        <lxml:dec-separator>.</lxml:dec-separator>
+        <lxml:images-path>/images</lxml:images-path>
+        <lxml:action-request>/cgi-bin/lansaweb</lxml:action-request>
+        </lxml:context>
+        
+        <lxml:options>
+        <lxml:option name="DBCS" shift-chars="true">false</lxml:option>
+        <lxml:option name="align-right">true</lxml:option>
+        <lxml:option name="check-numeric">false</lxml:option>
+        <lxml:option name="debug" />
+        <lxml:option name="trace" />
+        <lxml:option name="task" />
+        </lxml:options>
+        
+        <lxml:variables />
+        
+        <lxml:messages></lxml:messages>
+        
+        <lxml:fields>
+        <lxml:field name="STDRENTRY">
+        <lxml:caption>
+        <lxml:label>Std *WEBEVENT</lxml:label>
+        <lxml:description>Standard *WEBEVENT template field</lxml:description>
+        <lxml:heading-1>Std *WEBEVENT</lxml:heading-1>
+        <lxml:heading-2>template field</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="STDROWNUM">
+        <lxml:caption>
+        <lxml:label>Std *WEBEVENT</lxml:label>
+        <lxml:description>Standard *WEBEVENT template field</lxml:description>
+        <lxml:heading-1>Std *WEBEVENT</lxml:heading-1>
+        <lxml:heading-2>template field</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="WW3WEBUSR">
+        <lxml:caption>
+        <lxml:label>User Id</lxml:label>
+        <lxml:description>Web User Name</lxml:description>
+        <lxml:heading-1>Web</lxml:heading-1>
+        <lxml:heading-2>User</lxml:heading-2>
+        <lxml:heading-3>Name</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="LW3WEBUSR">
+        <lxml:caption>
+        <lxml:label>User Id</lxml:label>
+        <lxml:description>Web User Name</lxml:description>
+        <lxml:heading-1>Web</lxml:heading-1>
+        <lxml:heading-2>User</lxml:heading-2>
+        <lxml:heading-3>Name</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="LW3SFID">
+        <lxml:caption>
+        <lxml:label>Store Front ID</lxml:label>
+        <lxml:description>Store Front ID</lxml:description>
+        <lxml:heading-1>Store</lxml:heading-1>
+        <lxml:heading-2>Front</lxml:heading-2>
+        <lxml:heading-3>ID</lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="WK_CODE">
+        <lxml:caption>
+        <lxml:label>WK_CODE</lxml:label>
+        <lxml:description>Insert has been made (Y). No insert(N)</lxml:description>
+        <lxml:heading-1>WK_CODE</lxml:heading-1>
+        <lxml:heading-2></lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="LW3CUSTYP">
+        <lxml:caption>
+        <lxml:label>Customer Type</lxml:label>
+        <lxml:description>Customer Type</lxml:description>
+        <lxml:heading-1>Cust</lxml:heading-1>
+        <lxml:heading-2>Type</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="S_SPNMDS">
+        <lxml:caption>
+        <lxml:label>Customer Name</lxml:label>
+        <lxml:description>Customer Name</lxml:description>
+        <lxml:heading-1>Customer Name</lxml:heading-1>
+        <lxml:heading-2> </lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:caption>
+        <lxml:value />
+        </lxml:field>
+        <lxml:field name="LW3CDES">
+        <lxml:caption>
+        <lxml:label>Description</lxml:label>
+        <lxml:description>Code Description</lxml:description>
+        <lxml:heading-1>Code</lxml:heading-1>
+        <lxml:heading-2>Description</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:caption>
+        <lxml:value>aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZaAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxX</lxml:value>
+        </lxml:field>
+        </lxml:fields>
+        
+        <lxml:lists>
+        <lxml:list name="LS_MLNVAR" row-count="5">
+        <lxml:list-header>
+        <lxml:header name="FXVARNAM">
+        <lxml:heading-1>Variable</lxml:heading-1>
+        <lxml:heading-2>Name</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="FXVARTXT">
+        <lxml:heading-1>Variable</lxml:heading-1>
+        <lxml:heading-2>Text</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        </lxml:list-header>
+        <lxml:list-entries>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0001.FXVARNAM"></lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0001.FXVARTXT"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0002.FXVARNAM"></lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0002.FXVARTXT"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0003.FXVARNAM"></lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0003.FXVARTXT"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0004.FXVARNAM"></lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0004.FXVARTXT"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="FXVARNAM" id="LS_MLNVAR.0005.FXVARNAM"></lxml:column>
+        <lxml:column name="FXVARTXT" id="LS_MLNVAR.0005.FXVARTXT"></lxml:column>
+        </lxml:entry>
+        </lxml:list-entries>
+        </lxml:list>
+        
+        <lxml:list name="LST_CUST" row-count="5">
+        <lxml:list-header>
+        <lxml:header name="W_ASSC01">
+        <lxml:heading-1>Customer</lxml:heading-1>
+        <lxml:heading-2>     ID</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3WEBC01">
+        <lxml:heading-1>Customer</lxml:heading-1>
+        <lxml:heading-2>    ID</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3CUSNAM">
+        <lxml:heading-1>Customer Name</lxml:heading-1>
+        <lxml:heading-2> </lxml:heading-2>
+        <lxml:heading-3> </lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3CHCITY">
+        <lxml:heading-1>Customer</lxml:heading-1>
+        <lxml:heading-2>City</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3HSTATE">
+        <lxml:heading-1>Customer</lxml:heading-1>
+        <lxml:heading-2>State/Province</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3HPSTAL">
+        <lxml:heading-1>Customer</lxml:heading-1>
+        <lxml:heading-2>Postal</lxml:heading-2>
+        <lxml:heading-3>Code</lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3HCNTRY">
+        <lxml:heading-1>Customer</lxml:heading-1>
+        <lxml:heading-2>Country</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="W_SEL">
+        <lxml:heading-1>W_SEL</lxml:heading-1>
+        <lxml:heading-2></lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        </lxml:list-header>
+        <lxml:list-entries>
+        <lxml:entry>
+        <lxml:column name="W_ASSC01" id="LST_CUST.0001.W_ASSC01"></lxml:column>
+        <lxml:column name="LW3WEBC01" id="LST_CUST.0001.LW3WEBC01"></lxml:column>
+        <lxml:column name="LW3CUSNAM" id="LST_CUST.0001.LW3CUSNAM"></lxml:column>
+        <lxml:column name="LW3CHCITY" id="LST_CUST.0001.LW3CHCITY"></lxml:column>
+        <lxml:column name="LW3HSTATE" id="LST_CUST.0001.LW3HSTATE"></lxml:column>
+        <lxml:column name="LW3HPSTAL" id="LST_CUST.0001.LW3HPSTAL"></lxml:column>
+        <lxml:column name="LW3HCNTRY" id="LST_CUST.0001.LW3HCNTRY"></lxml:column>
+        <lxml:column name="W_SEL" id="LST_CUST.0001.W_SEL"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="W_ASSC01" id="LST_CUST.0002.W_ASSC01"></lxml:column>
+        <lxml:column name="LW3WEBC01" id="LST_CUST.0002.LW3WEBC01"></lxml:column>
+        <lxml:column name="LW3CUSNAM" id="LST_CUST.0002.LW3CUSNAM"></lxml:column>
+        <lxml:column name="LW3CHCITY" id="LST_CUST.0002.LW3CHCITY"></lxml:column>
+        <lxml:column name="LW3HSTATE" id="LST_CUST.0002.LW3HSTATE"></lxml:column>
+        <lxml:column name="LW3HPSTAL" id="LST_CUST.0002.LW3HPSTAL"></lxml:column>
+        <lxml:column name="LW3HCNTRY" id="LST_CUST.0002.LW3HCNTRY"></lxml:column>
+        <lxml:column name="W_SEL" id="LST_CUST.0002.W_SEL"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="W_ASSC01" id="LST_CUST.0003.W_ASSC01"></lxml:column>
+        <lxml:column name="LW3WEBC01" id="LST_CUST.0003.LW3WEBC01"></lxml:column>
+        <lxml:column name="LW3CUSNAM" id="LST_CUST.0003.LW3CUSNAM"></lxml:column>
+        <lxml:column name="LW3CHCITY" id="LST_CUST.0003.LW3CHCITY"></lxml:column>
+        <lxml:column name="LW3HSTATE" id="LST_CUST.0003.LW3HSTATE"></lxml:column>
+        <lxml:column name="LW3HPSTAL" id="LST_CUST.0003.LW3HPSTAL"></lxml:column>
+        <lxml:column name="LW3HCNTRY" id="LST_CUST.0003.LW3HCNTRY"></lxml:column>
+        <lxml:column name="W_SEL" id="LST_CUST.0003.W_SEL"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="W_ASSC01" id="LST_CUST.0004.W_ASSC01"></lxml:column>
+        <lxml:column name="LW3WEBC01" id="LST_CUST.0004.LW3WEBC01"></lxml:column>
+        <lxml:column name="LW3CUSNAM" id="LST_CUST.0004.LW3CUSNAM"></lxml:column>
+        <lxml:column name="LW3CHCITY" id="LST_CUST.0004.LW3CHCITY"></lxml:column>
+        <lxml:column name="LW3HSTATE" id="LST_CUST.0004.LW3HSTATE"></lxml:column>
+        <lxml:column name="LW3HPSTAL" id="LST_CUST.0004.LW3HPSTAL"></lxml:column>
+        <lxml:column name="LW3HCNTRY" id="LST_CUST.0004.LW3HCNTRY"></lxml:column>
+        <lxml:column name="W_SEL" id="LST_CUST.0004.W_SEL"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="W_ASSC01" id="LST_CUST.0005.W_ASSC01"></lxml:column>
+        <lxml:column name="LW3WEBC01" id="LST_CUST.0005.LW3WEBC01"></lxml:column>
+        <lxml:column name="LW3CUSNAM" id="LST_CUST.0005.LW3CUSNAM"></lxml:column>
+        <lxml:column name="LW3CHCITY" id="LST_CUST.0005.LW3CHCITY"></lxml:column>
+        <lxml:column name="LW3HSTATE" id="LST_CUST.0005.LW3HSTATE"></lxml:column>
+        <lxml:column name="LW3HPSTAL" id="LST_CUST.0005.LW3HPSTAL"></lxml:column>
+        <lxml:column name="LW3HCNTRY" id="LST_CUST.0005.LW3HCNTRY"></lxml:column>
+        <lxml:column name="W_SEL" id="LST_CUST.0005.W_SEL"></lxml:column>
+        </lxml:entry>
+        </lxml:list-entries>
+        </lxml:list>
+        
+        <lxml:list name="LST_TYP" row-count="5">
+        <lxml:list-header>
+        <lxml:header name="LW3CODE">
+        <lxml:heading-1>Code</lxml:heading-1>
+        <lxml:heading-2></lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        <lxml:header name="LW3CDES">
+        <lxml:heading-1>Code</lxml:heading-1>
+        <lxml:heading-2>Description</lxml:heading-2>
+        <lxml:heading-3></lxml:heading-3>
+        </lxml:header>
+        </lxml:list-header>
+        <lxml:list-entries>
+        <lxml:entry>
+        <lxml:column name="LW3CODE" id="LST_TYP.0001.LW3CODE"></lxml:column>
+        <lxml:column name="LW3CDES" id="LST_TYP.0001.LW3CDES"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3CODE" id="LST_TYP.0002.LW3CODE"></lxml:column>
+        <lxml:column name="LW3CDES" id="LST_TYP.0002.LW3CDES"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3CODE" id="LST_TYP.0003.LW3CODE"></lxml:column>
+        <lxml:column name="LW3CDES" id="LST_TYP.0003.LW3CDES"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3CODE" id="LST_TYP.0004.LW3CODE"></lxml:column>
+        <lxml:column name="LW3CDES" id="LST_TYP.0004.LW3CDES"></lxml:column>
+        </lxml:entry>
+        <lxml:entry>
+        <lxml:column name="LW3CODE" id="LST_TYP.0005.LW3CODE"></lxml:column>
+        <lxml:column name="LW3CDES" id="LST_TYP.0005.LW3CDES"></lxml:column>
+        </lxml:entry>
+        </lxml:list-entries>
+        </lxml:list>
+        
+        </lxml:lists>
+        
+        </lxml:data>
+        
+
+      Designs:
+      - Language:           ENG
+        Technology Service: LANSA JQMOBILE
+
+        XSL: |
+          <?xml version="1.0" encoding="UTF-8"?>
+          
+          <!-- WAM       : WSELCUS2 - Select Multiple Customers
+               Webroutine: Get_Cust - Select Multiple Customers
+               Timestamp : 2014-09-23T09:27:29-05:00 -->
+          
+          <xsl:transform version="1.0" exclude-result-prefixes="lxml wd" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+          
+          <xsl:import href="std_keys.xsl" />
+          <xsl:import href="std_variables.xsl" />
+          <xsl:import href="std_hidden.xsl" />
+          <xsl:import href="wselcus2_layout.xsl" />
+          
+          <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8" indent="no" />
+          
+          <xsl:template match="/">
+          <xsl:call-template name="layout" />
+          </xsl:template>
+          
+          <xsl:template match="/lxml:data">
+          <input type="text" id="{$lweb_WRName}_WW3WEBUSR" name="WW3WEBUSR" value="{key('field-value', 'WW3WEBUSR')}" size="10" maxlength="10" class="lstd_Field text" data-lstddatatype="alpha| |10" wd:caption="{key('field-caption', 'WW3WEBUSR')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_LW3WEBUSR" name="LW3WEBUSR" value="{key('field-value', 'LW3WEBUSR')}" size="10" maxlength="10" class="lstd_Field text" data-lstddatatype="alpha| |10" wd:caption="{key('field-caption', 'LW3WEBUSR')/lxml:description}" />
+          <br />
+          <input type="number" id="{$lweb_WRName}_LW3SFID" name="LW3SFID" value="{key('field-value', 'LW3SFID')}" data-lstdformattedvalue="{key('field-value', 'LW3SFID')}" size="5" maxlength="2" class="lstd_Field number" data-lstddatatype="packed|2|0|." wd:caption="{key('field-caption', 'LW3SFID')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_LW3CUSTYP" name="LW3CUSTYP" value="{key('field-value', 'LW3CUSTYP')}" size="3" maxlength="3" class="lstd_Field utext" data-lstddatatype="alpha| |3" wd:caption="{key('field-caption', 'LW3CUSTYP')/lxml:description}" />
+          <br />
+          <input type="text" id="{$lweb_WRName}_S_SPNMDS" name="S_SPNMDS" value="{key('field-value', 'S_SPNMDS')}" size="30" maxlength="30" class="lstd_Field text" data-lstddatatype="alpha| |30" wd:caption="{key('field-caption', 'S_SPNMDS')/lxml:description}" />
+          <br />
+          <xsl:value-of select="key('field-value', 'LW3CDES')" wd:lstddatatype="'alpha| |30'" wd:caption="key('field-caption', 'LW3CDES')/lxml:description" />
+          <br />
+          <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='LST_CUST']" wd:listname="LST_CUST">
+          <xsl:with-param name="class" select="''" />
+          <xsl:with-param name="countSwatch" select="''" />
+          <xsl:with-param name="dividerSwatch" select="''" />
+          <xsl:with-param name="hasSearchFilter" select="false()" />
+          <xsl:with-param name="hideIf" select="false()" />
+          <xsl:with-param name="inset" select="false()" />
+          <xsl:with-param name="searchFilterPlaceholder" select="''" />
+          <xsl:with-param name="searchFilterSwatch" />
+          <xsl:with-param name="splitIcon" select="''" />
+          <xsl:with-param name="splitSwatch" select="''" />
+          <xsl:with-param name="swatch" select="''" />
+          <xsl:with-param name="listItemClass" select="''" />
+          <xsl:with-param name="filterTextColumn" select="''" />
+          </xsl:apply-templates>
+          </xsl:template>
+          
+          <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='LST_CUST']">
+          <xsl:param name="class" select="''" />
+          <xsl:param name="countSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="dividerSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="hasSearchFilter" select="false()" wd:type="std:boolean" />
+          <xsl:param name="hideIf" select="false()" wd:type="std:boolean" />
+          <xsl:param name="inset" select="false()" wd:type="std:boolean" />
+          <xsl:param name="searchFilterPlaceholder" select="''" />
+          <xsl:param name="searchFilterSwatch" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="splitIcon" select="''" wd:type="std:jqm_icon" />
+          <xsl:param name="splitSwatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="swatch" select="''" wd:type="std:jqm_theme_swatch" />
+          <xsl:param name="listItemClass" select="''" />
+          <xsl:param name="filterTextColumn" select="''" />
+          <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='LST_CUST']" />
+          <xsl:if test="not($lweb_design_mode)">
+          <input type="hidden" name="LST_CUST.." value="0" />
+          </xsl:if>
+          <xsl:if test="not($hideIf) or $lweb_design_mode">
+          <ul data-role="listview" id="LST_CUST">
+          <xsl:choose>
+          <xsl:when test="$lweb_design_mode">
+          <xsl:attribute name="class">lstd-design-list <xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+          <xsl:if test="$class != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$class" /></xsl:attribute>
+          </xsl:if>
+          </xsl:otherwise>
+          </xsl:choose>
+          <xsl:if test="$swatch != ''">
+          <xsl:attribute name="data-theme"><xsl:value-of select="$swatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$countSwatch != ''">
+          <xsl:attribute name="data-count-theme"><xsl:value-of select="$countSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$dividerSwatch != ''">
+          <xsl:attribute name="data-divider-theme"><xsl:value-of select="$dividerSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitSwatch != ''">
+          <xsl:attribute name="data-split-theme"><xsl:value-of select="$splitSwatch" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$splitIcon!= ''">
+          <xsl:attribute name="data-split-icon"><xsl:value-of select="$splitIcon" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$inset">
+          <xsl:attribute name="data-inset">true</xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$hasSearchFilter">
+          <xsl:attribute name="data-filter">true</xsl:attribute>
+          <xsl:if test="$searchFilterPlaceholder != ''">
+          <xsl:attribute name="data-filter-placeholder"><xsl:value-of select="$searchFilterPlaceholder" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$searchFilterSwatch != ''">
+          <xsl:attribute name="data-filter-theme"><xsl:value-of select="$searchFilterSwatch" /></xsl:attribute>
+          </xsl:if>
+          </xsl:if>
+          <li data-role="list-divider">
+          <span class="W_SEL">
+          <xsl:for-each select="key('list','LST_CUST')/lxml:list-header/lxml:header[8]/*[.//text()[normalize-space(.)!='']]" wd:edit-as-list="false">
+          <xsl:value-of select="concat(.,' ')" />
+          </xsl:for-each>
+          </span>
+          </li>
+          <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+          <xsl:variable name="W_ASSC01" select="lxml:column[1]" />
+          <xsl:variable name="LW3WEBC01" select="lxml:column[2]" />
+          <xsl:variable name="LW3CUSNAM" select="lxml:column[3]" />
+          <xsl:variable name="LW3CHCITY" select="lxml:column[4]" />
+          <xsl:variable name="LW3HSTATE" select="lxml:column[5]" />
+          <xsl:variable name="LW3HPSTAL" select="lxml:column[6]" />
+          <xsl:variable name="LW3HCNTRY" select="lxml:column[7]" />
+          <xsl:variable name="W_SEL" select="lxml:column[8]" />
+          <li>
+          <xsl:if test="$listItemClass != ''">
+          <xsl:attribute name="class"><xsl:value-of select="$listItemClass" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$filterTextColumn != ''">
+          <xsl:attribute name="data-filtertext"><xsl:value-of select="lxml:column[@name = $filterTextColumn]" /></xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$lweb_design_mode">
+          <xsl:attribute name="style">min-width:50px;</xsl:attribute>
+          </xsl:if>
+          <input type="hidden" id="{concat($lweb_WRName,'_', $W_ASSC01/@id)}" name="{$W_ASSC01/@id}" value="{$W_ASSC01}" data-lstddatatype="alpha| |10" wd:caption="{normalize-space(concat(key('column-caption', 'LST_CUST_W_ASSC01')/lxml:heading-1,' ',key('column-caption', 'LST_CUST_W_ASSC01')/lxml:heading-2,' ',key('column-caption', 'LST_CUST_W_ASSC01')/lxml:heading-3))}" />
+          <input type="hidden" id="{concat($lweb_WRName,'_', $LW3WEBC01/@id)}" name="{$LW3WEBC01/@id}" value="{$LW3WEBC01}" data-lstddatatype="alpha| |10" wd:caption="{normalize-space(concat(key('column-caption', 'LST_CUST_LW3WEBC01')/lxml:heading-1,' ',key('column-caption', 'LST_CUST_LW3WEBC01')/lxml:heading-2,' ',key('column-caption', 'LST_CUST_LW3WEBC01')/lxml:heading-3))}" />
+          <input type="hidden" id="{concat($lweb_WRName,'_', $LW3CUSNAM/@id)}" name="{$LW3CUSNAM/@id}" value="{$LW3CUSNAM}" data-lstddatatype="alpha| |30" wd:caption="{normalize-space(concat(key('column-caption', 'LST_CUST_LW3CUSNAM')/lxml:heading-1,' ',key('column-caption', 'LST_CUST_LW3CUSNAM')/lxml:heading-2,' ',key('column-caption', 'LST_CUST_LW3CUSNAM')/lxml:heading-3))}" />
+          <input type="hidden" id="{concat($lweb_WRName,'_', $LW3CHCITY/@id)}" name="{$LW3CHCITY/@id}" value="{$LW3CHCITY}" data-lstddatatype="alpha| |30" wd:caption="{normalize-space(concat(key('column-caption', 'LST_CUST_LW3CHCITY')/lxml:heading-1,' ',key('column-caption', 'LST_CUST_LW3CHCITY')/lxml:heading-2,' ',key('column-caption', 'LST_CUST_LW3CHCITY')/lxml:heading-3))}" />
+          <input type="hidden" id="{concat($lweb_WRName,'_', $LW3HSTATE/@id)}" name="{$LW3HSTATE/@id}" value="{$LW3HSTATE}" data-lstddatatype="alpha| |3" wd:caption="{normalize-space(concat(key('column-caption', 'LST_CUST_LW3HSTATE')/lxml:heading-1,' ',key('column-caption', 'LST_CUST_LW3HSTATE')/lxml:heading-2,' ',key('column-caption', 'LST_CUST_LW3HSTATE')/lxml:heading-3))}" />
+          <input type="hidden" id="{concat($lweb_WRName,'_', $LW3HPSTAL/@id)}" name="{$LW3HPSTAL/@id}" value="{$LW3HPSTAL}" data-lstddatatype="alpha| |10" wd:caption="{normalize-space(concat(key('column-caption', 'LST_CUST_LW3HPSTAL')/lxml:heading-1,' ',key('column-caption', 'LST_CUST_LW3HPSTAL')/lxml:heading-2,' ',key('column-caption', 'LST_CUST_LW3HPSTAL')/lxml:heading-3))}" />
+          <input type="hidden" id="{concat($lweb_WRName,'_', $LW3HCNTRY/@id)}" name="{$LW3HCNTRY/@id}" value="{$LW3HCNTRY}" data-lstddatatype="alpha| |3" wd:caption="{normalize-space(concat(key('column-caption', 'LST_CUST_LW3HCNTRY')/lxml:heading-1,' ',key('column-caption', 'LST_CUST_LW3HCNTRY')/lxml:heading-2,' ',key('column-caption', 'LST_CUST_LW3HCNTRY')/lxml:heading-3))}" />
+          <input type="text" id="{concat($lweb_WRName,'_', $W_SEL/@id)}" name="{$W_SEL/@id}" value="{$W_SEL}" size="1" maxlength="1" class="lstd_Field utext" data-lstddatatype="alpha| |1" wd:caption="{normalize-space(concat(key('column-caption', 'LST_CUST_W_SEL')/lxml:heading-1,' ',key('column-caption', 'LST_CUST_W_SEL')/lxml:heading-2,' ',key('column-caption', 'LST_CUST_W_SEL')/lxml:heading-3))}" />
+          </li>
+          </xsl:for-each>
+          </ul>
+          </xsl:if>
+          </xsl:template>
+          
+          
+          
+          <xsl:template match="/lxml:data" mode="content.hidden">
+          <xsl:apply-imports />
+          
+          <input type="hidden" id="{$lweb_WRName}_STDRENTRY" name="STDRENTRY" value="{key('field-value', 'STDRENTRY')}" data-lstddatatype="alpha| |1" wd:caption="{key('field-caption', 'STDRENTRY')/lxml:description}" />
+          <input type="hidden" id="{$lweb_WRName}_STDROWNUM" name="STDROWNUM" value="{key('field-value', 'STDROWNUM')}" data-lstddatatype="packed|7|0|." wd:caption="{key('field-caption', 'STDROWNUM')/lxml:description}" />
+          <input type="hidden" id="{$lweb_WRName}_WK_CODE" name="WK_CODE" value="{key('field-value', 'WK_CODE')}" data-lstddatatype="alpha| |1" wd:caption="{key('field-caption', 'WK_CODE')/lxml:description}" />
+          
+          </xsl:template>
+          </xsl:transform>
+
+      - Language:           ENG
+        Technology Service: LANSA XHTML
+
+        XSL: |
+          <?xml version="1.0"?>
+          
+          <!-- Web application : WSELCUS2             Select Customer                         -->
+          <!-- Web routine     : Get_Cust                                                    -->
+          <!-- Timestamp       : 2010-03-08T14:38:16-07:00                                   -->
+          <xsl:transform version="1.0" exclude-result-prefixes="lxml wd" xmlns:lxml="http://www.lansa.com/2002/XML/Runtime-Data" xmlns:wd="http://www.lansa.com/2002/XSL/Weblet-Design" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+             <xsl:import href="std_keys.xsl"/>
+             <xsl:import href="std_variables.xsl"/>
+             <!--   <xsl:import href="wselcus_layout.xsl" /> -->
+             <xsl:import href="wadmlgn1_layout.xsl"/>
+             <xsl:import href="multi_button.xsl"/>
+             <xsl:import href="std_dropdown.xsl"/>
+             <xsl:import href="std_checkbox.xsl"/>
+             <xsl:output method="xml" omit-xml-declaration="yes" encoding="UTF-8" indent="no"/>
+             <xsl:template match="/">
+                <xsl:call-template name="layout">
+                   <xsl:with-param name="no_layout" select="true()"/>
+                </xsl:call-template>
+             </xsl:template>
+             <xsl:template match="/lxml:data">
+                <script type="text/javascript" src="/js/stickytooltips.js">
+          /***********************************************
+          * Sticky Tooltip script- (c) Dynamic Drive DHTML code library (www.dynamicdrive.com)
+          * This notice MUST stay intact for legal use
+          * Visit Dynamic Drive at http://www.dynamicdrive.com/ for this script and 100s more
+          ***********************************************/
+                </script>
+                <div class="hidden">
+                   <input id="STDRENTRY" maxlength="1" size="1" type="hidden" name="STDRENTRY" value="{key('field-value', 'STDRENTRY')}"/>
+                   <input maxlength="12" size="12" type="hidden" name="STDROWNUM" value="{key('field-value', 'STDROWNUM')}"/>
+                   <input id="LW3WEBUSR" maxlength="10" size="10" type="hidden" name="LW3WEBUSR" value="{key('field-value', 'LW3WEBUSR')}"/>
+                   <input id="WW3WEBUSR" maxlength="10" size="10" type="hidden" name="WW3WEBUSR" value="{key('field-value', 'WW3WEBUSR')}"/>
+                   <input onchange="return isValidNumber(this, '2', '0', '.')" class="number" maxlength="2" size="2" name="LW3SFID" value="{key('field-value', 'LW3SFID')}"/>
+                   <input id="WK_CODE" maxlength="1" size="1" type="hidden" name="WK_CODE" value="{key('field-value', 'WK_CODE')}"/>
+                </div>
+                <div>
+                   <table>
+                      <tbody>
+                         <tr>
+                            <td>
+                               <span data-tooltip="sticky1">
+                                  <img src="/img/QmarkHelp.gif" width="20" height="20"/>
+                               </span>  <!--HTML for the tooltips-->
+                               <div id="mystickytooltip" class="stickytooltip">
+                                  <div style="padding:5px">
+                                     <div id="sticky1" class="atip" style="width:250px">
+                                        <h1>
+                                           <xsl:call-template name="desc_lookup">
+                                              <xsl:with-param name="name" select="'TXT_ONESELHELP_HDR'"/>
+                                           </xsl:call-template>
+                                        </h1>
+                                        <p>
+                                           <xsl:call-template name="desc_lookup">
+                                              <xsl:with-param name="name" select="'TXT_ONESELHELP_1'"/>
+                                           </xsl:call-template>  <xsl:call-template name="desc_lookup">
+                                              <xsl:with-param name="name" select="'TXT_ONESELHELP_2'"/>
+                                           </xsl:call-template>  <xsl:call-template name="desc_lookup">
+                                              <xsl:with-param name="name" select="'TXT_ONESELHELP_3'"/>
+                                           </xsl:call-template>  <xsl:call-template name="desc_lookup">
+                                              <xsl:with-param name="name" select="'TXT_ONESELHELP_4'"/>
+                                           </xsl:call-template>  <xsl:call-template name="desc_lookup">
+                                              <xsl:with-param name="name" select="'TXT_ONESELHELP_5'"/>
+                                           </xsl:call-template>
+                                        </p>
+                                     </div>
+                                     <!-- <div class="stickystatus"></div> -->
+                                  </div>
+                               </div>
+                            </td>
+                         </tr>
+                      </tbody>
+                   </table>
+                </div>
+                <fieldset>
+                   <legend class="bold">
+                      <xsl:call-template name="desc_lookup">
+                         <xsl:with-param name="name" select="'LBL_SEARCH_CUSTOMER'"/>
+                      </xsl:call-template>
+                   </legend>
+                   <table cellspacing="5" cellpadding="5">
+                      <tbody>
+                         <tr>
+                            <td class="caption">
+                               <xsl:call-template name="desc_lookup">
+                                  <xsl:with-param name="name" select="'LBL_CUSTOMER_TYPE'"/>
+                               </xsl:call-template>
+                            </td>
+                            <td>
+                               <xsl:call-template name="std_dropdown">
+                                  <xsl:with-param name="captionfield" select="'LW3CDES'"/>
+                                  <xsl:with-param name="codefield" select="'LW3CODE'"/>
+                                  <xsl:with-param name="listname" select="'LST_TYP'"/>
+                                  <xsl:with-param name="name" select="'LW3CUSTYP'"/>
+                                  <xsl:with-param name="value" select="key('field-value', 'LW3CUSTYP')"/>
+                                  <xsl:with-param name="display_mode" select="'input'"/>
+                                  <!-- <xsl:with-param name="items" select="?" /> -->
+                                  <!-- <xsl:with-param name="selector_field" select="?" /> -->
+                                  <!-- <xsl:with-param name="selector_value_eq" select="?" /> -->
+                                  <!-- <xsl:with-param name="tagfield1" select="?" /> -->
+                                  <!-- <xsl:with-param name="tagfield2" select="?" /> -->
+                                  <!-- <xsl:with-param name="tagfield3" select="?" /> -->
+                                  <!-- <xsl:with-param name="submit_tagfields" select="?" /> -->
+                                  <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                                  <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                                  <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                                  <!-- <xsl:with-param name="formname" select="?" /> -->
+                                  <!-- <xsl:with-param name="pos_absolute" select="?" /> -->
+                                  <!-- <xsl:with-param name="width_design" select="?" /> -->
+                                  <!-- <xsl:with-param name="on_change_wamname" select="?" /> -->
+                                  <!-- <xsl:with-param name="on_change_wrname" select="?" /> -->
+                                  <!-- <xsl:with-param name="protocol" select="?" /> -->
+                                  <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                                  <!-- <xsl:with-param name="disabled" select="?" /> -->
+                                  <!-- <xsl:with-param name="class" select="?" /> -->
+                                  <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
+                                  <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                               </xsl:call-template>
+                            </td>
+                            <td class="caption">
+                               <xsl:call-template name="desc_lookup">
+                                  <xsl:with-param name="name" select="'LBL_CUSTOMER_NAME'"/>
+                               </xsl:call-template>
+                            </td>
+                            <td>
+                               <input onchange="return isValidText(this, ' ')" id="S_SPNMDS" class="utext" maxlength="30" size="30" name="S_SPNMDS" value="{key('field-value', 'S_SPNMDS')}"/>
+                            </td>
+                            <td>
+                               <xsl:call-template name="multi_button">
+                                  <xsl:with-param name="on_click_wrname" select="'Get_Cust'"/>
+                                  <xsl:with-param name="reentryvalue" select="'S'"/>
+                                  <xsl:with-param name="caption" select="key('desc-lookup', 'BTN_SEARCH')"/>
+                                  <xsl:with-param name="name" select="concat('o', position(), '_LANSA_12304')"/>
+                                  <!-- <xsl:with-param name="currentrowhfield" select="?" /> -->
+                                  <!-- <xsl:with-param name="currentrownumval" select="?" /> -->
+                                  <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                                  <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                                  <!-- <xsl:with-param name="formname" select="?" /> -->
+                                  <!-- <xsl:with-param name="pos_absolute_design" select="?" /> -->
+                                  <!-- <xsl:with-param name="width_design" select="?" /> -->
+                                  <!-- <xsl:with-param name="height_design" select="?" /> -->
+                                  <!-- <xsl:with-param name="on_click_wamname" select="?" /> -->
+                                  <!-- <xsl:with-param name="protocol" select="?" /> -->
+                                  <!-- <xsl:with-param name="show_in_new_window" select="?" /> -->
+                                  <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                                  <!-- <xsl:with-param name="disabled" select="?" /> -->
+                                  <!-- <xsl:with-param name="title" select="?" /> -->
+                                  <!-- <xsl:with-param name="class" select="?" /> -->
+                                  <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
+                                  <!-- <xsl:with-param name="presubmit_js" select="?" /> -->
+                                  <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                                  <!-- <xsl:with-param name="default_button" select="?" /> -->
+                               </xsl:call-template>
+                            </td>
+                            <td>
+                               <xsl:call-template name="multi_button">
+                                  <xsl:with-param name="on_click_wrname" select="'Get_Cust'"/>
+                                  <xsl:with-param name="reentryvalue" select="'R'"/>
+                                  <xsl:with-param name="caption" select="key('desc-lookup', 'BTN_RESET')"/>
+                                  <xsl:with-param name="name" select="concat('o', position(), '_LANSA_26796')"/>
+                                  <!-- <xsl:with-param name="currentrowhfield" select="?" /> -->
+                                  <!-- <xsl:with-param name="currentrownumval" select="?" /> -->
+                                  <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                                  <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                                  <!-- <xsl:with-param name="formname" select="?" /> -->
+                                  <!-- <xsl:with-param name="pos_absolute_design" select="?" /> -->
+                                  <!-- <xsl:with-param name="width_design" select="?" /> -->
+                                  <!-- <xsl:with-param name="height_design" select="?" /> -->
+                                  <!-- <xsl:with-param name="on_click_wamname" select="?" /> -->
+                                  <!-- <xsl:with-param name="protocol" select="?" /> -->
+                                  <!-- <xsl:with-param name="show_in_new_window" select="?" /> -->
+                                  <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                                  <!-- <xsl:with-param name="disabled" select="?" /> -->
+                                  <!-- <xsl:with-param name="title" select="?" /> -->
+                                  <!-- <xsl:with-param name="class" select="?" /> -->
+                                  <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
+                                  <!-- <xsl:with-param name="presubmit_js" select="?" /> -->
+                                  <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                                  <!-- <xsl:with-param name="default_button" select="?" /> -->
+                               </xsl:call-template>
+                            </td>
+                         </tr>
+                      </tbody>
+                   </table>
+                </fieldset>
+                <br/>
+                <br/>
+                <div class="hidden__"></div>
+                <fieldset>
+                   <legend class="bold">
+                      <xsl:call-template name="desc_lookup">
+                         <xsl:with-param name="name" select="'LBL_CUSTOMER_RESULT'"/>
+                      </xsl:call-template>
+                   </legend>
+                   <table cellpadding="10" align="center">
+                      <tbody>
+                         <tr>
+                            <td>
+                               <span style="overflow-y: auto; width: 600px; height: 300px;">
+                                  <xsl:apply-templates select="/lxml:data/lxml:lists/lxml:list[@name='LST_CUST']" wd:listname="LST_CUST">
+                                     <xsl:with-param name="allow_sort" select="true()"/>
+                                     <xsl:with-param name="allow_col_resize" select="true()"/>
+                                  </xsl:apply-templates>
+                               </span>
+                            </td>
+                         </tr>
+                      </tbody>
+                   </table>
+                </fieldset>
+                <table align="center">
+                   <tbody>
+                      <tr>
+                         <td>
+                            <xsl:call-template name="multi_button">
+                               <xsl:with-param name="on_click_wrname" select="'Get_Cust'"/>
+                               <xsl:with-param name="reentryvalue" select="'X'"/>
+                               <xsl:with-param name="caption" select="key('desc-lookup', 'BTN_SUBMIT')"/>
+                               <xsl:with-param name="name" select="concat('o', position(), '_LANSA_9057')"/>
+                               <!-- <xsl:with-param name="currentrowhfield" select="?" /> -->
+                               <!-- <xsl:with-param name="currentrownumval" select="?" /> -->
+                               <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                               <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                               <!-- <xsl:with-param name="formname" select="?" /> -->
+                               <!-- <xsl:with-param name="pos_absolute_design" select="?" /> -->
+                               <!-- <xsl:with-param name="width_design" select="?" /> -->
+                               <!-- <xsl:with-param name="height_design" select="?" /> -->
+                               <!-- <xsl:with-param name="on_click_wamname" select="?" /> -->
+                               <!-- <xsl:with-param name="protocol" select="?" /> -->
+                               <!-- <xsl:with-param name="show_in_new_window" select="?" /> -->
+                               <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                               <!-- <xsl:with-param name="disabled" select="?" /> -->
+                               <!-- <xsl:with-param name="title" select="?" /> -->
+                               <!-- <xsl:with-param name="class" select="?" /> -->
+                               <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
+                               <!-- <xsl:with-param name="presubmit_js" select="?" /> -->
+                               <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                               <!-- <xsl:with-param name="default_button" select="?" /> -->
+                            </xsl:call-template>
+                         </td>
+                         <td>
+                            <xsl:call-template name="multi_button">
+                               <!--<xsl:with-param name="presubmit_js"
+                                               select="'CloseWin();//'" />-->
+                               <xsl:with-param name="presubmit_js" select="'CloseWin();//'"/>
+                               <!-- <xsl:with-param name="on_click_wrname" select="?" /> -->
+                               <xsl:with-param name="reentryvalue" select="' '"/>
+                               <xsl:with-param name="caption" select="key('desc-lookup', 'BTN_CLOSE')"/>
+                               <xsl:with-param name="name" select="concat('o', position(), '_LANSA_9057')"/>
+                               <!-- <xsl:with-param name="currentrowhfield" select="?" /> -->
+                               <!-- <xsl:with-param name="currentrownumval" select="?" /> -->
+                               <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                               <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                               <!-- <xsl:with-param name="formname" select="?" /> -->
+                               <!-- <xsl:with-param name="pos_absolute_design" select="?" /> -->
+                               <!-- <xsl:with-param name="width_design" select="?" /> -->
+                               <!-- <xsl:with-param name="height_design" select="?" /> -->
+                               <!-- <xsl:with-param name="on_click_wamname" select="?" /> -->
+                               <!-- <xsl:with-param name="protocol" select="?" /> -->
+                               <!-- <xsl:with-param name="show_in_new_window" select="?" /> -->
+                               <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                               <!-- <xsl:with-param name="disabled" select="?" /> -->
+                               <!-- <xsl:with-param name="title" select="?" /> -->
+                               <!-- <xsl:with-param name="class" select="?" /> -->
+                               <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
+                               <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                               <!-- <xsl:with-param name="default_button" select="?" /> -->
+                            </xsl:call-template>
+                         </td>
+                      </tr>
+                   </tbody>
+                </table>
+             </xsl:template>
+             <xsl:template match="/lxml:data/lxml:lists/lxml:list[@name='LST_CUST']">
+                <xsl:param name="allow_sort" select="true()" wd:type="std:boolean" wd:tip_id=""/>
+                <xsl:param name="allow_col_resize" select="true()" wd:type="std:boolean" wd:tip_id=""/>
+                <xsl:variable name="thelist" select="/lxml:data/lxml:lists/lxml:list[@name='LST_CUST']"/>
+                <script language="javascript">
+                   <xsl:text disable-output-escaping="yes">//&lt;![CDATA[</xsl:text>
+                   function init_stdGrid_LST_CUST() {
+                   var g = register_std_grid('LST_CUST',8);
+                   g.allowSort = <xsl:value-of select="$allow_sort"/>;
+                   g.allowColResize = <xsl:value-of select="$allow_col_resize"/>;
+                   var col = 0;
+                   var ss = document.styleSheets[0];
+                   var gid = '.std_grid#LST_CUST ';
+                   
+                   addCSSRule(ss, gid + 'td.W_ASSC01', 'display:none;');
+                   addCSSRule(ss, gid + 'th.W_ASSC01', 'display:none;');
+                
+                   addCSSRule(ss, gid + 'td.LW3WEBC01', 'display:none;');
+                   addCSSRule(ss, gid + 'th.LW3WEBC01', 'display:none;');
+                
+                   addCSSRule(ss, gid + 'td.LW3CUSNAM', 'display:none;');
+                   addCSSRule(ss, gid + 'th.LW3CUSNAM', 'display:none;');
+                
+                   addCSSRule(ss, gid + 'td.LW3CHCITY', 'display:none;');
+                   addCSSRule(ss, gid + 'th.LW3CHCITY', 'display:none;');
+                
+                   addCSSRule(ss, gid + 'td.LW3HSTATE', 'display:none;');
+                   addCSSRule(ss, gid + 'th.LW3HSTATE', 'display:none;');
+                
+                   addCSSRule(ss, gid + 'td.LW3HPSTAL', 'display:none;');
+                   addCSSRule(ss, gid + 'th.LW3HPSTAL', 'display:none;');
+                
+                   addCSSRule(ss, gid + 'td.LW3HCNTRY', 'display:none;');
+                   addCSSRule(ss, gid + 'th.LW3HCNTRY', 'display:none;');
+                
+                   }
+                  
+                   function CloseWin() {
+                   //window.opener.HandleEvent('ADMUSRASC', 'wrInit', document.LANSA, 'MainWindow');
+                   //window.opener.location.reload();
+                   //window.close();
+          
+                   //*UDLC001
+                   //an insert has been made, refresh parent WAM
+                   if(document.getElementById("WK_CODE").value == 'Y'){
+                      window.top.closeContent4();
+                   }
+                   else{
+                      window.top.closeContent();
+                   }
+                   
+          
+                   return false;
+                   }
+                   
+                   init_stdGrid_LST_CUST();
+                   <xsl:text disable-output-escaping="yes">//]]&gt;</xsl:text>
+                </script>
+                <input type="hidden" name="LST_CUST.." value="{count(lxml:list-entries/lxml:entry[1])}"/>
+                <div id="LST_CUST_wrap" class="std_grid_wrapper">
+                   <xsl:if test="$lweb_design_mode">
+                      <xsl:attribute name="class">std_grid_wrapper_designtime</xsl:attribute>
+                   </xsl:if>
+                   <table id="LST_CUST" cellspacing="1" cellpadding="0" width="580">
+                      <thead>
+                         <tr class="list-h">
+                            <th>
+                               <xsl:call-template name="desc_lookup">
+                                  <xsl:with-param name="disable_output_escaping" select="true()"/>
+                                  <xsl:with-param name="name" select="'COL_SELECT'"/>
+                               </xsl:call-template>
+                            </th>
+                            <th align="center">
+                               <xsl:call-template name="desc_lookup">
+                                  <xsl:with-param name="disable_output_escaping" select="true()"/>
+                                  <xsl:with-param name="name" select="'COL_CUSTOMER_ID'"/>
+                               </xsl:call-template>
+                            </th>
+                            <th class="hidden">
+                               <xsl:call-template name="desc_lookup">
+                                  <xsl:with-param name="disable_output_escaping" select="true()"/>
+                                  <xsl:with-param name="name" select="'COL_ACCOUNT'"/>
+                               </xsl:call-template>
+                            </th>
+                            <th align="center">
+                               <xsl:call-template name="desc_lookup">
+                                  <xsl:with-param name="disable_output_escaping" select="true()"/>
+                                  <xsl:with-param name="name" select="'COL_CUSTOMER_NAME'"/>
+                               </xsl:call-template>
+                            </th>
+                            <th align="center">
+                               <xsl:call-template name="desc_lookup">
+                                  <xsl:with-param name="disable_output_escaping" select="true()"/>
+                                  <xsl:with-param name="name" select="'COL_CITY'"/>
+                               </xsl:call-template>
+                            </th>
+                            <th align="center">
+                               <xsl:call-template name="desc_lookup">
+                                  <xsl:with-param name="disable_output_escaping" select="true()"/>
+                                  <xsl:with-param name="name" select="'COL_STATE'"/>
+                               </xsl:call-template>
+                            </th>
+                            <th align="center">
+                               <xsl:call-template name="desc_lookup">
+                                  <xsl:with-param name="disable_output_escaping" select="true()"/>
+                                  <xsl:with-param name="name" select="'COL_ZIP'"/>
+                               </xsl:call-template>
+                            </th>
+                            <th align="center">
+                               <xsl:call-template name="desc_lookup">
+                                  <xsl:with-param name="disable_output_escaping" select="true()"/>
+                                  <xsl:with-param name="name" select="'COL_COUNTRY'"/>
+                               </xsl:call-template>
+                            </th>
+                         </tr>
+                      </thead>
+                      <tbody>
+                         <xsl:for-each select="$thelist/lxml:list-entries/lxml:entry">
+                            <xsl:variable name="W_ASSC01" select="lxml:column[1]"/>
+                            <xsl:variable name="LW3WEBC01" select="lxml:column[2]"/>
+                            <xsl:variable name="LW3CUSNAM" select="lxml:column[3]"/>
+                            <xsl:variable name="LW3CHCITY" select="lxml:column[4]"/>
+                            <xsl:variable name="LW3HSTATE" select="lxml:column[5]"/>
+                            <xsl:variable name="LW3HPSTAL" select="lxml:column[6]"/>
+                            <xsl:variable name="LW3HCNTRY" select="lxml:column[7]"/>
+                            <xsl:variable name="W_SEL" select="lxml:column[8]"/>
+                            <tr __oddrc="list-o" __evenrc="list-e">
+                               <xsl:attribute name="class">
+                                  <xsl:choose>
+                                     <xsl:when test="position() mod 2">list-o</xsl:when>
+                                     <xsl:otherwise>list-e</xsl:otherwise>
+                                  </xsl:choose>
+                               </xsl:attribute>
+                               <td align="center">
+                                  <xsl:call-template name="std_checkbox">
+                                     <xsl:with-param name="caption" select="''"/>
+                                     <xsl:with-param name="name" select="$W_SEL/@id"/>
+                                     <xsl:with-param name="value" select="$W_SEL"/>
+                                     <xsl:with-param name="display_mode" select="'input'"/>
+                                     <!-- <xsl:with-param name="oncode" select="?" /> -->
+                                     <!-- <xsl:with-param name="offcode" select="?" /> -->
+                                     <!-- <xsl:with-param name="reentryfield" select="?" /> -->
+                                     <!-- <xsl:with-param name="reentryvalue" select="?" /> -->
+                                     <!-- <xsl:with-param name="hide_if" select="?" /> -->
+                                     <!-- <xsl:with-param name="formname" select="?" /> -->
+                                     <!-- <xsl:with-param name="on_click_wamname" select="?" /> -->
+                                     <!-- <xsl:with-param name="on_click_wrname" select="?" /> -->
+                                     <!-- <xsl:with-param name="protocol" select="?" /> -->
+                                     <!-- <xsl:with-param name="target_window_name" select="?" /> -->
+                                     <!-- <xsl:with-param name="disabled" select="?" /> -->
+                                     <!-- <xsl:with-param name="alignment" select="?" /> -->
+                                     <!-- <xsl:with-param name="pos_absolute" select="?" /> -->
+                                     <!-- <xsl:with-param name="class" select="?" /> -->
+                                     <!-- <xsl:with-param name="mouseover_class" select="?" /> -->
+                                     <!-- <xsl:with-param name="text_class" select="?" /> -->
+                                     <!-- <xsl:with-param name="tab_index" select="?" /> -->
+                                  </xsl:call-template>
+                               </td>
+                               <td align="right">
+                                  <xsl:attribute name="__cellValue">
+                                     <xsl:value-of select="$W_ASSC01"/>
+                                  </xsl:attribute>
+                                  <input id="{$W_ASSC01/@id}" maxlength="10" size="10" type="hidden" name="{$W_ASSC01/@id}" value="{$W_ASSC01}"/>
+                                  <xsl:value-of select="$W_ASSC01"/>
+                               </td>
+                               <td class="hidden">
+                                  <xsl:attribute name="__cellValue">
+                                     <xsl:value-of select="$LW3WEBC01"/>
+                                  </xsl:attribute>
+                                  <input id="{$LW3WEBC01/@id}" maxlength="10" size="10" type="hidden" name="{$LW3WEBC01/@id}" value="{$LW3WEBC01}"/>
+                               </td>
+                               <td>
+                                  <xsl:attribute name="__cellValue">
+                                     <xsl:value-of select="$LW3CUSNAM"/>
+                                  </xsl:attribute>
+                                  <input id="{$LW3CUSNAM/@id}" maxlength="30" size="30" type="hidden" name="{$LW3CUSNAM/@id}" value="{$LW3CUSNAM}"/>
+                                  <xsl:value-of select="$LW3CUSNAM"/>
+                               </td>
+                               <td>
+                                  <xsl:attribute name="__cellValue">
+                                     <xsl:value-of select="$LW3CHCITY"/>
+                                  </xsl:attribute>
+                                  <input id="{$LW3CHCITY/@id}" maxlength="20" type="hidden" name="{$LW3CHCITY/@id}" value="{$LW3CHCITY}"/>
+                                  <xsl:value-of select="$LW3CHCITY"/>
+                               </td>
+                               <td align="center">
+                                  <xsl:attribute name="__cellValue">
+                                     <xsl:value-of select="$LW3HSTATE"/>
+                                  </xsl:attribute>
+                                  <input id="{$LW3HSTATE/@id}" maxlength="2" size="2" type="hidden" name="{$LW3HSTATE/@id}" value="{$LW3HSTATE}"/>
+                                  <xsl:value-of select="$LW3HSTATE"/>
+                               </td>
+                               <td>
+                                  <xsl:attribute name="__cellValue">
+                                     <xsl:value-of select="$LW3HPSTAL"/>
+                                  </xsl:attribute>
+                                  <input id="{$LW3HPSTAL/@id}" maxlength="13" size="13" type="hidden" name="{$LW3HPSTAL/@id}" value="{$LW3HPSTAL}"/>
+                                  <xsl:value-of select="$LW3HPSTAL"/>
+                               </td>
+                               <td>
+                                  <xsl:attribute name="__cellValue">
+                                     <xsl:value-of select="$LW3HCNTRY"/>
+                                  </xsl:attribute>
+                                  <input id="{$LW3HCNTRY/@id}" maxlength="13" size="13" type="hidden" name="{$LW3HCNTRY/@id}" value="{$LW3HCNTRY}"/>
+                                  <xsl:value-of select="$LW3HCNTRY"/>
+                               </td>
+                            </tr>
+                         </xsl:for-each>
+                      </tbody>
+                   </table>
+                </div>
+             </xsl:template>
+          </xsl:transform>

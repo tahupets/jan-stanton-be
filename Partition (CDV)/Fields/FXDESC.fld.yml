@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               FXDESC
+  Type:               Alpha
+  Length:             50
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Reference Field:    RFDESC50
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - LC
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Description"
+      Label:              "Description"
+      Heading1:           "Description"
+      Heading2:           " "
+      Heading3:           " "
+
+  Repository Help:
+  - ENG: |
+      $$USER
+      %$$title DESCRIPTION (LONG)
+      
+      This line is used to describe information found on another line.  For
+      example, currency code "CND" might have "Canadian Dollars" as its
+      description.  The description can be up to 50 characters in length.

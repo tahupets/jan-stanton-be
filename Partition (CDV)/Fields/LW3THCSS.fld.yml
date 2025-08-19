@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3THCSS
+  Type:               Alpha
+  Length:             256
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Theme CSS path"
+      Label:              "Theme CSS path"
+      Heading1:           "Theme"
+      Heading2:           "CSS"
+      Heading3:           "path"

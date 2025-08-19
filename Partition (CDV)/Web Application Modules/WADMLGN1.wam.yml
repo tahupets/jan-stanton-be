@@ -47,6 +47,17 @@
     Def_List Name(#ls_mlnvar) Fields(#FXVARNAM #FXVARTXT) Type(*WORKING) Entrys(*MAX)
     Web_Map For(*OUTPUT) Fields((#ls_mlnvar *private))
     
+    * =======================================================
+    * Processors
+    * =======================================================
+    
+    Define_Com Class(#CARPASWRD) Name(#Processor_Password) Desc('Password Processor') Help('Password Processor')
+    
+    * =======================================================
+    * Conditions
+    * =======================================================
+    
+    Define Field(#W_FLW32147) Type(*BOOLEAN) Desc('flag if msg:MSG_LW32147 has been added') Default(false)
     
     Webroutine Name(LWBOP01C1) Desc('Welcome to LANSA Commerce Edition Admin site') Onentry(*SESSIONSTATUS_NONE)
     
@@ -94,8 +105,8 @@
     * Validate User ID...
     * message #lw3cemail
     * message #lw3usrpas
-    #LW3WEBUSR #LW3EASTAT #LW3CUSVAL #LW3ADMUSR := *null
-    Fetch Fields(#LW3WEBUSR #LW3EASTAT #LW3CUSVAL #LW3ADMUSR) From_File(LW3USRL6) With_Key(#lw3cemail) Io_Error(*NEXT) Val_Error(*NEXT)
+    #LW3WEBUSR #LW3EASTAT #LW3CUSVAL #LW3ADMUSR #LW3PWDSLT := *null
+    Fetch Fields(#LW3WEBUSR #LW3EASTAT #LW3CUSVAL #LW3ADMUSR #LW3PWDSLT) From_File(LW3USRL6) With_Key(#lw3cemail) Io_Error(*NEXT) Val_Error(*NEXT)
     If_Status Is_Not(*OKAY)
     * multilingual message
     #LW3VARTXT := 'MSG_LW32147: Message text missing.'
@@ -119,18 +130,38 @@
     
     Endif
     
-    Change Field(#LW3OBJMOD) To(CHK)
-    Call Process(*DIRECT) Function(LW3GN08) Menu_Used(*NEXT) If_Error(*NEXT)
+    * * * Change Field(#LW3OBJMOD) To(CHK)
+    * * * Call Process(*DIRECT) Function(LW3GN08) Menu_Used(*NEXT) If_Error(*NEXT)
+    * * * * CONDCHECK FIELD(#LW3ERCODE) COND('#LW3ERCODE *EQ OK') MSGID(LW39001)
+    * * * * CONDCHECK FIELD(#LW3ERCODE) COND('#LW3ERCODE *EQ OK') MSGTXT('Web User Name and Password are case sensitive.')
+    * * * * multilingual message
+    * * * #LW3VARTXT := 'MSG_LW32147: Message text missing.'
+    * * * Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key('MSG_LW32147' *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * Condcheck Field(#LW3ERCODE) Cond('#LW3ERCODE *EQ OK') Msgtxt(#LW3VARTXT)
+    * * * * multilingual message
+    * * * #LW3VARTXT := 'MSG_LW32150: Message text missing.'
+    * * * Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key('MSG_LW32150' *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
+    * * * Condcheck Field(#LW3ERCODE) Cond('#LW3ERCODE *EQ OK') Msgtxt(#LW3VARTXT)
+    
+    If Cond(*Not #Processor_Password.ValidatePassword( #LW3USRPAS #LW3CUSVAL #LW3PWDSLT ))
+    #LW3ERCODE := 'ER'
+    
     * CONDCHECK FIELD(#LW3ERCODE) COND('#LW3ERCODE *EQ OK') MSGID(LW39001)
     * CONDCHECK FIELD(#LW3ERCODE) COND('#LW3ERCODE *EQ OK') MSGTXT('Web User Name and Password are case sensitive.')
+    * Gitlab#220 - check if MSG_LW32147 has already been added. to avoid duplicate error messages
+    If Cond(*Not #W_FLW32147)
     * multilingual message
     #LW3VARTXT := 'MSG_LW32147: Message text missing.'
     Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key('MSG_LW32147' *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
     Condcheck Field(#LW3ERCODE) Cond('#LW3ERCODE *EQ OK') Msgtxt(#LW3VARTXT)
+    #W_FLW32147 := true
+    Endif
     * multilingual message
     #LW3VARTXT := 'MSG_LW32150: Message text missing.'
     Fetch Fields(#LW3VARTXT) From_File(LW3MLNVAR) With_Key('MSG_LW32150' *LANGUAGE) Io_Error(*NEXT) Val_Error(*NEXT)
     Condcheck Field(#LW3ERCODE) Cond('#LW3ERCODE *EQ OK') Msgtxt(#LW3VARTXT)
+    Endif
+    
     Endcheck If_Error(RQS)
     
     * turns https off

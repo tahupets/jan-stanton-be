@@ -1,0 +1,19 @@
+﻿Field:
+  Name:               LW3SFLAG
+  Type:               String
+  Length:             3
+  Decimals:           0
+  Default Value:      "*NULL"
+  Enabled For RDMLX:  Yes
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Header Status Flag"
+      Label:              "Header Status F"
+      Heading1:           "Header"
+      Heading2:           "Status"
+      Heading3:           "Flag"

@@ -1,0 +1,29 @@
+﻿Field:
+  Name:               LW3UPDMRKPREMADE
+  Type:               Alpha
+  Length:             1
+  Decimals:           0
+  Default Value:      "*BLANKS"
+  Enabled For RDMLX:  No
+  System Field:       No
+
+  Input Attributes:
+  - FE
+
+  Multilingual Details:
+  - ENG:
+      Description:        "Can Update Premade Rug Markup"
+      Label:              "Can Update Prem"
+      Heading1:           "Can"
+      Heading2:           "Update"
+      Heading3:           "Premade"
+
+  Source: |
+    *
+    Begin_Com Role(*EXTENDS #PRIM_OBJT)
+    
+    Begin_Com Role(*Visual #PRIM_EVEF) Name(#VisualEdit) Defaultvisual(True) Usepicklist(False) Componentversion(1) Height(21) Marginleft(211) Width(263)
+    
+    End_Com
+    
+    End_Com
